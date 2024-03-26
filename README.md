@@ -1,3 +1,3 @@
-# admyral
+# Admyral
 
 Coming soon.
