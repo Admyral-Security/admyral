@@ -48,7 +48,6 @@ Admyral is an AI-powered SOAR with deep case management integration. It is engin
 - [ ] Alert Handling
 - [ ] Dashboard
 
-
 ### Hosting
 - [ ] Self-hosting
 - [ ] Cloud version
