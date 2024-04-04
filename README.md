@@ -1,54 +1,67 @@
-**TODO**: Adjust background of the image such that it works for every theme + remove the subheadings
-
 <p align="center">
-<img src="https://admyral-assets.s3.eu-central-1.amazonaws.com/admyral-light-theme.svg#gh-light-mode-only">
+<img src="https://admyral-assets.s3.eu-central-1.amazonaws.com/admyral-title.svg">
 </p>
 <div align="center">
-  <h3>Next-gen SOAR and Case Management</h3>
-  <h3>An Open-Source Torq and Tines // A Modern TheHive</h3>
+  <h3>An AI-Powered, Open-Source Torq and Tines </br> // A Modern TheHive</h3>
 </div>
 
 
 
-**TODO**
 <div align="center">
   <div>
       <a href=""><strong>Docs</strong></a> ·
       <a href=""><strong>Report Bug</strong></a> ·
-      <a href=""><strong>Feature Request</strong></a> ·
+      <a href="https://discord.gg/9ReNvc85"><strong>Feature Request</strong></a> ·
       <a href=""><strong>Website</strong></a> ·
-      <a href=""><strong>Discord</strong></a>
+      <a href="https://discord.gg/9ReNvc85"><strong>Discord</strong></a>
   </div>
   <div>
       <img alt="Discord" src="https://img.shields.io/discord/1222168064573968454?logo=Discord&logoColor=%23FFFFFF">
-      <img alt="GitHub Org's stars" src="https://img.shields.io/github/stars/admyral-technologies">
-      <img alt="License" src="https://img.shields.io/badge/license-AGPL%20V3-blue">
-      <a href="/LICENSE" target="_blank"><img src="https://img.shields.io/github/license/admyral-technologies/admyral?style=flat"/></a>
-      Release version: Alpha
+      <img alt="License" src="https://img.shields.io/badge/License-Apache%202.0-blue">
+      <img src="https://img.shields.io/badge/Status-alpha-blue">
   </div>
 </div>
 
-
 </br>
+
+*Disclaimer: Admyral is still in public alpha. If you'd like to use it within your company or try it out, reach out to us via chris@admyral.com or directly on [Discord](https://discord.gg/9ReNvc85).*
 
 Admyral is an AI-powered SOAR with deep case management integration. It is engineered to provide the most effective and scalable approach for tackling alert fatigue and automating security workflows.
 
 ## Key Features & Roadmap
 ### Workflow Builder & AI Actions
 
-- [ ] Test
-- [ ] Test
-- [ ] Test
+- [ ] Workflow Actions
+  - [x] HTTP & Webhook
+  - [ ] Credentials for Webhook
+  - [ ] Condition
+  - [ ] Scheduling
+  - [ ] Open case
+  - [ ] Update case
+  - [ ] AI Actions
+- [ ] Run history
 
 
 
 ### Case Management
-
+- [ ] Case Overview and Case Details
+- [ ] Alert Handling
+- [ ] Dashboard
 
 ### Hosting
+- [ ] Self-hosting
+- [ ] Cloud version
+- [ ] Infrastructure-as-code
+
+### AI Enablement
+// coming soon
+
+### Misc
+- [ ] Multi-tenancy
 
 
 ### Enterprise Version
+// coming soon
 
 
 ### Admyral in <5 Minutes
@@ -57,47 +70,29 @@ Admyral is an AI-powered SOAR with deep case management integration. It is engin
 
 
 ## Get Started
-- Cloud
-- Self-hosting
-- Installation and Usage
-- Provide step-by-step instructions on how to install and set up the project on different platforms or environments.
-- Include any dependencies or prerequisites that users need to have installed.
-- Explain how users can use the security project, including any key features or functionalities.
-- Provide examples or code snippets to demonstrate the usage of the project.
+// coming soon
 
 
 
 ## Feedback & Contributing to Admyral
-Just text us on Discord and we can discuss the details.
+We value your feedback and contributions! If you have suggestions, questions, or would like to discuss anything related to Admyral, just text us on [Discord](https://discord.gg/9ReNvc85).
 
-How to report security vulnerabilities or issues
-
-Contribution workflow (e.g., forking, branching, pull requests)
-
-CTA: Go to Discord + Link
-
-
+You can best support us and this project by:
+1. Giving it a star on Github
+2. Joining our active community on Discord
+3. And giving us feedback
 
 
 ## Security
-- Emphasize the importance of security in the project and how it is addressed.
-- Security mechanisms and controls implemented
-- Secure coding practices followed
-- Vulnerability disclosure and patching process
-- Security auditing and testing procedures
-- Pentesting is coming up
-- Recommend not to use this version. We still wanted to build in public and get early feedback. Currently in early alpha, so expect bugs and many changes.
-
-We strongly recommend using the latest version of Admyral to receive all security updates.
-
-For more information, please refer to the documentation or contact us via security@admyral.com or directly on Discord.
+Security is a foundational element of Admyral. We're dedicated to safeguarding our project with robust security measures, while also adhering to best practices in secure coding to mitigate vulnerabilities. Visit SECURITY for more details.
 
 
 ## FAQ
+- Who are you?
 - Why are you the right ones to work on a security idea? 
-- How do you ensure it is secure? 
-- Pricing?
 - Why does it need another SOAR?
+- How do you ensure it is secure?
+- Pricing?
 - Does it stay open-source?
 
 
