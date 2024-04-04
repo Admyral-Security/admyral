@@ -152,8 +152,9 @@ pub async fn mark_run_state_as_completed(pool: &Pool<Postgres>, run_id: &str) ->
 
 #[derive(sqlx::FromRow, Debug)]
 pub struct WebhookRow {
-    webhook_id: String,
-    workflow_id: String,
+    pub webhook_id: String,
+    pub reference_handle: String,
+    pub workflow_id: String,
 }
 
 pub async fn fetch_webhook(pool: &Pool<Postgres>, webhook_id: &str) -> Result<Option<WebhookRow>> {
@@ -162,7 +163,7 @@ pub async fn fetch_webhook(pool: &Pool<Postgres>, webhook_id: &str) -> Result<Op
     let webhook: Option<WebhookRow> = sqlx::query_as!(
         WebhookRow,
         r#"
-        SELECT webhook_id, workflow_id
+        SELECT webhook_id, a.reference_handle, workflow_id
         FROM webhooks w
         JOIN actions a ON w.action_id = a.action_id
         WHERE w.webhook_id = $1

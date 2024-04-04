@@ -7,8 +7,8 @@ use super::{execution_state::ExecutionState, ReferenceHandle};
 
 #[derive(Debug, Clone)]
 pub struct Context {
-    workflow_id: String,
-    execution_state: ExecutionState,
+    pub workflow_id: String,
+    pub execution_state: ExecutionState,
     pg_pool: Arc<Pool<Postgres>>,
     run_id: String,
 }

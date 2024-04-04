@@ -2,6 +2,7 @@ mod context;
 mod execution_state;
 pub mod executor;
 mod http_request_action;
+mod reference_resolution;
 mod webhook_action;
 
 use self::executor::WorkflowExecutor;
@@ -18,14 +19,16 @@ pub type ReferenceHandle = String;
 
 #[enum_dispatch]
 pub trait ActionExecutor {
-    async fn execute(&self, context: &mut context::Context) -> Result<()>;
+    fn get_reference_handle(&self) -> &ReferenceHandle;
+
+    async fn execute(&self, context: &mut context::Context) -> Result<Option<serde_json::Value>>;
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[enum_dispatch(ActionExecutor)]
 #[serde(tag = "type", content = "payload")]
 pub enum ActionNode {
-    WebhookNode(webhook_action::Webhook),
+    Webhook(webhook_action::Webhook),
     HttpRequest(http_request_action::HttpRequest),
 }
 
@@ -91,9 +94,15 @@ pub async fn run_workflow(
     pg_pool: Arc<Pool<Postgres>>,
 ) -> Result<()> {
     let workflow = Workflow::load_from_db(&workflow_id, pg_pool.borrow()).await?;
+
+    if !workflow.is_live {
+        // Workflow is offline
+        return Ok(());
+    }
+
     let mut executor = match initial_data {
         Some(inital_data) => {
-            WorkflowExecutor::init_from_webhook(
+            WorkflowExecutor::init_with_initial_payload(
                 pg_pool,
                 workflow,
                 start_node_reference_handle,

@@ -25,7 +25,7 @@ impl WorkflowExecutor {
         })
     }
 
-    pub async fn init_from_webhook(
+    pub async fn init_with_initial_payload(
         pg_pool: Arc<Pool<Postgres>>,
         workflow: Workflow,
         start_node_reference_handle: String,
@@ -52,7 +52,12 @@ impl WorkflowExecutor {
                 .actions
                 .get(action_reference_handle)
                 .expect("Failed to derference reference handle!");
-            action.node.execute(&mut self.context).await?;
+
+            if let Some(output) = action.node.execute(&mut self.context).await? {
+                self.context
+                    .persist_run_state(action.node.get_reference_handle().to_string(), output)
+                    .await?;
+            }
 
             if let Some(children) = self.workflow.adj_list.get(action_reference_handle) {
                 for next_action in children {
