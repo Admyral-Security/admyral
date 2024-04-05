@@ -1,4 +1,8 @@
+mod auth;
+mod shared_state;
+
 use anyhow::Result;
+use auth::authenticate_webhook;
 use axum::{
     extract::{Json, Path, State},
     http::StatusCode,
@@ -6,27 +10,43 @@ use axum::{
     routing::{get, post},
     Router,
 };
+use serde::Deserialize;
+use shared_state::SharedState;
 use sqlx::{Pool, Postgres};
 use std::{borrow::Borrow, sync::Arc};
 use tower_http::cors::CorsLayer;
 
 use crate::{
-    postgres::{fetch_webhook, setup_postgres_pool},
+    postgres::{fetch_action, fetch_webhook},
+    server::shared_state::setup_state,
     workflow::run_workflow,
 };
 
-#[derive(Debug)]
-struct SharedState {
-    db_pool: Arc<Pool<Postgres>>,
-}
+use self::auth::JwtClaims;
 
 async fn health_check() -> impl IntoResponse {
-    (StatusCode::OK, "OK")
+    (StatusCode::OK, "Healthy")
 }
 
-async fn verify_webhook(webhook_id: &str, secret: &str) -> Result<bool> {
-    // TODO:
-    Ok(true)
+async fn enqueue_workflow_job(
+    workflow_id: String,
+    start_reference_handle: String,
+    initial_payload: Option<serde_json::Value>,
+    db_pool: Arc<Pool<Postgres>>,
+) {
+    tokio::spawn(async move {
+        tracing::info!("Running workflow {workflow_id} starting at {start_reference_handle}");
+        if let Err(e) = run_workflow(
+            workflow_id.clone(),
+            start_reference_handle,
+            initial_payload,
+            db_pool,
+        )
+        .await
+        {
+            tracing::error!("Error running workflow with id {workflow_id}: {}", e);
+        }
+    });
 }
 
 async fn webhook_handler(
@@ -37,7 +57,7 @@ async fn webhook_handler(
 ) -> impl IntoResponse {
     tracing::info!("Webhook {} triggered", webhook_id);
 
-    match verify_webhook(&webhook_id, &secret).await {
+    match authenticate_webhook(db_pool.borrow(), &webhook_id, &secret).await {
         Err(e) => {
             tracing::error!("Error verifying webhook: {}", e);
             return (
@@ -52,59 +72,83 @@ async fn webhook_handler(
         }
     }
 
-    tokio::spawn(async move {
-        tracing::info!("Fetching webhook data for webhook {}", webhook_id);
-        let webhook = match fetch_webhook(db_pool.borrow(), &webhook_id).await {
-            Ok(webhook_opt) => match webhook_opt {
-                Some(webhook) => webhook,
-                None => {
-                    tracing::error!("The webhook {} does not exist.", webhook_id);
-                    return;
-                }
-            },
-            Err(e) => {
-                tracing::error!("Error fetching webhook {}: {}", webhook_id, e);
-                return;
+    tracing::info!("Fetching webhook data for webhook {}", webhook_id);
+    let webhook = match fetch_webhook(db_pool.borrow(), &webhook_id).await {
+        Ok(webhook_opt) => match webhook_opt {
+            Some(webhook) => webhook,
+            None => {
+                tracing::error!("The webhook {} does not exist.", webhook_id);
+                return (StatusCode::NOT_FOUND, "Webhook does not exis.");
             }
-        };
-
-        tracing::info!(
-            "Running workflow {} triggered by webhook {}",
-            webhook.workflow_id,
-            webhook_id
-        );
-        if let Err(e) = run_workflow(
-            webhook.workflow_id.clone(),
-            webhook.reference_handle,
-            inital_payload,
-            db_pool.clone(),
-        )
-        .await
-        {
-            tracing::error!(
-                "Error running workflow with id {}: {}",
-                webhook.workflow_id,
-                e
+        },
+        Err(e) => {
+            tracing::error!("Error fetching webhook {}: {}", webhook_id, e);
+            return (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "Error: Internal server error. Try again later.",
             );
         }
-    });
+    };
+
+    enqueue_workflow_job(
+        webhook.workflow_id,
+        webhook.reference_handle,
+        inital_payload,
+        db_pool,
+    )
+    .await;
 
     (StatusCode::ACCEPTED, "Ok")
 }
 
 async fn get_webhook_handler(
     Path((webhook_id, secret)): Path<(String, String)>,
-    State(state): State<Arc<SharedState>>,
+    State(state): State<SharedState>,
 ) -> impl IntoResponse {
     webhook_handler(webhook_id, secret, state.db_pool.clone(), None).await
 }
 
 async fn post_webhook_handler(
     Path((webhook_id, secret)): Path<(String, String)>,
-    State(state): State<Arc<SharedState>>,
+    State(state): State<SharedState>,
     Json(payload): Json<serde_json::Value>,
 ) -> impl IntoResponse {
     webhook_handler(webhook_id, secret, state.db_pool.clone(), Some(payload)).await
+}
+
+#[derive(Debug, Deserialize)]
+struct TriggerWorkflowRequest {
+    start_action_id: String,
+    payload: Option<serde_json::Value>,
+}
+
+async fn post_trigger_workflow_handler(
+    _claim: JwtClaims, // implements endpoint authentication
+    Path(workflow_id): Path<String>,
+    State(state): State<SharedState>,
+    Json(request): Json<TriggerWorkflowRequest>,
+) -> impl IntoResponse {
+    let action_opt = match fetch_action(state.db_pool.borrow(), &request.start_action_id).await {
+        Ok(action_opt) => action_opt,
+        Err(e) => {
+            tracing::error!("Error fetching action: {e}");
+            return (StatusCode::INTERNAL_SERVER_ERROR, "Internal server error");
+        }
+    };
+    let start_reference_handle = match action_opt {
+        None => return (StatusCode::NOT_FOUND, "Action does not exist."),
+        Some(action) => action.reference_handle,
+    };
+
+    enqueue_workflow_job(
+        workflow_id,
+        start_reference_handle,
+        request.payload,
+        state.db_pool.clone(),
+    )
+    .await;
+
+    (StatusCode::ACCEPTED, "Ok")
 }
 
 pub async fn run_server() -> Result<()> {
@@ -120,16 +164,15 @@ pub async fn run_server() -> Result<()> {
         }
     }
 
-    let state = SharedState {
-        db_pool: setup_postgres_pool().await?,
-    };
+    let state = setup_state().await?;
 
     let app = Router::new()
         .route("/health", get(health_check))
         .route("/webhook/:webhook_id/:secret", get(get_webhook_handler))
         .route("/webhook/:webhook_id/:secret", post(post_webhook_handler))
+        .route("/trigger/:workflow_id", post(post_trigger_workflow_handler))
         .layer(CorsLayer::permissive())
-        .with_state(Arc::new(state));
+        .with_state(state);
 
     // Run app with hyper
     let addr = format!("{ip_addr}:{port}");
