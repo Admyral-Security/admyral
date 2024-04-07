@@ -21,7 +21,7 @@ pub type ReferenceHandle = String;
 pub trait ActionExecutor {
     fn get_reference_handle(&self) -> &ReferenceHandle;
 
-    async fn execute(&self, context: &mut context::Context) -> Result<Option<serde_json::Value>>;
+    async fn execute(&self, context: &context::Context) -> Result<Option<serde_json::Value>>;
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

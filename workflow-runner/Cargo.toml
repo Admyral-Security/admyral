@@ -6,10 +6,14 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+aes-gcm = "0.10.3"
 anyhow = "1.0.81"
+async_once = "0.2.6"
 axum = "0.7.5"
 axum-extra = { version = "0.9.3", features = ["typed-header"] }
 enum_dispatch = "0.3.13"
+futures = "0.3.30"
+hex = "0.4.3"
 jsonwebtoken = "9.3.0"
 lazy_static = "1.4.0"
 regex = "1.10.4"

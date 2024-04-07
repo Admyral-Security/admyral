@@ -1,3 +1,5 @@
+mod crypto;
+
 use anyhow::{anyhow, Result};
 use serde_json::json;
 use sqlx::{postgres::PgPoolOptions, types::Uuid, Pool, Postgres};
@@ -280,4 +282,40 @@ pub async fn fetch_action(pool: &Pool<Postgres>, action_id: &str) -> Result<Opti
     tracing::info!("Finished fetching action - action_id = {action_id}");
 
     Ok(action)
+}
+
+#[derive(sqlx::FromRow, Debug)]
+struct CredentialRow {
+    encrypted_secret: String,
+}
+
+pub async fn fetch_secret(
+    pool: &Pool<Postgres>,
+    workflow_id: &str,
+    credential_name: &str,
+) -> Result<Option<String>> {
+    tracing::info!(
+        "Fetching secret - worklow_id = {workflow_id}, credential_name = {credential_name}"
+    );
+
+    let workflow_uuid = str_to_uuid(workflow_id)?;
+
+    let credential: Option<CredentialRow> = sqlx::query_as!(
+        CredentialRow,
+        r#"SELECT c.encrypted_secret FROM workflows w JOIN credentials c ON w.user_id = c.user_id WHERE c.credential_name = $1 AND w.workflow_id = $2"#,
+        credential_name,
+        workflow_uuid
+     )
+     .fetch_optional(pool)
+     .await?;
+
+    tracing::info!("Finished fetching secret - workflow_id = {workflow_id}, credential_name = {credential_name}");
+
+    match credential {
+        None => Ok(None),
+        Some(credential) => {
+            let decrypted_secret = crypto::decrypt_aes256_gcm(&credential.encrypted_secret).await?;
+            Ok(Some(decrypted_secret))
+        }
+    }
 }

@@ -9,7 +9,7 @@ use super::{execution_state::ExecutionState, ReferenceHandle};
 pub struct Context {
     pub workflow_id: String,
     pub execution_state: ExecutionState,
-    pg_pool: Arc<Pool<Postgres>>,
+    pub pg_pool: Arc<Pool<Postgres>>,
     run_id: String,
 }
 

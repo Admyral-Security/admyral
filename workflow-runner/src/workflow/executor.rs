@@ -53,7 +53,7 @@ impl WorkflowExecutor {
                 .get(action_reference_handle)
                 .expect("Failed to derference reference handle!");
 
-            if let Some(output) = action.node.execute(&mut self.context).await? {
+            if let Some(output) = action.node.execute(&self.context).await? {
                 self.context
                     .persist_run_state(action.node.get_reference_handle().to_string(), output)
                     .await?;

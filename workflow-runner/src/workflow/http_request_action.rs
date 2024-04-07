@@ -2,6 +2,7 @@ use super::context::Context;
 use super::reference_resolution::resolve_references;
 use super::{ActionExecutor, ReferenceHandle};
 use anyhow::Result;
+use futures::future::join_all;
 use lazy_static::lazy_static;
 use reqwest::header::{HeaderMap, HeaderName, HeaderValue};
 use serde::{Deserialize, Serialize};
@@ -36,7 +37,7 @@ impl ActionExecutor for HttpRequest {
     }
 
     /// Resolve reference possible in payload, headers value, url
-    async fn execute(&self, context: &mut Context) -> Result<Option<serde_json::Value>> {
+    async fn execute(&self, context: &Context) -> Result<Option<serde_json::Value>> {
         tracing::info!(
             "Executing HttpRequest {} of workflow {}",
             self.reference_handle,
@@ -45,32 +46,39 @@ impl ActionExecutor for HttpRequest {
 
         // Resolve references in the URL for dynamic URL construction or secrets
         let url = resolve_references(&json!(self.url), context)
+            .await?
             .as_str()
             .unwrap()
             .to_string();
 
         let client = REQ_CLIENT.clone();
-        let headers = self
+
+        let headers_futures = self
             .headers
             .iter()
-            .map(|(name, value)| {
-                // Resolve references in the value field (e.g. credentials)
-                let resolved_value = resolve_references(&json!(value), context);
-                (
+            .map(|(name, value)| async move {
+                let resolved_value = resolve_references(&json!(value), context).await?;
+                Ok((
                     HeaderName::from_str(name),
                     HeaderValue::from_str(&resolved_value.to_string()),
-                )
+                ))
             })
+            .collect::<Vec<_>>();
+        let result = join_all(headers_futures).await;
+        let result: Result<Vec<_>> = result.into_iter().collect();
+        let headers = result?
+            .into_iter()
             .filter(|(k, v)| k.is_ok() && v.is_ok())
             .map(|(k, v)| (k.unwrap(), v.unwrap()))
             .collect::<HeaderMap>();
+
         let response = match self.method {
             HttpMethod::Get => client.get(url).headers(headers).send().await?,
             HttpMethod::Post => {
                 let mut builder = client.post(url).headers(headers);
                 if let Some(payload) = self.payload.as_ref() {
                     // Resolve references in the POST request payload
-                    let resolved_payload = resolve_references(payload, context);
+                    let resolved_payload = resolve_references(payload, context).await?;
                     builder = builder.json(&resolved_payload);
                 }
                 builder.send().await?

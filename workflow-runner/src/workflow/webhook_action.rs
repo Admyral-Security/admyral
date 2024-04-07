@@ -13,7 +13,7 @@ impl ActionExecutor for Webhook {
         &self.reference_handle
     }
 
-    async fn execute(&self, context: &mut Context) -> Result<Option<serde_json::Value>> {
+    async fn execute(&self, context: &Context) -> Result<Option<serde_json::Value>> {
         tracing::info!(
             "Executing Webhook {} of workflow {}",
             self.reference_handle,
