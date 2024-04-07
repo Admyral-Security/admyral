@@ -11,7 +11,7 @@ datasource db {
 model user_profiles {
   user_id            String        @id @db.Uuid
   email              String
-  email_confirmed_at DateTime?
+  email_confirmed_at DateTime?     @db.Timestamp(6)
   credentials        credentials[]
   workflows          workflows[]
 }

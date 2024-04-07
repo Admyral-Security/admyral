@@ -4,7 +4,7 @@ use anyhow::{anyhow, Result};
 use serde_json::json;
 use sqlx::{postgres::PgPoolOptions, types::Uuid, Pool, Postgres};
 use std::sync::Arc;
-use time::OffsetDateTime;
+use time::PrimitiveDateTime;
 
 // TODO: wrap everything in a trait and implement a struct PostgresDbConnection (trait required for mocking)
 
@@ -231,8 +231,7 @@ pub async fn fetch_webhook_secret(
 
 #[derive(sqlx::FromRow, Debug)]
 struct UserValidation {
-    pub email_confirmed_at: Option<OffsetDateTime>,
-    pub deleted_at: Option<OffsetDateTime>,
+    pub email_confirmed_at: Option<PrimitiveDateTime>,
 }
 
 pub async fn is_user_valid(pool: &Pool<Postgres>, user_id: &str) -> Result<bool> {
@@ -247,9 +246,9 @@ pub async fn is_user_valid(pool: &Pool<Postgres>, user_id: &str) -> Result<bool>
     let user: Option<UserValidation> = sqlx::query_as!(
         UserValidation,
         r#"
-        SELECT email_confirmed_at, deleted_at
-        FROM auth.users
-        WHERE id = $1
+        SELECT email_confirmed_at
+        FROM user_profiles
+        WHERE user_id = $1
         "#,
         user_uuid
     )
@@ -258,7 +257,7 @@ pub async fn is_user_valid(pool: &Pool<Postgres>, user_id: &str) -> Result<bool>
 
     let is_valid = match user {
         None => false,
-        Some(user) => user.deleted_at.is_none() && user.email_confirmed_at.is_some(),
+        Some(user) => user.email_confirmed_at.is_some(),
     };
 
     tracing::info!("Finished validating user - user_id = {user_id}");

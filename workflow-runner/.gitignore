@@ -2,3 +2,5 @@ target
 
 .env*.local
 .env
+
+.sqlx
