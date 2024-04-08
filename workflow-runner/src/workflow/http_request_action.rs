@@ -27,7 +27,7 @@ pub struct HttpRequest {
     url: String,
     method: HttpMethod,
     headers: HashMap<String, String>,
-    payload: Option<serde_json::Value>, // TODO: rename to body
+    payload: Option<serde_json::Value>,
 }
 
 // TODO: unit test
@@ -96,6 +96,7 @@ impl ActionExecutor for HttpRequest {
             ))
             .collect::<HashMap<String, String>>());
 
+        // TODO: consider the content type of the resposne and parse the response accordingly
         let response_text = response.text().await?;
         let body = if let Ok(json) = serde_json::from_str(&response_text) {
             json

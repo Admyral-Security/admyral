@@ -98,7 +98,7 @@ async fn webhook_handler(
     )
     .await;
 
-    (StatusCode::ACCEPTED, "Ok")
+    (StatusCode::CREATED, "Ok")
 }
 
 async fn get_webhook_handler(
