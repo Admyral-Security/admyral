@@ -55,7 +55,7 @@ mod tests {
     use super::decrypt_aes256_gcm_impl;
 
     #[test]
-    fn test1() {
+    fn test_decrypt() {
         let cipher = "c559435bf727d348d196126f72956846eca6067b59c8edc71f8194b507693dbec2fadc15a0effe77089cc218";
         let secret = "5c9997afdd1a5aff0dafbb268ce432894226736ac833b912b0e3705688a99882";
         let mut key = [0; 32];

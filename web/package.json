@@ -7,7 +7,9 @@
 		"build": "next build",
 		"start": "next start",
 		"lint": "next lint",
-		"migrate-dev": "npx prisma migrate dev && npx tsx prisma/seedUserProfileTriggers.ts"
+		"migrate-dev": "npx prisma migrate dev && npx tsx prisma/seedUserProfileTriggers.ts",
+		"prisma-format": "npx prisma format",
+		"prisma-client": "npx prisma generate"
 	},
 	"dependencies": {
 		"@prisma/client": "^5.12.1",
