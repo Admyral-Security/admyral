@@ -72,7 +72,14 @@ pub async fn fetch_workflow_data(
 
     let workflow_edges: Vec<WorkflowEdgeRow> = sqlx::query_as!(
         WorkflowEdgeRow,
-        r#"SELECT parent_reference_handle, child_reference_handle FROM workflow_edges WHERE workflow_id = $1"#,
+        r#"
+        SELECT parent.reference_handle as parent_reference_handle, child.reference_handle as child_reference_handle
+        FROM workflow_edges we
+        JOIN actions parent
+        ON parent.action_id = we.parent_action_id
+        JOIN actions child
+        ON child.action_id = we.child_action_id
+        WHERE we.workflow_id = $1"#,
         workflow_uuid
     ).fetch_all(pool).await?;
 

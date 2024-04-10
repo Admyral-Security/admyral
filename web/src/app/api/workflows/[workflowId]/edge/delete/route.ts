@@ -1,6 +1,7 @@
 import prisma from "@/lib/db";
 import { NextRequest } from "next/server";
 
+// Delete an edge from a workflow
 // POST /api/workflows/[workflowId]/edge/delete
 export async function POST(request: NextRequest) {
 	const { parentActionId, childActionId } = await request.json();
@@ -14,5 +15,5 @@ export async function POST(request: NextRequest) {
 		},
 	});
 
-	return new Response("success", { status: 204 });
+	return new Response(null, { status: 204 });
 }

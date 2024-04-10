@@ -1,3 +1,5 @@
+import * as crypto from "crypto";
+
 function fromHexToBytes(hex: string): Uint8Array {
 	const buffer = [];
 	if (hex.length % 2 !== 0) {
@@ -59,4 +61,15 @@ export async function encrypt(data: string): Promise<string> {
 	outputBuffer.set(new Uint8Array(encrypted), iv.length);
 
 	return toHex(outputBuffer);
+}
+
+export function createWebhookSecret(webhookId: string): string {
+	const webhookSecret = process.env.WEBHOOK_SIGNING_SECRET;
+	if (!webhookSecret) {
+		throw new Error("Missing environment variable: WEBHOOK_SIGNING_SECRET");
+	}
+	return crypto
+		.createHmac("sha256", webhookSecret)
+		.update(webhookId)
+		.digest("hex");
 }

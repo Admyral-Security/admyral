@@ -2,6 +2,7 @@ import prisma from "@/lib/db";
 import { createClient } from "@/utils/supabase/server";
 import { NextResponse } from "next/server";
 
+// List all workflows of a user
 // GET /api/workflows
 export async function GET() {
 	const supabase = createClient();

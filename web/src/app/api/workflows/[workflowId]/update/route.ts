@@ -1,6 +1,7 @@
 import prisma from "@/lib/db";
 import { NextRequest } from "next/server";
 
+// Update metadata of a workflow
 // POST /api/workflows/[workflowId]/update
 export async function POST(
 	request: NextRequest,
@@ -26,5 +27,5 @@ export async function POST(
 		data,
 	});
 
-	return new Response("success", { status: 204 });
+	return new Response(null, { status: 204 });
 }

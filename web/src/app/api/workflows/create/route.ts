@@ -2,7 +2,8 @@ import prisma from "@/lib/db";
 import { createClient } from "@/utils/supabase/server";
 import { NextResponse } from "next/server";
 
-// POST /api/workflows/setup
+// Create a workflow
+// POST /api/workflows/create
 export async function POST() {
 	const supabase = createClient();
 

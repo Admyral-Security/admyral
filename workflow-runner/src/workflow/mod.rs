@@ -26,7 +26,7 @@ pub trait ActionExecutor {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[enum_dispatch(ActionExecutor)]
-#[serde(tag = "type", content = "payload")]
+#[serde(tag = "type", content = "definition")]
 pub enum ActionNode {
     Webhook(webhook_action::Webhook),
     HttpRequest(http_request_action::HttpRequest),
