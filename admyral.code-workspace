@@ -1,0 +1,16 @@
+{
+  "folders": [
+    {
+      "name": "Backend",
+      "path": "backend"
+    },
+    {
+      "name": "Frontend",
+      "path": "web"
+    },
+    {
+      "name": "WorkflowRunner",
+      "path": "workflow-runner"
+    }
+  ]
+}

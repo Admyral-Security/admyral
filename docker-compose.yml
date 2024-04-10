@@ -1,0 +1,9 @@
+version: "3.8"
+
+services:
+  backend:
+    build: ./backend
+    ports:
+      - 8004:8000
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://....
