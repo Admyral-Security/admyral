@@ -14,6 +14,9 @@ sqlmodel = "^0.0.16"
 uvicorn = "^0.29.0"
 sqlalchemy = {extras = ["asyncio"], version = "^2.0.29"}
 psycopg2-binary = "^2.9.9"
+pydantic = "^2.6.4"
+pydantic-settings = "^2.2.1"
+python-jose = {extras = ["cryptography"], version = "^3.3.0"}
 
 
 [build-system]
