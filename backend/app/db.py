@@ -1,18 +1,16 @@
-import os
-
 from sqlmodel import SQLModel
-from sqlmodel.ext.asyncio.session import AsyncSession
 from sqlalchemy.ext.asyncio import create_async_engine
-from sqlalchemy.orm import sessionmaker
 from sqlalchemy import text
 
 from app.config import settings 
 
+
 engine = create_async_engine(settings.DATABASE_URL, echo=True, future=True)
+
 
 async def init_db():
     async with engine.begin() as conn:
-        await conn.execute(text(f"DROP SCHEMA {settings.DATABASE_SCHEMA} CASCADE"))
+        # await conn.execute(text(f"DROP SCHEMA {settings.DATABASE_SCHEMA} CASCADE"))
         await conn.execute(text(f"CREATE SCHEMA IF NOT EXISTS {settings.DATABASE_SCHEMA}"))
         await conn.run_sync(SQLModel.metadata.create_all)
 
@@ -71,12 +69,4 @@ async def init_db():
                 after delete on {settings.DATABASE_SCHEMA}.user_profile
                 for each row execute procedure public.handle_user_delete()
         """))
-        
-
-
-async def get_session() -> AsyncSession:
-    async_session = sessionmaker(
-        engine, class_=AsyncSession, expire_on_commit=False
-    )
-    async with async_session() as session:
-        yield session
+ 

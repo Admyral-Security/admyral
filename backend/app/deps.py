@@ -2,14 +2,30 @@ from fastapi.security.api_key import APIKeyHeader
 from fastapi import Depends, HTTPException, status, Security
 from jose import jwt, JWTError
 from sqlmodel.ext.asyncio.session import AsyncSession
+from sqlalchemy.orm import sessionmaker
 from sqlmodel import select
+from pydantic import BaseModel
 
 from app.config import settings
-from app.db import get_session
-from app.models import AuthenticatedUser, UserProfile
+from app.db import engine
+from app.models import UserProfile
+
+
+async def get_session() -> AsyncSession:
+    async_session = sessionmaker(
+        engine, class_=AsyncSession, expire_on_commit=False
+    )
+    async with async_session() as session:
+        yield session
 
 
 api_key_header = APIKeyHeader(name="Authorization", auto_error=False)
+
+
+class AuthenticatedUser(BaseModel):
+    user_id: str
+    email: str
+    role: str
 
 
 async def get_authenticated_user(api_key: str | None = Security(api_key_header), session: AsyncSession = Depends(get_session)) -> AuthenticatedUser:
@@ -41,9 +57,9 @@ async def get_authenticated_user(api_key: str | None = Security(api_key_header),
             raise credentials_exception
 
         user = AuthenticatedUser(
-            user_id,
-            email,
-            role
+            user_id=user_id,
+            email=email,
+            role=role
         )
     except JWTError:
         raise credentials_exception

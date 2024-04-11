@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from enum import Enum
 from sqlmodel import SQLModel, Field, Relationship
 from typing import Optional
@@ -7,15 +5,8 @@ from sqlalchemy.dialects.postgresql import UUID, TIMESTAMP, TEXT, JSONB
 from datetime import datetime
 from sqlalchemy.sql.expression import func
 from sqlalchemy import Column, ForeignKey
-from pydantic import BaseModel
 
 from app.config import settings
-
-
-class AuthenticatedUser(BaseModel):
-    user_id: str
-    email: str
-    role: str
 
 
 class Base(SQLModel, table=False):
@@ -28,10 +19,10 @@ class UserProfile(Base, table=True):
     user_id: str = Field(primary_key=True, sa_type=UUID(as_uuid=True))
     created_at: datetime = Field(sa_type=TIMESTAMP(), sa_column_kwargs=dict(server_default=func.now()))
     email: str = Field(sa_type=TEXT())
-    email_confirmed_at: datetime = Field(sa_type=TIMESTAMP())
+    email_confirmed_at: Optional[datetime] = Field(sa_type=TIMESTAMP())
 
-    workflows: list[Workflow] = Relationship(back_populates="user")
-    credentials: list[Credential] = Relationship(back_populates="user")
+    workflows: list["Workflow"] = Relationship(back_populates="user")
+    credentials: list["Credential"] = Relationship(back_populates="user")
 
 
 class Credential(Base, table=True):
@@ -45,7 +36,7 @@ class Credential(Base, table=True):
     credential_name: str = Field(primary_key=True, sa_type=TEXT())
     encrypted_secret: str = Field(sa_type=TEXT())
 
-    user: UserProfile = Relationship(back_populates="credentials", sa_relationship_kwargs=dict(cascade="all, delete"))
+    user: UserProfile = Relationship(back_populates="credentials")
 
 
 class Workflow(Base, table=True):
@@ -62,10 +53,10 @@ class Workflow(Base, table=True):
         )
     )
 
-    user: UserProfile = Relationship(back_populates="workflows", sa_relationship_kwargs=dict(cascade="all, delete"))
+    user: UserProfile = Relationship(back_populates="workflows")
 
-    actions: list[ActionNode] = Relationship(back_populates="workflow")
-    workflow_runs: list[WorkflowRun] = Relationship(back_populates="workflow")
+    actions: list["ActionNode"] = Relationship(back_populates="workflow")
+    workflow_runs: list["WorkflowRun"] = Relationship(back_populates="workflow")
 
 
 class ActionType(Enum):
@@ -92,10 +83,10 @@ class ActionNode(Base, table=True):
 
     workflow: Workflow = Relationship(back_populates="actions", sa_relationship_kwargs=dict(cascade="all, delete"))
 
-    webhooks: list[Webhook] = Relationship(back_populates="action")    
-    parent_actions: list[WorkflowEdge] = Relationship(back_populates="parent_action")
-    child_actions: list[WorkflowEdge] = Relationship(back_populates="child_action")
-    workflow_run_action_states: list[WorkflowRunActionState] = Relationship(back_populates="workflow_run")
+    webhooks: list["Webhook"] = Relationship(back_populates="action")    
+    parent_actions: list["WorkflowEdge"] = Relationship(back_populates="parent_action", sa_relationship_kwargs=dict(foreign_keys="[WorkflowEdge.parent_action_id]"))
+    child_actions: list["WorkflowEdge"] = Relationship(back_populates="child_action", sa_relationship_kwargs=dict(foreign_keys="[WorkflowEdge.child_action_id]"))
+    workflow_run_action_states: list["WorkflowRunActionState"] = Relationship(back_populates="action_node")
 
 
 class Webhook(Base, table=True):
@@ -109,7 +100,7 @@ class Webhook(Base, table=True):
     )
     webhook_secret: Optional[str] = Field(sa_type=TEXT())
 
-    action: ActionNode = Relationship(back_populates="webhooks", sa_relationship_kwargs=dict(cascade="all, delete"))
+    action: ActionNode = Relationship(back_populates="webhooks")
 
 
 class WorkflowEdge(Base, table=True):
@@ -132,8 +123,8 @@ class WorkflowEdge(Base, table=True):
         )
     )
 
-    parent_action: ActionNode = Relationship(back_populates="parent_actions", sa_relationship_kwargs=dict(cascade="all, delete"))
-    child_action: ActionNode = Relationship(back_populates="child_actions", sa_relationship_kwargs=dict(cascade="all, delete"))
+    parent_action: ActionNode = Relationship(back_populates="parent_actions", sa_relationship_kwargs=dict(foreign_keys="[WorkflowEdge.parent_action_id]"))
+    child_action: ActionNode = Relationship(back_populates="child_actions", sa_relationship_kwargs=dict(foreign_keys="[WorkflowEdge.child_action_id]"))
 
 
 class WorkflowRun(Base, table=True):
@@ -150,9 +141,9 @@ class WorkflowRun(Base, table=True):
     started_timestamp: datetime = Field(sa_type=TIMESTAMP(), sa_column_kwargs=dict(server_default=func.now()))
     completed_timestamp: Optional[datetime] = Field(sa_type=TIMESTAMP())
 
-    workflow_run_action_states: list[WorkflowRunActionState] = Relationship(back_populates="workflow_run")
+    workflow_run_action_states: list["WorkflowRunActionState"] = Relationship(back_populates="workflow_run")
 
-    workflow: Workflow = Relationship(back_populates="workflow_runs", sa_relationship_kwargs=dict(cascade="all, delete"))
+    workflow: Workflow = Relationship(back_populates="workflow_runs")
 
 
 class WorkflowRunActionState(Base, table=True):
@@ -177,5 +168,5 @@ class WorkflowRunActionState(Base, table=True):
         )
     )
 
-    workflow_run: WorkflowRun = Relationship(back_populates="worklfow_run_action_states", sa_relationship_kwargs=dict(cascade="all, delete"))
-    action: ActionNode = Relationship(back_populates="workflow_run_action_states", sa_relationship_kwargs=dict(cascade="all, delete"))
+    workflow_run: WorkflowRun = Relationship(back_populates="workflow_run_action_states")
+    action_node: ActionNode = Relationship(back_populates="workflow_run_action_states")
