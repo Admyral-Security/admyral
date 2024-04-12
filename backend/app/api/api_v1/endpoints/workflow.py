@@ -394,19 +394,6 @@ async def update_action(
     await db.commit()
 
 
-@router.get("/{workflow_id}/actions/{action_id}/run")
-async def run_action(
-    workflow_id: str,
-    action_id: str,
-    db: AsyncSession = Depends(get_session),
-    user: AuthenticatedUser = Depends(get_authenticated_user)
-):
-    await raise_if_workflow_not_exists_for_user(db, workflow_id, user.user_id)
-
-    # TODO:
-    pass
-
-
 #### Edges
 
 
