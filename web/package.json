@@ -6,13 +6,9 @@
 		"dev": "next dev",
 		"build": "next build",
 		"start": "next start",
-		"lint": "next lint",
-		"migrate-dev": "npx prisma migrate dev && npx tsx prisma/seedUserProfileTriggers.ts",
-		"prisma-format": "npx prisma format",
-		"prisma-client": "npx prisma generate"
+		"lint": "next lint"
 	},
 	"dependencies": {
-		"@prisma/client": "^5.12.1",
 		"@supabase/ssr": "^0.1.0",
 		"@supabase/supabase-js": "^2.41.1",
 		"next": "14.1.4",
