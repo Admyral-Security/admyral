@@ -28,7 +28,10 @@ class AuthenticatedUser(BaseModel):
     role: str
 
 
-async def get_authenticated_user(api_key: str | None = Security(api_key_header), session: AsyncSession = Depends(get_session)) -> AuthenticatedUser:
+async def get_authenticated_user(
+    api_key: str | None = Security(api_key_header),
+    session: AsyncSession = Depends(get_session)
+) -> AuthenticatedUser:
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",

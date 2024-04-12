@@ -1,10 +1,8 @@
 mod crypto;
 
 use anyhow::{anyhow, Result};
-use serde_json::json;
 use sqlx::{postgres::PgPoolOptions, types::Uuid, Pool, Postgres};
 use std::sync::Arc;
-use time::PrimitiveDateTime;
 
 // TODO: wrap everything in a trait and implement a struct PostgresDbConnection (trait required for mocking)
 
@@ -39,6 +37,7 @@ pub struct ActionRow {
     pub workflow_id: String,
     pub action_name: String,
     pub reference_handle: String,
+    pub action_type: Option<String>,
     pub action_definition: serde_json::Value,
 }
 
@@ -58,7 +57,12 @@ pub async fn fetch_workflow_data(
 
     let workflow_row: WorkflowRow = sqlx::query_as!(
         WorkflowRow,
-        r#"SELECT workflow_id, workflow_name, is_live FROM workflows WHERE workflow_id = $1 LIMIT 1"#,
+        r#"
+        SELECT workflow_id, workflow_name, is_live
+        FROM admyral.workflow
+        WHERE workflow_id = $1
+        LIMIT 1
+        "#,
         workflow_uuid
     )
     .fetch_one(pool)
@@ -66,20 +70,25 @@ pub async fn fetch_workflow_data(
 
     let actions: Vec<ActionRow> = sqlx::query_as!(
         ActionRow,
-        r#"SELECT action_id, workflow_id, action_name, reference_handle, action_definition FROM actions WHERE workflow_id = $1"#,
+        r#"
+        SELECT action_id, workflow_id, action_name, reference_handle, action_type::text, action_definition
+        FROM admyral.action_node
+        WHERE workflow_id = $1
+        "#,
         workflow_uuid
-    ).fetch_all(pool).await?;
+    )
+    .fetch_all(pool)
+    .await?;
 
     let workflow_edges: Vec<WorkflowEdgeRow> = sqlx::query_as!(
         WorkflowEdgeRow,
         r#"
         SELECT parent.reference_handle as parent_reference_handle, child.reference_handle as child_reference_handle
-        FROM workflow_edges we
-        JOIN actions parent
-        ON parent.action_id = we.parent_action_id
-        JOIN actions child
-        ON child.action_id = we.child_action_id
-        WHERE we.workflow_id = $1"#,
+        FROM admyral.workflow_edge we
+        JOIN admyral.action_node parent ON parent.action_id = we.parent_action_id
+        JOIN admyral.action_node child ON child.action_id = we.child_action_id
+        JOIN admyral.workflow w ON w.workflow_id = parent.workflow_id AND w.workflow_id = child.workflow_id
+        WHERE w.workflow_id = $1"#,
         workflow_uuid
     ).fetch_all(pool).await?;
 
@@ -100,9 +109,12 @@ pub async fn init_run_state(pool: &Pool<Postgres>, workflow_id: &str) -> Result<
 
     let run_state: RunStateRow = sqlx::query_as!(
         RunStateRow,
-        r#"INSERT INTO workflow_run_states ( workflow_id, run_state ) VALUES ( $1, $2 ) RETURNING run_id"#,
-        workflow_uuid,
-        json!({})
+        r#"
+        INSERT INTO admyral.workflow_run ( workflow_id )
+        VALUES ( $1 )
+        RETURNING run_id
+        "#,
+        workflow_uuid
     )
     .fetch_one(pool)
     .await?;
@@ -113,40 +125,34 @@ pub async fn init_run_state(pool: &Pool<Postgres>, workflow_id: &str) -> Result<
 }
 
 /// Assumption: run state for workflow_id exists
-pub async fn update_run_state(
+pub async fn persist_action_run_state(
     pool: &Pool<Postgres>,
     run_id: &str,
-    run_state: serde_json::Value,
+    action_id: &str,
+    action_state: serde_json::Value,
 ) -> Result<()> {
-    tracing::info!("Updating run state - run_id = {run_id}");
+    tracing::info!("Persisting action run state - run_id = {run_id}, action_id = {action_id}");
 
     let run_uuid = str_to_uuid(run_id)?;
+    let action_uuid = str_to_uuid(action_id)?;
 
-    let rows_affected = sqlx::query!(
+    sqlx::query!(
         r#"
-        UPDATE workflow_run_states
-        SET last_updated_timestamp = CURRENT_TIMESTAMP,
-            run_state = $1
-        WHERE run_id = $2
+        INSERT INTO admyral.workflow_run_action_state ( action_state, run_id, action_id )
+        VALUES ( $1, $2, $3 )
         "#,
-        run_state,
-        run_uuid
+        action_state,
+        run_uuid,
+        action_uuid
     )
     .execute(pool)
-    .await?
-    .rows_affected();
+    .await?;
 
-    tracing::info!("Finished updating run state - run_id = {run_id}");
+    tracing::info!(
+        "Finished persisting action run state - run_id = {run_id}, action_id = {action_id}"
+    );
 
-    if rows_affected == 1 {
-        Ok(())
-    } else {
-        // this should not happen!
-        Err(anyhow!(
-            "Trying to update workflow run state for run id {} without initializing it first!",
-            run_id
-        ))
-    }
+    Ok(())
 }
 
 pub async fn mark_run_state_as_completed(pool: &Pool<Postgres>, run_id: &str) -> Result<()> {
@@ -156,7 +162,7 @@ pub async fn mark_run_state_as_completed(pool: &Pool<Postgres>, run_id: &str) ->
 
     let rows_affected = sqlx::query!(
         r#"
-        UPDATE workflow_run_states
+        UPDATE admyral.workflow_run
         SET completed_timestamp = CURRENT_TIMESTAMP
         WHERE run_id = $1
         "#,
@@ -166,9 +172,7 @@ pub async fn mark_run_state_as_completed(pool: &Pool<Postgres>, run_id: &str) ->
     .await?
     .rows_affected();
 
-    tracing::info!("Finished marking run state as completed - run_id = {run_id}");
-
-    if rows_affected == 1 {
+    let result = if rows_affected == 1 {
         Ok(())
     } else {
         // this should not happen!
@@ -176,7 +180,11 @@ pub async fn mark_run_state_as_completed(pool: &Pool<Postgres>, run_id: &str) ->
             "Trying to mark workflow run state as complete for run id {} without initializing it first!",
             run_id
         ))
-    }
+    };
+
+    tracing::info!("Finished marking run state as completed - run_id = {run_id}");
+
+    result
 }
 
 #[derive(sqlx::FromRow, Debug)]
@@ -194,9 +202,9 @@ pub async fn fetch_webhook(pool: &Pool<Postgres>, webhook_id: &str) -> Result<Op
     let webhook: Option<WebhookRow> = sqlx::query_as!(
         WebhookRow,
         r#"
-        SELECT webhook_id, a.reference_handle, workflow_id
-        FROM webhooks w
-        JOIN actions a ON w.action_id = a.action_id
+        SELECT w.webhook_id, a.reference_handle, workflow_id
+        FROM admyral.webhook w
+        JOIN admyral.action_node a ON w.action_id = a.action_id
         WHERE w.webhook_id = $1
         LIMIT 1
         "#,
@@ -212,7 +220,7 @@ pub async fn fetch_webhook(pool: &Pool<Postgres>, webhook_id: &str) -> Result<Op
 
 #[derive(sqlx::FromRow, Debug)]
 struct WebhookSecret {
-    webhook_secret: String,
+    webhook_secret: Option<String>,
 }
 
 pub async fn fetch_webhook_secret(
@@ -225,7 +233,7 @@ pub async fn fetch_webhook_secret(
 
     let webhook: Option<WebhookSecret> = sqlx::query_as!(
         WebhookSecret,
-        r#"SELECT webhook_secret FROM webhooks WHERE webhook_id = $1"#,
+        r#"SELECT webhook_secret FROM admyral.webhook WHERE webhook_id = $1 LIMIT 1"#,
         webhook_uuid
     )
     .fetch_optional(pool)
@@ -233,53 +241,98 @@ pub async fn fetch_webhook_secret(
 
     tracing::info!("Finished fetching webhook secret - webhook_id = {webhook_id}");
 
-    Ok(webhook.map(|webhook| webhook.webhook_secret))
+    Ok(match webhook {
+        None => None,
+        Some(webhook) => webhook.webhook_secret,
+    })
 }
 
 #[derive(sqlx::FromRow, Debug)]
 struct UserValidation {
-    pub email_confirmed_at: Option<PrimitiveDateTime>,
+    pub user_id: String,
 }
 
+/// Verify that the user exists and the confirmed its email.
 pub async fn is_user_valid(pool: &Pool<Postgres>, user_id: &str) -> Result<bool> {
     tracing::info!("Validating user - user_id = {user_id}");
 
-    // We perform the following checks:
-    // 1) Does the user exist?
-    // 2) Did the user confirm her/his email?
-    // 3) Was the user deleted?
     let user_uuid = str_to_uuid(user_id)?;
 
     let user: Option<UserValidation> = sqlx::query_as!(
         UserValidation,
         r#"
-        SELECT email_confirmed_at
-        FROM user_profiles
-        WHERE user_id = $1
+        SELECT user_id
+        FROM admyral.user_profile
+        WHERE user_id = $1 AND email_confirmed_at IS NOT NULL
+        LIMIT 1
         "#,
         user_uuid
     )
     .fetch_optional(pool)
     .await?;
 
-    let is_valid = match user {
-        None => false,
-        Some(user) => user.email_confirmed_at.is_some(),
-    };
+    let is_valid = user.is_some();
 
     tracing::info!("Finished validating user - user_id = {user_id}");
 
     Ok(is_valid)
 }
 
-pub async fn fetch_action(pool: &Pool<Postgres>, action_id: &str) -> Result<Option<ActionRow>> {
+#[derive(sqlx::FromRow, Debug)]
+struct WorkflowValidation {
+    pub workflow_id: String,
+}
+
+pub async fn is_workflow_owned_by_user(
+    pool: &Pool<Postgres>,
+    user_id: &str,
+    workflow_id: &str,
+) -> Result<bool> {
+    tracing::info!("Validating workflow id - workflow_id = {workflow_id}, user_id = {user_id}");
+
+    let user_uuid = str_to_uuid(user_id)?;
+    let workflow_uuid = str_to_uuid(workflow_id)?;
+
+    let workflow: Option<WorkflowValidation> = sqlx::query_as!(
+        WorkflowValidation,
+        r#"
+        SELECT workflow_id
+        FROM admyral.workflow
+        WHERE workflow_id = $1 AND user_id = $2
+        "#,
+        workflow_uuid,
+        user_uuid
+    )
+    .fetch_optional(pool)
+    .await?;
+
+    let is_valid = workflow.is_some();
+
+    tracing::info!(
+        "Finished validating workflow - user_id = {user_id}, workflow_id = {workflow_id}"
+    );
+
+    Ok(is_valid)
+}
+
+pub async fn fetch_action(
+    pool: &Pool<Postgres>,
+    workflow_id: &str,
+    action_id: &str,
+) -> Result<Option<ActionRow>> {
     tracing::info!("Fetching action - action_id = {action_id}");
 
+    let workflow_uuid = str_to_uuid(workflow_id)?;
     let action_uuid = str_to_uuid(action_id)?;
 
     let action: Option<ActionRow> = sqlx::query_as!(
         ActionRow,
-        r#"SELECT action_id, workflow_id, action_name, reference_handle, action_definition FROM actions WHERE action_id = $1"#,
+        r#"
+        SELECT action_id, workflow_id, action_name, reference_handle, action_type::text, action_definition
+        FROM admyral.action_node
+        WHERE workflow_id = $1 AND action_id = $2
+        "#,
+        workflow_uuid,
         action_uuid
     )
     .fetch_optional(pool)
@@ -308,12 +361,17 @@ pub async fn fetch_secret(
 
     let credential: Option<CredentialRow> = sqlx::query_as!(
         CredentialRow,
-        r#"SELECT c.encrypted_secret FROM workflows w JOIN credentials c ON w.user_id = c.user_id WHERE c.credential_name = $1 AND w.workflow_id = $2"#,
+        r#"
+        SELECT c.encrypted_secret
+        FROM admyral.workflow w
+        JOIN admyral.credential c ON w.user_id = c.user_id
+        WHERE c.credential_name = $1 AND w.workflow_id = $2
+        "#,
         credential_name,
         workflow_uuid
-     )
-     .fetch_optional(pool)
-     .await?;
+    )
+    .fetch_optional(pool)
+    .await?;
 
     tracing::info!("Finished fetching secret - workflow_id = {workflow_id}, credential_name = {credential_name}");
 

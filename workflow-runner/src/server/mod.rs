@@ -17,7 +17,7 @@ use std::{borrow::Borrow, sync::Arc};
 use tower_http::cors::CorsLayer;
 
 use crate::{
-    postgres::{fetch_action, fetch_webhook},
+    postgres::{fetch_action, fetch_webhook, is_workflow_owned_by_user},
     server::shared_state::setup_state,
     workflow::run_workflow,
 };
@@ -123,12 +123,32 @@ struct TriggerWorkflowRequest {
 }
 
 async fn post_trigger_workflow_handler(
-    _claim: JwtClaims, // implements endpoint authentication
+    claim: JwtClaims, // implements endpoint authentication
     Path(workflow_id): Path<String>,
     State(state): State<SharedState>,
     Json(request): Json<TriggerWorkflowRequest>,
 ) -> impl IntoResponse {
-    let action_opt = match fetch_action(state.db_pool.borrow(), &request.start_action_id).await {
+    // verify that the workflow is owned by the requesting user
+    let user_id = &claim.sub;
+    match is_workflow_owned_by_user(state.db_pool.borrow(), &workflow_id, user_id).await {
+        Ok(is_valid) => {
+            if !is_valid {
+                return (StatusCode::NOT_FOUND, "Workflow does not exist.");
+            }
+        }
+        Err(e) => {
+            tracing::error!("Error validating workflow ownership: {e}");
+            return (StatusCode::INTERNAL_SERVER_ERROR, "Internal server error");
+        }
+    }
+
+    let action_opt = match fetch_action(
+        state.db_pool.borrow(),
+        &workflow_id,
+        &request.start_action_id,
+    )
+    .await
+    {
         Ok(action_opt) => action_opt,
         Err(e) => {
             tracing::error!("Error fetching action: {e}");
@@ -154,7 +174,7 @@ async fn post_trigger_workflow_handler(
 pub async fn run_server() -> Result<()> {
     let args: Vec<String> = std::env::args().collect();
     let mut ip_addr = "127.0.0.1";
-    let mut port = "8000";
+    let mut port = "4000";
     for idx in 1..args.len() {
         if args[idx] == "--ip" {
             ip_addr = &args[idx + 1];

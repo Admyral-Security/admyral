@@ -1,6 +1,5 @@
 use super::ReferenceHandle;
 use serde::{Deserialize, Serialize};
-use serde_json::json;
 use std::collections::HashMap;
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -9,7 +8,6 @@ pub struct ExecutionState {
     state: HashMap<ReferenceHandle, serde_json::Value>,
 }
 
-// TODO: write unit tests
 impl ExecutionState {
     pub fn get_from_access_path(&self, path: String) -> Option<serde_json::Value> {
         let mut iter = path.split(".");
@@ -38,9 +36,5 @@ impl ExecutionState {
     pub fn store(&mut self, node_reference_handle: String, output: serde_json::Value) {
         // TODO: check whether node id is unique? or should we just assume it?
         self.state.insert(node_reference_handle, output);
-    }
-
-    pub fn json(&self) -> serde_json::Value {
-        json!(self.state.clone())
     }
 }

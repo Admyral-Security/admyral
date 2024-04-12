@@ -34,9 +34,14 @@ impl WorkflowExecutor {
         let mut executor =
             Self::init(pg_pool, workflow, start_node_reference_handle.clone()).await?;
         // Store payload from webhook
+        let start_node = executor
+            .workflow
+            .actions
+            .get(&start_node_reference_handle)
+            .expect("Invalid start node reference handle");
         executor
             .context
-            .persist_run_state(start_node_reference_handle, inital_data)
+            .persist_run_state(&start_node.reference_handle, &start_node.id, inital_data)
             .await?;
         Ok(executor)
     }
@@ -51,11 +56,17 @@ impl WorkflowExecutor {
                 .workflow
                 .actions
                 .get(action_reference_handle)
-                .expect("Failed to derference reference handle!");
+                .expect("Failed to dereference reference handle!");
 
+            tracing::info!(
+                "Executing action of type {} with action id {} of workflow {}",
+                action.node.type_as_str(),
+                action.id,
+                self.workflow.workflow_id
+            );
             if let Some(output) = action.node.execute(&self.context).await? {
                 self.context
-                    .persist_run_state(action.node.get_reference_handle().to_string(), output)
+                    .persist_run_state(&action.reference_handle, &action.id, output)
                     .await?;
             }
 

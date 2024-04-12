@@ -7,7 +7,7 @@ mod webhook_action;
 
 use self::executor::WorkflowExecutor;
 use crate::postgres::fetch_workflow_data;
-use anyhow::Result;
+use anyhow::{anyhow, Result};
 use enum_dispatch::enum_dispatch;
 use serde::{Deserialize, Serialize};
 use sqlx::{Pool, Postgres};
@@ -19,23 +19,40 @@ pub type ReferenceHandle = String;
 
 #[enum_dispatch]
 pub trait ActionExecutor {
-    fn get_reference_handle(&self) -> &ReferenceHandle;
-
     async fn execute(&self, context: &context::Context) -> Result<Option<serde_json::Value>>;
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[enum_dispatch(ActionExecutor)]
-#[serde(tag = "type", content = "definition")]
 pub enum ActionNode {
     Webhook(webhook_action::Webhook),
     HttpRequest(http_request_action::HttpRequest),
+}
+
+impl ActionNode {
+    fn from(action_type: &str, action_definition: serde_json::Value) -> Result<Self> {
+        match action_type {
+            "WEBHOOK" => Ok(Self::Webhook(webhook_action::Webhook)),
+            "HTTP_REQUEST" => Ok(Self::HttpRequest(serde_json::from_value::<
+                http_request_action::HttpRequest,
+            >(action_definition)?)),
+            _ => Err(anyhow!("Unknown action type: {action_type}")),
+        }
+    }
+
+    fn type_as_str(&self) -> &str {
+        match self {
+            Self::Webhook(_) => "WEBHOOK",
+            Self::HttpRequest(_) => "HTTP_REQUEST",
+        }
+    }
 }
 
 #[derive(Debug, Clone)]
 pub struct Action {
     pub id: String,
     pub name: String,
+    pub reference_handle: ReferenceHandle,
     pub node: ActionNode,
 }
 
@@ -56,12 +73,19 @@ impl Workflow {
             .into_iter()
             .map(|action_row| {
                 (
-                    action_row.reference_handle,
+                    action_row.reference_handle.clone(),
                     Action {
                         id: action_row.action_id,
                         name: action_row.action_name,
-                        node: serde_json::from_value::<ActionNode>(action_row.action_definition)
-                            .expect("ActionNode parsing went wrong"),
+                        reference_handle: action_row.reference_handle,
+                        node: ActionNode::from(
+                            action_row
+                                .action_type
+                                .as_ref()
+                                .expect("Action type is empty!"),
+                            action_row.action_definition,
+                        )
+                        .expect("ActionNode parsing went wrong"),
                     },
                 )
             })

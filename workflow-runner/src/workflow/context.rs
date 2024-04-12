@@ -1,4 +1,4 @@
-use crate::postgres::{init_run_state, mark_run_state_as_completed, update_run_state};
+use crate::postgres::{init_run_state, mark_run_state_as_completed, persist_action_run_state};
 use anyhow::Result;
 use sqlx::{Pool, Postgres};
 use std::{borrow::Borrow, sync::Arc};
@@ -26,16 +26,13 @@ impl Context {
 
     pub async fn persist_run_state(
         &mut self,
-        reference_handle: ReferenceHandle,
+        reference_handle: &ReferenceHandle,
+        action_id: &str,
         output: serde_json::Value,
     ) -> Result<()> {
-        self.execution_state.store(reference_handle, output);
-        update_run_state(
-            self.pg_pool.borrow(),
-            &self.run_id,
-            self.execution_state.json(),
-        )
-        .await?;
+        self.execution_state
+            .store(reference_handle.clone(), output.clone());
+        persist_action_run_state(self.pg_pool.borrow(), &self.run_id, action_id, output).await?;
         Ok(())
     }
 

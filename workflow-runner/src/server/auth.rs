@@ -53,20 +53,20 @@ impl IntoResponse for AuthError {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct JwtClaims {
-    sub: String,
-    exp: usize,
-    iat: usize,
-    iss: String,
-    aud: String,
-    email: String,
-    phone: String,
-    app_metadata: serde_json::Value,
-    user_metadata: serde_json::Value,
-    role: String,
-    aal: String,
-    amr: serde_json::Value,
-    session_id: String,
-    is_anonymous: bool,
+    pub sub: String,
+    pub exp: usize,
+    pub iat: usize,
+    pub iss: String,
+    pub aud: String,
+    pub email: String,
+    pub phone: String,
+    pub app_metadata: serde_json::Value,
+    pub user_metadata: serde_json::Value,
+    pub role: String,
+    pub aal: String,
+    pub amr: serde_json::Value,
+    pub session_id: String,
+    pub is_anonymous: bool,
 }
 
 impl Display for JwtClaims {

@@ -1,6 +1,6 @@
 use super::context::Context;
 use super::reference_resolution::resolve_references;
-use super::{ActionExecutor, ReferenceHandle};
+use super::ActionExecutor;
 use anyhow::Result;
 use futures::future::join_all;
 use lazy_static::lazy_static;
@@ -23,27 +23,15 @@ pub enum HttpMethod {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct HttpRequest {
-    reference_handle: ReferenceHandle,
     url: String,
     method: HttpMethod,
     headers: HashMap<String, String>,
     payload: Option<serde_json::Value>,
 }
 
-// TODO: unit test
 impl ActionExecutor for HttpRequest {
-    fn get_reference_handle(&self) -> &ReferenceHandle {
-        &self.reference_handle
-    }
-
     /// Resolve reference possible in payload, headers value, url
     async fn execute(&self, context: &Context) -> Result<Option<serde_json::Value>> {
-        tracing::info!(
-            "Executing HttpRequest {} of workflow {}",
-            self.reference_handle,
-            context.workflow_id
-        );
-
         // Resolve references in the URL for dynamic URL construction or secrets
         let url = resolve_references(&json!(self.url), context)
             .await?
