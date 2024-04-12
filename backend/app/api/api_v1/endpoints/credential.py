@@ -11,6 +11,9 @@ from app.models import Credential
 router = APIRouter()
 
 
+# TODO: add update functionality
+
+
 class CredentialCreateRequest(BaseModel):
     credential_name: str
     encrypted_secret: str
@@ -49,31 +52,33 @@ class CredentialDeleteRequest(BaseModel):
 
 @router.post(
     "/delete",
-    status_code=status.HTTP_201_CREATED
+    status_code=status.HTTP_204_NO_CONTENT
 )
 async def delete_credential(
     request: CredentialDeleteRequest,
     db: AsyncSession = Depends(get_session),
     user: AuthenticatedUser = Depends(get_authenticated_user)
-) -> str:
+):
     result = await db.exec(
         select(Credential)
         .where(Credential.user_id == user.user_id and Credential.credential_name == request.credential_name)
         .limit(1)
     )
-    existing_credentials = result.all()
-    if len(existing_credentials) != 1:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Credential not found")
-
-    existing_credential = existing_credentials[0]
+    existing_credential = result.one_or_none()
+    if not existing_credential:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Credential not found"
+        )
 
     await db.delete(existing_credential)
     await db.commit()
 
-    return "success"
 
-
-@router.get("/", status_code=status.HTTP_200_OK)
+@router.get(
+    "/",
+    status_code=status.HTTP_200_OK
+)
 async def list_credentials(
     db: AsyncSession = Depends(get_session),
     user: AuthenticatedUser = Depends(get_authenticated_user)
