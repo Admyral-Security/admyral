@@ -69,15 +69,15 @@ async def get_authenticated_user(
 
     # check whether the user exists in user_profile
     results = await session.exec(select(UserProfile).where(UserProfile.user_id == user.user_id).limit(1))
-    user_profiles = results.all()
+    user_profile = results.one_or_none()
 
-    if len(user_profiles) != 1:
+    if not user_profile:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="User does not exist"
         )
 
-    if not user_profiles[0].email_confirmed_at:
+    if not user_profile.email_confirmed_at:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Email not confirmed"

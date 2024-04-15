@@ -96,6 +96,34 @@ async def query_edge(
 #### Workflows
 
 
+class WorkflowListEntry(BaseModel):
+    workflow_id: str
+    workflow_name: str
+    is_live: bool
+
+
+@router.get("/", status_code=status.HTTP_200_OK)
+async def get_workflows(
+    db: AsyncSession = Depends(get_session),
+    user: AuthenticatedUser = Depends(get_authenticated_user)
+) -> list[WorkflowListEntry]:
+    result = await db.exec(
+        select(Workflow)
+            .where(Workflow.user_id == user.user_id)
+            .order_by(Workflow.created_at.desc())
+    )
+    return list(
+        map(
+            lambda workflow: WorkflowListEntry(
+                workflow_id=workflow.workflow_id,
+                workflow_name=workflow.workflow_name,
+                is_live=workflow.is_live
+            ),
+            result.all()
+        )
+    )
+
+
 class WorkflowData(BaseModel):
     workflow_name: str
     workflow_description: str

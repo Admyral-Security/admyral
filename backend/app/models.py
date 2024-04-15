@@ -21,6 +21,9 @@ class UserProfile(Base, table=True):
     created_at: datetime = Field(sa_type=TIMESTAMP(), sa_column_kwargs=dict(server_default=func.now()))
     email: str = Field(sa_type=TEXT())
     email_confirmed_at: Optional[datetime] = Field(sa_type=TIMESTAMP())
+    company: str = Field(sa_type=TEXT(), default="")
+    first_name: str = Field(sa_type=TEXT(), default="")
+    last_name: str = Field(sa_type=TEXT(), default="")
 
     workflows: list["Workflow"] = Relationship(back_populates="user", sa_relationship_kwargs=dict(cascade="all, delete"))
     credentials: list["Credential"] = Relationship(back_populates="user", sa_relationship_kwargs=dict(cascade="all, delete"))
@@ -36,6 +39,7 @@ class Credential(Base, table=True):
     )
     credential_name: str = Field(primary_key=True, sa_type=TEXT())
     encrypted_secret: str = Field(sa_type=TEXT())
+    created_at: datetime = Field(sa_type=TIMESTAMP(), sa_column_kwargs=dict(server_default=func.now()))
 
     user: UserProfile = Relationship(back_populates="credentials")
 
@@ -45,6 +49,7 @@ class Workflow(Base, table=True):
     workflow_name: str = Field(sa_type=TEXT())
     workflow_description: str = Field(sa_type=TEXT())
     is_live: bool
+    created_at: datetime = Field(sa_type=TIMESTAMP(), sa_column_kwargs=dict(server_default=func.now()))
 
     user_id: str = Field(
         sa_column=Column(
@@ -76,6 +81,7 @@ class ActionNode(Base, table=True):
     action_type: ActionType
     action_description: str = Field(sa_type=TEXT())
     action_definition: dict = Field(sa_type=JSONB())
+    created_at: datetime = Field(sa_type=TIMESTAMP(), sa_column_kwargs=dict(server_default=func.now()))
 
     workflow: Workflow = Relationship(back_populates="actions")
 

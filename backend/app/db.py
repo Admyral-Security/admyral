@@ -21,8 +21,8 @@ async def init_db():
             create or replace function public.handle_new_user()
             returns trigger as $$
             begin
-                insert into {settings.DATABASE_SCHEMA}.user_profile (user_id, email)
-                values (new.id, new.email);
+                insert into {settings.DATABASE_SCHEMA}.user_profile (user_id, email, company, first_name, last_name)
+                values (new.id, new.email, '', '', '');
                 return new;
             end;
             $$ language plpgsql security definer;

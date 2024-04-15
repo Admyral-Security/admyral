@@ -21,13 +21,13 @@ class CredentialCreateRequest(BaseModel):
 
 @router.post(
     "/create",
-    status_code=status.HTTP_201_CREATED,
+    status_code=status.HTTP_204_NO_CONTENT
 )
 async def create_credential(
     request: CredentialCreateRequest,
     db: AsyncSession = Depends(get_session),
     user: AuthenticatedUser = Depends(get_authenticated_user)
-) -> str:
+):
     new_credential = Credential(
         user_id=user.user_id,
         credential_name=request.credential_name,
@@ -42,8 +42,6 @@ async def create_credential(
             status_code=status.HTTP_409_CONFLICT,
             detail="Insert is violating constraints."
         )
-
-    return "success"
 
 
 class CredentialDeleteRequest(BaseModel):
