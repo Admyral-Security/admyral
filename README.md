@@ -32,16 +32,20 @@ Admyral is an AI-powered SOAR with deep case management integration. It is engin
 ### Workflow Builder & AI Actions
 
 - [ ] Workflow Actions
-  - [x] HTTP & Webhook
+  - [x] HTTP request
+  - [X] Webhook
   - [X] Credentials for Webhook
   - [ ] Condition
   - [ ] Scheduling
-  - [ ] Open case
-  - [ ] Update case
+  - [ ] Case Management
   - [ ] AI Actions
+  - [ ] Send Emails
+  - [ ] Receive Emails
+  - [ ] Data Transformations
+  - [ ] Formulas
+  - [ ] Custom Python code
 - [ ] Run history
-
-
+- [ ] Integrations - do you need any integration? let us know!
 
 ### Case Management
 - [ ] Case Overview and Case Details
@@ -51,7 +55,6 @@ Admyral is an AI-powered SOAR with deep case management integration. It is engin
 ### Hosting
 - [ ] Self-hosting
 - [ ] Cloud version
-- [ ] Infrastructure-as-code
 
 ### AI Enablement
 // coming soon
@@ -87,7 +90,7 @@ Security is a foundational element of Admyral. We're dedicated to safeguarding o
 #### Why does it need another SOAR?
 Admyral addresses several shortcomings in the current SOAR landscape, providing compelling reasons for its necessity:
 - **Open-Source Initiative**: Unlike existing SOAR platforms, Admyral is one of the few open-source options available, allowing for greater adaptability and community-driven enhancements.
-- **Performance Optimization**: Builing in Rust offers superior performance and reliability compared to platforms like Cortex XSOAR, which can struggle under heavy loads. Rust’s safety features and efficiency are exceptionally suitable for demanding security environments.
+- **Performance Optimization**: Building in Rust offers superior performance and reliability compared to platforms like Cortex XSOAR, which can struggle under heavy loads. Rust’s safety features and efficiency are exceptionally suitable for demanding security environments.
 - **Enhanced Case Management**: Many SOAR solutions fall short in their case management capabilities. Admyral incorporates deep case management integration, enabling more thorough and effective handling of security incidents from start to finish.
 - **Advanced AI Integration**: While most existing tools do not fully utilize AI technologies or consider AI from the beginning, Admyral will be designed from the ground up with AI in mind, enhancing both the automation and intelligence of security operations significantly.
 
@@ -108,7 +111,7 @@ Admyral will maintain its commitment to keeping all currently open-sourced featu
 
 ## Enterprise Version
 As of now, our project does not have a dedicated Enterprise version.
-If you represent an MSSP or an Enterprise and would like to discuss potential collaborations of Admyral, please do not hesitate to reach out. You can contact Chris directly at [chris@admyral.com](mailto:chris@admyral.com) for more details and to start a conversation.
+If you represent an MSSP or an Enterprise and would like to discuss potential collaborations with Admyral, please do not hesitate to reach out. You can contact Chris directly at [chris@admyral.com](mailto:chris@admyral.com) for more details and to start a conversation.
 We are excited about the possibility of working together to meet your specific business needs and to expand the capabilities of our project in a way that benefits your organization.
 
 
