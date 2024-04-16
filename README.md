@@ -2,7 +2,7 @@
 <img src="https://admyral-assets.s3.eu-central-1.amazonaws.com/admyral-title.svg">
 </p>
 <div align="center">
-  <h3>An AI-Powered, Open-Source Torq and Tines </br> // A Modern TheHive</h3>
+  <h3>An AI-Powered, Open-Source Torq</h3>
 </div>
 
 
@@ -24,13 +24,12 @@
 
 </br>
 
-*Disclaimer: Admyral is still in public alpha. If you'd like to use it within your company or try it out, reach out to us via chris@admyral.com or directly on [Discord](https://discord.gg/9ReNvc85).*
+*Disclaimer: Admyral is still in public alpha. If you'd like to use it within your company or try it out, reach out to us via [chris@admyral.com](mailto:chris@admyral.com) or directly on [Discord](https://discord.gg/9ReNvc85).*
 
-Admyral is an AI-powered SOAR with deep case management integration. It is engineered to provide the most effective and scalable approach for tackling alert fatigue and automating security workflows.
+Admyral is a next-gen Hyperautomation Platform with deep case management integration. It is engineered to provide a new and more effective and scalable approach for tackling alert fatigue and automating security workflows.
 
 ## Key Features & Roadmap
-### Workflow Builder & AI Actions
-
+### Hyperautomation Platform Foundation
 - [ ] Workflow Actions
   - [x] HTTP request
   - [X] Webhook
@@ -45,19 +44,24 @@ Admyral is an AI-powered SOAR with deep case management integration. It is engin
   - [ ] Formulas
   - [ ] Custom Python code
 - [ ] Run history
-- [ ] Integrations - do you need any integration? let us know!
-
-### Case Management
-- [ ] Case Overview and Case Details
+- [ ] Case Management
 - [ ] Alert Handling
 - [ ] Dashboard
+- [ ] Integrations - do you need any integration? let us know!
+
+
+### Next-Gen Hyperautomation Features
+- [ ] Natural Language to Workflow
+- [ ] Investigation Copilot
+- [ ] Next steps recommendation for cases
+- [ ] Customized workflow recommendations
+- [ ] Integration Copilot
+
 
 ### Hosting
 - [ ] Self-hosting
 - [ ] Cloud version
 
-### AI Enablement
-// coming soon
 
 ### Misc
 - [ ] Multi-tenancy
@@ -78,7 +82,7 @@ We value your feedback and contributions! If you have suggestions, questions, or
 
 You can best support us and this project by:
 1. Giving it a star on Github
-2. Joining our active community on Discord
+2. Joining our active community on [Discord](https://discord.gg/9ReNvc85)
 3. And giving us feedback
 
 
@@ -87,12 +91,21 @@ Security is a foundational element of Admyral. We're dedicated to safeguarding o
 
 
 ## FAQ
-#### Why does it need another SOAR?
-Admyral addresses several shortcomings in the current SOAR landscape, providing compelling reasons for its necessity:
-- **Open-Source Initiative**: Unlike existing SOAR platforms, Admyral is one of the few open-source options available, allowing for greater adaptability and community-driven enhancements.
-- **Performance Optimization**: Building in Rust offers superior performance and reliability compared to platforms like Cortex XSOAR, which can struggle under heavy loads. Rust’s safety features and efficiency are exceptionally suitable for demanding security environments.
-- **Enhanced Case Management**: Many SOAR solutions fall short in their case management capabilities. Admyral incorporates deep case management integration, enabling more thorough and effective handling of security incidents from start to finish.
-- **Advanced AI Integration**: While most existing tools do not fully utilize AI technologies or consider AI from the beginning, Admyral will be designed from the ground up with AI in mind, enhancing both the automation and intelligence of security operations significantly.
+#### What is the issue with the currenty Security Automation tools?
+1. **Challenges of Staffing in Security Automation Implementation**: 
+Security automation platforms promised to reduce the burden on security teams. However, they still require a dedicated team for building and managing automations, not addressing the ongoing issue of a skilled worker shortage.
+-> Creating workflows should be made easier, more accessible, and faster.
+
+2. **Automation Builders & Requesters vs. Automation Users**: 
+Security Engineers are tasked with building automations while Managers drive their development based on input from the end users, aka Security Analysts. To complicate this, there's a lack of a feedback loop among these groups. 
+-> Automation Users, e.g. Security Analysts, should be empowered to effortlessly create workflows during their regular workflow without creating additional overhead.
+
+3. **Inflexibility of Static Workflows in a Dynamic Threat Environment**: 
+Existing security automation platforms originated from generic workflow builders like Zapier and Make.com, designed for static environments and pre-GenAI era. In cybersecurity, where threats evolve rapidly, especially with GenAI-enhanced threats, static workflows are inadequate. It is impossible to constantly maintain and update static and predefined workflows.
+-> Workflows is a dynamic concept that should welcome easy case-by-case adjustments during the incident investigation stage and beyond
+
+Security Automation has to be rethought, which is why we are building Admyral, a next-generation hyperautomation platform. More details on the new concept will be shared as we progress.
+
 
 
 #### How do you ensure Admyral is secure?
