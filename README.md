@@ -33,7 +33,7 @@ Admyral is an AI-powered SOAR with deep case management integration. It is engin
 
 - [ ] Workflow Actions
   - [x] HTTP & Webhook
-  - [ ] Credentials for Webhook
+  - [X] Credentials for Webhook
   - [ ] Condition
   - [ ] Scheduling
   - [ ] Open case
@@ -60,12 +60,8 @@ Admyral is an AI-powered SOAR with deep case management integration. It is engin
 - [ ] Multi-tenancy
 
 
-### Enterprise Version
-// coming soon
-
-
 ### Admyral in <5 Minutes
-// coming soon
+// A demo is coming soon
 
 
 
@@ -88,13 +84,32 @@ Security is a foundational element of Admyral. We're dedicated to safeguarding o
 
 
 ## FAQ
-- Who are you?
-- Why are you the right ones to work on a security idea? 
-- Why does it need another SOAR?
-- How do you ensure it is secure?
-- Pricing?
-- Does it stay open-source?
+#### Why does it need another SOAR?
+Admyral addresses several shortcomings in the current SOAR landscape, providing compelling reasons for its necessity:
+- **Open-Source Initiative**: Unlike existing SOAR platforms, Admyral is one of the few open-source options available, allowing for greater adaptability and community-driven enhancements.
+- **Performance Optimization**: Builing in Rust offers superior performance and reliability compared to platforms like Cortex XSOAR, which can struggle under heavy loads. Rust’s safety features and efficiency are exceptionally suitable for demanding security environments.
+- **Enhanced Case Management**: Many SOAR solutions fall short in their case management capabilities. Admyral incorporates deep case management integration, enabling more thorough and effective handling of security incidents from start to finish.
+- **Advanced AI Integration**: While most existing tools do not fully utilize AI technologies or consider AI from the beginning, Admyral will be designed from the ground up with AI in mind, enhancing both the automation and intelligence of security operations significantly.
 
+
+#### How do you ensure Admyral is secure?
+Please refer to [SECURITY.md](https://github.com/Admyral-Security/admyral/blob/main/SECURITY.md) for more detailed information.
+
+
+#### What does your pricing look like?
+As Admyral is still in its public alpha phase, we have not finalized a specific pricing structure yet. We invite interested organizations to reach out directly via email at [chris@admyral.com](mailto:chris@admyral.com) or [Discord](https://discord.gg/9ReNvc85) to discuss potential use cases and explore custom pricing options based on their needs and the scale of implementation.
+
+
+
+#### Does Admyral stay open-source?
+Admyral will maintain its commitment to keeping all currently open-sourced features available under the same open-source terms. However, future features specifically developed for enterprise use will not be open-sourced and will be available under different terms.
+
+
+
+## Enterprise Version
+As of now, our project does not have a dedicated Enterprise version.
+If you represent an MSSP or an Enterprise and would like to discuss potential collaborations of Admyral, please do not hesitate to reach out. You can contact Chris directly at [chris@admyral.com](mailto:chris@admyral.com) for more details and to start a conversation.
+We are excited about the possibility of working together to meet your specific business needs and to expand the capabilities of our project in a way that benefits your organization.
 
 
 
