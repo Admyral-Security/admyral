@@ -244,3 +244,41 @@ export async function deleteCredential(credentialName: string) {
 		throw new Error("Failed to delete credential!");
 	}
 }
+
+export async function getWorkflow(workflowId: string) {
+	const accessToken = await getAccessToken();
+
+	const result = await fetch(
+		`${process.env.BACKEND_API_URL}/api/v1/workflows/${workflowId}`,
+		{
+			method: "GET",
+			headers: {
+				Authorization: `Bearer ${accessToken}`,
+			},
+		},
+	);
+	if (result.status !== 200) {
+		throw new Error("Failed to get workflow!");
+	}
+
+	const workflow = await result.json();
+	return transformObjectKeysToCamelCase(workflow);
+}
+
+export async function deleteWorkflow(workflowId: string) {
+	const accessToken = await getAccessToken();
+
+	const result = await fetch(
+		`${process.env.BACKEND_API_URL}/api/v1/workflows/${workflowId}/delete`,
+		{
+			method: "POST",
+			headers: {
+				Authorization: `Bearer ${accessToken}`,
+			},
+		},
+	);
+	if (result.status !== 204) {
+		throw new Error("Failed to delete workflow!");
+	}
+	redirect("/");
+}

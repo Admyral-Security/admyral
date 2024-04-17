@@ -78,6 +78,8 @@ export default function Nav() {
 			align="center"
 			gap="8"
 			className="border-r-2 border-r-gray-200"
+			width="56px"
+			style={{ position: "fixed" }}
 		>
 			<Flex direction="column" gap="9">
 				<Link href="/">
@@ -128,7 +130,7 @@ export default function Nav() {
 			<NavLink
 				pageName="Settings"
 				linkHref="/settings"
-				icon={<SettingsIcon />}
+				icon={<SettingsIcon color="#1C2024" />}
 				selectionCriteria={["/settings"]}
 			/>
 		</Flex>

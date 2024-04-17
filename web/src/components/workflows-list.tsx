@@ -7,7 +7,6 @@ import RightArrowIcon from "./icons/right-arrow-icon";
 import PublishWorkflowToggle from "./publish-workflow-toggle";
 import Link from "next/link";
 import { useState } from "react";
-import { updateWorkflow } from "@/lib/api";
 
 function NoWorkflowExists() {
 	return (
@@ -32,14 +31,18 @@ interface WorkflowListElementProps {
 	workflowId: string;
 	workflowName: string;
 	isLive: boolean;
-	onIsLiveChange: (newIsLive: boolean) => void;
+	publishWorkflowToggleBeforeUpdate: () => void;
+	publishWorkflowToggleOnSuccess: () => void;
+	publishWorkflowToggleOnError: () => void;
 }
 
 function WorkflowListElement({
 	workflowId,
 	workflowName,
 	isLive,
-	onIsLiveChange,
+	publishWorkflowToggleBeforeUpdate,
+	publishWorkflowToggleOnSuccess,
+	publishWorkflowToggleOnError,
 }: WorkflowListElementProps) {
 	return (
 		<Card key={workflowId} size="3" variant="surface">
@@ -48,8 +51,11 @@ function WorkflowListElement({
 
 				<Flex align="center" gap="5" justify="between" width="178px">
 					<PublishWorkflowToggle
+						workflowId={workflowId}
 						isLive={isLive}
-						onIsLiveChange={onIsLiveChange}
+						beforeUpdate={publishWorkflowToggleBeforeUpdate}
+						onSuccess={publishWorkflowToggleOnSuccess}
+						onError={publishWorkflowToggleOnError}
 					/>
 
 					<Link href={`/workflows/${workflowId}`}>
@@ -83,27 +89,6 @@ export default function WorkflowsList({ workflowsList }: WorkflowsListProps) {
 		useState<WorkflowListEntry[]>(workflowsList);
 	const [error, setError] = useState<string | null>();
 
-	const onsIsLiveChange = (
-		workflowId: string,
-		newIsLive: boolean,
-		workflowsIdx: number,
-	) => {
-		setError(null);
-
-		const workflowsCopy = [...workflows];
-		workflowsCopy[workflowsIdx].isLive = newIsLive;
-
-		updateWorkflow(workflowId, null, null, newIsLive)
-			.then(() => setWorkflows(workflowsCopy))
-			.catch((_) => {
-				if (newIsLive) {
-					setError("Failed to set workflow as active");
-				} else {
-					setError("Failed to set workflow as inactive");
-				}
-			});
-	};
-
 	return (
 		<Flex direction="column" width="100%" align="center" gap="5">
 			<Box width="50%">
@@ -131,13 +116,26 @@ export default function WorkflowsList({ workflowsList }: WorkflowsListProps) {
 								workflowId={workflow.workflowId}
 								workflowName={workflow.workflowName}
 								isLive={workflow.isLive}
-								onIsLiveChange={(newIsLive) =>
-									onsIsLiveChange(
-										workflow.workflowId,
-										newIsLive,
-										idx,
-									)
+								publishWorkflowToggleBeforeUpdate={() =>
+									setError(null)
 								}
+								publishWorkflowToggleOnSuccess={() => {
+									const workflowsCopy = [...workflows];
+									workflowsCopy[idx].isLive =
+										!workflow.isLive;
+									setWorkflows(workflowsCopy);
+								}}
+								publishWorkflowToggleOnError={() => {
+									if (workflow.isLive) {
+										setError(
+											"Failed to set workflow as active",
+										);
+									} else {
+										setError(
+											"Failed to set workflow as inactive",
+										);
+									}
+								}}
 							/>
 						))}
 					</Flex>

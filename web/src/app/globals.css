@@ -1,3 +1,9 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Radix Customization (e.g. overriding  */
+.radix-themes {
+	/* --accent-track: var(--Accent-color-Accent-12, #101d46); */
+	--indigo-track: var(--Accent-color-Accent-12, #101d46);
+}

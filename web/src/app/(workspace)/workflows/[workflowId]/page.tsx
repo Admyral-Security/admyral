@@ -1,12 +1,21 @@
-export default function WorkflowPage({
-	params: { workflowId },
-}: {
+import WorkflowBuilder from "@/components/workflow-builder";
+import { getWorkflow } from "@/lib/api";
+
+export interface WorkflowPageProps {
 	params: { workflowId: string };
-}) {
+}
+
+export default async function WorkflowPage({
+	params: { workflowId },
+}: WorkflowPageProps) {
+	const workflow = await getWorkflow(workflowId);
+
 	return (
-		<div>
-			<p>Workflow Builder: {workflowId}</p>
-			<p>You can also view the run history here</p>
-		</div>
+		<WorkflowBuilder
+			workflowId={workflowId}
+			workflowData={workflow.workflow}
+			actionsData={workflow.actions}
+			edgesData={workflow.edges}
+		/>
 	);
 }

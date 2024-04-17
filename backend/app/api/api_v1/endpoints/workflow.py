@@ -231,7 +231,7 @@ async def create_workflow(
     return workflow.workflow_id
 
 
-@router.get(
+@router.post(
     "/{workflow_id}/delete",
     status_code=status.HTTP_204_NO_CONTENT
 )

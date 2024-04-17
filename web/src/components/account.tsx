@@ -14,6 +14,8 @@ import {
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
+// TODO: Fix API function calling pattern
+
 /**
  * TODO:
  * - Update email address https://supabase.com/docs/reference/javascript/auth-updateuser

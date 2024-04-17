@@ -2,31 +2,40 @@ import Account from "@/components/account";
 import Credentials from "@/components/credentials";
 import DeleteAccountButton from "@/components/delete-account-button";
 import LogoutButton from "@/components/logout-button";
-import { Flex, Grid, Text } from "@radix-ui/themes";
+import { Box, Flex, Grid, Text } from "@radix-ui/themes";
 
 export default function SettingsPage() {
 	return (
-		<Grid rows="48px 1fr" width="auto">
-			<Flex
-				pb="2"
-				pt="2"
-				pl="4"
-				pr="4"
-				justify="between"
-				align="center"
-				className="border-b-2 border-gray-200"
-			>
-				<Text size="4" weight="medium">
-					Settings
-				</Text>
-			</Flex>
+		<Grid rows="50px 1fr" width="auto" height="100%">
+			<Box width="100%" height="100%">
+				<Flex
+					pb="2"
+					pt="2"
+					pl="4"
+					pr="4"
+					justify="between"
+					align="center"
+					className="border-b-2 border-gray-200"
+					height="56px"
+					width="calc(100% - 56px)"
+					style={{
+						position: "fixed",
+						zIndex: 100,
+						backgroundColor: "white",
+					}}
+				>
+					<Text size="4" weight="medium">
+						Settings
+					</Text>
+				</Flex>
+			</Box>
 
 			<Flex
 				mt="6"
 				direction="column"
 				height="100%"
 				width="100%"
-				justify="center"
+				justify="start"
 				align="center"
 				gap="5"
 			>
