@@ -32,7 +32,7 @@ import SendEmailNode from "./workflow-graph/send-email-node";
 import IfConditionNode from "./workflow-graph/if-condition-node";
 import ConnectionLine from "./workflow-graph/connection-line";
 import WorkflowBuilderRightPanelBase from "./workflow-builder-right-panel-base";
-import { ActionNode, getActionNodeLabel } from "@/lib/workflows";
+import { ActionNode, getActionNodeLabel } from "@/lib/types";
 import { EnterIcon } from "@radix-ui/react-icons";
 import Webhook from "./action-editing/webhook";
 import HttpRequest from "./action-editing/http-request";
@@ -291,6 +291,28 @@ function actionNodeTypeToIcon(actionNode: ActionNode) {
 	}
 }
 
+function initAiAction() {
+	// TODO: API call
+	return {
+		actionId: "sdaasdasddas",
+		actionName: "my awesome ai action",
+	};
+}
+
+function initAction(actionNode: ActionNode) {
+	switch (actionNode) {
+		case ActionNode.AI_ACTION:
+			return initAiAction();
+
+		// TODO:
+
+		default:
+			return {
+				actionName: `${actionNode} node`,
+			};
+	}
+}
+
 let id = 0;
 const getId = () => `actionnode_${id++}`;
 
@@ -360,9 +382,7 @@ function WorkflowBuilderEditor({ workflowId }: WorkflowBuilderEditorProps) {
 						id: nodeId,
 						type,
 						position,
-						data: {
-							actionName: `${type} node`,
-						},
+						data: initAction(type as ActionNode),
 					},
 				];
 			});
@@ -388,6 +408,23 @@ function WorkflowBuilderEditor({ workflowId }: WorkflowBuilderEditorProps) {
 	);
 
 	const selectNodeIdx = nodes.findIndex((node) => node.id === selectedNodeId);
+
+	const updateNameOfSelectedNode = (newName: string) => {
+		setNodes((nodes) =>
+			nodes.map((node) => {
+				if (node.id === selectedNodeId) {
+					return {
+						...node,
+						data: {
+							...node.data,
+							actionName: newName,
+						},
+					};
+				}
+				return node;
+			}),
+		);
+	};
 
 	return (
 		<>
@@ -423,19 +460,44 @@ function WorkflowBuilderEditor({ workflowId }: WorkflowBuilderEditorProps) {
 					zIndex={100}
 				>
 					{(nodes[selectNodeIdx].type as ActionNode) ===
-						ActionNode.WEBHOOK && <Webhook />}
+						ActionNode.WEBHOOK && (
+						<Webhook
+							actionId={nodes[selectNodeIdx].data.actionId}
+							updateNodeName={updateNameOfSelectedNode}
+						/>
+					)}
 
 					{(nodes[selectNodeIdx].type as ActionNode) ===
-						ActionNode.HTTP_REQUEST && <HttpRequest />}
+						ActionNode.HTTP_REQUEST && (
+						<HttpRequest
+							actionId={nodes[selectNodeIdx].data.actionId}
+							updateNodeName={updateNameOfSelectedNode}
+						/>
+					)}
 
 					{(nodes[selectNodeIdx].type as ActionNode) ===
-						ActionNode.AI_ACTION && <AiAction />}
+						ActionNode.AI_ACTION && (
+						<AiAction
+							actionId={nodes[selectNodeIdx].data.actionId}
+							updateNodeName={updateNameOfSelectedNode}
+						/>
+					)}
 
 					{(nodes[selectNodeIdx].type as ActionNode) ===
-						ActionNode.IF_CONDITION && <IfCondition />}
+						ActionNode.IF_CONDITION && (
+						<IfCondition
+							actionId={nodes[selectNodeIdx].data.actionId}
+							updateNodeName={updateNameOfSelectedNode}
+						/>
+					)}
 
 					{(nodes[selectNodeIdx].type as ActionNode) ===
-						ActionNode.SEND_EMAIL && <SendEmail />}
+						ActionNode.SEND_EMAIL && (
+						<SendEmail
+							actionId={nodes[selectNodeIdx].data.actionId}
+							updateNodeName={updateNameOfSelectedNode}
+						/>
+					)}
 				</WorkflowBuilderRightPanelBase>
 			)}
 		</>

@@ -1,21 +1,44 @@
 import { Flex, Select, Text, TextArea, TextField } from "@radix-ui/themes";
 import CopyText from "../copy-text";
+import { cloneDeep } from "lodash";
+import { generateReferenceHandle } from "@/lib/workflows";
+import { useEffect, useState } from "react";
+import { AiActionData } from "@/lib/types";
 
-// TODO: templates
-// TODO: based on action id, fetch webhook data
-// TODO: autosave webhook data
-// TODO: Input: action id and workflow id and a function for updating the action name state
-export default function AiAction() {
-	const data = {
-		actionId: "sdaasdasddas",
-		workflowId: "sddasdasdasd",
-		actionName: "my awesome api call",
-		referenceHandle: "gfdkrgt",
-		actionDescription: "this is an awesome api call",
+export interface AiActionProps {
+	actionId: string;
+	updateNodeName: (name: string) => void;
+}
+
+// TODO: prompt templates
+export default function AiAction({ actionId, updateNodeName }: AiActionProps) {
+	const [aiActionData, setAiActionData] = useState<AiActionData>({
+		actionId: "",
+		workflowId: "",
+		actionName: "",
+		referenceHandle: "",
+		actionDescription: "",
 		actionDefinition: {
-			prompt: "Please classify the following text: ",
+			prompt: "",
 		},
-	};
+	});
+
+	useEffect(() => {
+		// TODO: load data
+		console.log("LOADING DATA");
+		setAiActionData({
+			actionId: "sdaasdasddas",
+			workflowId: "sddasdasdasd",
+			actionName: "my awesome api call",
+			referenceHandle: "gfdkrgt",
+			actionDescription: "this is an awesome api call",
+			actionDefinition: {
+				prompt: "Please classify the following text: ",
+			},
+		});
+	}, [actionId]);
+
+	// TODO: in regular intervals, save the data if it changed!
 
 	return (
 		<Flex direction="column" gap="4" p="4">
@@ -23,16 +46,25 @@ export default function AiAction() {
 				<Text>Name</Text>
 				<TextField.Root
 					variant="surface"
-					value={data.actionName}
+					value={aiActionData.actionName}
 					onChange={(event) => {
-						// TODO:
+						// Update name in the state
+						const clonedData = cloneDeep(aiActionData);
+						clonedData.actionName = event.target.value;
+						clonedData.referenceHandle = generateReferenceHandle(
+							event.target.value,
+						);
+						setAiActionData(clonedData);
+
+						// Update name in the workflow node
+						updateNodeName(event.target.value);
 					}}
 				/>
 			</Flex>
 
 			<Flex direction="column" gap="2">
 				<Text>Reference Handle</Text>
-				<CopyText text={data.referenceHandle} />
+				<CopyText text={aiActionData.referenceHandle} />
 			</Flex>
 
 			<Flex direction="column" gap="2">
@@ -41,9 +73,11 @@ export default function AiAction() {
 					size="2"
 					variant="surface"
 					resize="vertical"
-					value={data.actionDescription}
+					value={aiActionData.actionDescription}
 					onChange={(event) => {
-						// TODO:
+						const clonedData = cloneDeep(aiActionData);
+						clonedData.actionDescription = event.target.value;
+						setAiActionData(clonedData);
 					}}
 				/>
 			</Flex>
@@ -55,8 +89,10 @@ export default function AiAction() {
 					<Select.Root
 						value=""
 						onValueChange={(template) => {
-							// TODO: inject template into textfield
-							console.log("Template: ", template);
+							// inject template into prompt field
+							const clonedData = cloneDeep(aiActionData);
+							clonedData.actionDefinition.prompt += template;
+							setAiActionData(clonedData);
 						}}
 					>
 						<Select.Trigger placeholder="Templates" />
@@ -69,8 +105,13 @@ export default function AiAction() {
 				</Flex>
 				<TextArea
 					variant="surface"
-					value={data.actionDefinition.prompt}
+					value={aiActionData.actionDefinition.prompt}
 					style={{ height: "100px" }}
+					onChange={(event) => {
+						const clonedData = cloneDeep(aiActionData);
+						clonedData.actionDefinition.prompt = event.target.value;
+						setAiActionData(clonedData);
+					}}
 				/>
 			</Flex>
 		</Flex>

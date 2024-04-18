@@ -8,35 +8,64 @@ import {
 } from "@radix-ui/themes";
 import CopyText from "../copy-text";
 import { MinusIcon, PlusIcon } from "@radix-ui/react-icons";
+import { generateReferenceHandle } from "@/lib/workflows";
+import { useEffect, useState } from "react";
+import { cloneDeep } from "lodash";
+import { HttpRequestData } from "@/lib/types";
+
+export interface HttpRequestProps {
+	actionId: string;
+	updateNodeName: (name: string) => void;
+}
 
 // TODO: retries
 // TODO: timeout
-// TODO: based on action id, fetch webhook data
-// TODO: autosave webhook data
-// TODO: Input: action id and workflow id and a function for updating the action name state
-export default function HttpRequest() {
-	const data = {
-		actionId: "sdaasdasddas",
-		workflowId: "sddasdasdasd",
-		actionName: "my awesome api call",
-		referenceHandle: "gfdkrgt",
-		actionDescription: "this is an awesome api call",
+export default function HttpRequest({
+	actionId,
+	updateNodeName,
+}: HttpRequestProps) {
+	const [httpRequestData, setHttpRequestData] = useState<HttpRequestData>({
+		actionId: "",
+		workflowId: "",
+		actionName: "",
+		referenceHandle: "",
+		actionDescription: "",
 		actionDefinition: {
-			method: "POST",
-			url: "https://1ec498973e1abe4622fd3dc2a9ecd62d.m.pipedream.net",
+			method: "GET",
+			url: "",
 			contentType: "application/json",
-			headers: [
-				{
-					key: "Authorization",
-					value: "Bearer <<CREDENTIAL.API_KEY>>",
-				},
-			],
-			payload: {
-				name: "John Doe",
-				email: "test@test.de",
-			},
+			headers: [],
+			payload: "",
 		},
-	};
+	});
+
+	useEffect(() => {
+		// TODO: FETCH DATA
+		setHttpRequestData({
+			actionId: "sdaasdasddas",
+			workflowId: "sddasdasdasd",
+			actionName: "my awesome api call",
+			referenceHandle: "gfdkrgt",
+			actionDescription: "this is an awesome api call",
+			actionDefinition: {
+				method: "POST",
+				url: "https://1ec498973e1abe4622fd3dc2a9ecd62d.m.pipedream.net",
+				contentType: "application/json",
+				headers: [
+					{
+						key: "Authorization",
+						value: "Bearer <<CREDENTIAL.API_KEY>>",
+					},
+				],
+				payload: JSON.stringify({
+					name: "John Doe",
+					email: "test@test.de",
+				}),
+			},
+		});
+	}, [actionId]);
+
+	// TODO: Regularly save the data if it changed
 
 	return (
 		<Flex direction="column" gap="4" p="4">
@@ -44,16 +73,25 @@ export default function HttpRequest() {
 				<Text>Name</Text>
 				<TextField.Root
 					variant="surface"
-					value={data.actionName}
+					value={httpRequestData.actionName}
 					onChange={(event) => {
-						// TODO:
+						// Update name in the state
+						const clonedData = cloneDeep(httpRequestData);
+						clonedData.actionName = event.target.value;
+						clonedData.referenceHandle = generateReferenceHandle(
+							event.target.value,
+						);
+						setHttpRequestData(clonedData);
+
+						// Update name in the workflow node
+						updateNodeName(event.target.value);
 					}}
 				/>
 			</Flex>
 
 			<Flex direction="column" gap="2">
 				<Text>Reference Handle</Text>
-				<CopyText text={data.referenceHandle} />
+				<CopyText text={httpRequestData.referenceHandle} />
 			</Flex>
 
 			<Flex direction="column" gap="2">
@@ -62,9 +100,11 @@ export default function HttpRequest() {
 					size="2"
 					variant="surface"
 					resize="vertical"
-					value={data.actionDescription}
+					value={httpRequestData.actionDescription}
 					onChange={(event) => {
-						// TODO:
+						const clonedData = cloneDeep(httpRequestData);
+						clonedData.actionDescription = event.target.value;
+						setHttpRequestData(clonedData);
 					}}
 				/>
 			</Flex>
@@ -73,13 +113,25 @@ export default function HttpRequest() {
 				<Text>URL</Text>
 				<TextField.Root
 					variant="surface"
-					value={data.actionDefinition.url}
+					value={httpRequestData.actionDefinition.url}
+					onChange={(event) => {
+						const clonedData = cloneDeep(httpRequestData);
+						clonedData.actionDefinition.url = event.target.value;
+						setHttpRequestData(clonedData);
+					}}
 				/>
 			</Flex>
 
 			<Flex direction="column" gap="2">
 				<Text>Content Type</Text>
-				<Select.Root value={data.actionDefinition.contentType || ""}>
+				<Select.Root
+					value={httpRequestData.actionDefinition.contentType}
+					onValueChange={(contentType) => {
+						const clonedData = cloneDeep(httpRequestData);
+						clonedData.actionDefinition.contentType = contentType;
+						setHttpRequestData(clonedData);
+					}}
+				>
 					<Select.Trigger placeholder="None" />
 					<Select.Content>
 						<Select.Item value="application/json">JSON</Select.Item>
@@ -90,8 +142,12 @@ export default function HttpRequest() {
 			<Flex direction="column" gap="2">
 				<Text>Method</Text>
 				<Select.Root
-					value={data.actionDefinition.method}
-					defaultValue="GET"
+					value={httpRequestData.actionDefinition.method}
+					onValueChange={(method) => {
+						const clonedData = cloneDeep(httpRequestData);
+						clonedData.actionDefinition.method = method;
+						setHttpRequestData(clonedData);
+					}}
 				>
 					<Select.Trigger />
 					<Select.Content>
@@ -105,57 +161,78 @@ export default function HttpRequest() {
 				<Text>Headers</Text>
 
 				<Flex direction="column" gap="4">
-					{data.actionDefinition.headers.map((header, index) => (
-						<Flex justify="between" gap="2">
-							<Flex direction="column" gap="2" width="100%">
-								<TextField.Root
-									variant="surface"
-									value={header.key}
-									onChange={(event) => {
-										// TODO:
-									}}
-									placeholder="Key"
-									style={{
-										width: "100%",
-									}}
-								/>
+					{httpRequestData.actionDefinition.headers.map(
+						(header, idx) => (
+							<Flex justify="between" gap="2">
+								<Flex direction="column" gap="2" width="100%">
+									<TextField.Root
+										variant="surface"
+										value={header.key}
+										onChange={(event) => {
+											const clonedData =
+												cloneDeep(httpRequestData);
+											clonedData.actionDefinition.headers[
+												idx
+											].key = event.target.value;
+											setHttpRequestData(clonedData);
+										}}
+										placeholder="Key"
+										style={{
+											width: "100%",
+										}}
+									/>
 
-								<TextField.Root
-									variant="surface"
-									value={header.value}
-									onChange={(event) => {
-										// TODO:
-									}}
-									placeholder="Value"
-									style={{
-										width: "100%",
-									}}
-								/>
-							</Flex>
+									<TextField.Root
+										variant="surface"
+										value={header.value}
+										onChange={(event) => {
+											const clonedData =
+												cloneDeep(httpRequestData);
+											clonedData.actionDefinition.headers[
+												idx
+											].value = event.target.value;
+											setHttpRequestData(clonedData);
+										}}
+										placeholder="Value"
+										style={{
+											width: "100%",
+										}}
+									/>
+								</Flex>
 
-							<Flex justify="end">
-								<IconButton
-									size="1"
-									radius="full"
-									onClick={() => {
-										// TODO:
-										alert("Hello!");
-									}}
-									style={{ cursor: "pointer" }}
-								>
-									<MinusIcon />
-								</IconButton>
+								<Flex justify="end">
+									<IconButton
+										size="1"
+										radius="full"
+										onClick={() => {
+											const clonedData =
+												cloneDeep(httpRequestData);
+											clonedData.actionDefinition.headers.splice(
+												idx,
+												1,
+											);
+											setHttpRequestData(clonedData);
+										}}
+										style={{ cursor: "pointer" }}
+									>
+										<MinusIcon />
+									</IconButton>
+								</Flex>
 							</Flex>
-						</Flex>
-					))}
+						),
+					)}
 
 					<Flex justify="center" align="center">
 						<IconButton
 							size="1"
 							radius="full"
 							onClick={() => {
-								// TODO:
-								alert("Hello!");
+								const clonedData = cloneDeep(httpRequestData);
+								clonedData.actionDefinition.headers.push({
+									key: "",
+									value: "",
+								});
+								setHttpRequestData(clonedData);
 							}}
 							style={{ cursor: "pointer" }}
 						>
@@ -171,6 +248,13 @@ export default function HttpRequest() {
 					size="2"
 					resize="vertical"
 					style={{ height: "200px" }}
+					value={httpRequestData.actionDefinition.payload}
+					onChange={(event) => {
+						const clonedData = cloneDeep(httpRequestData);
+						clonedData.actionDefinition.payload =
+							event.target.value;
+						setHttpRequestData(clonedData);
+					}}
 				/>
 			</Flex>
 		</Flex>
