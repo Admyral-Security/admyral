@@ -13,7 +13,10 @@ export default function WorkflowTemplates() {
 					}}
 					asChild
 				>
-					<button type="button" style={{ cursor: "pointer" }}>
+					<button
+						type="button"
+						style={{ cursor: "pointer", width: "100%" }}
+					>
 						<Flex justify="between" align="center" width="100%">
 							<Text size="3" weight="medium">
 								Workflow Templates

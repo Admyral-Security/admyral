@@ -1,4 +1,4 @@
-import { Badge, Card, Flex, HoverCard, Text } from "@radix-ui/themes";
+import { Badge, Box, Card, Flex, HoverCard, Text } from "@radix-ui/themes";
 import ReactFlow, {
 	Background,
 	BackgroundVariant,
@@ -7,6 +7,9 @@ import ReactFlow, {
 	useNodesState,
 	addEdge,
 	MarkerType,
+	useOnSelectionChange,
+	ReactFlowProvider,
+	useStore,
 } from "reactflow";
 import HttpRequestActionIcon from "./icons/http-request-action-icon";
 import WebhookActionIcon from "./icons/webhook-action-icon";
@@ -28,6 +31,14 @@ import AiActionNode from "./workflow-graph/ai-action-node";
 import SendEmailNode from "./workflow-graph/send-email-node";
 import IfConditionNode from "./workflow-graph/if-condition-node";
 import ConnectionLine from "./workflow-graph/connection-line";
+import WorkflowBuilderRightPanelBase from "./workflow-builder-right-panel-base";
+import { ActionNode, getActionNodeLabel } from "@/lib/workflows";
+import { EnterIcon } from "@radix-ui/react-icons";
+import Webhook from "./action-editing/webhook";
+import HttpRequest from "./action-editing/http-request";
+import AiAction from "./action-editing/ai-action";
+import IfCondition from "./action-editing/if-condition";
+import SendEmail from "./action-editing/send-email";
 
 interface EditorCardProps {
 	icon: React.ReactNode;
@@ -44,6 +55,7 @@ function EditorCard({ icon, label, isComingSoon = false }: EditorCardProps) {
 						style={{
 							padding: "8px",
 							cursor: "pointer",
+							width: "95%",
 						}}
 					>
 						<Flex gap="2">
@@ -69,7 +81,9 @@ function EditorCard({ icon, label, isComingSoon = false }: EditorCardProps) {
 			style={{
 				padding: "8px",
 				cursor: "pointer",
+				width: "95%",
 			}}
+			draggable
 		>
 			<Flex gap="2">
 				{icon}
@@ -109,9 +123,18 @@ function EditorSideBar() {
 				pl="4"
 				pr="4"
 				pb="4"
+				style={{
+					display: "flex",
+					flexDirection: "column",
+				}}
 			>
-				<Flex direction="column" gap="6">
-					<Flex direction="column" gap="4">
+				<Flex
+					direction="column"
+					gap="4"
+					height="100%"
+					style={{ flex: 1, overflowY: "auto" }}
+				>
+					<Flex direction="column" gap="3">
 						<Text size="3" weight="medium">
 							Workflow Actions
 						</Text>
@@ -119,73 +142,80 @@ function EditorSideBar() {
 						<Flex direction="column" gap="2">
 							<div
 								onDragStart={(event) =>
-									onDragStart(event, "webhook")
+									onDragStart(event, ActionNode.WEBHOOK)
 								}
-								draggable
 							>
 								<EditorCard
 									icon={<WebhookActionIcon />}
-									label="Webhook"
+									label={getActionNodeLabel(
+										ActionNode.WEBHOOK,
+									)}
 								/>
 							</div>
 
 							<div
 								onDragStart={(event) =>
-									onDragStart(event, "httpRequest")
+									onDragStart(event, ActionNode.HTTP_REQUEST)
 								}
-								draggable
 							>
 								<EditorCard
 									icon={<HttpRequestActionIcon />}
-									label="HTTP Request"
+									label={getActionNodeLabel(
+										ActionNode.HTTP_REQUEST,
+									)}
 								/>
 							</div>
 
 							<EditorCard
 								icon={<TransformActionIcon />}
-								label="Transform"
+								label={getActionNodeLabel(ActionNode.TRANSFORM)}
 								isComingSoon
 							/>
 
 							<div
 								onDragStart={(event) =>
-									onDragStart(event, "ifCondition")
+									onDragStart(event, ActionNode.IF_CONDITION)
 								}
-								draggable
 							>
 								<EditorCard
 									icon={<IfConditionActionIcon />}
-									label="If-Condition"
+									label={getActionNodeLabel(
+										ActionNode.IF_CONDITION,
+									)}
 								/>
 							</div>
 
 							<div
 								onDragStart={(event) =>
-									onDragStart(event, "aiAction")
+									onDragStart(event, ActionNode.AI_ACTION)
 								}
-								draggable
 							>
 								<EditorCard
 									icon={<AiActionsIcon />}
-									label="AI Action"
+									label={getActionNodeLabel(
+										ActionNode.AI_ACTION,
+									)}
 								/>
 							</div>
 
 							<div
 								onDragStart={(event) =>
-									onDragStart(event, "sendEmail")
+									onDragStart(event, ActionNode.SEND_EMAIL)
 								}
-								draggable
 							>
 								<EditorCard
 									icon={<SendEmailActionIcon />}
-									label="Send Email"
+									label={getActionNodeLabel(
+										ActionNode.SEND_EMAIL,
+									)}
 								/>
 							</div>
 
 							<EditorCard
 								icon={<ReceiveEmailActionIcon />}
-								label="Receive Email"
+								label={getActionNodeLabel(
+									ActionNode.RECEIVE_EMAIL,
+								)}
 								isComingSoon
 							/>
 						</Flex>
@@ -216,24 +246,60 @@ function EditorSideBar() {
 							/>
 						</Flex>
 					</Flex>
+
+					<Flex direction="column" gap="4">
+						<Text size="3" weight="medium">
+							Integrations
+						</Text>
+
+						<Flex direction="column" gap="2">
+							<EditorCard
+								icon={<EnterIcon width="24" height="24" />}
+								label="Coming soon"
+								isComingSoon
+							/>
+						</Flex>
+					</Flex>
 				</Flex>
 
-				<WorkflowTemplates />
+				<Box pt="4" width="95%">
+					<WorkflowTemplates />
+				</Box>
 			</Flex>
 		</Card>
 	);
 }
 
+function actionNodeTypeToIcon(actionNode: ActionNode) {
+	switch (actionNode) {
+		case ActionNode.WEBHOOK:
+			return <WebhookActionIcon />;
+		case ActionNode.HTTP_REQUEST:
+			return <HttpRequestActionIcon />;
+		case ActionNode.TRANSFORM:
+			return <TransformActionIcon />;
+		case ActionNode.IF_CONDITION:
+			return <IfConditionActionIcon />;
+		case ActionNode.AI_ACTION:
+			return <AiActionsIcon />;
+		case ActionNode.SEND_EMAIL:
+			return <SendEmailActionIcon />;
+		case ActionNode.RECEIVE_EMAIL:
+			return <ReceiveEmailActionIcon />;
+		default:
+			return null;
+	}
+}
+
 let id = 0;
 const getId = () => `actionnode_${id++}`;
 
-// TODO: make node type keys an enum
 const nodeTypes = {
-	webhook: WebhookNode,
-	httpRequest: HttpRequestNode,
-	aiAction: AiActionNode,
-	sendEmail: SendEmailNode,
-	ifCondition: IfConditionNode,
+	[ActionNode.WEBHOOK]: WebhookNode,
+	[ActionNode.HTTP_REQUEST]: HttpRequestNode,
+	[ActionNode.AI_ACTION]: AiActionNode,
+	[ActionNode.SEND_EMAIL]: SendEmailNode,
+	[ActionNode.IF_CONDITION]: IfConditionNode,
 };
 
 const edgeTypes = {
@@ -244,14 +310,28 @@ export interface WorkflowBuilderEditorProps {
 	workflowId: string;
 }
 
-export default function WorkflowBuilderEditor({
-	workflowId,
-}: WorkflowBuilderEditorProps) {
+function WorkflowBuilderEditor({ workflowId }: WorkflowBuilderEditorProps) {
 	const [nodes, setNodes, onNodesChange] = useNodesState([]);
 	const [edges, setEdges, onEdgesChange] = useEdgesState([]);
 	const [reactFlowInstance, setReactFlowInstance] = useState<any>(null);
 
+	// Node selection management
+	const addSelectedNodes = useStore((store) => store.addSelectedNodes);
 	const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
+	useOnSelectionChange({
+		onChange: ({ nodes, edges }) => {
+			if (nodes.length === 0) {
+				setSelectedNodeId(null);
+			} else {
+				setSelectedNodeId(nodes[0].id as string);
+			}
+		},
+	});
+
+	const closeActionDefinitionPanel = () => {
+		addSelectedNodes([]);
+		setSelectedNodeId(null);
+	};
 
 	const onDragOver = useCallback((event: any) => {
 		event.preventDefault();
@@ -281,15 +361,7 @@ export default function WorkflowBuilderEditor({
 						type,
 						position,
 						data: {
-							name: `${type} node`,
-							// meta: {
-							// 	selectedNodeId,
-							// 	onSelect: () => setSelectedNodeId(nodeId),
-							// 	onUnselect: () => setSelectedNodeId(null),
-							// },
-							// actionNode: {
-							// 	name: `${type} node`,
-							// },
+							actionName: `${type} node`,
 						},
 					},
 				];
@@ -315,6 +387,8 @@ export default function WorkflowBuilderEditor({
 		[setEdges],
 	);
 
+	const selectNodeIdx = nodes.findIndex((node) => node.id === selectedNodeId);
+
 	return (
 		<>
 			<ReactFlow
@@ -336,6 +410,42 @@ export default function WorkflowBuilderEditor({
 			</ReactFlow>
 
 			<EditorSideBar />
+
+			{selectNodeIdx !== -1 && selectNodeIdx < nodes.length && (
+				<WorkflowBuilderRightPanelBase
+					title={getActionNodeLabel(
+						nodes[selectNodeIdx].type as ActionNode,
+					)}
+					titleIcon={actionNodeTypeToIcon(
+						nodes[selectNodeIdx].type as ActionNode,
+					)}
+					onIconClick={closeActionDefinitionPanel}
+					zIndex={100}
+				>
+					{(nodes[selectNodeIdx].type as ActionNode) ===
+						ActionNode.WEBHOOK && <Webhook />}
+
+					{(nodes[selectNodeIdx].type as ActionNode) ===
+						ActionNode.HTTP_REQUEST && <HttpRequest />}
+
+					{(nodes[selectNodeIdx].type as ActionNode) ===
+						ActionNode.AI_ACTION && <AiAction />}
+
+					{(nodes[selectNodeIdx].type as ActionNode) ===
+						ActionNode.IF_CONDITION && <IfCondition />}
+
+					{(nodes[selectNodeIdx].type as ActionNode) ===
+						ActionNode.SEND_EMAIL && <SendEmail />}
+				</WorkflowBuilderRightPanelBase>
+			)}
 		</>
+	);
+}
+
+export default function WorkflowBuilderEditorWrapper({ ...props }: any) {
+	return (
+		<ReactFlowProvider>
+			<WorkflowBuilderEditor {...props} />
+		</ReactFlowProvider>
 	);
 }

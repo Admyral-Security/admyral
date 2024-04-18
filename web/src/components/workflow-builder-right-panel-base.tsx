@@ -3,9 +3,10 @@ import { Box, Button, Card, Flex, Text } from "@radix-ui/themes";
 
 export interface WorkflowBuilderRightPanelBaseProps {
 	title: string;
-	titleIcon: React.ReactNode;
+	titleIcon?: React.ReactNode;
 	children: React.ReactNode;
 	onIconClick: () => void;
+	zIndex?: number;
 }
 
 export default function WorkflowBuilderRightPanelBase({
@@ -13,6 +14,7 @@ export default function WorkflowBuilderRightPanelBase({
 	titleIcon,
 	children,
 	onIconClick,
+	zIndex = 10,
 }: WorkflowBuilderRightPanelBaseProps) {
 	return (
 		<Card
@@ -20,15 +22,17 @@ export default function WorkflowBuilderRightPanelBase({
 				position: "fixed",
 				right: "16px",
 				top: "68px",
-				zIndex: 50,
+				zIndex,
 				width: "384px",
 				backgroundColor: "white",
 				height: "calc(99vh - 68px)",
 				padding: 0,
+				display: "flex",
+				flexDirection: "column",
 			}}
 			size="4"
 		>
-			<Flex direction="column">
+			<Flex direction="column" height="100%">
 				<Flex
 					width="100%"
 					style={{
@@ -40,7 +44,7 @@ export default function WorkflowBuilderRightPanelBase({
 					p="4"
 				>
 					<Flex gap="2" align="center">
-						{titleIcon}
+						{titleIcon !== undefined && titleIcon}
 						<Text size="4" weight="medium">
 							{title}
 						</Text>
@@ -61,7 +65,11 @@ export default function WorkflowBuilderRightPanelBase({
 					</Button>
 				</Flex>
 
-				<Box width="100%" height="100%">
+				<Box
+					width="100%"
+					height="100%"
+					style={{ flex: 1, overflowY: "auto" }}
+				>
 					{children}
 				</Box>
 			</Flex>

@@ -6,7 +6,7 @@ import IfConditionActionIcon from "../icons/if-condition-action-icon";
 import { ibmPlexMono } from "@/app/fonts";
 
 type IfConditionData = {
-	name: string;
+	actionName: string;
 };
 
 export type IfConditionNode = Node<IfConditionData>;
@@ -33,7 +33,7 @@ export default memo(({ data, selected }: NodeProps<IfConditionData>) => {
 			<NodeBase
 				selected={selected}
 				icon={<IfConditionActionIcon />}
-				name={data.name}
+				name={data.actionName}
 				type="If-Condition"
 			/>
 

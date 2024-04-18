@@ -39,7 +39,6 @@ export default async function WorkflowOverviewPage() {
 				width="100%"
 				justify="center"
 				align="center"
-				// style={{ overflow: "scroll" }}
 			>
 				<WorkflowsList workflowsList={workflows} />
 			</Flex>

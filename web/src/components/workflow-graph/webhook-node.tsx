@@ -5,7 +5,7 @@ import NodeBase from "./node-base";
 import { Flex } from "@radix-ui/themes";
 
 type WebhookNodeData = {
-	name: string;
+	actionName: string;
 };
 
 export type WebhookNode = Node<WebhookNodeData>;
@@ -16,7 +16,7 @@ export default memo(({ data, selected }: NodeProps<WebhookNodeData>) => {
 			<NodeBase
 				selected={selected}
 				icon={<WebhookActionIcon />}
-				name={data.name}
+				name={data.actionName}
 				type="Webhook"
 			/>
 			<Handle

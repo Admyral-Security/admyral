@@ -64,7 +64,7 @@ export default function WorkflowBuilder({
 	const [isDeletingWorkflow, setIsDeletingWorkflow] =
 		useState<boolean>(false);
 
-	const [openSettings, setOpenSettings] = useState<boolean>(true);
+	const [openSettings, setOpenSettings] = useState<boolean>(false);
 
 	const handleDeleteWorkflow = async () => {
 		setIsDeletingWorkflow(true);
@@ -88,7 +88,6 @@ export default function WorkflowBuilder({
 					columns="3"
 					className="border-b-2 border-gray-200"
 					align="center"
-					// TODO: EXPERIMENTAL
 					height="56px"
 					width="calc(100% - 56px)"
 					style={{

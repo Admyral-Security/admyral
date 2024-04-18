@@ -5,7 +5,7 @@ import { Flex } from "@radix-ui/themes";
 import AiActionsIcon from "../icons/ai-actions-icon";
 
 type AiActionData = {
-	name: string;
+	actionName: string;
 };
 
 export type AiActionNode = Node<AiActionData>;
@@ -32,7 +32,7 @@ export default memo(({ data, selected }: NodeProps<AiActionData>) => {
 			<NodeBase
 				selected={selected}
 				icon={<AiActionsIcon />}
-				name={data.name}
+				name={data.actionName}
 				type="AI Action"
 			/>
 			<Handle

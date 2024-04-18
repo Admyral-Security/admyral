@@ -5,7 +5,7 @@ import { Flex } from "@radix-ui/themes";
 import SendEmailActionIcon from "../icons/send-email-action-icon";
 
 type SendEmailData = {
-	name: string;
+	actionName: string;
 };
 
 export type SendEmailNode = Node<SendEmailData>;
@@ -32,7 +32,7 @@ export default memo(({ data, selected }: NodeProps<SendEmailData>) => {
 			<NodeBase
 				selected={selected}
 				icon={<SendEmailActionIcon />}
-				name={data.name}
+				name={data.actionName}
 				type="Send Email"
 			/>
 			<Handle

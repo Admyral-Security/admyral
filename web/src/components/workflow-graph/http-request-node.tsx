@@ -5,7 +5,7 @@ import HttpRequestActionIcon from "../icons/http-request-action-icon";
 import { Flex } from "@radix-ui/themes";
 
 type HttpRequestData = {
-	name: string;
+	actionName: string;
 };
 
 export type HttpRequestNode = Node<HttpRequestData>;
@@ -32,7 +32,7 @@ export default memo(({ data, selected }: NodeProps<HttpRequestData>) => {
 			<NodeBase
 				selected={selected}
 				icon={<HttpRequestActionIcon />}
-				name={data.name}
+				name={data.actionName}
 				type="HTTP Request"
 			/>
 			<Handle
