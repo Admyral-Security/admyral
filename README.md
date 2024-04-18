@@ -87,7 +87,7 @@ You can best support us and this project by:
 
 
 ## Security
-Security is a foundational element of Admyral. We're dedicated to safeguarding our project with robust security measures, while also adhering to best practices in secure coding to mitigate vulnerabilities. Visit SECURITY for more details.
+Security is a foundational element of Admyral. We're dedicated to safeguarding our project with robust security measures, while also adhering to best practices in secure coding to mitigate vulnerabilities. Visit [SECURITY.md](https://github.com/Admyral-Security/admyral/blob/main/SECURITY.md) for more details.
 
 
 ## FAQ
