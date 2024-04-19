@@ -1,3 +1,5 @@
+"use server";
+
 import * as crypto from "crypto";
 
 function fromHexToBytes(hex: string): Uint8Array {
@@ -63,7 +65,7 @@ export async function encrypt(data: string): Promise<string> {
 	return toHex(outputBuffer);
 }
 
-export function createWebhookSecret(webhookId: string): string {
+export async function createWebhookSecret(webhookId: string): string {
 	const webhookSecret = process.env.WEBHOOK_SIGNING_SECRET;
 	if (!webhookSecret) {
 		throw new Error("Missing environment variable: WEBHOOK_SIGNING_SECRET");

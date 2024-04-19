@@ -74,10 +74,12 @@ export function getIfConditionOperatorLabel(
 
 export type ActionDataBase = {
 	actionId: string;
-	workflowId: string;
 	actionName: string;
 	referenceHandle: string;
 	actionDescription: string;
+	xPosition: number;
+	yPosition: number;
+	actionType: ActionNode;
 };
 
 export type AiActionData = ActionDataBase & {
@@ -100,7 +102,6 @@ export type HttpRequestData = ActionDataBase & {
 };
 
 export type WebhookData = ActionDataBase & {
-	webhookUrl: string;
 	webhookId: string;
 	secret: string;
 };
@@ -122,4 +123,28 @@ export type SendEmailData = ActionDataBase & {
 		body: string;
 		senderName: string;
 	};
+};
+
+// TODO:
+export type ReceiveEmailData = ActionDataBase;
+
+export type ActionData =
+	| AiActionData
+	| HttpRequestData
+	| WebhookData
+	| IfConditionData
+	| SendEmailData
+	| ReceiveEmailData;
+
+export type EdgeData = {
+	parentActionId: string;
+	childActionId: string;
+};
+
+export type WorkflowData = {
+	workflowName: string;
+	workflowDescription: string;
+	isLive: boolean;
+	actions: ActionData[];
+	edges: EdgeData[];
 };

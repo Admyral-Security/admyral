@@ -3,13 +3,14 @@ import ReactFlow, {
 	Background,
 	BackgroundVariant,
 	Controls,
-	useEdgesState,
-	useNodesState,
 	addEdge,
 	MarkerType,
 	useOnSelectionChange,
 	ReactFlowProvider,
 	useStore,
+	Node,
+	NodeChange,
+	EdgeChange,
 } from "reactflow";
 import HttpRequestActionIcon from "./icons/http-request-action-icon";
 import WebhookActionIcon from "./icons/webhook-action-icon";
@@ -22,23 +23,39 @@ import UpdateCaseIcon from "./icons/update-case-icon";
 import QueryCasesIcon from "./icons/query-cases-icon";
 import WorkflowTemplates from "./workflow-templates";
 import "reactflow/dist/style.css";
-import { useCallback, useState } from "react";
+import {
+	Dispatch,
+	SetStateAction,
+	useCallback,
+	useEffect,
+	useState,
+} from "react";
 import WebhookNode from "./workflow-graph/webhook-node";
 import HttpRequestNode from "./workflow-graph/http-request-node";
 import ReceiveEmailActionIcon from "./icons/receive-email-action-icon";
-import DirectedEdge from "./workflow-graph/edge";
+import DirectedEdgeComponent, { DirectedEdge } from "./workflow-graph/edge";
 import AiActionNode from "./workflow-graph/ai-action-node";
 import SendEmailNode from "./workflow-graph/send-email-node";
 import IfConditionNode from "./workflow-graph/if-condition-node";
 import ConnectionLine from "./workflow-graph/connection-line";
 import WorkflowBuilderRightPanelBase from "./workflow-builder-right-panel-base";
-import { ActionNode, getActionNodeLabel } from "@/lib/types";
+import {
+	ActionNode,
+	ActionData,
+	getActionNodeLabel,
+	SendEmailData,
+	IfConditionData,
+	AiActionData,
+	HttpRequestData,
+	WebhookData,
+} from "@/lib/types";
 import { EnterIcon } from "@radix-ui/react-icons";
 import Webhook from "./action-editing/webhook";
 import HttpRequest from "./action-editing/http-request";
 import AiAction from "./action-editing/ai-action";
 import IfCondition from "./action-editing/if-condition";
 import SendEmail from "./action-editing/send-email";
+import { initActionData } from "@/lib/workflows";
 
 interface EditorCardProps {
 	icon: React.ReactNode;
@@ -270,6 +287,9 @@ function EditorSideBar() {
 	);
 }
 
+let id = 0;
+const getId = () => `workflow_obj_${id++}`;
+
 function actionNodeTypeToIcon(actionNode: ActionNode) {
 	switch (actionNode) {
 		case ActionNode.WEBHOOK:
@@ -291,31 +311,6 @@ function actionNodeTypeToIcon(actionNode: ActionNode) {
 	}
 }
 
-function initAiAction() {
-	// TODO: API call
-	return {
-		actionId: "sdaasdasddas",
-		actionName: "my awesome ai action",
-	};
-}
-
-function initAction(actionNode: ActionNode) {
-	switch (actionNode) {
-		case ActionNode.AI_ACTION:
-			return initAiAction();
-
-		// TODO:
-
-		default:
-			return {
-				actionName: `${actionNode} node`,
-			};
-	}
-}
-
-let id = 0;
-const getId = () => `actionnode_${id++}`;
-
 const nodeTypes = {
 	[ActionNode.WEBHOOK]: WebhookNode,
 	[ActionNode.HTTP_REQUEST]: HttpRequestNode,
@@ -325,16 +320,26 @@ const nodeTypes = {
 };
 
 const edgeTypes = {
-	edge: DirectedEdge,
+	edge: DirectedEdgeComponent,
 };
 
 export interface WorkflowBuilderEditorProps {
-	workflowId: string;
+	nodes: Node<ActionData>[];
+	setNodes: Dispatch<SetStateAction<Node<ActionData>[]>>;
+	onNodesChange: (changes: NodeChange[]) => void;
+	edges: DirectedEdge[];
+	setEdges: Dispatch<SetStateAction<DirectedEdge[]>>;
+	onEdgesChange: (changes: EdgeChange[]) => void;
 }
 
-function WorkflowBuilderEditor({ workflowId }: WorkflowBuilderEditorProps) {
-	const [nodes, setNodes, onNodesChange] = useNodesState([]);
-	const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+function WorkflowBuilderEditor({
+	nodes,
+	setNodes,
+	onNodesChange,
+	edges,
+	setEdges,
+	onEdgesChange,
+}: WorkflowBuilderEditorProps) {
 	const [reactFlowInstance, setReactFlowInstance] = useState<any>(null);
 
 	// Node selection management
@@ -361,7 +366,7 @@ function WorkflowBuilderEditor({ workflowId }: WorkflowBuilderEditorProps) {
 	}, []);
 
 	const onDrop = useCallback(
-		(event: any) => {
+		async (event: any) => {
 			event.preventDefault();
 
 			const type = event.dataTransfer.getData("application/reactflow");
@@ -374,15 +379,38 @@ function WorkflowBuilderEditor({ workflowId }: WorkflowBuilderEditorProps) {
 				y: event.clientY,
 			});
 
+			// Generate a unique action name
+			let actionName = getActionNodeLabel(type as ActionNode);
+			const nodeNames = new Set(
+				nodes.map((node) => node.data.actionName),
+			);
+			if (nodeNames.has(actionName)) {
+				for (let i = 0; i < nodes.length + 1; i++) {
+					let testActionName = `${actionName} (${i + 1})`;
+					if (!nodeNames.has(actionName)) {
+						actionName = testActionName;
+						break;
+					}
+				}
+			}
+
+			const nodeId = getId();
+			const data = await initActionData(
+				type as ActionNode,
+				nodeId,
+				actionName,
+				position.x,
+				position.y,
+			);
+
 			setNodes((nodes) => {
-				const nodeId = getId();
 				return [
 					...nodes,
 					{
 						id: nodeId,
 						type,
 						position,
-						data: initAction(type as ActionNode),
+						data,
 					},
 				];
 			});
@@ -402,6 +430,7 @@ function WorkflowBuilderEditor({ workflowId }: WorkflowBuilderEditorProps) {
 					color: "var(--Accent-color-Accent-9, #3E63DD)",
 				},
 			};
+
 			setEdges((eds) => addEdge(edge, eds));
 		},
 		[setEdges],
@@ -409,16 +438,13 @@ function WorkflowBuilderEditor({ workflowId }: WorkflowBuilderEditorProps) {
 
 	const selectNodeIdx = nodes.findIndex((node) => node.id === selectedNodeId);
 
-	const updateNameOfSelectedNode = (newName: string) => {
+	const updateData = (data: ActionData) => {
 		setNodes((nodes) =>
 			nodes.map((node) => {
 				if (node.id === selectedNodeId) {
 					return {
 						...node,
-						data: {
-							...node.data,
-							actionName: newName,
-						},
+						data,
 					};
 				}
 				return node;
@@ -462,40 +488,40 @@ function WorkflowBuilderEditor({ workflowId }: WorkflowBuilderEditorProps) {
 					{(nodes[selectNodeIdx].type as ActionNode) ===
 						ActionNode.WEBHOOK && (
 						<Webhook
-							actionId={nodes[selectNodeIdx].data.actionId}
-							updateNodeName={updateNameOfSelectedNode}
+							data={nodes[selectNodeIdx].data as WebhookData}
+							updateData={updateData}
 						/>
 					)}
 
 					{(nodes[selectNodeIdx].type as ActionNode) ===
 						ActionNode.HTTP_REQUEST && (
 						<HttpRequest
-							actionId={nodes[selectNodeIdx].data.actionId}
-							updateNodeName={updateNameOfSelectedNode}
+							data={nodes[selectNodeIdx].data as HttpRequestData}
+							updateData={updateData}
 						/>
 					)}
 
 					{(nodes[selectNodeIdx].type as ActionNode) ===
 						ActionNode.AI_ACTION && (
 						<AiAction
-							actionId={nodes[selectNodeIdx].data.actionId}
-							updateNodeName={updateNameOfSelectedNode}
+							data={nodes[selectNodeIdx].data as AiActionData}
+							updateData={updateData}
 						/>
 					)}
 
 					{(nodes[selectNodeIdx].type as ActionNode) ===
 						ActionNode.IF_CONDITION && (
 						<IfCondition
-							actionId={nodes[selectNodeIdx].data.actionId}
-							updateNodeName={updateNameOfSelectedNode}
+							data={nodes[selectNodeIdx].data as IfConditionData}
+							updateData={updateData}
 						/>
 					)}
 
 					{(nodes[selectNodeIdx].type as ActionNode) ===
 						ActionNode.SEND_EMAIL && (
 						<SendEmail
-							actionId={nodes[selectNodeIdx].data.actionId}
-							updateNodeName={updateNameOfSelectedNode}
+							data={nodes[selectNodeIdx].data as SendEmailData}
+							updateData={updateData}
 						/>
 					)}
 				</WorkflowBuilderRightPanelBase>

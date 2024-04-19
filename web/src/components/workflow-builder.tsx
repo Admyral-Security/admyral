@@ -11,60 +11,93 @@ import {
 	TextArea,
 	TextField,
 } from "@radix-ui/themes";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import PublishWorkflowToggle from "./publish-workflow-toggle";
 import SettingsIcon from "./icons/settings-icon";
 import WorkflowBuilderEditor from "./workflow-builder-editor";
 import WorkflowBuilderRunHistory from "./workflow-builder-run-history";
 import WorkflowBuilderRightPanelBase from "./workflow-builder-right-panel-base";
-import { deleteWorkflow } from "@/lib/api";
+import { deleteWorkflow, updateWorkflowAndCreateIfNotExists } from "@/lib/api";
 import TrashIcon from "./icons/trash-icon";
+import { DiscIcon } from "@radix-ui/react-icons";
+import { ActionNode, ActionData, EdgeData, WorkflowData } from "@/lib/types";
+import { useEdgesState, useNodesState, Node, MarkerType } from "reactflow";
+import { DirectedEdge } from "./workflow-graph/edge";
 
-interface WorkflowData {
-	workflowName: string;
-	workflowDescription: string;
-	isLive: boolean;
-}
+function buildInitialWorkflowGraph(
+	actionData: ActionData[],
+	edgeData: EdgeData[],
+): [Node<ActionData>[], DirectedEdge[]] {
+	const actionNodes = actionData.map((action) => ({
+		id: action.actionId,
+		type: action.actionType as ActionNode,
+		position: {
+			x: action.xPosition,
+			y: action.yPosition,
+		},
+		data: action,
+	}));
 
-interface ActionData {
-	actionId: string;
-	actionName: string;
-	actionType: string;
-}
+	const actionIdToId = actionNodes.reduce(
+		(acc, node) => {
+			acc[node.data.actionId as string] = node.id;
+			return acc;
+		},
+		{} as Record<string, string>,
+	);
 
-interface EdgeData {
-	parentActionId: string;
-	childActionId: string;
+	const edges = edgeData.map((edge) => ({
+		id: `${edge.parentActionId}_${edge.childActionId}`,
+		source: actionIdToId[edge.parentActionId],
+		target: actionIdToId[edge.childActionId],
+		type: "edge",
+		markerEnd: {
+			type: MarkerType.ArrowClosed,
+			height: 15,
+			width: 15,
+			color: "var(--Accent-color-Accent-9, #3E63DD)",
+		},
+		data: edge,
+	}));
+
+	return [actionNodes, edges];
 }
 
 export interface WorkflowBuilderProps {
 	workflowId: string;
-	workflowData: WorkflowData;
-	actionsData: ActionData[];
-	edgesData: EdgeData[];
+	workflow: WorkflowData;
 }
 
 type View = "workflowBuilder" | "runHistory";
 
-/**
- * TODO:
- * - auto-save functionality
- */
 export default function WorkflowBuilder({
 	workflowId,
-	workflowData,
-	actionsData,
-	edgesData,
+	workflow,
 }: WorkflowBuilderProps) {
 	const [view, setView] = useState<View>("workflowBuilder");
-	const [workflow, setWorkflow] = useState<WorkflowData>(workflowData);
-	const [actions, setActions] = useState<ActionData[]>(actionsData);
-	const [edges, setEdges] = useState<EdgeData[]>(edgesData);
+	const [workflowData, setWorkflowData] = useState({
+		workflowId,
+		workflowName: workflow.workflowName,
+		workflowDescription: workflow.workflowDescription,
+		isLive: workflow.isLive,
+	});
+
+	const [nodes, setNodes, onNodesChange] = useNodesState([]);
+	const [edges, setEdges, onEdgesChange] = useEdgesState([]);
 
 	const [isDeletingWorkflow, setIsDeletingWorkflow] =
 		useState<boolean>(false);
 
 	const [openSettings, setOpenSettings] = useState<boolean>(false);
+
+	useEffect(() => {
+		const [n, e] = buildInitialWorkflowGraph(
+			workflow.actions,
+			workflow.edges,
+		);
+		setNodes(n);
+		setEdges(e);
+	}, [workflowId]);
 
 	const handleDeleteWorkflow = async () => {
 		setIsDeletingWorkflow(true);
@@ -75,6 +108,11 @@ export default function WorkflowBuilder({
 		} finally {
 			setIsDeletingWorkflow(false);
 		}
+	};
+
+	const handleSaveWorkflow = async () => {
+		// TODO:
+		alert("SAVE WORKFLOW");
 	};
 
 	return (
@@ -130,6 +168,18 @@ export default function WorkflowBuilder({
 
 					<Flex justify="end" align="center" gap="3">
 						<Button
+							variant="solid"
+							size="2"
+							onClick={handleSaveWorkflow}
+							style={{
+								cursor: "pointer",
+							}}
+						>
+							<DiscIcon />
+							Save Workflow
+						</Button>
+
+						<Button
 							variant="soft"
 							size="2"
 							onClick={() => setOpenSettings(!openSettings)}
@@ -148,12 +198,12 @@ export default function WorkflowBuilder({
 							<PublishWorkflowToggle
 								workflowId={workflowId}
 								isLive={workflow.isLive}
-								onSuccess={() => {
-									setWorkflow((prev) => ({
-										...prev,
-										isLive: !prev.isLive,
-									}));
-								}}
+								onSuccess={() =>
+									setWorkflowData({
+										...workflowData,
+										isLive: !workflowData.isLive,
+									})
+								}
 								onError={() => {
 									if (workflow.isLive) {
 										alert("Failed to deactivate workflow");
@@ -169,7 +219,14 @@ export default function WorkflowBuilder({
 
 			<Box height="100%" width="100%">
 				{view === "workflowBuilder" && (
-					<WorkflowBuilderEditor workflowId={workflowId} />
+					<WorkflowBuilderEditor
+						nodes={nodes}
+						setNodes={setNodes}
+						onNodesChange={onNodesChange}
+						edges={edges}
+						setEdges={setEdges}
+						onEdgesChange={onEdgesChange}
+					/>
 				)}
 				{view === "runHistory" && <WorkflowBuilderRunHistory />}
 			</Box>
@@ -187,8 +244,8 @@ export default function WorkflowBuilder({
 								variant="surface"
 								value={workflow.workflowName}
 								onChange={(event) =>
-									setWorkflow({
-										...workflow,
+									setWorkflowData({
+										...workflowData,
 										workflowName: event.target.value,
 									})
 								}
@@ -203,8 +260,8 @@ export default function WorkflowBuilder({
 								resize="vertical"
 								value={workflow.workflowDescription}
 								onChange={(event) =>
-									setWorkflow({
-										...workflow,
+									setWorkflowData({
+										...workflowData,
 										workflowDescription: event.target.value,
 									})
 								}

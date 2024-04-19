@@ -82,6 +82,8 @@ class ActionNode(Base, table=True):
     action_description: str = Field(sa_type=TEXT())
     action_definition: dict = Field(sa_type=JSONB())
     created_at: datetime = Field(sa_type=TIMESTAMP(), sa_column_kwargs=dict(server_default=func.now()))
+    x_position: float = Field(default=300.0)
+    y_position: float = Field(default=300.0)
 
     workflow: Workflow = Relationship(back_populates="actions")
 

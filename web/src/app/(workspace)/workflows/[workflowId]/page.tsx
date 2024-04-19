@@ -10,12 +10,5 @@ export default async function WorkflowPage({
 }: WorkflowPageProps) {
 	const workflow = await getWorkflow(workflowId);
 
-	return (
-		<WorkflowBuilder
-			workflowId={workflowId}
-			workflowData={workflow.workflow}
-			actionsData={workflow.actions}
-			edgesData={workflow.edges}
-		/>
-	);
+	return <WorkflowBuilder workflowId={workflowId} workflow={workflow} />;
 }

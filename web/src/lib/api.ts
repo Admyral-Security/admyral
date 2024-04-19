@@ -4,6 +4,7 @@ import { createClient } from "@/utils/supabase/server";
 import { transformObjectKeysToCamelCase } from "@/utils/utils";
 import { redirect } from "next/navigation";
 import { encrypt } from "./crypto";
+import { ActionNode, WorkflowData } from "./types";
 
 async function getAccessToken() {
 	const supabase = createClient();
@@ -281,4 +282,46 @@ export async function deleteWorkflow(workflowId: string) {
 		throw new Error("Failed to delete workflow!");
 	}
 	redirect("/");
+}
+
+export async function createAction(
+	workflowId: string,
+	actionType: ActionNode,
+	actionName: string,
+	xPosition: number,
+	yPosition: number,
+): Promise<string> {
+	const accessToken = await getAccessToken();
+
+	const result = await fetch(
+		`${process.env.BACKEND_API_URL}/api/v1/workflows/${workflowId}/actions/create`,
+		{
+			method: "POST",
+			headers: {
+				Authorization: `Bearer ${accessToken}`,
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify({
+				action_type: actionType,
+				action_name: actionName,
+				action_description: "",
+				x_position: xPosition,
+				y_position: yPosition,
+			}),
+		},
+	);
+	if (result.status !== 201) {
+		throw new Error("Failed to create action!");
+	}
+
+	const actionId = await result.json();
+	return actionId;
+}
+
+export async function updateWorkflowAndCreateIfNotExists(
+	workflow: WorkflowData,
+): Promise<WorkflowData> {
+	// TODO: update
+	// TODO: we must consider that we generate the webhook ID and webhook secret on the frontend server side!
+	return workflow;
 }

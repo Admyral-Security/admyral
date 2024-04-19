@@ -124,16 +124,18 @@ async def get_workflows(
     )
 
 
-class WorkflowData(BaseModel):
-    workflow_name: str
-    workflow_description: str
-    is_live: bool
-
-
 class ActionData(BaseModel):
     action_id: str
     action_name: str
+    reference_handle: str
     action_type: ActionType
+    action_description: str
+    x_position: float
+    y_position: float
+    action_definition: dict
+    # Webhook specific fields
+    webhookId: Optional[str] = None
+    secret: Optional[str] = None
 
 
 class EdgeData(BaseModel):
@@ -141,12 +143,15 @@ class EdgeData(BaseModel):
     child_action_id: str
 
 
-class WorkflowResponse(BaseModel):
-    workflow: WorkflowData
+class WorkflowData(BaseModel):
+    workflow_name: str
+    workflow_description: str
+    is_live: bool
     actions: list[ActionData]
     edges: list[EdgeData]
 
 
+# TODO: optimize data fetching: actions, workflow, and edges in parallel as well as webhooks in one query
 @router.get(
     "/{workflow_id}",
     status_code=status.HTTP_200_OK
@@ -155,7 +160,8 @@ async def get_workflow(
     workflow_id: str,
     db: AsyncSession = Depends(get_session),
     user: AuthenticatedUser = Depends(get_authenticated_user)
-) -> WorkflowResponse:
+) -> WorkflowData:
+    # Fetch general workflow data
     workflow = await query_workflow(db, workflow_id, user.user_id)
     if not workflow:
         raise HTTPException(
@@ -163,6 +169,7 @@ async def get_workflow(
             detail="Workflow does not exist"
         )
 
+    # Fetch actions
     result = await db.exec(
         select(ActionNode)
             .where(ActionNode.workflow_id == workflow_id)
@@ -172,12 +179,31 @@ async def get_workflow(
             lambda action: ActionData(
                 action_id=action.action_id,
                 action_name=action.action_name,
-                action_type=action.action_type
+                reference_handle=action.reference_handle,
+                action_type=action.action_type,
+                action_description=action.action_description,
+                x_position=action.x_position,
+                y_position=action.y_position,
+                action_definition=action.action_definition,
             ),
             result.all()
         )
     )
 
+    # Enrich webhook actions with webhook data
+    for action in action_nodes:
+        if action.action_type == ActionType.WEBHOOK:
+            result = await db.exec(select(Webhook).where(Webhook.action_id == action.action_id).limit(1))
+            webhook = result.one_or_none()
+            if not webhook:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Webhook does not exist"
+                )
+            action.webhookId = webhook.webhook_id
+            action.secret = webhook.webhook_secret
+
+    # Fetcj edges
     parent_action = aliased(ActionNode, name="parent_action")
     child_action = aliased(ActionNode, name="child_action")
     result = await db.exec(
@@ -197,14 +223,10 @@ async def get_workflow(
         )
     )
 
-    workflow = WorkflowData(
+    return WorkflowData(
         workflow_name=workflow.workflow_name,
         workflow_description=workflow.workflow_description,
-        is_live=workflow.is_live
-    )
-
-    return WorkflowResponse(
-        workflow=workflow,
+        is_live=workflow.is_live,
         actions=action_nodes,
         edges=workflow_edges
     )
@@ -305,6 +327,8 @@ class CreateActionRequest(BaseModel):
     action_name: str
     action_description: str
     action_type: ActionType
+    x_position: float
+    y_position: float
 
 
 @router.post(
@@ -325,7 +349,9 @@ async def create_action(
         reference_handle=get_reference_handle(request.action_name),
         action_type=request.action_type,
         action_description=request.action_description,
-        action_definition={}
+        action_definition={},
+        x_position=request.x_position,
+        y_position=request.y_position
     )
     db.add(action_node)
 

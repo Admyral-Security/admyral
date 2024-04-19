@@ -1,6 +1,8 @@
-import { BaseEdge, EdgeProps, getBezierPath } from "reactflow";
+import { BaseEdge, EdgeProps, getBezierPath, Edge } from "reactflow";
 
-export default function DirectedEdge({
+export type DirectedEdge = Edge;
+
+export default function DirectedEdgeComponent({
 	id,
 	sourceX,
 	sourceY,
