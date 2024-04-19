@@ -68,12 +68,14 @@ Admyral is a next-gen Hyperautomation Platform with deep case management integra
 
 
 ### Admyral in <5 Minutes
-// A demo is coming soon
+// A demo is coming at the end of April
+
+<img src="https://admyral-assets.s3.eu-central-1.amazonaws.com/admyral-github-screen.svg">
 
 
 
 ## Get Started
-// coming soon
+// coming at the end of April
 
 
 
