@@ -1,10 +1,13 @@
 "use server";
 
 import { createClient } from "@/utils/supabase/server";
-import { transformObjectKeysToCamelCase } from "@/utils/utils";
+import {
+	transformObjectKeysToCamelCase,
+	transformObjectKeysToSnakeCase,
+} from "@/utils/utils";
 import { redirect } from "next/navigation";
 import { encrypt } from "./crypto";
-import { ActionNode, WorkflowData } from "./types";
+import { WorkflowData } from "./types";
 
 async function getAccessToken() {
 	const supabase = createClient();
@@ -84,16 +87,11 @@ export async function createNewWorkflow() {
 	redirect(`/workflows/${workflowId}`);
 }
 
-export async function updateWorkflow(
-	workflowId: string,
-	workflowName: string | null,
-	workflowDescription: string | null,
-	isLive: boolean | null,
-) {
+export async function publishWorkflow(workflowId: string, isLive: boolean) {
 	const token = await getAccessToken();
 
 	const result = await fetch(
-		`${process.env.BACKEND_API_URL}/api/v1/workflows/${workflowId}/update`,
+		`${process.env.BACKEND_API_URL}/api/v1/workflows/${workflowId}/publish`,
 		{
 			method: "POST",
 			headers: {
@@ -101,8 +99,6 @@ export async function updateWorkflow(
 				Authorization: `Bearer ${token}`,
 			},
 			body: JSON.stringify({
-				workflow_name: workflowName,
-				workflow_description: workflowDescription,
 				is_live: isLive,
 			}),
 		},
@@ -284,44 +280,35 @@ export async function deleteWorkflow(workflowId: string) {
 	redirect("/");
 }
 
-export async function createAction(
+export async function updateWorkflowAndCreateIfNotExists(
 	workflowId: string,
-	actionType: ActionNode,
-	actionName: string,
-	xPosition: number,
-	yPosition: number,
-): Promise<string> {
+	workflow: WorkflowData,
+	deletedNodes: string[],
+	deletedEdges: [string, string][],
+): Promise<WorkflowData> {
 	const accessToken = await getAccessToken();
 
+	const body = JSON.stringify({
+		workflow: transformObjectKeysToSnakeCase(workflow),
+		deleted_nodes: deletedNodes,
+		deleted_edges: deletedEdges,
+	});
+
 	const result = await fetch(
-		`${process.env.BACKEND_API_URL}/api/v1/workflows/${workflowId}/actions/create`,
+		`${process.env.BACKEND_API_URL}/api/v1/workflows/${workflowId}/update`,
 		{
 			method: "POST",
 			headers: {
 				Authorization: `Bearer ${accessToken}`,
 				"Content-Type": "application/json",
 			},
-			body: JSON.stringify({
-				action_type: actionType,
-				action_name: actionName,
-				action_description: "",
-				x_position: xPosition,
-				y_position: yPosition,
-			}),
+			body,
 		},
 	);
 	if (result.status !== 201) {
-		throw new Error("Failed to create action!");
+		throw new Error("Failed to update workflow!");
 	}
 
-	const actionId = await result.json();
-	return actionId;
-}
-
-export async function updateWorkflowAndCreateIfNotExists(
-	workflow: WorkflowData,
-): Promise<WorkflowData> {
-	// TODO: update
-	// TODO: we must consider that we generate the webhook ID and webhook secret on the frontend server side!
-	return workflow;
+	const updatedWorkflow = await result.json();
+	return transformObjectKeysToCamelCase(updatedWorkflow);
 }

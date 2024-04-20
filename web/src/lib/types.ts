@@ -1,6 +1,6 @@
 export enum ActionNode {
 	WEBHOOK = "Webhook",
-	HTTP_REQUEST = "HTTPRequest",
+	HTTP_REQUEST = "HttpRequest",
 	TRANSFORM = "Transform",
 	IF_CONDITION = "IfCondition",
 	AI_ACTION = "AiAction",
@@ -80,6 +80,8 @@ export type ActionDataBase = {
 	xPosition: number;
 	yPosition: number;
 	actionType: ActionNode;
+	webhookId: string | null;
+	secret: string | null;
 };
 
 export type AiActionData = ActionDataBase & {
@@ -102,6 +104,7 @@ export type HttpRequestData = ActionDataBase & {
 };
 
 export type WebhookData = ActionDataBase & {
+	actionDefinition: {};
 	webhookId: string;
 	secret: string;
 };

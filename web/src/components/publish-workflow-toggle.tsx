@@ -1,4 +1,4 @@
-import { updateWorkflow } from "@/lib/api";
+import { publishWorkflow } from "@/lib/api";
 import { Flex, Switch, Text } from "@radix-ui/themes";
 import { useState } from "react";
 
@@ -25,7 +25,7 @@ export default function PublishWorkflowToggle({
 			if (beforeUpdate) {
 				beforeUpdate();
 			}
-			await updateWorkflow(workflowId, null, null, newIsLive);
+			await publishWorkflow(workflowId, newIsLive);
 			onSuccess();
 		} catch (error) {
 			onError();

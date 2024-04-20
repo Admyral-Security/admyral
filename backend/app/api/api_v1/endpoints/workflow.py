@@ -1,17 +1,14 @@
 from typing import Optional
 
-import hmac
-import hashlib
 from fastapi import APIRouter, Depends, status, HTTPException
 from sqlmodel.ext.asyncio.session import AsyncSession
-from sqlmodel import select
+from sqlmodel import select, and_
 from sqlalchemy.orm import aliased
 from pydantic import BaseModel
 
 from app.deps import AuthenticatedUser, get_authenticated_user, get_session
 from app.models import Workflow, ActionNode, Webhook, WorkflowEdge
 from app.schema import ActionType
-from app.config import settings
 
 
 router = APIRouter()
@@ -42,7 +39,8 @@ async def query_workflow(
 ) -> Workflow | None:
     result = await db.exec(
         select(Workflow)
-        .where(Workflow.workflow_id == workflow_id and Workflow.user_id == user_id)
+        .where(Workflow.workflow_id == workflow_id)
+        .where(Workflow.user_id == user_id)
         .limit(1)
     )
     return result.one_or_none()
@@ -60,10 +58,9 @@ async def query_action(
     result = await db.exec(
         select(ActionNode)
             .join(Workflow)
-            .where(
-                Workflow.workflow_id == workflow_id and Workflow.user_id == user_id and \
-                    ActionNode.action_id == action_id
-            )
+            .where(Workflow.workflow_id == workflow_id)
+            .where(Workflow.user_id == user_id)
+            .where(ActionNode.action_id == action_id)
             .limit(1)
     )
     return result.one_or_none()
@@ -83,11 +80,16 @@ async def query_edge(
         select(WorkflowEdge)
             .join(parent_action, parent_action.action_id == WorkflowEdge.parent_action_id)
             .join(child_action, child_action.action_id == WorkflowEdge.child_action_id)
-            .join(Workflow, Workflow.workflow_id == parent_action.workflow_id and Workflow.workflow_id == child_action.workflow_id)
-            .where(
-                Workflow.workflow_id == workflow_id and Workflow.user_id == user_id and \
-                    parent_action.action_id == parent_action_id and child_action.action_id == child_action_id
+            .join(Workflow, 
+                and_(
+                    Workflow.workflow_id == parent_action.workflow_id,
+                    Workflow.workflow_id == child_action.workflow_id
+                )
             )
+            .where(Workflow.workflow_id == workflow_id)
+            .where(Workflow.user_id == user_id)
+            .where(parent_action.action_id == parent_action_id)
+            .where(child_action.action_id == child_action_id)
             .limit(1)
     )
     return result.one_or_none()
@@ -130,11 +132,11 @@ class ActionData(BaseModel):
     reference_handle: str
     action_type: ActionType
     action_description: str
-    x_position: float
+    x_position: float 
     y_position: float
     action_definition: dict
     # Webhook specific fields
-    webhookId: Optional[str] = None
+    webhook_id: Optional[str] = None
     secret: Optional[str] = None
 
 
@@ -151,7 +153,7 @@ class WorkflowData(BaseModel):
     edges: list[EdgeData]
 
 
-# TODO: optimize data fetching: actions, workflow, and edges in parallel as well as webhooks in one query
+# TODO: optimize data fetching: actions, workflow, and edges concurrently as well as webhooks in one query
 @router.get(
     "/{workflow_id}",
     status_code=status.HTTP_200_OK
@@ -200,18 +202,24 @@ async def get_workflow(
                     status_code=status.HTTP_404_NOT_FOUND,
                     detail="Webhook does not exist"
                 )
-            action.webhookId = webhook.webhook_id
+            action.webhook_id = webhook.webhook_id
             action.secret = webhook.webhook_secret
 
-    # Fetcj edges
+    # Fetch all related edges
     parent_action = aliased(ActionNode, name="parent_action")
     child_action = aliased(ActionNode, name="child_action")
     result = await db.exec(
         select(WorkflowEdge)
             .join(parent_action, parent_action.action_id == WorkflowEdge.parent_action_id)
             .join(child_action, child_action.action_id == WorkflowEdge.child_action_id)
-            .join(Workflow, Workflow.workflow_id == parent_action.workflow_id and Workflow.workflow_id == child_action.workflow_id)
-            .where(Workflow.workflow_id == workflow_id and Workflow.user_id == user.user_id)
+            .join(Workflow,
+                and_(
+                    Workflow.workflow_id == parent_action.workflow_id,
+                    Workflow.workflow_id == child_action.workflow_id
+                )
+            )
+            .where(Workflow.workflow_id == workflow_id)
+            .where(Workflow.user_id == user.user_id)
     )
     workflow_edges = list(
         map(
@@ -230,6 +238,136 @@ async def get_workflow(
         actions=action_nodes,
         edges=workflow_edges
     )
+
+
+class WorkflowUpdateRequest(BaseModel):
+    workflow: WorkflowData
+    deleted_nodes: list[str]
+    deleted_edges: list[tuple[str, str]]
+
+
+NEW_MARKER = "new_"
+
+
+@router.post(
+    "/{workflow_id}/update",
+    status_code=status.HTTP_201_CREATED
+)
+async def update_workflow(
+    workflow_id: str,
+    request: WorkflowUpdateRequest,
+    db: AsyncSession = Depends(get_session),
+    user: AuthenticatedUser = Depends(get_authenticated_user)
+) -> WorkflowData:
+    # 1) Update workflow
+    workflow = await query_workflow(db, workflow_id, user.user_id)
+    if not workflow:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Workflow does not exist"
+        )
+
+    workflow.workflow_name = request.workflow.workflow_name
+    workflow.workflow_description = request.workflow.workflow_description
+    workflow.is_live = request.workflow.is_live
+
+    db.add(workflow)
+    await db.commit()
+
+    # 2) Update actions & webhooks
+    output_actions = []
+
+    temp_ids_to_new_action_ids = {}
+    for action in request.workflow.actions:
+        if action.action_id.startswith(NEW_MARKER):
+            # Create new action
+            new_action = ActionNode(
+                workflow_id=workflow_id,
+                action_name=action.action_name,
+                reference_handle=action.reference_handle,
+                action_type=action.action_type,
+                action_description=action.action_description,
+                action_definition=action.action_definition,
+                x_position=action.x_position,
+                y_position=action.y_position
+            )
+            db.add(new_action)
+            await db.commit()
+            temp_ids_to_new_action_ids[action.action_id] = new_action.action_id
+
+            if action.action_type == ActionType.WEBHOOK:
+                webhook = Webhook(
+                    webhook_id=action.webhook_id,
+                    action_id=new_action.action_id,
+                    webhook_secret=action.secret
+                )
+                db.add(webhook)
+                await db.commit()
+
+            action.action_id = new_action.action_id
+        else:
+            # Update existing action
+            existing_action = await query_action(db, action.action_id, workflow_id, user.user_id)
+            if not existing_action:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Action node not found"
+                )
+
+            existing_action.action_name = action.action_name
+            existing_action.reference_handle = action.reference_handle
+            existing_action.action_type = action.action_type
+            existing_action.action_description = action.action_description
+            existing_action.action_definition = action.action_definition
+            existing_action.x_position = action.x_position
+            existing_action.y_position = action.y_position
+
+            db.add(existing_action)
+            await db.commit()
+
+        output_actions.append(action)
+
+    # 3) Update edges
+    output_edges = []
+    
+    for edge in request.workflow.edges: 
+        parent_action_id = temp_ids_to_new_action_ids.get(edge.parent_action_id, edge.parent_action_id)
+        child_action_id = temp_ids_to_new_action_ids.get(edge.child_action_id, edge.child_action_id)
+
+        existing_edge = await query_edge(db, parent_action_id, child_action_id, workflow_id, user.user_id)
+        if not existing_edge:
+            workflow_edge = WorkflowEdge(
+                parent_action_id=parent_action_id,
+                child_action_id=child_action_id
+            )
+            db.add(workflow_edge)
+            await db.commit()
+
+            edge.parent_action_id = parent_action_id
+            edge.child_action_id = child_action_id
+        
+        output_edges.append(edge)
+
+    # 4) Delete edges
+    for (parent_action_id, child_action_id) in request.deleted_edges:
+        existing_edge = await query_edge(db, parent_action_id, child_action_id, workflow_id, user.user_id)
+        if existing_edge:
+            await db.delete(existing_edge)
+            await db.commit()
+
+    # 5) Delete nodes incl. their involved edges
+    for deleted_node in request.deleted_nodes:
+        existing_action = await query_action(db, deleted_node, workflow_id, user.user_id)
+        if existing_action:
+            await db.delete(existing_action)
+            await db.commit()
+
+    # Create updated workflow data
+    workflow_data = request.workflow
+    workflow_data.actions = output_actions
+    workflow_data.edges = output_edges
+
+    return workflow_data
 
 
 @router.post(
@@ -273,19 +411,14 @@ async def delete_workflow(
     await db.commit()
 
 
-class UpdateWorkflowRequest(BaseModel):
-    workflow_name: Optional[str]
-    workflow_description: Optional[str]
-    is_live: Optional[bool]
+class PublishWorkflowRequest(BaseModel):
+    is_live: bool
 
 
-@router.post(
-    "/{workflow_id}/update",
-    status_code=status.HTTP_204_NO_CONTENT
-)
-async def update_workflow(
+@router.post("/{workflow_id}/publish", status_code=status.HTTP_204_NO_CONTENT)
+async def publish_workflow(
     workflow_id: str,
-    request: UpdateWorkflowRequest,
+    request: PublishWorkflowRequest,
     db: AsyncSession = Depends(get_session),
     user: AuthenticatedUser = Depends(get_authenticated_user)
 ):
@@ -296,224 +429,6 @@ async def update_workflow(
             detail="Workflow not found"
         )
 
-    if request.workflow_name:
-        workflow.workflow_name = request.workflow_name
-    if request.workflow_description:
-        workflow.workflow_description = request.workflow_description
-    if request.is_live is not None:
-        workflow.is_live = request.is_live
-
+    workflow.is_live = request.is_live
     db.add(workflow)
-    await db.commit()
-
-
-#### Actions
-
-
-def get_reference_handle(action_name: str) -> str:
-    # TODO: we need to generate a unique reference handle
-    return action_name.lower().replace(" ", "_")
-
-
-def create_webhook_secret(webhook_id: str) -> str:
-    return hmac.new(
-        settings.WEBHOOK_SIGNING_SECRET.encode(),
-        msg=webhook_id.encode(),
-        digestmod=hashlib.sha256
-    ).hexdigest()
-
-
-class CreateActionRequest(BaseModel):
-    action_name: str
-    action_description: str
-    action_type: ActionType
-    x_position: float
-    y_position: float
-
-
-@router.post(
-    "/{workflow_id}/actions/create",
-    status_code=status.HTTP_201_CREATED
-)
-async def create_action(
-    workflow_id: str,
-    request: CreateActionRequest,
-    db: AsyncSession = Depends(get_session),
-    user: AuthenticatedUser = Depends(get_authenticated_user)
-) -> str:
-    await raise_if_workflow_not_exists_for_user(db, workflow_id, user.user_id)
-
-    action_node = ActionNode(
-        workflow_id=workflow_id,
-        action_name=request.action_name,
-        reference_handle=get_reference_handle(request.action_name),
-        action_type=request.action_type,
-        action_description=request.action_description,
-        action_definition={},
-        x_position=request.x_position,
-        y_position=request.y_position
-    )
-    db.add(action_node)
-
-    if request.action_type == ActionType.WEBHOOK:
-        await db.flush()
-
-        webhook = Webhook(
-            action_id=action_node.action_id
-        )
-        db.add(webhook)
-        await db.flush()
-
-        webhook.webhook_secret = create_webhook_secret(webhook.webhook_id)
-        db.add(webhook)
-
-    await db.commit()
-
-    return action_node.action_id
-
-
-@router.get(
-    "/{workflow_id}/actions/{action_id}",
-    status_code=status.HTTP_200_OK
-)
-async def get_action(
-    workflow_id: str,
-    action_id: str,
-    db: AsyncSession = Depends(get_session),
-    user: AuthenticatedUser = Depends(get_authenticated_user)
-) -> ActionNode:
-    action_node = await query_action(db, action_id, workflow_id, user.user_id)
-    if not action_node:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Action node not found"
-        )
-    return action_node
-
-
-@router.post(
-    "/{workflow_id}/actions/{action_id}/delete",
-    status_code=status.HTTP_204_NO_CONTENT
-)
-async def delete_action(
-    workflow_id: str,
-    action_id: str,
-    db: AsyncSession = Depends(get_session),
-    user: AuthenticatedUser = Depends(get_authenticated_user)
-):
-    action_node = await query_action(db, action_id, workflow_id, user.user_id)
-    if not action_node:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Action node not found"
-        )
-    
-    await db.delete(action_node)
-    await db.commit()
-
-
-class UpdateActionRequest(BaseModel):
-    action_name: Optional[str]
-    action_description: Optional[str]
-    action_definition: Optional[dict]
-
-
-@router.post(
-    "/{workflow_id}/actions/{action_id}/update",
-    status_code=status.HTTP_204_NO_CONTENT
-)
-async def update_action(
-    workflow_id: str,
-    action_id: str,
-    request: UpdateActionRequest,
-    db: AsyncSession = Depends(get_session),
-    user: AuthenticatedUser = Depends(get_authenticated_user)
-):
-    action_node = await query_action(db, action_id, workflow_id, user.user_id)
-    if not action_node:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Action node not found"
-        )
-
-    if request.action_name:
-        action_node.action_name = request.action_name
-    if request.action_description:
-        action_node.action_description = request.action_description
-    if request.action_definition:
-        # TODO: validation based on action type
-        action_node.action_definition = request.action_definition
-
-    db.add(action_node)
-    await db.commit()
-
-
-#### Edges
-
-
-class EdgeRequest(BaseModel):
-    parent_action_id: str
-    child_action_id: str
-
-
-@router.post(
-    "/{workflow_id}/edge/create",
-    status_code=status.HTTP_201_CREATED
-)
-async def create_edge(
-    workflow_id: str,
-    request: EdgeRequest,
-    db: AsyncSession = Depends(get_session),
-    user: AuthenticatedUser = Depends(get_authenticated_user)
-):
-    # Verify that both the parent action and child action are valid actions for the user.
-    child_action = await query_action(db, request.child_action_id, workflow_id, user.user_id)
-    if not child_action:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Child action not found"
-        )
-    parent_action = await query_action(db, request.parent_action_id, workflow_id, user.user_id)
-    if not parent_action:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Parent action not found"
-        )
-
-    # TODO: check connection constraints (e.g., Webhook cannot have incoming edges)
-
-    workflow_edge = WorkflowEdge(
-        parent_action_id=request.parent_action_id,
-        child_action_id=request.child_action_id
-    )
-    db.add(workflow_edge)
-    await db.commit()
-
-    return "success"
-
-
-@router.post(
-    "/{workflow_id}/edge/delete",
-    status_code=status.HTTP_204_NO_CONTENT
-)
-async def delete_edge(
-    workflow_id: str,
-    request: EdgeRequest,
-    db: AsyncSession = Depends(get_session),
-    user: AuthenticatedUser = Depends(get_authenticated_user)
-):
-    workflow_edge = await query_edge(
-        db,
-        request.parent_action_id,
-        request.child_action_id,
-        workflow_id,
-        user.user_id
-    )
-    if not workflow_edge:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Workflow edge not found"
-        )
-
-    await db.delete(workflow_edge)
     await db.commit()

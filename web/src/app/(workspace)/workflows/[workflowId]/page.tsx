@@ -1,5 +1,4 @@
 import WorkflowBuilder from "@/components/workflow-builder";
-import { getWorkflow } from "@/lib/api";
 
 export interface WorkflowPageProps {
 	params: { workflowId: string };
@@ -8,7 +7,5 @@ export interface WorkflowPageProps {
 export default async function WorkflowPage({
 	params: { workflowId },
 }: WorkflowPageProps) {
-	const workflow = await getWorkflow(workflowId);
-
-	return <WorkflowBuilder workflowId={workflowId} workflow={workflow} />;
+	return <WorkflowBuilder workflowId={workflowId} />;
 }

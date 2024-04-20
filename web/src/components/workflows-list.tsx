@@ -128,11 +128,11 @@ export default function WorkflowsList({ workflowsList }: WorkflowsListProps) {
 								publishWorkflowToggleOnError={() => {
 									if (workflow.isLive) {
 										setError(
-											"Failed to set workflow as active",
+											"Failed to set workflow as inactive",
 										);
 									} else {
 										setError(
-											"Failed to set workflow as inactive",
+											"Failed to set workflow as active",
 										);
 									}
 								}}

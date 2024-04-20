@@ -30,6 +30,8 @@ export async function initActionData(
 		actionDescription: "",
 		xPosition,
 		yPosition,
+		webhookId: null,
+		secret: null,
 	};
 
 	switch (actionType) {
@@ -37,6 +39,7 @@ export async function initActionData(
 			const webhookData = await generateWebhook();
 			return {
 				...base,
+				actionDefinition: {},
 				webhookId: webhookData.webhookId,
 				secret: webhookData.secret,
 			};
@@ -88,3 +91,5 @@ export async function initActionData(
 			throw new Error("Unhandled action type: " + actionType);
 	}
 }
+
+export const NEW_MARKER = "new_";

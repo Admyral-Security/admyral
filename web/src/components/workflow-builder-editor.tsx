@@ -23,13 +23,7 @@ import UpdateCaseIcon from "./icons/update-case-icon";
 import QueryCasesIcon from "./icons/query-cases-icon";
 import WorkflowTemplates from "./workflow-templates";
 import "reactflow/dist/style.css";
-import {
-	Dispatch,
-	SetStateAction,
-	useCallback,
-	useEffect,
-	useState,
-} from "react";
+import { Dispatch, SetStateAction, useCallback, useState } from "react";
 import WebhookNode from "./workflow-graph/webhook-node";
 import HttpRequestNode from "./workflow-graph/http-request-node";
 import ReceiveEmailActionIcon from "./icons/receive-email-action-icon";
@@ -55,7 +49,7 @@ import HttpRequest from "./action-editing/http-request";
 import AiAction from "./action-editing/ai-action";
 import IfCondition from "./action-editing/if-condition";
 import SendEmail from "./action-editing/send-email";
-import { initActionData } from "@/lib/workflows";
+import { NEW_MARKER, initActionData } from "@/lib/workflows";
 
 interface EditorCardProps {
 	icon: React.ReactNode;
@@ -199,6 +193,7 @@ function EditorSideBar() {
 									label={getActionNodeLabel(
 										ActionNode.IF_CONDITION,
 									)}
+									isComingSoon
 								/>
 							</div>
 
@@ -212,6 +207,7 @@ function EditorSideBar() {
 									label={getActionNodeLabel(
 										ActionNode.AI_ACTION,
 									)}
+									isComingSoon
 								/>
 							</div>
 
@@ -225,6 +221,7 @@ function EditorSideBar() {
 									label={getActionNodeLabel(
 										ActionNode.SEND_EMAIL,
 									)}
+									isComingSoon
 								/>
 							</div>
 
@@ -288,7 +285,7 @@ function EditorSideBar() {
 }
 
 let id = 0;
-const getId = () => `workflow_obj_${id++}`;
+const getId = () => `${NEW_MARKER}workflow_obj_${id++}`;
 
 function actionNodeTypeToIcon(actionNode: ActionNode) {
 	switch (actionNode) {
