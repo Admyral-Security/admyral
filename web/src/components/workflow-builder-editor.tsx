@@ -50,6 +50,7 @@ import AiAction from "./action-editing/ai-action";
 import IfCondition from "./action-editing/if-condition";
 import SendEmail from "./action-editing/send-email";
 import { NEW_MARKER, initActionData } from "@/lib/workflows";
+import CaseTriggerIcon from "./icons/case-trigger-icon";
 
 interface EditorCardProps {
 	icon: React.ReactNode;
@@ -256,6 +257,12 @@ function EditorSideBar() {
 							<EditorCard
 								icon={<QueryCasesIcon />}
 								label="Query Cases"
+								isComingSoon
+							/>
+
+							<EditorCard
+								icon={<CaseTriggerIcon />}
+								label="Case Trigger"
 								isComingSoon
 							/>
 						</Flex>
