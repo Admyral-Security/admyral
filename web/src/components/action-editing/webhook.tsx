@@ -52,7 +52,7 @@ export default function Webhook({ data, updateData }: WebhookProps) {
 			<Flex direction="column" gap="2">
 				<Text>Webhook URL</Text>
 				<CopyText
-					text={`${process.env.NEXT_PUBLIC_WORKFLOW_RUNNER_API_URL}/webhooks/${data.webhookId}/${data.secret}`}
+					text={`${process.env.NEXT_PUBLIC_WORKFLOW_RUNNER_API_URL}/webhook/${data.webhookId}/${data.secret}`}
 				/>
 			</Flex>
 

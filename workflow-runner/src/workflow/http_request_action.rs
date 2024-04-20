@@ -16,16 +16,27 @@ lazy_static! {
 }
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize)]
+#[serde(rename_all(
+    serialize = "SCREAMING_SNAKE_CASE",
+    deserialize = "SCREAMING_SNAKE_CASE"
+))]
 pub enum HttpMethod {
     Get,
     Post,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct KeyValuePair {
+    key: String,
+    value: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct HttpRequest {
     url: String,
     method: HttpMethod,
-    headers: HashMap<String, String>,
+    content_type: String,
+    headers: Vec<KeyValuePair>,
     payload: Option<serde_json::Value>,
 }
 
@@ -44,21 +55,24 @@ impl ActionExecutor for HttpRequest {
         let headers_futures = self
             .headers
             .iter()
-            .map(|(name, value)| async move {
-                let resolved_value = resolve_references(&json!(value), context).await?;
+            .map(|key_value_pair| async move {
+                let resolved_value =
+                    resolve_references(&json!(&key_value_pair.value), context).await?;
                 Ok((
-                    HeaderName::from_str(name),
+                    HeaderName::from_str(&key_value_pair.key),
                     HeaderValue::from_str(&resolved_value.to_string()),
                 ))
             })
             .collect::<Vec<_>>();
         let result = join_all(headers_futures).await;
         let result: Result<Vec<_>> = result.into_iter().collect();
-        let headers = result?
+        let mut headers = result?
             .into_iter()
             .filter(|(k, v)| k.is_ok() && v.is_ok())
             .map(|(k, v)| (k.unwrap(), v.unwrap()))
             .collect::<HeaderMap>();
+
+        headers.insert("Content-Type", HeaderValue::from_str(&self.content_type)?);
 
         let response = match self.method {
             HttpMethod::Get => client.get(url).headers(headers).send().await?,
