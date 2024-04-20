@@ -426,6 +426,7 @@ function WorkflowBuilderEditor({
 		(connection: any) => {
 			const edge = {
 				...connection,
+				id: getId(),
 				type: "edge",
 				markerEnd: {
 					type: MarkerType.ArrowClosed,

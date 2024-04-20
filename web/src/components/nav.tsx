@@ -106,7 +106,7 @@ export default function Nav() {
 					</HoverCard.Root>
 
 					<NavLink
-						pageName="Workflows Overview"
+						pageName="Workflow Overview"
 						linkHref="/"
 						icon={<WorkflowOverviewIcon />}
 						selectionCriteria={["/", "/workflows"]}
