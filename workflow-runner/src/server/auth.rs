@@ -22,8 +22,8 @@ use std::fmt::Display;
 
 lazy_static! {
     static ref JWT_SECRET: DecodingKey = DecodingKey::from_secret(
-        std::env::var("SUPABASE_JWT_SECRET")
-            .expect("Missing environment variable SUPABASE_JWT_SECRET")
+        std::env::var("JWT_SECRET")
+            .expect("Missing environment variable JWT_SECRET")
             .as_bytes()
     );
 }

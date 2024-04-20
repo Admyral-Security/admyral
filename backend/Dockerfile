@@ -12,8 +12,9 @@ FROM python:3.11-slim-buster
 # set working directory
 WORKDIR /usr/src/app
 
-# set environment variables
+# prevent python from writing pyc files to disc
 ENV PYTHONDONTWRITEBYTECODE 1
+# prevent python from buffering stdout and stderr
 ENV PYTHONUNBUFFERED 1
 
 # install system dependencies
@@ -29,4 +30,4 @@ RUN pip install -r requirements.txt
 # add app
 COPY . .
 
-CMD ["uvicorn", "app.main:app", "--proxy-headers", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "app.main:app", "--proxy-headers", "--host", "0.0.0.0", "--port", "80"]

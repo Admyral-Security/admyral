@@ -1,0 +1,52 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT action_id, workflow_id, action_name, reference_handle, action_type::text, action_definition\n        FROM admyral.action_node\n        WHERE workflow_id = $1\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "action_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "workflow_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "action_name",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "reference_handle",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 4,
+        "name": "action_type",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 5,
+        "name": "action_definition",
+        "type_info": "Jsonb"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      null,
+      false
+    ]
+  },
+  "hash": "6d2a1e0477241d6e781bb7065702a4917a5903d96881cd90531215e863daea6d"
+}
