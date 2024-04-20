@@ -113,6 +113,7 @@ export default function WorkflowsList({ workflowsList }: WorkflowsListProps) {
 					<Flex direction="column" gap="17px">
 						{workflows.map((workflow, idx) => (
 							<WorkflowListElement
+								key={`workflows_list_${idx}`}
 								workflowId={workflow.workflowId}
 								workflowName={workflow.workflowName}
 								isLive={workflow.isLive}

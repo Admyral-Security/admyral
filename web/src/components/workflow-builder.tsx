@@ -124,7 +124,7 @@ export default function WorkflowBuilder({ workflowId }: WorkflowBuilderProps) {
 					"Failed to fetch workflow. Please try to refresh the page",
 				);
 			});
-	}, []);
+	}, [workflowId, setNodes, setEdges]);
 
 	const handleDeleteWorkflow = async () => {
 		setIsDeletingWorkflow(true);

@@ -14,8 +14,6 @@ import {
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
-// TODO: Fix API function calling pattern
-
 /**
  * TODO:
  * - Update email address https://supabase.com/docs/reference/javascript/auth-updateuser
@@ -28,8 +26,6 @@ export default function Account() {
 		company: "",
 		email: "",
 	});
-
-	const [doSaveChanges, setDoSaveChanges] = useState<boolean>(false);
 	const [isSaving, setIsSaving] = useState<boolean>(false);
 
 	useEffect(() => {
@@ -44,28 +40,24 @@ export default function Account() {
 			});
 	}, []);
 
-	useEffect(() => {
-		if (!doSaveChanges || isSaving) {
-			return;
-		}
-
+	const handleSaveChanges = async () => {
 		setIsSaving(true);
 		setError(null);
-		updateUserProfile(
-			userProfile.firstName,
-			userProfile.lastName,
-			userProfile.company,
-		)
-			.catch((error) => {
-				setError(
-					`Failed to update user profile! If the problem persists, please contact us on Discord or via email ${process.env.NEXT_PUBLIC_SUPPORT_EMAIL}`,
-				);
-			})
-			.finally(() => {
-				setDoSaveChanges(false);
-				setIsSaving(false);
-			});
-	}, [doSaveChanges, isSaving]);
+
+		try {
+			await updateUserProfile(
+				userProfile.firstName,
+				userProfile.lastName,
+				userProfile.company,
+			);
+		} catch (error) {
+			setError(
+				`Failed to update user profile! If the problem persists, please contact us on Discord or via email ${process.env.NEXT_PUBLIC_SUPPORT_EMAIL}`,
+			);
+		} finally {
+			setIsSaving(false);
+		}
+	};
 
 	return (
 		<Box width="50%">
@@ -168,7 +160,7 @@ export default function Account() {
 							size="2"
 							variant="solid"
 							style={{ cursor: "pointer" }}
-							onClick={() => setDoSaveChanges(true)}
+							onClick={handleSaveChanges}
 							loading={isSaving}
 						>
 							Save changes

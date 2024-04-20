@@ -11,7 +11,10 @@ type IfConditionData = {
 
 export type IfConditionNode = Node<IfConditionData>;
 
-export default memo(({ data, selected }: NodeProps<IfConditionData>) => {
+function IfConditionNodeComponent({
+	data,
+	selected,
+}: NodeProps<IfConditionData>) {
 	return (
 		<>
 			<Handle
@@ -163,4 +166,6 @@ export default memo(({ data, selected }: NodeProps<IfConditionData>) => {
 			</Handle>
 		</>
 	);
-});
+}
+
+export default memo(IfConditionNodeComponent);

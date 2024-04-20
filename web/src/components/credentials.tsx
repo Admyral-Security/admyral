@@ -244,7 +244,11 @@ export default function Credentials() {
 					{credentials.length === 0 && <NoCredentialsInfo />}
 
 					{credentials.map((credential, idx) => (
-						<Flex direction="column" gap="2">
+						<Flex
+							key={`credentials_${idx}`}
+							direction="column"
+							gap="2"
+						>
 							<Grid
 								columns="1fr 1fr 38px"
 								align="end"

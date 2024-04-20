@@ -10,7 +10,10 @@ type HttpRequestData = {
 
 export type HttpRequestNode = Node<HttpRequestData>;
 
-export default memo(({ data, selected }: NodeProps<HttpRequestData>) => {
+function HttpRequestNodeComponent({
+	data,
+	selected,
+}: NodeProps<HttpRequestData>) {
 	return (
 		<>
 			<Handle
@@ -70,4 +73,6 @@ export default memo(({ data, selected }: NodeProps<HttpRequestData>) => {
 			</Handle>
 		</>
 	);
-});
+}
+
+export default memo(HttpRequestNodeComponent);

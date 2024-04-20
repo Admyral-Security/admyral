@@ -56,7 +56,7 @@ export default function SendEmail({ data, updateData }: SendEmailProps) {
 				<Text>Recipients</Text>
 
 				{data.actionDefinition.recipients.map((recipient, idx) => (
-					<Flex justify="between" gap="2">
+					<Flex key={`send_email_${idx}`} justify="between" gap="2">
 						<Flex width="100%">
 							<TextField.Root
 								type="email"

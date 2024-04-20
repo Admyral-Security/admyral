@@ -65,7 +65,7 @@ export async function encrypt(data: string): Promise<string> {
 	return toHex(outputBuffer);
 }
 
-export async function createWebhookSecret(webhookId: string): string {
+export async function createWebhookSecret(webhookId: string): Promise<string> {
 	const webhookSecret = process.env.WEBHOOK_SIGNING_SECRET;
 	if (!webhookSecret) {
 		throw new Error("Missing environment variable: WEBHOOK_SIGNING_SECRET");

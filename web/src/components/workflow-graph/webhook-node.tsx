@@ -10,7 +10,7 @@ type WebhookNodeData = {
 
 export type WebhookNode = Node<WebhookNodeData>;
 
-export default memo(({ data, selected }: NodeProps<WebhookNodeData>) => {
+function WebhookNodeComponent({ data, selected }: NodeProps<WebhookNodeData>) {
 	return (
 		<>
 			<NodeBase
@@ -54,4 +54,6 @@ export default memo(({ data, selected }: NodeProps<WebhookNodeData>) => {
 			</Handle>
 		</>
 	);
-});
+}
+
+export default memo(WebhookNodeComponent);

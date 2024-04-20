@@ -70,7 +70,7 @@ export default function IfCondition({ data, updateData }: IfConditionProps) {
 				</Flex>
 
 				{data.actionDefinition.conditions.map((condition, idx) => (
-					<Flex direction="column" gap="2">
+					<Flex key={`if_cond_${idx}`} direction="column" gap="2">
 						<Flex justify="between" gap="2">
 							<Flex gap="4" direction="column" width="100%">
 								<Flex
@@ -113,6 +113,7 @@ export default function IfCondition({ data, updateData }: IfConditionProps) {
 												{IF_CONDITION_OPERATORS.map(
 													(operator) => (
 														<Select.Item
+															key={`if_condition_operators_${operator}`}
 															value={operator}
 														>
 															{getIfConditionOperatorLabel(

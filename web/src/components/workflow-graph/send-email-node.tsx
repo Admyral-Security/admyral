@@ -10,7 +10,7 @@ type SendEmailData = {
 
 export type SendEmailNode = Node<SendEmailData>;
 
-export default memo(({ data, selected }: NodeProps<SendEmailData>) => {
+function SendEmailNodeComponent({ data, selected }: NodeProps<SendEmailData>) {
 	return (
 		<>
 			<Handle
@@ -70,4 +70,6 @@ export default memo(({ data, selected }: NodeProps<SendEmailData>) => {
 			</Handle>
 		</>
 	);
-});
+}
+
+export default memo(SendEmailNodeComponent);

@@ -10,7 +10,7 @@ type AiActionData = {
 
 export type AiActionNode = Node<AiActionData>;
 
-export default memo(({ data, selected }: NodeProps<AiActionData>) => {
+function AiActionNodeComponent({ data, selected }: NodeProps<AiActionData>) {
 	return (
 		<>
 			<Handle
@@ -70,4 +70,6 @@ export default memo(({ data, selected }: NodeProps<AiActionData>) => {
 			</Handle>
 		</>
 	);
-});
+}
+
+export default memo(AiActionNodeComponent);

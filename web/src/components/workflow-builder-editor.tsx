@@ -419,7 +419,7 @@ function WorkflowBuilderEditor({
 				];
 			});
 		},
-		[reactFlowInstance],
+		[reactFlowInstance, nodes, setNodes],
 	);
 
 	const onConnect = useCallback(

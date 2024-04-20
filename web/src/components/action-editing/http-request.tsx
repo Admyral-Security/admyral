@@ -112,7 +112,11 @@ export default function HttpRequest({ data, updateData }: HttpRequestProps) {
 
 				<Flex direction="column" gap="4">
 					{data.actionDefinition.headers.map((header, idx) => (
-						<Flex justify="between" gap="2">
+						<Flex
+							key={`http_request_${idx}`}
+							justify="between"
+							gap="2"
+						>
 							<Flex direction="column" gap="2" width="100%">
 								<TextField.Root
 									variant="surface"
