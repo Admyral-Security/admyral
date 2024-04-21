@@ -8,7 +8,7 @@ from pydantic import BaseModel
 
 from app.deps import AuthenticatedUser, get_authenticated_user, get_session
 from app.models import Workflow, ActionNode, Webhook, WorkflowEdge
-from app.schema import ActionType
+from app.schema import ActionType, EdgeType
 
 
 router = APIRouter()
@@ -143,6 +143,9 @@ class ActionData(BaseModel):
 class EdgeData(BaseModel):
     parent_action_id: str
     child_action_id: str
+    edge_type: EdgeType
+    parent_node_handle: Optional[str]
+    child_node_handle: Optional[str]
 
 
 class WorkflowData(BaseModel):
@@ -225,7 +228,10 @@ async def get_workflow(
         map(
             lambda edge: EdgeData(
                 parent_action_id=edge.parent_action_id,
-                child_action_id=edge.child_action_id
+                child_action_id=edge.child_action_id,
+                edge_type=edge.edge_type,
+                parent_node_handle=edge.parent_node_handle,
+                child_node_handle=edge.child_node_handle
             ),
             result.all()
         )
@@ -338,7 +344,10 @@ async def update_workflow(
         if not existing_edge:
             workflow_edge = WorkflowEdge(
                 parent_action_id=parent_action_id,
-                child_action_id=child_action_id
+                child_action_id=child_action_id,
+                edge_type=edge.edge_type,
+                parent_node_handle=edge.parent_node_handle,
+                child_node_handle=edge.child_node_handle
             )
             db.add(workflow_edge)
             await db.commit()

@@ -65,8 +65,8 @@ async def init_db():
             $$ language plpgsql security definer;
         """))
         await conn.execute(text(f"""
-            create or replace trigger on_profile_user_deleted
-                after delete on {settings.DATABASE_SCHEMA}.user_profile
-                for each row execute procedure public.handle_user_delete()
+            create or replace trigger on_profile_user_email_confirmed
+                after update on {settings.DATABASE_SCHEMA}.user_profile
+                for each row execute procedure public.handle_user_email_confirmed()
         """))
  

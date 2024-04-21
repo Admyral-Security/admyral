@@ -1,15 +1,16 @@
 import asyncio
 from logging.config import fileConfig
+import os
 
 from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
-from sqlmodel import SQLModel                       # NEW
+from sqlmodel import SQLModel
 
 
 from alembic import context
 
-from app.models import Song                         # NEW
+from app.models import Base, UserProfile, Credential, Workflow, ActionNode, Webhook, WorkflowEdge, WorkflowRun, WorkflowRunActionState
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -24,12 +25,18 @@ if config.config_file_name is not None:
 # for 'autogenerate' support
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
-target_metadata = SQLModel.metadata             # UPDATED
+target_metadata = SQLModel.metadata
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:
 # my_important_option = config.get_main_option("my_important_option")
 # ... etc.
+
+
+def include_object(object, name, type_, reflected, compare_to):
+    if type_ == "table":
+        return object.schema == "admyral" and name != "alembic_version"
+    return True  # Include all other types by default
 
 
 def run_migrations_offline() -> None:
@@ -44,11 +51,14 @@ def run_migrations_offline() -> None:
     script output.
 
     """
-    url = config.get_main_option("sqlalchemy.url")
+    url = config.get_main_option("sqlalchemy.url", os.enviorn["DATABASE_URL"])
     context.configure(
         url=url,
         target_metadata=target_metadata,
+        version_table_schema=target_metadata.schema,
         literal_binds=True,
+        include_schemas=True,
+        include_object=include_object,
         dialect_opts={"paramstyle": "named"},
     )
 
@@ -57,9 +67,17 @@ def run_migrations_offline() -> None:
 
 
 def do_run_migrations(connection: Connection) -> None:
-    context.configure(connection=connection, target_metadata=target_metadata)
+    context.configure(
+        connection=connection,
+        target_metadata=target_metadata,
+        version_table_schema=target_metadata.schema,
+        include_schemas=True,
+        include_object=include_object,
+    )
 
     with context.begin_transaction():
+        context.execute("CREATE SCHEMA IF NOT EXISTS admyral")
+        context.execute("SET search_path TO admyral")
         context.run_migrations()
 
 
@@ -69,8 +87,10 @@ async def run_async_migrations() -> None:
 
     """
 
+    cfg = config.get_section(config.config_ini_section, {})
+    cfg["sqlalchemy.url"] = os.environ["DATABASE_URL"]
     connectable = async_engine_from_config(
-        config.get_section(config.config_ini_section, {}),
+        cfg,
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
     )

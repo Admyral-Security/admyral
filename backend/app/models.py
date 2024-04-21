@@ -1,4 +1,3 @@
-from enum import Enum
 from sqlmodel import SQLModel, Field, Relationship
 from typing import Optional
 from sqlalchemy.dialects.postgresql import UUID, TIMESTAMP, TEXT, JSONB
@@ -7,7 +6,7 @@ from sqlalchemy.sql.expression import func
 from sqlalchemy import Column, ForeignKey
 
 from app.config import settings
-from app.schema import ActionType
+from app.schema import ActionType, EdgeType
 
 
 class Base(SQLModel, table=False):
@@ -126,6 +125,9 @@ class WorkflowEdge(Base, table=True):
             nullable=False,
         )
     )
+    edge_type: EdgeType = Field(default=EdgeType.DEFAULT)
+    parent_node_handle: Optional[str] = Field(sa_type=TEXT(), nullable=True)
+    child_node_handle: Optional[str] = Field(sa_type=TEXT(), nullable=True)
 
     parent_action: ActionNode = Relationship(back_populates="parent_actions", sa_relationship_kwargs=dict(foreign_keys="[WorkflowEdge.parent_action_id]"))
     child_action: ActionNode = Relationship(back_populates="child_actions", sa_relationship_kwargs=dict(foreign_keys="[WorkflowEdge.child_action_id]"))
