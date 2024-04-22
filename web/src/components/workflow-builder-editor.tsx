@@ -211,7 +211,6 @@ function EditorSideBar() {
 									label={getActionNodeLabel(
 										ActionNode.AI_ACTION,
 									)}
-									isComingSoon
 								/>
 							</div>
 

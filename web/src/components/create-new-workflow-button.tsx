@@ -2,7 +2,7 @@
 
 import { createNewWorkflow } from "@/lib/api";
 import { Button } from "@radix-ui/themes";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 export interface CreateNewWorkflowButtonProps {
 	size: "1" | "2" | "3" | "4";
@@ -11,18 +11,18 @@ export interface CreateNewWorkflowButtonProps {
 export default function CreateNewWorkflowButton({
 	size,
 }: CreateNewWorkflowButtonProps) {
-	const [doCreateNewWorkflow, setDoCreateNewWorkflow] =
-		useState<boolean>(false);
 	const [loading, setLoading] = useState<boolean>(false);
 
-	useEffect(() => {
-		if (!doCreateNewWorkflow) {
-			return;
-		}
-
+	const handleCreateNewWorkflow = async () => {
 		setLoading(true);
-		createNewWorkflow();
-	}, [doCreateNewWorkflow]);
+		try {
+			await createNewWorkflow();
+		} catch (error) {
+			alert("Failed to create new workflow. Please try again.");
+		} finally {
+			setLoading(false);
+		}
+	};
 
 	return (
 		<Button
@@ -30,7 +30,7 @@ export default function CreateNewWorkflowButton({
 			size={size}
 			variant="solid"
 			style={{ cursor: "pointer" }}
-			onClick={() => setDoCreateNewWorkflow(true)}
+			onClick={handleCreateNewWorkflow}
 		>
 			Create New Workflow
 		</Button>

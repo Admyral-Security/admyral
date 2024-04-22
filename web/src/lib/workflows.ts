@@ -1,5 +1,5 @@
 import { createWebhookSecret } from "./crypto";
-import { ActionNode, ActionData } from "./types";
+import { ActionNode, ActionData, LLM } from "./types";
 
 export function generateReferenceHandle(actionName: string): string {
 	// TODO: make sure that reference handle is unique within a workflow
@@ -61,6 +61,7 @@ export async function initActionData(
 				...base,
 				actionDefinition: {
 					prompt: "",
+					model: LLM.GPT4_TURBO,
 				},
 			};
 

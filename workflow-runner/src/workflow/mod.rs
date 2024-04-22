@@ -1,3 +1,4 @@
+mod ai_action;
 mod context;
 mod execution_state;
 pub mod executor;
@@ -47,6 +48,7 @@ pub enum ActionNode {
     Webhook(webhook_action::Webhook),
     HttpRequest(http_request_action::HttpRequest),
     IfCondition(if_condition_action::IfCondition),
+    AiAction(ai_action::AiAction),
 }
 
 impl ActionNode {
@@ -59,6 +61,9 @@ impl ActionNode {
             "IF_CONDITION" => Ok(Self::IfCondition(serde_json::from_value::<
                 if_condition_action::IfCondition,
             >(action_definition)?)),
+            "AI_ACTION" => Ok(Self::AiAction(
+                serde_json::from_value::<ai_action::AiAction>(action_definition)?,
+            )),
             _ => Err(anyhow!("Unknown action type: {action_type}")),
         }
     }
@@ -68,6 +73,7 @@ impl ActionNode {
             Self::Webhook(_) => "WEBHOOK",
             Self::HttpRequest(_) => "HTTP_REQUEST",
             Self::IfCondition(_) => "IF_CONDITION",
+            Self::AiAction(_) => "AI_ACTION",
         }
     }
 
@@ -120,9 +126,8 @@ impl Workflow {
             .collect::<HashMap<ReferenceHandle, Action>>();
 
         let mut adj_list = HashMap::new();
-        edges.into_iter().for_each(|edge_row| { 
-            let edge_type =
-                EdgeType::from_str(&edge_row.edge_type).expect("Illegal edge type!");
+        edges.into_iter().for_each(|edge_row| {
+            let edge_type = EdgeType::from_str(&edge_row.edge_type).expect("Illegal edge type!");
 
             adj_list
                 .entry(edge_row.parent_reference_handle)
@@ -170,7 +175,6 @@ pub async fn run_workflow(
     executor.execute().await?;
     Ok(())
 }
-
 
 #[cfg(test)]
 mod tests {

@@ -2,7 +2,7 @@ import { Flex, Select, Text, TextArea, TextField } from "@radix-ui/themes";
 import CopyText from "../copy-text";
 import { cloneDeep } from "lodash";
 import { generateReferenceHandle } from "@/lib/workflows";
-import { AiActionData } from "@/lib/types";
+import { AiActionData, LLM, LLM_MODELS, getLLMLabel } from "@/lib/types";
 
 export interface AiActionProps {
 	data: AiActionData;
@@ -51,6 +51,31 @@ export default function AiAction({ data, updateData }: AiActionProps) {
 			</Flex>
 
 			<Flex direction="column" gap="2">
+				<Text>Model</Text>
+				<Select.Root
+					value={data.actionDefinition.model}
+					onValueChange={(model) => {
+						const clonedData = cloneDeep(data);
+						clonedData.actionDefinition.model = model as LLM;
+						updateData(clonedData);
+					}}
+					defaultValue={LLM_MODELS[0]}
+				>
+					<Select.Trigger />
+					<Select.Content>
+						{LLM_MODELS.map((model) => (
+							<Select.Item
+								key={`ai_action_model_${model}`}
+								value={model}
+							>
+								{getLLMLabel(model)}
+							</Select.Item>
+						))}
+					</Select.Content>
+				</Select.Root>
+			</Flex>
+
+			<Flex direction="column" gap="2">
 				<Flex justify="between" align="center">
 					<Text>Prompt</Text>
 
@@ -72,9 +97,11 @@ export default function AiAction({ data, updateData }: AiActionProps) {
 					</Select.Root>
 				</Flex>
 				<TextArea
+					size="2"
+					resize="vertical"
 					variant="surface"
 					value={data.actionDefinition.prompt}
-					style={{ height: "100px" }}
+					style={{ height: "250px" }}
 					onChange={(event) => {
 						const clonedData = cloneDeep(data);
 						clonedData.actionDefinition.prompt = event.target.value;

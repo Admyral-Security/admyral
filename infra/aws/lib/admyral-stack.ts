@@ -86,6 +86,7 @@ export class AdmyralStack extends cdk.Stack {
 							DATABASE_CONNECTION_POOL_SIZE:
 								process.env.DATABASE_CONNECTION_POOL_SIZE!,
 							CREDENTIALS_SECRET: process.env.CREDENTIALS_SECRET!,
+							OPENAI_API_KEY: process.env.OPENAI_API_KEY!,
 						},
 					},
 					cpu: 512,
