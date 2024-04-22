@@ -224,7 +224,6 @@ function EditorSideBar() {
 									label={getActionNodeLabel(
 										ActionNode.SEND_EMAIL,
 									)}
-									isComingSoon
 								/>
 							</div>
 

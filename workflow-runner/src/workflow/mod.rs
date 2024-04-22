@@ -5,6 +5,7 @@ pub mod executor;
 mod http_request_action;
 mod if_condition_action;
 mod reference_resolution;
+mod send_email_action;
 mod webhook_action;
 
 use self::executor::WorkflowExecutor;
@@ -49,6 +50,7 @@ pub enum ActionNode {
     HttpRequest(http_request_action::HttpRequest),
     IfCondition(if_condition_action::IfCondition),
     AiAction(ai_action::AiAction),
+    SendEmail(send_email_action::SendEmail),
 }
 
 impl ActionNode {
@@ -64,6 +66,9 @@ impl ActionNode {
             "AI_ACTION" => Ok(Self::AiAction(
                 serde_json::from_value::<ai_action::AiAction>(action_definition)?,
             )),
+            "SEND_EMAIL" => Ok(Self::SendEmail(serde_json::from_value::<
+                send_email_action::SendEmail,
+            >(action_definition)?)),
             _ => Err(anyhow!("Unknown action type: {action_type}")),
         }
     }
@@ -74,6 +79,7 @@ impl ActionNode {
             Self::HttpRequest(_) => "HTTP_REQUEST",
             Self::IfCondition(_) => "IF_CONDITION",
             Self::AiAction(_) => "AI_ACTION",
+            Self::SendEmail(_) => "SEND_EMAIL",
         }
     }
 
