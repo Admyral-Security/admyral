@@ -11,6 +11,11 @@ type IfConditionData = {
 
 export type IfConditionNode = Node<IfConditionData>;
 
+export const IF_CONDITION_TRUE_BRANCH_HANDLE_ID: string =
+	"ifConditionTrueBranch";
+export const IF_CONDITION_FALSE_BRANCH_HANDLE_ID: string =
+	"ifConditionFalseBranch";
+
 function IfConditionNodeComponent({
 	data,
 	selected,
@@ -43,7 +48,7 @@ function IfConditionNodeComponent({
 			<Handle
 				type="source"
 				position={Position.Bottom}
-				id="trueBranch"
+				id={IF_CONDITION_TRUE_BRANCH_HANDLE_ID}
 				style={{
 					width: "48px",
 					height: "18px",
@@ -103,7 +108,7 @@ function IfConditionNodeComponent({
 			<Handle
 				type="source"
 				position={Position.Bottom}
-				id="falseBranch"
+				id={IF_CONDITION_FALSE_BRANCH_HANDLE_ID}
 				style={{
 					width: "52px",
 					height: "18px",

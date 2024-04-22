@@ -37,7 +37,7 @@ pub struct ActionRow {
     pub workflow_id: String,
     pub action_name: String,
     pub reference_handle: String,
-    pub action_type: Option<String>,
+    pub action_type: String,
     pub action_definition: serde_json::Value,
 }
 
@@ -45,6 +45,7 @@ pub struct ActionRow {
 pub struct WorkflowEdgeRow {
     pub parent_reference_handle: String,
     pub child_reference_handle: String,
+    pub edge_type: String,
 }
 
 pub async fn fetch_workflow_data(
@@ -71,7 +72,7 @@ pub async fn fetch_workflow_data(
     let actions: Vec<ActionRow> = sqlx::query_as!(
         ActionRow,
         r#"
-        SELECT action_id, workflow_id, action_name, reference_handle, action_type::text, action_definition
+        SELECT action_id, workflow_id, action_name, reference_handle, action_type::text as "action_type!: String", action_definition
         FROM admyral.action_node
         WHERE workflow_id = $1
         "#,
@@ -83,7 +84,7 @@ pub async fn fetch_workflow_data(
     let workflow_edges: Vec<WorkflowEdgeRow> = sqlx::query_as!(
         WorkflowEdgeRow,
         r#"
-        SELECT parent.reference_handle as parent_reference_handle, child.reference_handle as child_reference_handle
+        SELECT parent.reference_handle as parent_reference_handle, child.reference_handle as child_reference_handle, we.edge_type::TEXT as "edge_type!: String"
         FROM admyral.workflow_edge we
         JOIN admyral.action_node parent ON parent.action_id = we.parent_action_id
         JOIN admyral.action_node child ON child.action_id = we.child_action_id
@@ -328,7 +329,7 @@ pub async fn fetch_action(
     let action: Option<ActionRow> = sqlx::query_as!(
         ActionRow,
         r#"
-        SELECT action_id, workflow_id, action_name, reference_handle, action_type::text, action_definition
+        SELECT action_id, workflow_id, action_name, reference_handle, action_type::text as "action_type!: String", action_definition
         FROM admyral.action_node
         WHERE workflow_id = $1 AND action_id = $2
         "#,

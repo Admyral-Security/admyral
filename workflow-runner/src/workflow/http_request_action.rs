@@ -16,10 +16,7 @@ lazy_static! {
 }
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize)]
-#[serde(rename_all(
-    serialize = "SCREAMING_SNAKE_CASE",
-    deserialize = "SCREAMING_SNAKE_CASE"
-))]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum HttpMethod {
     Get,
     Post,
@@ -41,7 +38,7 @@ pub struct HttpRequest {
 }
 
 impl ActionExecutor for HttpRequest {
-    /// Resolve reference possible in payload, headers value, url
+    /// Reference resolution possible in payload, headers value, url
     async fn execute(&self, context: &Context) -> Result<Option<serde_json::Value>> {
         // Resolve references in the URL for dynamic URL construction or secrets
         let url = resolve_references(&json!(self.url), context)
@@ -98,7 +95,7 @@ impl ActionExecutor for HttpRequest {
             ))
             .collect::<HashMap<String, String>>());
 
-        // TODO: consider the content type of the resposne and parse the response accordingly
+        // TODO: consider the content type of the response and parse the response accordingly
         let response_text = response.text().await?;
         let body = if let Ok(json) = serde_json::from_str(&response_text) {
             json

@@ -1,11 +1,11 @@
 export enum ActionNode {
-	WEBHOOK = "Webhook",
-	HTTP_REQUEST = "HttpRequest",
-	TRANSFORM = "Transform",
-	IF_CONDITION = "IfCondition",
-	AI_ACTION = "AiAction",
-	SEND_EMAIL = "SendEmail",
-	RECEIVE_EMAIL = "ReceiveEmail",
+	WEBHOOK = "WEBHOOK",
+	HTTP_REQUEST = "HTTP_REQUEST",
+	TRANSFORM = "TRANSFORM",
+	IF_CONDITION = "IF_CONDITION",
+	AI_ACTION = "AI_ACTION",
+	SEND_EMAIL = "SEND_EMAIL",
+	RECEIVE_EMAIL = "RECEIVE_EMAIL",
 }
 
 export function getActionNodeLabel(actionNode: ActionNode) {
@@ -28,34 +28,30 @@ export function getActionNodeLabel(actionNode: ActionNode) {
 }
 
 export enum IfConditionOperator {
-	EQUAL = "eq",
-	NOT_EQUAL = "ne",
-	GREATER_THAN = "gt",
-	GREATER_THAN_OR_EQUAL = "gte",
-	LESS_THAN = "lt",
-	LESS_THAN_OR_EQUAL = "lte",
-	MATCH_REGEX = "regex",
-	NOT_MATCH_REGEX = "not_regex",
+	EQUALS = "EQUALS",
+	NOT_EQUALS = "NOT_EQUALS",
+	GREATER_THAN = "GREATER_THAN",
+	GREATER_THAN_OR_EQUAL = "GREATER_THAN_OR_EQUAL",
+	LESS_THAN = "LESS_THAN",
+	LESS_THAN_OR_EQUAL = "LESS_THAN_OR_EQUAL",
 }
 
 export const IF_CONDITION_OPERATORS = [
-	IfConditionOperator.EQUAL,
-	IfConditionOperator.NOT_EQUAL,
+	IfConditionOperator.EQUALS,
+	IfConditionOperator.NOT_EQUALS,
 	IfConditionOperator.GREATER_THAN,
 	IfConditionOperator.GREATER_THAN_OR_EQUAL,
 	IfConditionOperator.LESS_THAN,
 	IfConditionOperator.LESS_THAN_OR_EQUAL,
-	IfConditionOperator.MATCH_REGEX,
-	IfConditionOperator.NOT_MATCH_REGEX,
 ];
 
 export function getIfConditionOperatorLabel(
 	ifConditionOperator: IfConditionOperator,
 ) {
 	switch (ifConditionOperator) {
-		case IfConditionOperator.EQUAL:
+		case IfConditionOperator.EQUALS:
 			return "equals";
-		case IfConditionOperator.NOT_EQUAL:
+		case IfConditionOperator.NOT_EQUALS:
 			return "does not equal";
 		case IfConditionOperator.GREATER_THAN:
 			return "is greater than";
@@ -65,11 +61,13 @@ export function getIfConditionOperatorLabel(
 			return "is less than";
 		case IfConditionOperator.LESS_THAN_OR_EQUAL:
 			return "is less than or equal to";
-		case IfConditionOperator.MATCH_REGEX:
-			return "matches regex";
-		case IfConditionOperator.NOT_MATCH_REGEX:
-			return "does not match regex";
 	}
+}
+
+export enum EdgeType {
+	TRUE = "TRUE",
+	FALSE = "FALSE",
+	DEFAULT = "DEFAULT",
 }
 
 export type ActionDataBase = {
@@ -141,7 +139,10 @@ export type ActionData =
 
 export type EdgeData = {
 	parentActionId: string;
+	parentNodeHandle: string | null | undefined;
 	childActionId: string;
+	childNodeHandle: string | null | undefined;
+	edgeType: EdgeType;
 };
 
 export type WorkflowData = {

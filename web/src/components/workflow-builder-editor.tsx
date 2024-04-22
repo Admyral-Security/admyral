@@ -30,7 +30,10 @@ import ReceiveEmailActionIcon from "./icons/receive-email-action-icon";
 import DirectedEdgeComponent, { DirectedEdge } from "./workflow-graph/edge";
 import AiActionNode from "./workflow-graph/ai-action-node";
 import SendEmailNode from "./workflow-graph/send-email-node";
-import IfConditionNode from "./workflow-graph/if-condition-node";
+import IfConditionNode, {
+	IF_CONDITION_FALSE_BRANCH_HANDLE_ID,
+	IF_CONDITION_TRUE_BRANCH_HANDLE_ID,
+} from "./workflow-graph/if-condition-node";
 import ConnectionLine from "./workflow-graph/connection-line";
 import WorkflowBuilderRightPanelBase from "./workflow-builder-right-panel-base";
 import {
@@ -42,6 +45,7 @@ import {
 	AiActionData,
 	HttpRequestData,
 	WebhookData,
+	EdgeType,
 } from "@/lib/types";
 import { EnterIcon } from "@radix-ui/react-icons";
 import Webhook from "./action-editing/webhook";
@@ -194,7 +198,6 @@ function EditorSideBar() {
 									label={getActionNodeLabel(
 										ActionNode.IF_CONDITION,
 									)}
-									isComingSoon
 								/>
 							</div>
 
@@ -324,7 +327,9 @@ const nodeTypes = {
 };
 
 const edgeTypes = {
-	edge: DirectedEdgeComponent,
+	[EdgeType.DEFAULT]: DirectedEdgeComponent,
+	[EdgeType.TRUE]: DirectedEdgeComponent,
+	[EdgeType.FALSE]: DirectedEdgeComponent,
 };
 
 export interface WorkflowBuilderEditorProps {
@@ -424,10 +429,22 @@ function WorkflowBuilderEditor({
 
 	const onConnect = useCallback(
 		(connection: any) => {
+			// Determine edge type
+			let edgeType = EdgeType.DEFAULT;
+			if (
+				connection.sourceHandle === IF_CONDITION_TRUE_BRANCH_HANDLE_ID
+			) {
+				edgeType = EdgeType.TRUE;
+			} else if (
+				connection.sourceHandle === IF_CONDITION_FALSE_BRANCH_HANDLE_ID
+			) {
+				edgeType = EdgeType.FALSE;
+			}
+
 			const edge = {
 				...connection,
 				id: getId(),
-				type: "edge",
+				type: edgeType,
 				markerEnd: {
 					type: MarkerType.ArrowClosed,
 					height: 15,

@@ -5,14 +5,16 @@ use anyhow::Result;
 use auth::authenticate_webhook;
 use axum::{
     extract::{Json, Path, State},
-    http::StatusCode,
+    http::{HeaderMap, StatusCode},
     response::IntoResponse,
     routing::{get, post},
     Router,
 };
 use serde::Deserialize;
+use serde_json::json;
 use shared_state::SharedState;
 use sqlx::{Pool, Postgres};
+use std::collections::HashMap;
 use std::{borrow::Borrow, sync::Arc};
 use tower_http::cors::CorsLayer;
 
@@ -31,7 +33,7 @@ async fn health_check() -> impl IntoResponse {
 async fn enqueue_workflow_job(
     workflow_id: String,
     start_reference_handle: String,
-    initial_payload: Option<serde_json::Value>,
+    trigger_event: Option<serde_json::Value>,
     db_pool: Arc<Pool<Postgres>>,
 ) {
     tokio::spawn(async move {
@@ -39,7 +41,7 @@ async fn enqueue_workflow_job(
         if let Err(e) = run_workflow(
             workflow_id.clone(),
             start_reference_handle,
-            initial_payload,
+            trigger_event,
             db_pool,
         )
         .await
@@ -53,7 +55,7 @@ async fn webhook_handler(
     webhook_id: String,
     secret: String,
     db_pool: Arc<Pool<Postgres>>,
-    inital_payload: Option<serde_json::Value>,
+    trigger_event: serde_json::Value,
 ) -> impl IntoResponse {
     tracing::info!("Webhook {} triggered", webhook_id);
 
@@ -93,7 +95,7 @@ async fn webhook_handler(
     enqueue_workflow_job(
         webhook.workflow_id,
         webhook.reference_handle,
-        inital_payload,
+        Some(trigger_event),
         db_pool,
     )
     .await;
@@ -101,19 +103,37 @@ async fn webhook_handler(
     (StatusCode::CREATED, "Ok")
 }
 
+fn headersmap_to_json(headers: HeaderMap) -> serde_json::Value {
+    json!(headers
+        .into_iter()
+        .filter(|(key, _value)| key.is_some())
+        .map(|(key, value)| (key.unwrap().to_string(), json!(value.to_str().unwrap())))
+        .collect::<HashMap<String, serde_json::Value>>())
+}
+
 async fn get_webhook_handler(
     Path((webhook_id, secret)): Path<(String, String)>,
+    headers: HeaderMap,
     State(state): State<SharedState>,
 ) -> impl IntoResponse {
-    webhook_handler(webhook_id, secret, state.db_pool.clone(), None).await
+    let trigger_event = json!({
+        "body": json!(""),
+        "headers": headersmap_to_json(headers)
+    });
+    webhook_handler(webhook_id, secret, state.db_pool.clone(), trigger_event).await
 }
 
 async fn post_webhook_handler(
     Path((webhook_id, secret)): Path<(String, String)>,
     State(state): State<SharedState>,
+    headers: HeaderMap,
     Json(payload): Json<serde_json::Value>,
 ) -> impl IntoResponse {
-    webhook_handler(webhook_id, secret, state.db_pool.clone(), Some(payload)).await
+    let trigger_event = json!({
+        "body": payload,
+        "headers": headersmap_to_json(headers)
+    });
+    webhook_handler(webhook_id, secret, state.db_pool.clone(), trigger_event).await
 }
 
 #[derive(Debug, Deserialize)]

@@ -92,7 +92,7 @@ export default function IfCondition({ data, updateData }: IfConditionProps) {
 										style={{ width: "100%" }}
 									/>
 
-									<Flex width="60%" align="center">
+									<Flex width="70%" align="center">
 										<Select.Root
 											value={condition.operator}
 											onValueChange={(operator) => {
@@ -179,9 +179,10 @@ export default function IfCondition({ data, updateData }: IfConditionProps) {
 							const clonedData = cloneDeep(data);
 							clonedData.actionDefinition.conditions.push({
 								lhs: "",
-								operator: IfConditionOperator.EQUAL,
+								operator: IfConditionOperator.EQUALS,
 								rhs: "",
 							});
+							updateData(clonedData);
 						}}
 						style={{ cursor: "pointer" }}
 					>

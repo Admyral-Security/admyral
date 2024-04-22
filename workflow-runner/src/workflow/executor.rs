@@ -1,3 +1,5 @@
+use crate::workflow::EdgeType;
+
 use super::{context::Context, ActionExecutor, ReferenceHandle, Workflow};
 use anyhow::Result;
 use sqlx::{Pool, Postgres};
@@ -39,23 +41,25 @@ impl WorkflowExecutor {
             .actions
             .get(&start_node_reference_handle)
             .expect("Invalid start node reference handle");
+
         executor
             .context
-            .persist_run_state(&start_node.reference_handle, &start_node.id, inital_data)
+            .persist_run_state(&start_node_reference_handle, &start_node.id, inital_data)
             .await?;
+
         Ok(executor)
     }
 
     pub async fn execute(&mut self) -> Result<()> {
         let mut queue = VecDeque::new();
-        queue.push_back(&self.start_node_reference_handle);
+        queue.push_back(self.start_node_reference_handle.clone());
 
         while !queue.is_empty() {
             let action_reference_handle = queue.pop_front().unwrap();
             let action = self
                 .workflow
                 .actions
-                .get(action_reference_handle)
+                .get(&action_reference_handle)
                 .expect("Failed to dereference reference handle!");
 
             tracing::info!(
@@ -64,15 +68,37 @@ impl WorkflowExecutor {
                 action.id,
                 self.workflow.workflow_id
             );
+
+            let mut allowed_edge_type = EdgeType::Default;
             if let Some(output) = action.node.execute(&self.context).await? {
+                // If the current action node is an if-condition, we must decide which
+                // path the execution should follow.
+                if action.node.is_if_condition() {
+                    let condition_result = output
+                        .as_object()
+                        .expect("If-Condition action result must be an object!")
+                        .get("condition_result")
+                        .expect("If-Condition action result object must have key \"condition_result\"")
+                        .as_bool()
+                        .expect(
+                            "If-Condition action result object with key \"condition_result\" must be bool",
+                        );
+                    allowed_edge_type = match condition_result {
+                        true => EdgeType::True,
+                        false => EdgeType::False,
+                    };
+                }
+
                 self.context
-                    .persist_run_state(&action.reference_handle, &action.id, output)
+                    .persist_run_state(&action_reference_handle, &action.id, output)
                     .await?;
             }
 
-            if let Some(children) = self.workflow.adj_list.get(action_reference_handle) {
-                for next_action in children {
-                    queue.push_back(next_action);
+            if let Some(children) = self.workflow.adj_list.get(&action_reference_handle) {
+                for (next_action, next_edge_type) in children {
+                    if *next_edge_type == allowed_edge_type {
+                        queue.push_back(next_action.clone());
+                    }
                 }
             }
         }

@@ -24,7 +24,7 @@ import {
 } from "@/lib/api";
 import TrashIcon from "./icons/trash-icon";
 import { DiscIcon } from "@radix-ui/react-icons";
-import { ActionNode, ActionData, EdgeData } from "@/lib/types";
+import { ActionNode, ActionData, EdgeData, EdgeType } from "@/lib/types";
 import {
 	useEdgesState,
 	useNodesState,
@@ -63,15 +63,16 @@ function buildInitialWorkflowGraph(
 	const edges = edgeData.map((edge) => ({
 		id: `${edge.parentActionId}_${edge.childActionId}`,
 		source: actionIdToId[edge.parentActionId],
+		sourceHandle: edge.parentNodeHandle,
 		target: actionIdToId[edge.childActionId],
-		type: "edge",
+		targetHandle: edge.childNodeHandle,
+		type: edge.edgeType,
 		markerEnd: {
 			type: MarkerType.ArrowClosed,
 			height: 15,
 			width: 15,
 			color: "var(--Accent-color-Accent-9, #3E63DD)",
 		},
-		data: edge,
 	}));
 
 	return [actionNodes, edges];
@@ -158,7 +159,10 @@ export default function WorkflowBuilder({ workflowId }: WorkflowBuilderProps) {
 			actions,
 			edges: edges.map((edge) => ({
 				parentActionId: idToActionId[edge.source],
+				parentNodeHandle: edge.sourceHandle,
 				childActionId: idToActionId[edge.target],
+				childNodeHandle: edge.targetHandle,
+				edgeType: edge.type as EdgeType,
 			})),
 		};
 

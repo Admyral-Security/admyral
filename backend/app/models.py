@@ -1,12 +1,17 @@
 from sqlmodel import SQLModel, Field, Relationship
 from typing import Optional
-from sqlalchemy.dialects.postgresql import UUID, TIMESTAMP, TEXT, JSONB
+from sqlalchemy.dialects.postgresql import UUID, TIMESTAMP, TEXT, JSONB, ENUM
 from datetime import datetime
 from sqlalchemy.sql.expression import func
 from sqlalchemy import Column, ForeignKey
 
 from app.config import settings
 from app.schema import ActionType, EdgeType
+
+
+# We must register the ENUM types with the database under the correct schema
+action_type_enum = ENUM(ActionType, schema=settings.DATABASE_SCHEMA, create_type=False, name="actiontype")
+edge_type_enum = ENUM(EdgeType, schema=settings.DATABASE_SCHEMA, create_type=False, name="edgetype")
 
 
 class Base(SQLModel, table=False):
@@ -77,12 +82,12 @@ class ActionNode(Base, table=True):
     )
     action_name: str = Field(sa_type=TEXT())
     reference_handle: str = Field(sa_type=TEXT())
-    action_type: ActionType
+    action_type: ActionType = Field(sa_column=Column(action_type_enum))
     action_description: str = Field(sa_type=TEXT())
     action_definition: dict = Field(sa_type=JSONB())
     created_at: datetime = Field(sa_type=TIMESTAMP(), sa_column_kwargs=dict(server_default=func.now()))
-    x_position: float = Field(default=300.0)
-    y_position: float = Field(default=300.0)
+    x_position: float
+    y_position: float
 
     workflow: Workflow = Relationship(back_populates="actions")
 
@@ -125,7 +130,7 @@ class WorkflowEdge(Base, table=True):
             nullable=False,
         )
     )
-    edge_type: EdgeType = Field(default=EdgeType.DEFAULT)
+    edge_type: EdgeType = Field(sa_column=Column(edge_type_enum))
     parent_node_handle: Optional[str] = Field(sa_type=TEXT(), nullable=True)
     child_node_handle: Optional[str] = Field(sa_type=TEXT(), nullable=True)
 
