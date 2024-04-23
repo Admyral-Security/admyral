@@ -20,7 +20,8 @@ export const config = {
 		 * - /error
 		 * - /login
 		 * - /auth/confirm
+		 * - /auth/callback
 		 */
-		"/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$|auth/confirm|password/forgot*|error|login|signup-success).*)",
+		"/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$|auth/confirm|auth/callback|password/forgot*|error|login|signup-success).*)",
 	],
 };

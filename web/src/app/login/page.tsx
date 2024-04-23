@@ -1,11 +1,17 @@
 "use client";
 
-import Logo from "@/components/icons/logo";
 import { login, signup } from "./actions";
 import { useState } from "react";
 import Link from "next/link";
+import { Button, Flex, Grid, Separator, Text } from "@radix-ui/themes";
+import GoogleIcon from "@/components/icons/google-icon";
+import GithubIcon from "@/components/icons/github-icon";
+import LogoWithName from "@/components/icons/logo-with-name";
+import { createClient } from "@/utils/supabase/client";
 
 export default function LoginPage() {
+	const supabase = createClient();
+
 	const [isSignIn, setIsSignIn] = useState<boolean>(true);
 	const [isLoading, setIsLoading] = useState<boolean>(false);
 
@@ -22,10 +28,24 @@ export default function LoginPage() {
 		}
 	};
 
+	const handleGithubLogin = async () => {
+		try {
+			const { error } = await supabase.auth.signInWithOAuth({
+				provider: "github",
+				options: {
+					redirectTo: `${window.location.origin}/auth/callback`,
+				},
+			});
+			if (error) throw error;
+		} catch (error) {
+			alert(error);
+		}
+	};
+
 	return (
 		<div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8 gap-4">
 			<div className="flex items-center justify-center flex-row gap-4">
-				<Logo /> <p className="text-4xl">Admyral</p>
+				<LogoWithName />
 			</div>
 
 			<div className="sm:mx-auto sm:w-full sm:max-w-sm">
@@ -122,6 +142,57 @@ export default function LoginPage() {
 
 			<div className="sm:mx-auto sm:w-full sm:max-w-sm hover:text-blue-800">
 				<Link href="/password/forgot">Forgot password?</Link>
+			</div>
+
+			<div className="sm:mx-auto sm:w-full sm:max-w-sm">
+				<Grid columns="1fr 38px 1fr" justify="center">
+					<Separator my="3" size="4" />
+					<Flex justify="center" align="start">
+						<Text
+							size="4"
+							style={{
+								color: "var(--Neutral-color-Neutral-Alpha-6, rgba(1, 1, 46, 0.13))",
+							}}
+						>
+							or
+						</Text>
+					</Flex>
+					<Separator my="3" size="4" />
+				</Grid>
+			</div>
+
+			<div className="sm:mx-auto sm:w-full sm:max-w-sm">
+				<Button
+					style={{
+						width: "100%",
+						height: "auto",
+						display: "flex",
+						padding: "12px var(--Space-5, 24px)",
+						alignItems: "center",
+						justifyContent: "start",
+						gap: "var(--Space-5, 24px)",
+						alignSelf: "stretch",
+						borderRadius: "var(--Radius-4, 8px)",
+						border: "1px solid var(--Neutral-color-Neutral-5, #E4E4E9)",
+						background: "var(--Panel-solid, #FFF)",
+						boxShadow:
+							"0px 0px 3px 0px rgba(0, 0, 0, 0.08), 0px 2px 3px 0px rgba(0, 0, 0, 0.17)",
+						cursor: "pointer",
+					}}
+					onClick={() => handleGithubLogin()}
+				>
+					<GithubIcon />
+					<Text
+						size="4"
+						style={{
+							color: "var(--Tokens-Colors-text, #1C2024)",
+						}}
+					>
+						{isSignIn
+							? "Sign in with GitHub"
+							: "Log in with GitHub"}
+					</Text>
+				</Button>
 			</div>
 		</div>
 	);
