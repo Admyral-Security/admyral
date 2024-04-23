@@ -1,16 +1,11 @@
-import { Badge, Box, Card, Flex, HoverCard, Text } from "@radix-ui/themes";
 import ReactFlow, {
 	Background,
 	BackgroundVariant,
 	Controls,
-	addEdge,
-	MarkerType,
 	useOnSelectionChange,
 	ReactFlowProvider,
 	useStore,
 	Node,
-	NodeChange,
-	EdgeChange,
 } from "reactflow";
 import HttpRequestActionIcon from "./icons/http-request-action-icon";
 import WebhookActionIcon from "./icons/webhook-action-icon";
@@ -18,282 +13,31 @@ import TransformActionIcon from "./icons/transform-action-icon";
 import IfConditionActionIcon from "./icons/if-condition-action-icon";
 import AiActionsIcon from "./icons/ai-actions-icon";
 import SendEmailActionIcon from "./icons/send-email-action-icon";
-import CreateCaseIcon from "./icons/create-case-icon";
-import UpdateCaseIcon from "./icons/update-case-icon";
-import QueryCasesIcon from "./icons/query-cases-icon";
-import WorkflowTemplates from "./workflow-templates";
 import "reactflow/dist/style.css";
-import { Dispatch, SetStateAction, useCallback, useState } from "react";
+import { useCallback, useState } from "react";
 import WebhookNode from "./workflow-graph/webhook-node";
 import HttpRequestNode from "./workflow-graph/http-request-node";
 import ReceiveEmailActionIcon from "./icons/receive-email-action-icon";
-import DirectedEdgeComponent, { DirectedEdge } from "./workflow-graph/edge";
+import DirectedEdgeComponent from "./workflow-graph/edge";
 import AiActionNode from "./workflow-graph/ai-action-node";
 import SendEmailNode from "./workflow-graph/send-email-node";
-import IfConditionNode, {
-	IF_CONDITION_FALSE_BRANCH_HANDLE_ID,
-	IF_CONDITION_TRUE_BRANCH_HANDLE_ID,
-} from "./workflow-graph/if-condition-node";
+import IfConditionNode from "./workflow-graph/if-condition-node";
 import ConnectionLine from "./workflow-graph/connection-line";
 import WorkflowBuilderRightPanelBase from "./workflow-builder-right-panel-base";
 import {
 	ActionNode,
 	ActionData,
 	getActionNodeLabel,
-	SendEmailData,
-	IfConditionData,
-	AiActionData,
-	HttpRequestData,
-	WebhookData,
 	EdgeType,
 } from "@/lib/types";
-import { EnterIcon } from "@radix-ui/react-icons";
 import Webhook from "./action-editing/webhook";
 import HttpRequest from "./action-editing/http-request";
 import AiAction from "./action-editing/ai-action";
 import IfCondition from "./action-editing/if-condition";
 import SendEmail from "./action-editing/send-email";
-import { NEW_MARKER, initActionData } from "@/lib/workflows";
-import CaseTriggerIcon from "./icons/case-trigger-icon";
-
-interface EditorCardProps {
-	icon: React.ReactNode;
-	label: string;
-	isComingSoon?: boolean;
-}
-
-function EditorCard({ icon, label, isComingSoon = false }: EditorCardProps) {
-	if (isComingSoon) {
-		return (
-			<HoverCard.Root>
-				<HoverCard.Trigger>
-					<Card
-						style={{
-							padding: "8px",
-							cursor: "pointer",
-							width: "95%",
-						}}
-					>
-						<Flex gap="2">
-							{icon}
-							<Text size="3" weight="medium">
-								{label}
-							</Text>
-						</Flex>
-					</Card>
-				</HoverCard.Trigger>
-
-				<HoverCard.Content style={{ padding: 0 }}>
-					<Badge size="3" color="green">
-						Coming soon
-					</Badge>
-				</HoverCard.Content>
-			</HoverCard.Root>
-		);
-	}
-
-	return (
-		<Card
-			style={{
-				padding: "8px",
-				cursor: "pointer",
-				width: "95%",
-			}}
-			draggable
-		>
-			<Flex gap="2">
-				{icon}
-				<Text size="3" weight="medium">
-					{label}
-				</Text>
-			</Flex>
-		</Card>
-	);
-}
-
-function EditorSideBar() {
-	const onDragStart = (event: any, nodeType: string) => {
-		event.dataTransfer.setData("application/reactflow", nodeType);
-		event.dataTransfer.effectAllowed = "move";
-	};
-
-	return (
-		<Card
-			style={{
-				position: "fixed",
-				left: "68px",
-				top: "68px",
-				zIndex: 50,
-				width: "232px",
-				backgroundColor: "white",
-				height: "calc(99vh - 68px)",
-				padding: 0,
-			}}
-			size="4"
-		>
-			<Flex
-				direction="column"
-				justify="between"
-				height="100%"
-				pt="5"
-				pl="4"
-				pr="4"
-				pb="4"
-				style={{
-					display: "flex",
-					flexDirection: "column",
-				}}
-			>
-				<Flex
-					direction="column"
-					gap="4"
-					height="100%"
-					style={{ flex: 1, overflowY: "auto" }}
-				>
-					<Flex direction="column" gap="3">
-						<Text size="3" weight="medium">
-							Workflow Actions
-						</Text>
-
-						<Flex direction="column" gap="2">
-							<div
-								onDragStart={(event) =>
-									onDragStart(event, ActionNode.WEBHOOK)
-								}
-							>
-								<EditorCard
-									icon={<WebhookActionIcon />}
-									label={getActionNodeLabel(
-										ActionNode.WEBHOOK,
-									)}
-								/>
-							</div>
-
-							<div
-								onDragStart={(event) =>
-									onDragStart(event, ActionNode.HTTP_REQUEST)
-								}
-							>
-								<EditorCard
-									icon={<HttpRequestActionIcon />}
-									label={getActionNodeLabel(
-										ActionNode.HTTP_REQUEST,
-									)}
-								/>
-							</div>
-
-							<EditorCard
-								icon={<TransformActionIcon />}
-								label={getActionNodeLabel(ActionNode.TRANSFORM)}
-								isComingSoon
-							/>
-
-							<div
-								onDragStart={(event) =>
-									onDragStart(event, ActionNode.IF_CONDITION)
-								}
-							>
-								<EditorCard
-									icon={<IfConditionActionIcon />}
-									label={getActionNodeLabel(
-										ActionNode.IF_CONDITION,
-									)}
-								/>
-							</div>
-
-							<div
-								onDragStart={(event) =>
-									onDragStart(event, ActionNode.AI_ACTION)
-								}
-							>
-								<EditorCard
-									icon={<AiActionsIcon />}
-									label={getActionNodeLabel(
-										ActionNode.AI_ACTION,
-									)}
-								/>
-							</div>
-
-							<div
-								onDragStart={(event) =>
-									onDragStart(event, ActionNode.SEND_EMAIL)
-								}
-							>
-								<EditorCard
-									icon={<SendEmailActionIcon />}
-									label={getActionNodeLabel(
-										ActionNode.SEND_EMAIL,
-									)}
-								/>
-							</div>
-
-							<EditorCard
-								icon={<ReceiveEmailActionIcon />}
-								label={getActionNodeLabel(
-									ActionNode.RECEIVE_EMAIL,
-								)}
-								isComingSoon
-							/>
-						</Flex>
-					</Flex>
-
-					<Flex direction="column" gap="4">
-						<Text size="3" weight="medium">
-							Case Actions
-						</Text>
-
-						<Flex direction="column" gap="2">
-							<EditorCard
-								icon={<CreateCaseIcon />}
-								label="Create Case"
-								isComingSoon
-							/>
-
-							<EditorCard
-								icon={<UpdateCaseIcon />}
-								label="Update Case"
-								isComingSoon
-							/>
-
-							<EditorCard
-								icon={<QueryCasesIcon />}
-								label="Query Cases"
-								isComingSoon
-							/>
-
-							<EditorCard
-								icon={<CaseTriggerIcon />}
-								label="Case Trigger"
-								isComingSoon
-							/>
-						</Flex>
-					</Flex>
-
-					<Flex direction="column" gap="4">
-						<Text size="3" weight="medium">
-							Integrations
-						</Text>
-
-						<Flex direction="column" gap="2">
-							<EditorCard
-								icon={<EnterIcon width="24" height="24" />}
-								label="Coming soon"
-								isComingSoon
-							/>
-						</Flex>
-					</Flex>
-				</Flex>
-
-				<Box pt="4" width="95%">
-					<WorkflowTemplates />
-				</Box>
-			</Flex>
-		</Card>
-	);
-}
-
-let id = 0;
-const getId = () => `${NEW_MARKER}workflow_obj_${id++}`;
+import { initActionData } from "@/lib/workflows";
+import useWorkflowStore from "@/lib/workflow-store";
+import EditorSideBar from "./workflow-builder-editor-side-bar";
 
 function actionNodeTypeToIcon(actionNode: ActionNode) {
 	switch (actionNode) {
@@ -330,24 +74,26 @@ const edgeTypes = {
 	[EdgeType.FALSE]: DirectedEdgeComponent,
 };
 
-export interface WorkflowBuilderEditorProps {
-	nodes: Node<ActionData>[];
-	setNodes: Dispatch<SetStateAction<Node<ActionData>[]>>;
-	onNodesChange: (changes: NodeChange[]) => void;
-	edges: DirectedEdge[];
-	setEdges: Dispatch<SetStateAction<DirectedEdge[]>>;
-	onEdgesChange: (changes: EdgeChange[]) => void;
-}
-
-function WorkflowBuilderEditor({
-	nodes,
-	setNodes,
-	onNodesChange,
-	edges,
-	setEdges,
-	onEdgesChange,
-}: WorkflowBuilderEditorProps) {
+function WorkflowBuilderEditor() {
 	const [reactFlowInstance, setReactFlowInstance] = useState<any>(null);
+
+	const {
+		nodes,
+		edges,
+		setNodes,
+		onConnect,
+		onNodesChange,
+		onEdgesChange,
+		getId,
+	} = useWorkflowStore((state) => ({
+		nodes: state.nodes,
+		edges: state.edges,
+		setNodes: state.setNodes,
+		onConnect: state.onConnect,
+		onNodesChange: state.onNodesChange,
+		onEdgesChange: state.onEdgesChange,
+		getId: state.getId,
+	}));
 
 	// Node selection management
 	const addSelectedNodes = useStore((store) => store.addSelectedNodes);
@@ -410,67 +156,20 @@ function WorkflowBuilderEditor({
 				position.y,
 			);
 
-			setNodes((nodes) => {
-				return [
-					...nodes,
-					{
-						id: nodeId,
-						type,
-						position,
-						data,
-					},
-				];
-			});
+			setNodes([
+				...nodes,
+				{
+					id: nodeId,
+					type,
+					position,
+					data,
+				} as Node<ActionData>,
+			]);
 		},
 		[reactFlowInstance, nodes, setNodes],
 	);
 
-	const onConnect = useCallback(
-		(connection: any) => {
-			// Determine edge type
-			let edgeType = EdgeType.DEFAULT;
-			if (
-				connection.sourceHandle === IF_CONDITION_TRUE_BRANCH_HANDLE_ID
-			) {
-				edgeType = EdgeType.TRUE;
-			} else if (
-				connection.sourceHandle === IF_CONDITION_FALSE_BRANCH_HANDLE_ID
-			) {
-				edgeType = EdgeType.FALSE;
-			}
-
-			const edge = {
-				...connection,
-				id: getId(),
-				type: edgeType,
-				markerEnd: {
-					type: MarkerType.ArrowClosed,
-					height: 15,
-					width: 15,
-					color: "var(--Accent-color-Accent-9, #3E63DD)",
-				},
-			};
-
-			setEdges((eds) => addEdge(edge, eds));
-		},
-		[setEdges],
-	);
-
 	const selectNodeIdx = nodes.findIndex((node) => node.id === selectedNodeId);
-
-	const updateData = (data: ActionData) => {
-		setNodes((nodes) =>
-			nodes.map((node) => {
-				if (node.id === selectedNodeId) {
-					return {
-						...node,
-						data,
-					};
-				}
-				return node;
-			}),
-		);
-	};
 
 	return (
 		<>
@@ -507,42 +206,27 @@ function WorkflowBuilderEditor({
 				>
 					{(nodes[selectNodeIdx].type as ActionNode) ===
 						ActionNode.WEBHOOK && (
-						<Webhook
-							data={nodes[selectNodeIdx].data as WebhookData}
-							updateData={updateData}
-						/>
+						<Webhook id={nodes[selectNodeIdx].id} />
 					)}
 
 					{(nodes[selectNodeIdx].type as ActionNode) ===
 						ActionNode.HTTP_REQUEST && (
-						<HttpRequest
-							data={nodes[selectNodeIdx].data as HttpRequestData}
-							updateData={updateData}
-						/>
+						<HttpRequest id={nodes[selectNodeIdx].id} />
 					)}
 
 					{(nodes[selectNodeIdx].type as ActionNode) ===
 						ActionNode.AI_ACTION && (
-						<AiAction
-							data={nodes[selectNodeIdx].data as AiActionData}
-							updateData={updateData}
-						/>
+						<AiAction id={nodes[selectNodeIdx].id} />
 					)}
 
 					{(nodes[selectNodeIdx].type as ActionNode) ===
 						ActionNode.IF_CONDITION && (
-						<IfCondition
-							data={nodes[selectNodeIdx].data as IfConditionData}
-							updateData={updateData}
-						/>
+						<IfCondition id={nodes[selectNodeIdx].id} />
 					)}
 
 					{(nodes[selectNodeIdx].type as ActionNode) ===
 						ActionNode.SEND_EMAIL && (
-						<SendEmail
-							data={nodes[selectNodeIdx].data as SendEmailData}
-							updateData={updateData}
-						/>
+						<SendEmail id={nodes[selectNodeIdx].id} />
 					)}
 				</WorkflowBuilderRightPanelBase>
 			)}

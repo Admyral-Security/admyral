@@ -10,10 +10,13 @@ type HttpRequestData = {
 
 export type HttpRequestNode = Node<HttpRequestData>;
 
+type HttpRequestNodeProps = NodeProps<HttpRequestData>;
+
 function HttpRequestNodeComponent({
+	id,
 	data,
 	selected,
-}: NodeProps<HttpRequestData>) {
+}: HttpRequestNodeProps) {
 	return (
 		<>
 			<Handle
@@ -33,6 +36,7 @@ function HttpRequestNodeComponent({
 				isConnectableStart={false}
 			/>
 			<NodeBase
+				nodeId={id}
 				selected={selected}
 				icon={<HttpRequestActionIcon />}
 				name={data.actionName}

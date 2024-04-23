@@ -4,15 +4,21 @@ import { MinusIcon, PlusIcon } from "@radix-ui/react-icons";
 import { SendEmailData } from "@/lib/types";
 import { generateReferenceHandle } from "@/lib/workflows";
 import { cloneDeep } from "lodash";
+import useWorkflowStore from "@/lib/workflow-store";
 
 export interface SendEmailProps {
-	data: SendEmailData;
-	updateData: (data: SendEmailData) => void;
+	id: string;
 }
 
 // TODO: recipients => email validation
 // TODO: "reply to" field
-export default function SendEmail({ data, updateData }: SendEmailProps) {
+export default function SendEmail({ id }: SendEmailProps) {
+	const { data, updateData } = useWorkflowStore((state) => ({
+		data: state.nodes.find((node) => node.id === id)?.data as SendEmailData,
+		updateData: (updatedData: SendEmailData) =>
+			state.updateNodeData(id, updatedData),
+	}));
+
 	return (
 		<Flex direction="column" gap="4" p="4">
 			<Flex direction="column" gap="2">

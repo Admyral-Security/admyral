@@ -76,8 +76,8 @@ impl ActionExecutor for SendEmail {
             .await?;
 
         if response.status().as_u16() != 200 {
-            let x = response.json::<serde_json::Value>().await?;
-            // tracing::error!("Failed to send email: {:?}", response);
+            let result = response.json::<serde_json::Value>().await?;
+            tracing::error!("Failed to send email: {:?}", result);
             return Err(anyhow!("Failed to send email!"));
         }
 

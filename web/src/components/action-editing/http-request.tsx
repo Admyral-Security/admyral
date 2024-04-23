@@ -11,15 +11,22 @@ import { MinusIcon, PlusIcon } from "@radix-ui/react-icons";
 import { generateReferenceHandle } from "@/lib/workflows";
 import { cloneDeep } from "lodash";
 import { HttpRequestData } from "@/lib/types";
+import useWorkflowStore from "@/lib/workflow-store";
 
 export interface HttpRequestProps {
-	data: HttpRequestData;
-	updateData: (data: HttpRequestData) => void;
+	id: string;
 }
 
 // TODO: retries
 // TODO: timeout
-export default function HttpRequest({ data, updateData }: HttpRequestProps) {
+export default function HttpRequest({ id }: HttpRequestProps) {
+	const { data, updateData } = useWorkflowStore((state) => ({
+		data: state.nodes.find((node) => node.id === id)
+			?.data as HttpRequestData,
+		updateData: (updatedData: HttpRequestData) =>
+			state.updateNodeData(id, updatedData),
+	}));
+
 	return (
 		<Flex direction="column" gap="4" p="4">
 			<Flex direction="column" gap="2">

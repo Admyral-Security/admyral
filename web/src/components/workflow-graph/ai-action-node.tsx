@@ -10,7 +10,9 @@ type AiActionData = {
 
 export type AiActionNode = Node<AiActionData>;
 
-function AiActionNodeComponent({ data, selected }: NodeProps<AiActionData>) {
+type AiActionNodeProps = NodeProps<AiActionData>;
+
+function AiActionNodeComponent({ id, data, selected }: AiActionNodeProps) {
 	return (
 		<>
 			<Handle
@@ -30,6 +32,7 @@ function AiActionNodeComponent({ data, selected }: NodeProps<AiActionData>) {
 				isConnectableStart={false}
 			/>
 			<NodeBase
+				nodeId={id}
 				selected={selected}
 				icon={<AiActionsIcon />}
 				name={data.actionName}

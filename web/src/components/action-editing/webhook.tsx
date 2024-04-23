@@ -3,13 +3,19 @@ import CopyText from "../copy-text";
 import { generateReferenceHandle } from "@/lib/workflows";
 import { cloneDeep } from "lodash";
 import { WebhookData } from "@/lib/types";
+import useWorkflowStore from "@/lib/workflow-store";
 
 export interface WebhookProps {
-	data: WebhookData;
-	updateData: (data: WebhookData) => void;
+	id: string;
 }
 
-export default function Webhook({ data, updateData }: WebhookProps) {
+export default function Webhook({ id }: WebhookProps) {
+	const { data, updateData } = useWorkflowStore((state) => ({
+		data: state.nodes.find((node) => node.id === id)?.data as WebhookData,
+		updateData: (updatedData: WebhookData) =>
+			state.updateNodeData(id, updatedData),
+	}));
+
 	return (
 		<Flex direction="column" gap="4" p="4">
 			<Flex direction="column" gap="2">

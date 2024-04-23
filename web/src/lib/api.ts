@@ -312,3 +312,27 @@ export async function updateWorkflowAndCreateIfNotExists(
 	const updatedWorkflow = await result.json();
 	return transformObjectKeysToCamelCase(updatedWorkflow);
 }
+
+export async function triggerWorkflowFromAction(
+	workflowId: string,
+	actionId: string,
+): Promise<void> {
+	const accessToken = await getAccessToken();
+
+	const result = await fetch(
+		`${process.env.NEXT_PUBLIC_WORKFLOW_RUNNER_API_URL}/trigger/${workflowId}/${actionId}`,
+		{
+			method: "POST",
+			headers: {
+				Authorization: `Bearer ${accessToken}`,
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify({
+				payload: null,
+			}),
+		},
+	);
+	if (result.status !== 202) {
+		throw new Error("Failed to trigger workflow!");
+	}
+}

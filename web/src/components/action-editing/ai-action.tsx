@@ -3,14 +3,20 @@ import CopyText from "../copy-text";
 import { cloneDeep } from "lodash";
 import { generateReferenceHandle } from "@/lib/workflows";
 import { AiActionData, LLM, LLM_MODELS, getLLMLabel } from "@/lib/types";
+import useWorkflowStore from "@/lib/workflow-store";
 
 export interface AiActionProps {
-	data: AiActionData;
-	updateData: (data: AiActionData) => void;
+	id: string;
 }
 
 // TODO: prompt templates
-export default function AiAction({ data, updateData }: AiActionProps) {
+export default function AiAction({ id }: AiActionProps) {
+	const { data, updateData } = useWorkflowStore((state) => ({
+		data: state.nodes.find((node) => node.id === id)?.data as AiActionData,
+		updateData: (updatedData: AiActionData) =>
+			state.updateNodeData(id, updatedData),
+	}));
+
 	return (
 		<Flex direction="column" gap="4" p="4">
 			<Flex direction="column" gap="2">

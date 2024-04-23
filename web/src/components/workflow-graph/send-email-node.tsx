@@ -6,11 +6,14 @@ import SendEmailActionIcon from "../icons/send-email-action-icon";
 
 type SendEmailData = {
 	actionName: string;
+	deleteAction: () => void;
 };
 
 export type SendEmailNode = Node<SendEmailData>;
 
-function SendEmailNodeComponent({ data, selected }: NodeProps<SendEmailData>) {
+type SendEmailNodeProps = NodeProps<SendEmailData>;
+
+function SendEmailNodeComponent({ id, data, selected }: SendEmailNodeProps) {
 	return (
 		<>
 			<Handle
@@ -30,6 +33,7 @@ function SendEmailNodeComponent({ data, selected }: NodeProps<SendEmailData>) {
 				isConnectableStart={false}
 			/>
 			<NodeBase
+				nodeId={id}
 				selected={selected}
 				icon={<SendEmailActionIcon />}
 				name={data.actionName}

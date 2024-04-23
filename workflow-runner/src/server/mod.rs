@@ -138,21 +138,21 @@ async fn post_webhook_handler(
 
 #[derive(Debug, Deserialize)]
 struct TriggerWorkflowRequest {
-    start_action_id: String,
     payload: Option<serde_json::Value>,
 }
 
 async fn post_trigger_workflow_handler(
     claim: JwtClaims, // implements endpoint authentication
-    Path(workflow_id): Path<String>,
+    Path((workflow_id, action_id)): Path<(String, String)>,
     State(state): State<SharedState>,
     Json(request): Json<TriggerWorkflowRequest>,
 ) -> impl IntoResponse {
     // verify that the workflow is owned by the requesting user
     let user_id = &claim.sub;
-    match is_workflow_owned_by_user(state.db_pool.borrow(), &workflow_id, user_id).await {
+    match is_workflow_owned_by_user(state.db_pool.borrow(), user_id, &workflow_id).await {
         Ok(is_valid) => {
             if !is_valid {
+                tracing::error!("Workflow {workflow_id} does not exist.");
                 return (StatusCode::NOT_FOUND, "Workflow does not exist.");
             }
         }
@@ -162,13 +162,7 @@ async fn post_trigger_workflow_handler(
         }
     }
 
-    let action_opt = match fetch_action(
-        state.db_pool.borrow(),
-        &workflow_id,
-        &request.start_action_id,
-    )
-    .await
-    {
+    let action_opt = match fetch_action(state.db_pool.borrow(), &workflow_id, &action_id).await {
         Ok(action_opt) => action_opt,
         Err(e) => {
             tracing::error!("Error fetching action: {e}");
@@ -210,7 +204,10 @@ pub async fn run_server() -> Result<()> {
         .route("/health", get(health_check))
         .route("/webhook/:webhook_id/:secret", get(get_webhook_handler))
         .route("/webhook/:webhook_id/:secret", post(post_webhook_handler))
-        .route("/trigger/:workflow_id", post(post_trigger_workflow_handler))
+        .route(
+            "/trigger/:workflow_id/:action_id",
+            post(post_trigger_workflow_handler),
+        )
         .layer(CorsLayer::permissive())
         .with_state(state);
 

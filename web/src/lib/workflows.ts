@@ -86,7 +86,7 @@ export async function initActionData(
 
 		case ActionNode.RECEIVE_EMAIL:
 			// TODO:
-			return base;
+			return { ...base, actionDefinition: {} };
 
 		default:
 			throw new Error("Unhandled action type: " + actionType);

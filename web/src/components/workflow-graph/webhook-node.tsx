@@ -6,14 +6,18 @@ import { Flex } from "@radix-ui/themes";
 
 type WebhookNodeData = {
 	actionName: string;
+	deleteAction: () => void;
 };
 
 export type WebhookNode = Node<WebhookNodeData>;
 
-function WebhookNodeComponent({ data, selected }: NodeProps<WebhookNodeData>) {
+type WebhookNodeProps = NodeProps<WebhookNodeData>;
+
+function WebhookNodeComponent({ id, data, selected }: WebhookNodeProps) {
 	return (
 		<>
 			<NodeBase
+				nodeId={id}
 				selected={selected}
 				icon={<WebhookActionIcon />}
 				name={data.actionName}

@@ -20,23 +20,15 @@ import WorkflowBuilderRightPanelBase from "./workflow-builder-right-panel-base";
 import {
 	deleteWorkflow,
 	getWorkflow,
+	triggerWorkflowFromAction,
 	updateWorkflowAndCreateIfNotExists,
 } from "@/lib/api";
 import TrashIcon from "./icons/trash-icon";
 import { DiscIcon } from "@radix-ui/react-icons";
 import { ActionNode, ActionData, EdgeData, EdgeType } from "@/lib/types";
-import {
-	useEdgesState,
-	useNodesState,
-	Node,
-	MarkerType,
-	NodeChange,
-	EdgeChange,
-	NodeRemoveChange,
-	EdgeRemoveChange,
-} from "reactflow";
+import { Node, MarkerType } from "reactflow";
 import { DirectedEdge } from "./workflow-graph/edge";
-import { NEW_MARKER } from "@/lib/workflows";
+import useWorkflowStore from "@/lib/workflow-store";
 
 function buildInitialWorkflowGraph(
 	actionData: ActionData[],
@@ -52,19 +44,11 @@ function buildInitialWorkflowGraph(
 		data: action,
 	}));
 
-	const actionIdToId = actionNodes.reduce(
-		(acc, node) => {
-			acc[node.data.actionId as string] = node.id;
-			return acc;
-		},
-		{} as Record<string, string>,
-	);
-
 	const edges = edgeData.map((edge) => ({
 		id: `${edge.parentActionId}_${edge.childActionId}`,
-		source: actionIdToId[edge.parentActionId],
+		source: edge.parentActionId,
 		sourceHandle: edge.parentNodeHandle,
-		target: actionIdToId[edge.childActionId],
+		target: edge.childActionId,
 		targetHandle: edge.childNodeHandle,
 		type: edge.edgeType,
 		markerEnd: {
@@ -92,11 +76,33 @@ export default function WorkflowBuilder({ workflowId }: WorkflowBuilderProps) {
 		isLive: false,
 	});
 
-	const [nodes, setNodes, onNodesChange] = useNodesState([]);
-	const [edges, setEdges, onEdgesChange] = useEdgesState([]);
-
-	const [deletedNodes, setDeletedNodes] = useState<string[]>([]);
-	const [deletedEdges, setDeletedEdges] = useState<[string, string][]>([]);
+	const {
+		nodes,
+		deletedNodes,
+		deletedEdges,
+		edges,
+		setNodes,
+		setEdges,
+		setDeletedNodes,
+		setDeletedEdges,
+		clearWorkflowState,
+		triggerNodeId,
+		setTriggerNodeId,
+		hasUnsavedChanges,
+	} = useWorkflowStore((state) => ({
+		nodes: state.nodes,
+		deletedNodes: state.deletedNodes,
+		edges: state.edges,
+		deletedEdges: state.deletedEdges,
+		setNodes: state.setNodes,
+		setEdges: state.setEdges,
+		setDeletedNodes: state.setDeletedNodes,
+		setDeletedEdges: state.setDeletedEdges,
+		clearWorkflowState: state.clear,
+		triggerNodeId: state.triggerNodeId,
+		setTriggerNodeId: state.setTriggerNodeId,
+		hasUnsavedChanges: state.hasUnsavedChanges,
+	}));
 
 	const [isSavingWorkflow, setIsSavingWorkflow] = useState<boolean>(false);
 	const [isDeletingWorkflow, setIsDeletingWorkflow] =
@@ -113,6 +119,9 @@ export default function WorkflowBuilder({ workflowId }: WorkflowBuilderProps) {
 					isLive: workflow.isLive,
 				});
 
+				setDeletedNodes([]);
+				setDeletedEdges([]);
+
 				const [n, e] = buildInitialWorkflowGraph(
 					workflow.actions,
 					workflow.edges,
@@ -125,7 +134,31 @@ export default function WorkflowBuilder({ workflowId }: WorkflowBuilderProps) {
 					"Failed to fetch workflow. Please try to refresh the page",
 				);
 			});
+		return () => clearWorkflowState();
 	}, [workflowId, setNodes, setEdges]);
+
+	useEffect(() => {
+		if (triggerNodeId === null) {
+			return;
+		}
+
+		setTriggerNodeId(null);
+
+		if (hasUnsavedChanges()) {
+			alert(
+				"There are unsaved changes. Please save the workflow before running it.",
+			);
+			return;
+		}
+
+		triggerWorkflowFromAction(workflowId, triggerNodeId)
+			.then(() => {
+				alert("Workflow triggered successfully.");
+			})
+			.catch((error) => {
+				alert("Failed to trigger workflow. Please try again.");
+			});
+	}, [triggerNodeId, setTriggerNodeId]);
 
 	const handleDeleteWorkflow = async () => {
 		setIsDeletingWorkflow(true);
@@ -303,66 +336,7 @@ export default function WorkflowBuilder({ workflowId }: WorkflowBuilderProps) {
 			</Box>
 
 			<Box height="100%" width="100%">
-				{view === "workflowBuilder" && (
-					<WorkflowBuilderEditor
-						nodes={nodes}
-						setNodes={setNodes}
-						onNodesChange={(change: NodeChange[]) => {
-							// Track deleted nodes which were already persisted in the DB
-							const deletedNodeIds = change
-								.filter(
-									(c) =>
-										c.type === "remove" &&
-										!c.id.startsWith(NEW_MARKER),
-								)
-								.map((c) => (c as NodeRemoveChange).id);
-							if (deletedNodeIds.length > 0) {
-								setDeletedNodes([
-									...deletedNodes,
-									...deletedNodeIds,
-								]);
-							}
-
-							// The usual stuff...
-							onNodesChange(change);
-						}}
-						edges={edges}
-						setEdges={setEdges}
-						onEdgesChange={(change: EdgeChange[]) => {
-							// Track deleted edges which were already persisted in the DB
-							const deletedEdgeIds = change
-								.filter(
-									(c) =>
-										c.type === "remove" &&
-										!c.id.startsWith(NEW_MARKER),
-								)
-								.map((c) => (c as EdgeRemoveChange).id);
-							if (deletedEdgeIds.length > 0) {
-								const deletedEdgeIdsLookup = new Set(
-									deletedEdgeIds,
-								);
-								const newDeletedEdges = edges
-									.filter((edge) =>
-										deletedEdgeIdsLookup.has(edge.id),
-									)
-									.map(
-										(edge) =>
-											[edge.source, edge.target] as [
-												string,
-												string,
-											],
-									);
-								setDeletedEdges([
-									...deletedEdges,
-									...newDeletedEdges,
-								]);
-							}
-
-							// The usual stuff...
-							onEdgesChange(change);
-						}}
-					/>
-				)}
+				{view === "workflowBuilder" && <WorkflowBuilderEditor />}
 				{view === "runHistory" && <WorkflowBuilderRunHistory />}
 			</Box>
 

@@ -1,11 +1,8 @@
 import CreateNewWorkflowButton from "@/components/create-new-workflow-button";
 import WorkflowsList from "@/components/workflows-list";
 import { Box, Flex, Grid, Text } from "@radix-ui/themes";
-import { listWorkflows } from "@/lib/api";
 
 export default async function WorkflowOverviewPage() {
-	const workflows = await listWorkflows();
-
 	return (
 		<Grid rows="56px 1fr" width="auto">
 			<Box width="100%">
@@ -40,7 +37,7 @@ export default async function WorkflowOverviewPage() {
 				justify="center"
 				align="center"
 			>
-				<WorkflowsList workflowsList={workflows} />
+				<WorkflowsList />
 			</Flex>
 		</Grid>
 	);

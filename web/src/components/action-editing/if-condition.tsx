@@ -18,13 +18,20 @@ import {
 import { MinusIcon, PlusIcon } from "@radix-ui/react-icons";
 import { cloneDeep } from "lodash";
 import { generateReferenceHandle } from "@/lib/workflows";
+import useWorkflowStore from "@/lib/workflow-store";
 
 export interface IfConditionProps {
-	data: IfConditionData;
-	updateData: (data: IfConditionData) => void;
+	id: string;
 }
 
-export default function IfCondition({ data, updateData }: IfConditionProps) {
+export default function IfCondition({ id }: IfConditionProps) {
+	const { data, updateData } = useWorkflowStore((state) => ({
+		data: state.nodes.find((node) => node.id === id)
+			?.data as IfConditionData,
+		updateData: (updatedData: IfConditionData) =>
+			state.updateNodeData(id, updatedData),
+	}));
+
 	return (
 		<Flex direction="column" gap="4" p="4">
 			<Flex direction="column" gap="2">

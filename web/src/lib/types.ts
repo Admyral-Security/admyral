@@ -86,7 +86,7 @@ export enum EdgeType {
 	DEFAULT = "DEFAULT",
 }
 
-export type ActionDataBase = {
+export type ActionDataBase<T> = {
 	actionId: string;
 	actionName: string;
 	referenceHandle: string;
@@ -94,57 +94,46 @@ export type ActionDataBase = {
 	xPosition: number;
 	yPosition: number;
 	actionType: ActionNode;
+	actionDefinition: T;
 	webhookId: string | null;
 	secret: string | null;
 };
 
-export type AiActionData = ActionDataBase & {
-	actionDefinition: {
-		model: LLM;
-		prompt: string;
-	};
-};
+export type AiActionData = ActionDataBase<{ model: LLM; prompt: string }>;
 
-export type HttpRequestData = ActionDataBase & {
-	actionDefinition: {
-		method: string;
-		url: string;
-		contentType: string;
-		headers: {
-			key: string;
-			value: string;
-		}[];
-		payload: string;
-	};
-};
+export type HttpRequestData = ActionDataBase<{
+	method: string;
+	url: string;
+	contentType: string;
+	headers: {
+		key: string;
+		value: string;
+	}[];
+	payload: string;
+}>;
 
-export type WebhookData = ActionDataBase & {
-	actionDefinition: {};
+export type WebhookData = ActionDataBase<{}> & {
 	webhookId: string;
 	secret: string;
 };
 
-export type IfConditionData = ActionDataBase & {
-	actionDefinition: {
-		conditions: {
-			lhs: string;
-			operator: IfConditionOperator;
-			rhs: string;
-		}[];
-	};
-};
+export type IfConditionData = ActionDataBase<{
+	conditions: {
+		lhs: string;
+		operator: IfConditionOperator;
+		rhs: string;
+	}[];
+}>;
 
-export type SendEmailData = ActionDataBase & {
-	actionDefinition: {
-		recipients: string[];
-		subject: string;
-		body: string;
-		senderName: string;
-	};
-};
+export type SendEmailData = ActionDataBase<{
+	recipients: string[];
+	subject: string;
+	body: string;
+	senderName: string;
+}>;
 
 // TODO:
-export type ReceiveEmailData = ActionDataBase;
+export type ReceiveEmailData = ActionDataBase<{}>;
 
 export type ActionData =
 	| AiActionData

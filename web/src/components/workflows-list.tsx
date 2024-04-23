@@ -1,12 +1,21 @@
 "use client";
 
 import { InfoCircledIcon } from "@radix-ui/react-icons";
-import { Box, Callout, Card, Flex, IconButton, Text } from "@radix-ui/themes";
+import {
+	Box,
+	Callout,
+	Card,
+	Flex,
+	IconButton,
+	Spinner,
+	Text,
+} from "@radix-ui/themes";
 import CreateNewWorkflowButton from "./create-new-workflow-button";
 import RightArrowIcon from "./icons/right-arrow-icon";
 import PublishWorkflowToggle from "./publish-workflow-toggle";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { listWorkflows } from "@/lib/api";
 
 function NoWorkflowExists() {
 	return (
@@ -80,14 +89,42 @@ export interface WorkflowListEntry {
 	isLive: boolean;
 }
 
-export interface WorkflowsListProps {
-	workflowsList: WorkflowListEntry[];
-}
-
-export default function WorkflowsList({ workflowsList }: WorkflowsListProps) {
-	const [workflows, setWorkflows] =
-		useState<WorkflowListEntry[]>(workflowsList);
+export default function WorkflowsList() {
+	const [loading, setLoading] = useState(true);
+	const [workflows, setWorkflows] = useState<WorkflowListEntry[]>([]);
 	const [error, setError] = useState<string | null>();
+
+	useEffect(() => {
+		setError(null);
+		listWorkflows()
+			.then((workflows) => setWorkflows(workflows))
+			.catch((err) =>
+				setError(
+					`Failed to load workflow list. Please refresh the page. If the issue persists, please contact us on Discord or via email ${process.env.NEXT_PUBLIC_SUPPORT_EMAIL}.`,
+				),
+			)
+			.finally(() => setLoading(false));
+	}, []);
+
+	if (loading) {
+		return (
+			<Flex
+				direction="column"
+				width="100%"
+				align="center"
+				justify="center"
+				gap="5"
+			>
+				<Box width="50%">
+					<Text size="4" weight="medium">
+						Workflows
+					</Text>
+				</Box>
+
+				<Spinner size="3" />
+			</Flex>
+		);
+	}
 
 	return (
 		<Flex direction="column" width="100%" align="center" gap="5">

@@ -7,6 +7,7 @@ import { ibmPlexMono } from "@/app/fonts";
 
 type IfConditionData = {
 	actionName: string;
+	deleteAction: () => void;
 };
 
 export type IfConditionNode = Node<IfConditionData>;
@@ -16,10 +17,13 @@ export const IF_CONDITION_TRUE_BRANCH_HANDLE_ID: string =
 export const IF_CONDITION_FALSE_BRANCH_HANDLE_ID: string =
 	"ifConditionFalseBranch";
 
+type IfConditionNodeProps = NodeProps<IfConditionData>;
+
 function IfConditionNodeComponent({
+	id,
 	data,
 	selected,
-}: NodeProps<IfConditionData>) {
+}: IfConditionNodeProps) {
 	return (
 		<>
 			<Handle
@@ -39,6 +43,7 @@ function IfConditionNodeComponent({
 				isConnectableStart={false}
 			/>
 			<NodeBase
+				nodeId={id}
 				selected={selected}
 				icon={<IfConditionActionIcon />}
 				name={data.actionName}
