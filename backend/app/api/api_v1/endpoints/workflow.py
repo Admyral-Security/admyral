@@ -5,10 +5,14 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 from sqlmodel import select, and_
 from sqlalchemy.orm import aliased
 from pydantic import BaseModel
+import uuid
+import hmac
+import hashlib
 
 from app.deps import AuthenticatedUser, get_authenticated_user, get_session
-from app.models import Workflow, ActionNode, Webhook, WorkflowEdge
+from app.models import Workflow, ActionNode, Webhook, WorkflowEdge, WorkflowTemplateMetadata
 from app.schema import ActionType, EdgeType
+from app.config import settings
 
 
 router = APIRouter()
@@ -17,7 +21,7 @@ router = APIRouter()
 async def raise_if_workflow_not_exists_for_user(
     db: AsyncSession,
     workflow_id: str,
-    user_id: str
+    user_id: str | None
 ) -> bool:
     result = await db.exec(
         select(Workflow)
@@ -35,12 +39,14 @@ async def raise_if_workflow_not_exists_for_user(
 async def query_workflow(
     db: AsyncSession,
     workflow_id: str,
-    user_id: str
+    user_id: str | None,
+    is_template: bool = False
 ) -> Workflow | None:
     result = await db.exec(
         select(Workflow)
         .where(Workflow.workflow_id == workflow_id)
         .where(Workflow.user_id == user_id)
+        .where(Workflow.is_template == is_template)
         .limit(1)
     )
     return result.one_or_none()
@@ -50,7 +56,8 @@ async def query_action(
     db: AsyncSession,
     action_id: str,
     workflow_id: str,
-    user_id: str
+    user_id: str | None,
+    is_template: bool = False
 ) -> ActionNode | None:
     # retrieve the action but we also need to make sure that the user only
     # access its own actions by joining with the workflow table and checking
@@ -60,6 +67,7 @@ async def query_action(
             .join(Workflow)
             .where(Workflow.workflow_id == workflow_id)
             .where(Workflow.user_id == user_id)
+            .where(Workflow.is_template == is_template)
             .where(ActionNode.action_id == action_id)
             .limit(1)
     )
@@ -71,7 +79,8 @@ async def query_edge(
     parent_action_id: str,
     child_action_id: str,
     workflow_id: str,
-    user_id: str
+    user_id: str | None,
+    is_template: bool = False
 ) -> WorkflowEdge | None:
     parent_action = aliased(ActionNode, name="parent_action")
     child_action = aliased(ActionNode, name="child_action")
@@ -83,7 +92,8 @@ async def query_edge(
             .join(Workflow, 
                 and_(
                     Workflow.workflow_id == parent_action.workflow_id,
-                    Workflow.workflow_id == child_action.workflow_id
+                    Workflow.workflow_id == child_action.workflow_id,
+                    Workflow.is_template == is_template
                 )
             )
             .where(Workflow.workflow_id == workflow_id)
@@ -157,17 +167,14 @@ class WorkflowData(BaseModel):
 
 
 # TODO: optimize data fetching: actions, workflow, and edges concurrently as well as webhooks in one query
-@router.get(
-    "/{workflow_id}",
-    status_code=status.HTTP_200_OK
-)
-async def get_workflow(
+async def get_workflow_impl(
     workflow_id: str,
-    db: AsyncSession = Depends(get_session),
-    user: AuthenticatedUser = Depends(get_authenticated_user)
+    db: AsyncSession,
+    user_id: str | None,
+    is_template: bool
 ) -> WorkflowData:
     # Fetch general workflow data
-    workflow = await query_workflow(db, workflow_id, user.user_id)
+    workflow = await query_workflow(db, workflow_id, user_id, is_template)
     if not workflow:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -198,7 +205,11 @@ async def get_workflow(
     # Enrich webhook actions with webhook data
     for action in action_nodes:
         if action.action_type == ActionType.WEBHOOK:
-            result = await db.exec(select(Webhook).where(Webhook.action_id == action.action_id).limit(1))
+            result = await db.exec(
+                select(Webhook)
+                    .where(Webhook.action_id == action.action_id)
+                    .limit(1)
+                )
             webhook = result.one_or_none()
             if not webhook:
                 raise HTTPException(
@@ -218,11 +229,12 @@ async def get_workflow(
             .join(Workflow,
                 and_(
                     Workflow.workflow_id == parent_action.workflow_id,
-                    Workflow.workflow_id == child_action.workflow_id
+                    Workflow.workflow_id == child_action.workflow_id,
+                    Workflow.is_template == is_template
                 )
             )
             .where(Workflow.workflow_id == workflow_id)
-            .where(Workflow.user_id == user.user_id)
+            .where(Workflow.user_id == user_id)
     )
     workflow_edges = list(
         map(
@@ -244,6 +256,17 @@ async def get_workflow(
         actions=action_nodes,
         edges=workflow_edges
     )
+
+@router.get(
+    "/{workflow_id}",
+    status_code=status.HTTP_200_OK
+)
+async def get_workflow(
+    workflow_id: str,
+    db: AsyncSession = Depends(get_session),
+    user: AuthenticatedUser = Depends(get_authenticated_user)
+) -> WorkflowData:
+    return await get_workflow_impl(workflow_id, db, user.user_id, False)
 
 
 class WorkflowUpdateRequest(BaseModel):
@@ -441,3 +464,86 @@ async def publish_workflow(
     workflow.is_live = request.is_live
     db.add(workflow)
     await db.commit()
+
+
+@router.get("/templates/list", status_code=status.HTTP_200_OK)
+async def get_workflow_templates(
+    db: AsyncSession = Depends(get_session),
+    _user: AuthenticatedUser = Depends(get_authenticated_user)
+) -> list[WorkflowTemplateMetadata]:
+    result = await db.exec(
+        select(WorkflowTemplateMetadata)
+    )
+    return result.all()
+
+
+@router.post("/templates/import/{workflow_id}", status_code=status.HTTP_201_CREATED)
+async def import_workflow_template(
+    workflow_id: str,
+    db: AsyncSession = Depends(get_session),
+    user: AuthenticatedUser = Depends(get_authenticated_user)
+) -> str:
+    template_workflow = await get_workflow_impl(workflow_id, db, None, True)
+
+    # 1) Insert into workflow table
+    new_workflow = Workflow(
+        workflow_name=template_workflow.workflow_name,
+        workflow_description=template_workflow.workflow_description,
+        is_live=False,
+        user_id=user.user_id
+    )
+    db.add(new_workflow)
+    await db.flush()
+
+    # 2) Copy from action_node table and generate webhook secrets
+    template_action_id_to_new_action_id = {}
+
+    for action in template_workflow.actions:
+        # Copy action and replace IDs
+        new_action = ActionNode(
+            workflow_id=new_workflow.workflow_id,
+            action_name=action.action_name,
+            reference_handle=action.reference_handle,
+            action_type=action.action_type,
+            action_description=action.action_description,
+            x_position=action.x_position,
+            y_position=action.y_position,
+            action_definition=action.action_definition
+        )
+
+        db.add(new_action)
+        await db.flush()
+
+        if action.action_type == ActionType.WEBHOOK:
+            # Generate a new webhook
+            webhook_id = uuid.uuid4()
+            webhook_secret = hmac.new(settings.WEBHOOK_SIGNING_SECRET.encode(), webhook_id.bytes, hashlib.sha256)
+            webhook_secret = webhook_secret.hexdigest()
+
+            webhook = Webhook(
+                webhook_id=webhook_id,
+                webhook_secret=webhook_secret,
+                action_id=new_action.action_id,
+            )
+            db.add(webhook)
+            await db.flush()
+
+        template_action_id_to_new_action_id[action.action_id] = new_action.action_id
+
+    # 3) Copy from workflow_edge table
+    for edge in template_workflow.edges:
+        new_edge = WorkflowEdge(
+            parent_action_id=template_action_id_to_new_action_id[edge.parent_action_id],
+            child_action_id=template_action_id_to_new_action_id[edge.child_action_id],
+            edge_type=edge.edge_type,
+            parent_node_handle=edge.parent_node_handle,
+            child_node_handle=edge.child_node_handle,
+            workflow_id=new_workflow.workflow_id
+        )
+
+        db.add(new_edge)
+        await db.flush()
+
+    await db.commit()
+
+    return new_workflow.workflow_id

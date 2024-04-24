@@ -41,6 +41,8 @@ export class AdmyralStack extends cdk.Stack {
 							DATABASE_URL:
 								process.env.DATABASE_URL_WITH_ASYNCPG!,
 							JWT_SECRET: process.env.JWT_SECRET!,
+							WEBHOOK_SIGNING_SECRET:
+								process.env.WEBHOOK_SIGNING_SECRET!,
 						},
 					},
 					cpu: 512,
@@ -87,6 +89,8 @@ export class AdmyralStack extends cdk.Stack {
 								process.env.DATABASE_CONNECTION_POOL_SIZE!,
 							CREDENTIALS_SECRET: process.env.CREDENTIALS_SECRET!,
 							OPENAI_API_KEY: process.env.OPENAI_API_KEY!,
+							RESEND_API_KEY: process.env.RESEND_API_KEY!,
+							RESEND_EMAIL: process.env.RESEND_EMAIL!,
 						},
 					},
 					cpu: 512,

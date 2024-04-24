@@ -158,3 +158,11 @@ export type WorkflowData = {
 	actions: ActionData[];
 	edges: EdgeData[];
 };
+
+export type WorkflowTemplate = {
+	workflowId: string;
+	templateHeadline: string;
+	templateDescription: string;
+	category: string;
+	icon: string;
+};

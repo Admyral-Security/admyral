@@ -7,7 +7,7 @@ import {
 } from "@/utils/utils";
 import { redirect } from "next/navigation";
 import { encrypt } from "./crypto";
-import { WorkflowData } from "./types";
+import { WorkflowData, WorkflowTemplate } from "./types";
 
 async function getAccessToken() {
 	const supabase = createClient();
@@ -335,4 +335,46 @@ export async function triggerWorkflowFromAction(
 	if (result.status !== 202) {
 		throw new Error("Failed to trigger workflow!");
 	}
+}
+
+export async function loadWorkflowTemplates(): Promise<WorkflowTemplate[]> {
+	const accessToken = await getAccessToken();
+
+	const result = await fetch(
+		`${process.env.BACKEND_API_URL}/api/v1/workflows/templates/list`,
+		{
+			method: "GET",
+			headers: {
+				Authorization: `Bearer ${accessToken}`,
+			},
+		},
+	);
+	if (result.status !== 200) {
+		throw new Error("Failed to load workflow templates!");
+	}
+
+	const templates = await result.json();
+	return transformObjectKeysToCamelCase(templates);
+}
+
+export async function importWorkflowFromTemplate(
+	templateWorkflowId: string,
+): Promise<void> {
+	const accessToken = await getAccessToken();
+
+	const result = await fetch(
+		`${process.env.BACKEND_API_URL}/api/v1/workflows/templates/import/${templateWorkflowId}`,
+		{
+			method: "POST",
+			headers: {
+				Authorization: `Bearer ${accessToken}`,
+			},
+		},
+	);
+	if (result.status !== 201) {
+		throw new Error("Failed to import workflow from template!");
+	}
+
+	const workflowId = await result.json();
+	redirect(`/workflows/${workflowId}`);
 }

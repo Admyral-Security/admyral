@@ -52,21 +52,24 @@ class Workflow(Base, table=True):
     workflow_id: str = Field(primary_key=True, sa_type=UUID(as_uuid=False), sa_column_kwargs=dict(server_default=func.gen_random_uuid()))
     workflow_name: str = Field(sa_type=TEXT())
     workflow_description: str = Field(sa_type=TEXT())
-    is_live: bool
+    is_live: bool = Field(default=False)
     created_at: datetime = Field(sa_type=TIMESTAMP(), sa_column_kwargs=dict(server_default=func.now()))
 
+    # Note: we have a template workflow iff is_template is True and user_id is NULL
     user_id: str = Field(
         sa_column=Column(
             UUID(as_uuid=False),
             ForeignKey("admyral.user_profile.user_id", ondelete="CASCADE"),
-            nullable=False,
         ),
     )
+
+    is_template: bool = Field(default=False)
 
     user: UserProfile = Relationship(back_populates="workflows")
 
     actions: list["ActionNode"] = Relationship(back_populates="workflow", sa_relationship_kwargs=dict(cascade="all, delete"))
     workflow_runs: list["WorkflowRun"] = Relationship(back_populates="workflow", sa_relationship_kwargs=dict(cascade="all, delete"))
+    workflow_template_metadata: "WorkflowTemplateMetadata" = Relationship(back_populates="workflow", sa_relationship_kwargs=dict(cascade="all, delete"))
 
 
 class ActionNode(Base, table=True):
@@ -181,3 +184,22 @@ class WorkflowRunActionState(Base, table=True):
 
     workflow_run: WorkflowRun = Relationship(back_populates="workflow_run_action_states")
     action_node: ActionNode = Relationship(back_populates="workflow_run_action_states")
+
+
+class WorkflowTemplateMetadata(Base, table=True):
+    __tablename__ = "workflow_template_metadata"
+
+    workflow_id: str = Field(
+        sa_column=Column(
+            UUID(as_uuid=False),
+            ForeignKey("admyral.workflow.workflow_id", ondelete="CASCADE"),
+            nullable=False,
+            primary_key=True,
+        )
+    )
+    template_headline: str = Field(sa_type=TEXT())
+    template_description: str = Field(sa_type=TEXT())
+    category: str = Field(sa_type=TEXT())
+    icon: str = Field(sa_type=TEXT())
+
+    workflow: Workflow = Relationship(back_populates="workflow_template_metadata")
