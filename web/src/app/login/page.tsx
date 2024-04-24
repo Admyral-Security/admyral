@@ -3,7 +3,14 @@
 import { login, signup } from "./actions";
 import { useState } from "react";
 import Link from "next/link";
-import { Button, Flex, Grid, Separator, Text } from "@radix-ui/themes";
+import {
+	Button,
+	Flex,
+	Grid,
+	Separator,
+	Text,
+	TextField,
+} from "@radix-ui/themes";
 import GoogleIcon from "@/components/icons/google-icon";
 import GithubIcon from "@/components/icons/github-icon";
 import LogoWithName from "@/components/icons/logo-with-name";
@@ -45,9 +52,17 @@ export default function LoginPage() {
 	};
 
 	return (
-		<div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8 gap-4">
-			<div className="flex items-center justify-center flex-row gap-4">
-				<LogoWithName />
+		<Flex
+			direction="column"
+			justify="center"
+			align="center"
+			gap="4"
+			minHeight="100vh"
+		>
+			<div className="sm:mx-auto sm:w-full sm:max-w-sm">
+				<Flex justify="start" align="center">
+					<LogoWithName />
+				</Flex>
 			</div>
 
 			<div className="sm:mx-auto sm:w-full sm:max-w-sm">
@@ -64,7 +79,7 @@ export default function LoginPage() {
 							}
 							aria-current={isSignIn ? "page" : undefined}
 						>
-							Sign in
+							Log in
 						</button>
 					</li>
 					<li className="me-2">
@@ -79,7 +94,7 @@ export default function LoginPage() {
 							}
 							aria-current={!isSignIn ? "page" : undefined}
 						>
-							Register
+							Sign up
 						</button>
 					</li>
 				</ul>
@@ -90,12 +105,13 @@ export default function LoginPage() {
 					<div>
 						<label htmlFor="email">Email</label>
 						<div className="mt-2">
-							<input
+							<TextField.Root
+								size="3"
+								variant="surface"
 								id="email"
 								name="email"
 								type="email"
 								required
-								className="block w-full rounded-md border-0 px-2 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-800 sm:text-sm sm:leading-6"
 							/>
 						</div>
 					</div>
@@ -103,41 +119,27 @@ export default function LoginPage() {
 					<div>
 						<label htmlFor="password">Password</label>
 						<div className="mt-2">
-							<input
+							<TextField.Root
+								size="3"
+								variant="surface"
 								id="password"
 								name="password"
 								type="password"
 								required
-								className="block w-full rounded-md border-0 px-2 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-800 sm:text-sm sm:leading-6"
 							/>
 						</div>
 					</div>
 
 					<div>
-						<button
+						<Button
 							type="submit"
-							className={`flex w-full items-center justify-center rounded-md bg-blue-800 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm ${isLoading ? "" : "hover:bg-blue-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-800"}`}
-							disabled={isLoading}
+							size="4"
+							variant="solid"
+							loading={isLoading}
+							style={{ width: "100%", cursor: "pointer" }}
 						>
-							{isLoading ? (
-								<div className="flex flex-row items-center space-x-2">
-									<span
-										className="animate-spin inline-block w-4 h-4 border-[3px] border-current border-t-transparent text-white rounded-full"
-										role="status"
-										aria-label="loading"
-									></span>
-									<span>
-										{isSignIn
-											? "Signing in..."
-											: "Registering..."}
-									</span>
-								</div>
-							) : isSignIn ? (
-								"Sign in"
-							) : (
-								"Register"
-							)}
-						</button>
+							{isSignIn ? "Log in" : "Sign up"}
+						</Button>
 					</div>
 				</form>
 			</div>
@@ -191,8 +193,8 @@ export default function LoginPage() {
 						}}
 					>
 						{isSignIn
-							? "Sign in with Google"
-							: "Log in with Google"}
+							? "Log in with Google"
+							: "Sign up with Google"}
 					</Text>
 				</Button>
 			</div>
@@ -225,11 +227,11 @@ export default function LoginPage() {
 						}}
 					>
 						{isSignIn
-							? "Sign in with GitHub"
-							: "Log in with GitHub"}
+							? "Log in with GitHub"
+							: "Sign up with GitHub"}
 					</Text>
 				</Button>
 			</div>
-		</div>
+		</Flex>
 	);
 }
