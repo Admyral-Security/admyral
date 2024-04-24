@@ -42,6 +42,7 @@ function buildInitialWorkflowGraph(
 			y: action.yPosition,
 		},
 		data: action,
+		selected: false,
 	}));
 
 	const edges = edgeData.map((edge) => ({

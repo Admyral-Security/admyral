@@ -95,22 +95,9 @@ function WorkflowBuilderEditor() {
 		getId: state.getId,
 	}));
 
-	// Node selection management
 	const addSelectedNodes = useStore((store) => store.addSelectedNodes);
-	const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
-	useOnSelectionChange({
-		onChange: ({ nodes, edges }) => {
-			if (nodes.length === 0) {
-				setSelectedNodeId(null);
-			} else {
-				setSelectedNodeId(nodes[0].id as string);
-			}
-		},
-	});
-
 	const closeActionDefinitionPanel = () => {
 		addSelectedNodes([]);
-		setSelectedNodeId(null);
 	};
 
 	const onDragOver = useCallback((event: any) => {
@@ -163,13 +150,14 @@ function WorkflowBuilderEditor() {
 					type,
 					position,
 					data,
+					selected: false,
 				} as Node<ActionData>,
 			]);
 		},
 		[reactFlowInstance, nodes, setNodes],
 	);
 
-	const selectNodeIdx = nodes.findIndex((node) => node.id === selectedNodeId);
+	const selectNodeIdx = nodes.findIndex((node) => node.selected);
 
 	return (
 		<>

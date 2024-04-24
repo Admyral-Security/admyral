@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n        SELECT action_id, workflow_id, action_name, reference_handle, action_type::text, action_definition\n        FROM admyral.action_node\n        WHERE workflow_id = $1\n        ",
+  "query": "\n        SELECT action_id, workflow_id, action_name, reference_handle, action_type::text as \"action_type!: String\", action_definition\n        FROM admyral.action_node\n        WHERE workflow_id = $1 AND action_id = $2\n        ",
   "describe": {
     "columns": [
       {
@@ -25,7 +25,7 @@
       },
       {
         "ordinal": 4,
-        "name": "action_type",
+        "name": "action_type!: String",
         "type_info": "Text"
       },
       {
@@ -36,6 +36,7 @@
     ],
     "parameters": {
       "Left": [
+        "Uuid",
         "Uuid"
       ]
     },
@@ -48,5 +49,5 @@
       false
     ]
   },
-  "hash": "6d2a1e0477241d6e781bb7065702a4917a5903d96881cd90531215e863daea6d"
+  "hash": "805417f4fbde08fdcfc80ca461a44299412ee57c5bbcfc1527822bef5e96c0bf"
 }
