@@ -9,6 +9,8 @@ import GithubIcon from "@/components/icons/github-icon";
 import LogoWithName from "@/components/icons/logo-with-name";
 import { createClient } from "@/utils/supabase/client";
 
+type OAuthProvider = "google" | "github";
+
 export default function LoginPage() {
 	const supabase = createClient();
 
@@ -28,10 +30,10 @@ export default function LoginPage() {
 		}
 	};
 
-	const handleGithubLogin = async () => {
+	const handleOAuthLogin = async (provider: OAuthProvider) => {
 		try {
 			const { error } = await supabase.auth.signInWithOAuth({
-				provider: "github",
+				provider,
 				options: {
 					redirectTo: `${window.location.origin}/auth/callback`,
 				},
@@ -179,7 +181,41 @@ export default function LoginPage() {
 							"0px 0px 3px 0px rgba(0, 0, 0, 0.08), 0px 2px 3px 0px rgba(0, 0, 0, 0.17)",
 						cursor: "pointer",
 					}}
-					onClick={() => handleGithubLogin()}
+					onClick={() => handleOAuthLogin("google")}
+				>
+					<GoogleIcon />
+					<Text
+						size="4"
+						style={{
+							color: "var(--Tokens-Colors-text, #1C2024)",
+						}}
+					>
+						{isSignIn
+							? "Sign in with Google"
+							: "Log in with Google"}
+					</Text>
+				</Button>
+			</div>
+
+			<div className="sm:mx-auto sm:w-full sm:max-w-sm">
+				<Button
+					style={{
+						width: "100%",
+						height: "auto",
+						display: "flex",
+						padding: "12px var(--Space-5, 24px)",
+						alignItems: "center",
+						justifyContent: "start",
+						gap: "var(--Space-5, 24px)",
+						alignSelf: "stretch",
+						borderRadius: "var(--Radius-4, 8px)",
+						border: "1px solid var(--Neutral-color-Neutral-5, #E4E4E9)",
+						background: "var(--Panel-solid, #FFF)",
+						boxShadow:
+							"0px 0px 3px 0px rgba(0, 0, 0, 0.08), 0px 2px 3px 0px rgba(0, 0, 0, 0.17)",
+						cursor: "pointer",
+					}}
+					onClick={() => handleOAuthLogin("github")}
 				>
 					<GithubIcon />
 					<Text
