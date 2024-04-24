@@ -1,5 +1,5 @@
 <p align="center">
-<img src="https://admyral-assets.s3.eu-central-1.amazonaws.com/admyral-title.svg">
+<img src="img/banner.svg" alt="admyral" />
 </p>
 <div align="center">
   <h3>An AI-Powered, Open-Source Torq</h3>
@@ -34,7 +34,7 @@ Admyral is an open-source, drag-and-drop security workflow builder with integrat
 This is what we call a next-gen Hyperautomation Platform. It is engineered to provide a new and more effective and scalable approach for tackling alert fatigue and automating security workflows.
 
 Here is a sneek-peak into the workflow builder:
-<img src="https://admyral-assets.s3.eu-central-1.amazonaws.com/admyral-github-screen.svg">
+<img src="img/product_screen.svg" alt="admyral" />
 
 ## 🗺️ Key Features & Roadmap
 
