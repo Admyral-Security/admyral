@@ -1,0 +1,9 @@
+{
+	"index": "Introduction",
+	"contact": {
+		"title": "Contact Us ↗",
+		"type": "page",
+		"href": "mailto:chris@admyral.com",
+		"newWindow": true
+	}
+}
