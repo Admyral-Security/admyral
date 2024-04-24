@@ -1,5 +1,5 @@
 <p align="center">
-<img src="./img/banner.svg" alt="admyral" />
+<img src="../img/banner.svg" alt="admyral" />
 </p>
 
 
