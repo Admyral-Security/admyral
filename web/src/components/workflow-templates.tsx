@@ -148,7 +148,7 @@ function WorkflowTemplatesDialog() {
 			<Grid columns="2" gap="4" mt="5">
 				{templates.map((template) => (
 					<WorkflowTemplateCard
-						key={template.workflowId}
+						key={`workflow_templates_${template.workflowId}`}
 						workflowId={template.workflowId}
 						templateHeadline={template.templateHeadline}
 						templateDescription={template.templateDescription}
