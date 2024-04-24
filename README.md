@@ -12,9 +12,11 @@
       <a href="https://discord.gg/GqbJZT9Hbf"><strong>Discord</strong></a>
   </div>
   <div>
-      <img alt="Discord" src="https://img.shields.io/discord/1222168064573968454?logo=Discord&logoColor=%23FFFFFF">
-      <img alt="License" src="https://img.shields.io/badge/License-Apache%202.0-blue">
-      <img src="https://img.shields.io/badge/Status-alpha-blue">
+      [![Discord](https://img.shields.io/discord/1222168064573968454?logo=Discord&logoColor=%23FFFFFF&style=flat-square)](https://discord.gg/GqbJZT9Hbf)
+      ![Commit Activity](https://img.shields.io/github/commit-activity/m/Admyral-Security/admyral?style=flat-square&logo=github)
+      ![License](https://img.shields.io/badge/License-Apache%202.0-blue?style=flat-square&logo=apache)
+      ![Status](https://img.shields.io/badge/Status-alpha-blue?style=flat-square)
+
   </div>
 </div>
 
