@@ -4,6 +4,9 @@ import * as ecs from "aws-cdk-lib/aws-ecs";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as ecsPatterns from "aws-cdk-lib/aws-ecs-patterns";
 import * as iam from "aws-cdk-lib/aws-iam";
+import * as route53 from "aws-cdk-lib/aws-route53";
+import * as acm from "aws-cdk-lib/aws-certificatemanager";
+import * as elb2 from "aws-cdk-lib/aws-elasticloadbalancingv2";
 
 export class AdmyralStack extends cdk.Stack {
 	constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -27,6 +30,27 @@ export class AdmyralStack extends cdk.Stack {
 		const cluster = new ecs.Cluster(this, "AdmyralCluster", {
 			vpc,
 		});
+
+		const hostedZone = route53.HostedZone.fromLookup(
+			this,
+			"AdmyralHostedZone",
+			{
+				domainName: process.env.DOMAIN_NAME!,
+			},
+		);
+
+		// Backend service
+
+		const backendServiceDomain = `backend.${process.env.DOMAIN_NAME}`;
+
+		const backendServiceCertificate = new acm.Certificate(
+			this,
+			"AdmyralBackendServiceCertificate",
+			{
+				domainName: backendServiceDomain,
+				validation: acm.CertificateValidation.fromDns(hostedZone),
+			},
+		);
 
 		const backendService =
 			new ecsPatterns.ApplicationLoadBalancedFargateService(
@@ -54,6 +78,11 @@ export class AdmyralStack extends cdk.Stack {
 						cpuArchitecture: ecs.CpuArchitecture.ARM64,
 						operatingSystemFamily: ecs.OperatingSystemFamily.LINUX,
 					},
+					domainName: backendServiceDomain,
+					certificate: backendServiceCertificate,
+					domainZone: hostedZone,
+					redirectHTTP: true,
+					protocol: elb2.ApplicationProtocol.HTTPS,
 				},
 			);
 
@@ -70,6 +99,19 @@ export class AdmyralStack extends cdk.Stack {
 			interval: cdk.Duration.seconds(30),
 			timeout: cdk.Duration.seconds(10),
 		});
+
+		// Workflow runner service
+
+		const workflowRunnerServiceDomain = `runner.${process.env.DOMAIN_NAME}`;
+
+		const workflowRunnerServiceCertificate = new acm.Certificate(
+			this,
+			"AdmyralWorkflowRunnerServiceCertificate",
+			{
+				domainName: workflowRunnerServiceDomain,
+				validation: acm.CertificateValidation.fromDns(hostedZone),
+			},
+		);
 
 		const workflowRunnerService =
 			new ecsPatterns.ApplicationLoadBalancedFargateService(
@@ -102,6 +144,11 @@ export class AdmyralStack extends cdk.Stack {
 						cpuArchitecture: ecs.CpuArchitecture.ARM64,
 						operatingSystemFamily: ecs.OperatingSystemFamily.LINUX,
 					},
+					domainName: workflowRunnerServiceDomain,
+					certificate: workflowRunnerServiceCertificate,
+					domainZone: hostedZone,
+					redirectHTTP: true,
+					protocol: elb2.ApplicationProtocol.HTTPS,
 				},
 			);
 
