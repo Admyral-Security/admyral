@@ -94,7 +94,7 @@ impl ActionExecutor for AiAction {
         let prompt = resolve_references(&json!(self.prompt), context).await?;
         let prompt = prompt.as_str().unwrap().to_string();
 
-        let max_tokens = 300;
+        let max_tokens = 500;
         let response = self
             .model
             .openai_chat_completion(&prompt, max_tokens)
