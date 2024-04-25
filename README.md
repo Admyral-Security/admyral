@@ -68,8 +68,9 @@ Here is a sneek-peak into the workflow builder:
 
 ### Hosting
 
+-   [X] Cloud version
 -   [ ] Self-hosting
--   [ ] Cloud version
+
 
 ### Misc
 
