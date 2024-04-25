@@ -5,7 +5,10 @@ from sqlalchemy.ext.asyncio import create_async_engine
 from app.config import settings 
 
 
-engine = create_async_engine(settings.DATABASE_URL, echo=True, future=True)
+# TODO: https://github.com/MagicStack/asyncpg/issues/309
+# => <class 'asyncpg.exceptions.ConnectionDoesNotExistError'>: connection was closed in the middle of operation
+# setting pool_pre_ping=True for now. let's monitor whether this works
+engine = create_async_engine(settings.DATABASE_URL, echo=True, future=True, pool_pre_ping=True)
 
 
 # async def init_db():
