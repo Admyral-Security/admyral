@@ -5,7 +5,7 @@
 
 # Admyral Docs
 
-Based on [Nextra](https://nextra.site/).
+Docs are based on [Nextra](https://nextra.site/).
 
 ## Local Development
 

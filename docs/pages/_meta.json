@@ -1,5 +1,12 @@
 {
 	"index": "Introduction",
+	"quickstart": "Quickstart",
+	"setup": "Setup",
+	"workflows": "Workflows",
+	"actions": "Actions",
+	"credentials": "Credentials",
+	"account_settings": "Account Settings",
+	"security": "Security",
 	"contact": {
 		"title": "Contact Us ↗",
 		"type": "page",
