@@ -63,6 +63,7 @@ export default function IfCondition({ id }: IfConditionProps) {
 					variant="surface"
 					resize="vertical"
 					value={data.actionDescription}
+					style={{ height: "250px" }}
 					onChange={(event) => {
 						const clonedData = cloneDeep(data);
 						clonedData.actionDescription = event.target.value;

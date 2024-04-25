@@ -371,6 +371,7 @@ export default function WorkflowBuilder({ workflowId }: WorkflowBuilderProps) {
 								variant="surface"
 								resize="vertical"
 								value={workflowData.workflowDescription}
+								style={{ height: "250px" }}
 								onChange={(event) =>
 									setWorkflowData({
 										...workflowData,
