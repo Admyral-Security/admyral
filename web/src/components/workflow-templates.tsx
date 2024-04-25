@@ -14,6 +14,7 @@ import RightArrowIcon from "./icons/right-arrow-icon";
 import { importWorkflowFromTemplate, loadWorkflowTemplates } from "@/lib/api";
 import { useEffect, useState } from "react";
 import { WorkflowTemplate } from "@/lib/types";
+import Image from "next/image";
 
 interface WorkflowTemplateCardProps {
 	workflowId: string;
@@ -26,6 +27,8 @@ interface WorkflowTemplateCardProps {
 function getIcon(icon: string) {
 	switch (icon) {
 		default:
+			// TODO: use <Image />
+			// return <Image src="/logo.svg" alt="Admyral" />;
 			return <img src="/logo.svg" alt="Admyral" />;
 	}
 }

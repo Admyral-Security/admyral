@@ -1,14 +1,14 @@
 "use client";
 
-import Logo from "@/components/icons/logo";
 import Link from "next/link";
 import { resetPassowrd } from "./actions";
+import LogoWithName from "@/components/icons/logo-with-name";
 
 export default function ForgotPasswordPage() {
 	return (
 		<div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8 gap-4">
 			<div className="flex items-center justify-center flex-row gap-4">
-				<Logo /> <p className="text-4xl">Admyral</p>
+				<LogoWithName />
 			</div>
 
 			<div className="sm:mx-auto sm:w-full sm:max-w-sm">

@@ -180,13 +180,14 @@ export default function TermsOfServicePage() {
 					other technology developed in connection with any
 					implementation services as set out in an Order Form
 					(“Implementation Services”) or support, (d) all workflows
-					that you creates using the Services (the "Stories"), and (e)
-					all intellectual property rights related to any of the
-					foregoing. Except as expressly stated herein, these Terms do
-					not grant you any rights to, under or in, any patents,
-					copyright, database right, trade secrets, trade names, trade
-					marks (whether registered or unregistered), or any other
-					rights or licenses in respect of the Services.
+					that you creates using the Services (the
+					&quot;Stories&quot;), and (e) all intellectual property
+					rights related to any of the foregoing. Except as expressly
+					stated herein, these Terms do not grant you any rights to,
+					under or in, any patents, copyright, database right, trade
+					secrets, trade names, trade marks (whether registered or
+					unregistered), or any other rights or licenses in respect of
+					the Services.
 				</Text>
 			</Flex>
 

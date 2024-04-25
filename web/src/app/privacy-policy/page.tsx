@@ -33,12 +33,12 @@ export default function PrivacyPolicyPage() {
 					Admyral Technologies GmbH ( “Admyral”, “we”, “our” and “us”)
 					of Augustenstr. 74, 80333, Munich, Germany. Admyral respects
 					your right to data protection and privacy. This Privacy
-					Notice ("Notice") sets out the basis on which we use,
-					process, store or disclose any personal information about
-					you ("Personal Data"), as detailed below, that we collect
-					from you or that you provide to us through the Website. The
-					Personal Data provided by you will be held by Admyral as a
-					controller.
+					Notice (&quot;Notice&quot;) sets out the basis on which we
+					use, process, store or disclose any personal information
+					about you (&quot;Personal Data&quot;), as detailed below,
+					that we collect from you or that you provide to us through
+					the Website. The Personal Data provided by you will be held
+					by Admyral as a controller.
 				</Text>
 
 				<br />
