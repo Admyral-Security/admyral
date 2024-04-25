@@ -7,7 +7,7 @@
 
 <div align="center">
   <div>
-      <a href="https://admyral-docs.vercel.app/"><strong>Docs</strong></a> ·
+      <a href="https://docs.admyral.dev/"><strong>Docs</strong></a> ·
       <a href="https://discord.gg/GqbJZT9Hbf"><strong>Discord</strong></a>
   </div>
   <div>

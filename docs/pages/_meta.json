@@ -10,7 +10,7 @@
 	"contact": {
 		"title": "Contact Us ↗",
 		"type": "page",
-		"href": "mailto:chris@admyral.com",
+		"href": "mailto:chris@admyral.dev",
 		"newWindow": true
 	}
 }
