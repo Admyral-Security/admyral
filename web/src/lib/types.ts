@@ -166,3 +166,19 @@ export type WorkflowTemplate = {
 	category: string;
 	icon: string;
 };
+
+export type WorkflowRun = {
+	runId: string;
+	startedAt: string;
+	completeddAt: string | null;
+	actionStateCount: number;
+};
+
+export type WorkflowRunEvent = {
+	actionStateId: string;
+	createdAt: string;
+	actionType: ActionNode;
+	actionName: string;
+	actionState: Record<string, any>;
+	prevActionStateId: string | null;
+};

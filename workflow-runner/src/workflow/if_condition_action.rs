@@ -249,7 +249,7 @@ pub struct IfCondition {
 impl ActionExecutor for IfCondition {
     /// Resolve reference possible in lhs, rhs
     /// Returns JSON of the following form: { "condition_result": <condition-evaluation-result> }
-    async fn execute(&self, context: &Context) -> Result<Option<serde_json::Value>> {
+    async fn execute(&self, context: &Context) -> Result<serde_json::Value> {
         let mut result = true;
 
         for condition_expression in &self.conditions {
@@ -260,9 +260,9 @@ impl ActionExecutor for IfCondition {
             }
         }
 
-        Ok(Some(json!({
+        Ok(json!({
             "condition_result": result
-        })))
+        }))
     }
 }
 

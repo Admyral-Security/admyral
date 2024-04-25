@@ -171,7 +171,13 @@ async fn post_trigger_workflow_handler(
     };
     let start_reference_handle = match action_opt {
         None => return (StatusCode::NOT_FOUND, "Action does not exist."),
-        Some(action) => action.reference_handle,
+        Some(action) => {
+            if action.action_type != "WEBHOOK" && request.payload.is_some() {
+                return (StatusCode::BAD_REQUEST, "Triggering workflow action with initial payload is only allowed with webhook actions!");
+            }
+
+            action.reference_handle
+        }
     };
 
     enqueue_workflow_job(

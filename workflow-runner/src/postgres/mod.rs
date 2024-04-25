@@ -125,35 +125,48 @@ pub async fn init_run_state(pool: &Pool<Postgres>, workflow_id: &str) -> Result<
     Ok(run_state.run_id)
 }
 
+#[derive(sqlx::FromRow, Debug)]
+struct WorkflowRunActionStateRow {
+    action_state_id: String,
+}
+
 /// Assumption: run state for workflow_id exists
 pub async fn persist_action_run_state(
     pool: &Pool<Postgres>,
     run_id: &str,
     action_id: &str,
+    prev_action_state_id: Option<&str>,
     action_state: serde_json::Value,
-) -> Result<()> {
+) -> Result<String> {
     tracing::info!("Persisting action run state - run_id = {run_id}, action_id = {action_id}");
 
     let run_uuid = str_to_uuid(run_id)?;
     let action_uuid = str_to_uuid(action_id)?;
+    let prev_action_state_uuid = match prev_action_state_id {
+        None => None,
+        Some(id) => Some(str_to_uuid(id)?),
+    };
 
-    sqlx::query!(
+    let row: WorkflowRunActionStateRow = sqlx::query_as!(
+        WorkflowRunActionStateRow,
         r#"
-        INSERT INTO admyral.workflow_run_action_state ( action_state, run_id, action_id )
-        VALUES ( $1, $2, $3 )
+        INSERT INTO admyral.workflow_run_action_state ( action_state, run_id, action_id, prev_action_state_id)
+        VALUES ( $1, $2, $3, $4 )
+        RETURNING action_state_id
         "#,
         action_state,
         run_uuid,
-        action_uuid
+        action_uuid,
+        prev_action_state_uuid
     )
-    .execute(pool)
+    .fetch_one(pool)
     .await?;
 
     tracing::info!(
         "Finished persisting action run state - run_id = {run_id}, action_id = {action_id}"
     );
 
-    Ok(())
+    Ok(row.action_state_id)
 }
 
 pub async fn mark_run_state_as_completed(pool: &Pool<Postgres>, run_id: &str) -> Result<()> {

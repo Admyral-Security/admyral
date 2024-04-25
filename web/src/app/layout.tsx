@@ -6,7 +6,7 @@ import { inter } from "./fonts";
 
 export const metadata: Metadata = {
 	title: "Admyral",
-	description: "Next-gen SOAR",
+	description: "Next-gen Security Automation",
 	icons: [
 		{
 			rel: "icon",

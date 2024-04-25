@@ -181,6 +181,7 @@ class WorkflowRunActionState(Base, table=True):
             nullable=False
         )
     )
+    prev_action_state_id: Optional[str] = Field(sa_type=UUID(as_uuid=False), nullable=True)
 
     workflow_run: WorkflowRun = Relationship(back_populates="workflow_run_action_states")
     action_node: ActionNode = Relationship(back_populates="workflow_run_action_states")

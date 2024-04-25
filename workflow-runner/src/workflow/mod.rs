@@ -40,7 +40,7 @@ impl EdgeType {
 
 #[enum_dispatch]
 pub trait ActionExecutor {
-    async fn execute(&self, context: &context::Context) -> Result<Option<serde_json::Value>>;
+    async fn execute(&self, context: &context::Context) -> Result<serde_json::Value>;
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -56,7 +56,7 @@ pub enum ActionNode {
 impl ActionNode {
     fn from(action_type: &str, action_definition: serde_json::Value) -> Result<Self> {
         match action_type {
-            "WEBHOOK" => Ok(Self::Webhook(webhook_action::Webhook)),
+            "WEBHOOK" => Ok(Self::Webhook(webhook_action::Webhook::default())),
             "HTTP_REQUEST" => Ok(Self::HttpRequest(serde_json::from_value::<
                 http_request_action::HttpRequest,
             >(action_definition)?)),
@@ -159,25 +159,31 @@ pub async fn run_workflow(
     trigger_event: Option<serde_json::Value>,
     pg_pool: Arc<Pool<Postgres>>,
 ) -> Result<()> {
-    let workflow = Workflow::load_from_db(&workflow_id, pg_pool.borrow()).await?;
+    let mut workflow = Workflow::load_from_db(&workflow_id, pg_pool.borrow()).await?;
 
     if !workflow.is_live {
         // Workflow is offline
         return Ok(());
     }
 
-    let mut executor = match trigger_event {
-        Some(event) => {
-            WorkflowExecutor::init_with_initial_payload(
-                pg_pool,
-                workflow,
-                start_node_reference_handle,
-                event,
-            )
-            .await?
+    // if a trigger event exists, inject trigger event into webhook (note: only possible from webhooks for now)
+    if let Some(initial_event) = trigger_event {
+        let action = workflow
+            .actions
+            .get_mut(&start_node_reference_handle)
+            .expect("Start node reference handle does not exist!");
+        if let ActionNode::Webhook(webhook_action) = &mut action.node {
+            webhook_action.set_input(initial_event);
+        } else {
+            tracing::error!("Trying to run workflow {workflow_id} from non-webhook action type with initial data!");
+            return Err(anyhow!(
+                "Trying to run workflow from non-webhook action type with initial data!"
+            ));
         }
-        None => WorkflowExecutor::init(pg_pool, workflow, start_node_reference_handle).await?,
-    };
+    }
+
+    let mut executor =
+        WorkflowExecutor::init(pg_pool, workflow, start_node_reference_handle).await?;
     executor.execute().await?;
     Ok(())
 }

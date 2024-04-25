@@ -39,7 +39,7 @@ pub struct HttpRequest {
 
 impl ActionExecutor for HttpRequest {
     /// Reference resolution possible in payload, headers value, url
-    async fn execute(&self, context: &Context) -> Result<Option<serde_json::Value>> {
+    async fn execute(&self, context: &Context) -> Result<serde_json::Value> {
         // Resolve references in the URL for dynamic URL construction or secrets
         let url = resolve_references(&json!(self.url), context)
             .await?
@@ -103,10 +103,10 @@ impl ActionExecutor for HttpRequest {
             json!(response_text)
         };
 
-        Ok(Some(json!({
+        Ok(json!({
             "status": status,
             "headers": headers,
             "body": body
-        })))
+        }))
     }
 }

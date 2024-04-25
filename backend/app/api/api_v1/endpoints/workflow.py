@@ -2,15 +2,16 @@ from typing import Optional
 
 from fastapi import APIRouter, Depends, status, HTTPException
 from sqlmodel.ext.asyncio.session import AsyncSession
-from sqlmodel import select, and_
+from sqlmodel import select, and_, func
 from sqlalchemy.orm import aliased
 from pydantic import BaseModel
 import uuid
 import hmac
 import hashlib
+from datetime import datetime
 
 from app.deps import AuthenticatedUser, get_authenticated_user, get_session
-from app.models import Workflow, ActionNode, Webhook, WorkflowEdge, WorkflowTemplateMetadata
+from app.models import Workflow, ActionNode, Webhook, WorkflowEdge, WorkflowTemplateMetadata, WorkflowRun, WorkflowRunActionState
 from app.schema import ActionType, EdgeType
 from app.config import settings
 
@@ -547,3 +548,86 @@ async def import_workflow_template(
     await db.commit()
 
     return new_workflow.workflow_id
+
+
+class WorkflowRunEntry(BaseModel):
+    run_id: str
+    started_at: datetime
+    completed_at: Optional[datetime]
+    action_state_count: int
+
+
+@router.get("/{workflow_id}/runs", status_code=status.HTTP_200_OK)
+async def get_workflow_runs(
+    workflow_id: str,
+    db: AsyncSession = Depends(get_session),
+    user: AuthenticatedUser = Depends(get_authenticated_user)
+) -> list[WorkflowRunEntry]:
+    # get all run_ids together with the started timestamp and sort by started timestamp in DESC order
+    result = await db.exec(
+        select(
+                WorkflowRun,
+                func.count(WorkflowRunActionState.action_state_id).label("action_state_count")                
+            )
+            .join(Workflow)
+            .join(WorkflowRunActionState)
+            .where(WorkflowRun.workflow_id == workflow_id)
+            .where(Workflow.user_id == user.user_id)
+            .group_by(WorkflowRun)
+            .order_by(WorkflowRun.started_timestamp.desc())
+    )
+    workflow_runs = result.all()
+    return list(
+        map(
+            lambda run: WorkflowRunEntry(
+                run_id=run.WorkflowRun.run_id,
+                started_at=run.WorkflowRun.started_timestamp,
+                completed_at=run.WorkflowRun.completed_timestamp,
+                action_state_count=run.action_state_count
+            ),
+            workflow_runs
+        )
+    )
+
+
+class WorkflowRunEvent(BaseModel):
+    action_state_id: str
+    created_at: datetime
+    action_name: str
+    action_type: ActionType
+    action_state: dict
+    prev_action_state_id: Optional[str]
+
+
+@router.get("/{workflow_id}/runs/{run_id}", status_code=status.HTTP_200_OK)
+async def get_workflow_run_events(
+    workflow_id: str,
+    run_id: str,
+    db: AsyncSession = Depends(get_session),
+    user: AuthenticatedUser = Depends(get_authenticated_user)
+) -> list[WorkflowRunEvent]:
+    await raise_if_workflow_not_exists_for_user(db, workflow_id, user.user_id)
+
+    result = await db.exec(
+        select(WorkflowRunActionState, ActionNode)
+            .join(ActionNode)
+            .join(WorkflowRun)
+            .where(WorkflowRun.workflow_id == workflow_id)
+            .where(WorkflowRun.run_id == run_id)
+            .order_by(WorkflowRunActionState.created_at.asc())
+    )
+    action_states = result.all()
+
+    return list(
+        map(
+            lambda action_state: WorkflowRunEvent(
+                action_state_id=action_state.WorkflowRunActionState.action_state_id,
+                created_at=action_state.WorkflowRunActionState.created_at,
+                action_name=action_state.ActionNode.action_name,
+                action_type=action_state.ActionNode.action_type,
+                action_state=action_state.WorkflowRunActionState.action_state,
+                prev_action_state_id=action_state.WorkflowRunActionState.prev_action_state_id
+            ),
+            action_states
+        )
+    )

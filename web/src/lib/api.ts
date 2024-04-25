@@ -7,7 +7,12 @@ import {
 } from "@/utils/utils";
 import { redirect } from "next/navigation";
 import { encrypt } from "./crypto";
-import { WorkflowData, WorkflowTemplate } from "./types";
+import {
+	WorkflowData,
+	WorkflowRun,
+	WorkflowRunEvent,
+	WorkflowTemplate,
+} from "./types";
 
 async function getAccessToken() {
 	const supabase = createClient();
@@ -377,4 +382,49 @@ export async function importWorkflowFromTemplate(
 
 	const workflowId = await result.json();
 	redirect(`/workflows/${workflowId}`);
+}
+
+export async function loadWorkflowRuns(
+	workflowId: string,
+): Promise<WorkflowRun[]> {
+	const accessToken = await getAccessToken();
+
+	const result = await fetch(
+		`${process.env.BACKEND_API_URL}/api/v1/workflows/${workflowId}/runs`,
+		{
+			method: "GET",
+			headers: {
+				Authorization: `Bearer ${accessToken}`,
+			},
+		},
+	);
+	if (result.status !== 200) {
+		throw new Error("Failed to load workflow runs!");
+	}
+
+	const workflowRuns = await result.json();
+	return transformObjectKeysToCamelCase(workflowRuns);
+}
+
+export async function loadWorkflowRunEvents(
+	workflowId: string,
+	runId: string,
+): Promise<WorkflowRunEvent[]> {
+	const accessToken = await getAccessToken();
+
+	const result = await fetch(
+		`${process.env.BACKEND_API_URL}/api/v1/workflows/${workflowId}/runs/${runId}`,
+		{
+			method: "GET",
+			headers: {
+				Authorization: `Bearer ${accessToken}`,
+			},
+		},
+	);
+	if (result.status !== 200) {
+		throw new Error("Failed to load workflow run traces!");
+	}
+
+	const traces = await result.json();
+	return transformObjectKeysToCamelCase(traces);
 }

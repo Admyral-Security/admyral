@@ -1,0 +1,6 @@
+.row:hover {
+	background-color: var(
+		--Neutral-color-Neutral-Alpha-4,
+		rgba(2, 2, 52, 0.08)
+	);
+}

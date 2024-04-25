@@ -28,12 +28,20 @@ impl Context {
         &mut self,
         reference_handle: &ReferenceHandle,
         action_id: &str,
+        prev_action_state_id: Option<&str>,
         output: serde_json::Value,
-    ) -> Result<()> {
+    ) -> Result<String> {
         self.execution_state
             .store(reference_handle.clone(), output.clone());
-        persist_action_run_state(self.pg_pool.borrow(), &self.run_id, action_id, output).await?;
-        Ok(())
+        let action_state_id = persist_action_run_state(
+            self.pg_pool.borrow(),
+            &self.run_id,
+            action_id,
+            prev_action_state_id,
+            output,
+        )
+        .await?;
+        Ok(action_state_id)
     }
 
     pub async fn complete_run(&self) -> Result<()> {

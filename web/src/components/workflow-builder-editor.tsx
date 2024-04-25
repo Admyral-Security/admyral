@@ -2,22 +2,14 @@ import ReactFlow, {
 	Background,
 	BackgroundVariant,
 	Controls,
-	useOnSelectionChange,
 	ReactFlowProvider,
 	useStore,
 	Node,
 } from "reactflow";
-import HttpRequestActionIcon from "./icons/http-request-action-icon";
-import WebhookActionIcon from "./icons/webhook-action-icon";
-import TransformActionIcon from "./icons/transform-action-icon";
-import IfConditionActionIcon from "./icons/if-condition-action-icon";
-import AiActionsIcon from "./icons/ai-actions-icon";
-import SendEmailActionIcon from "./icons/send-email-action-icon";
 import "reactflow/dist/style.css";
 import { useCallback, useState } from "react";
 import WebhookNode from "./workflow-graph/webhook-node";
 import HttpRequestNode from "./workflow-graph/http-request-node";
-import ReceiveEmailActionIcon from "./icons/receive-email-action-icon";
 import DirectedEdgeComponent from "./workflow-graph/edge";
 import AiActionNode from "./workflow-graph/ai-action-node";
 import SendEmailNode from "./workflow-graph/send-email-node";
@@ -38,27 +30,7 @@ import SendEmail from "./action-editing/send-email";
 import { initActionData } from "@/lib/workflows";
 import useWorkflowStore from "@/lib/workflow-store";
 import EditorSideBar from "./workflow-builder-editor-side-bar";
-
-function actionNodeTypeToIcon(actionNode: ActionNode) {
-	switch (actionNode) {
-		case ActionNode.WEBHOOK:
-			return <WebhookActionIcon />;
-		case ActionNode.HTTP_REQUEST:
-			return <HttpRequestActionIcon />;
-		case ActionNode.TRANSFORM:
-			return <TransformActionIcon />;
-		case ActionNode.IF_CONDITION:
-			return <IfConditionActionIcon />;
-		case ActionNode.AI_ACTION:
-			return <AiActionsIcon />;
-		case ActionNode.SEND_EMAIL:
-			return <SendEmailActionIcon />;
-		case ActionNode.RECEIVE_EMAIL:
-			return <ReceiveEmailActionIcon />;
-		default:
-			return null;
-	}
-}
+import ActionNodeIcon from "./action-node-icon";
 
 const nodeTypes = {
 	[ActionNode.WEBHOOK]: WebhookNode,
@@ -186,9 +158,11 @@ function WorkflowBuilderEditor() {
 					title={getActionNodeLabel(
 						nodes[selectNodeIdx].type as ActionNode,
 					)}
-					titleIcon={actionNodeTypeToIcon(
-						nodes[selectNodeIdx].type as ActionNode,
-					)}
+					titleIcon={
+						<ActionNodeIcon
+							actionType={nodes[selectNodeIdx].type as ActionNode}
+						/>
+					}
 					onIconClick={closeActionDefinitionPanel}
 					zIndex={100}
 				>

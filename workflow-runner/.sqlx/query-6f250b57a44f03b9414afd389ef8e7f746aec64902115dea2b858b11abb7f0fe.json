@@ -1,0 +1,25 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        INSERT INTO admyral.workflow_run_action_state ( action_state, run_id, action_id, prev_action_state_id)\n        VALUES ( $1, $2, $3, $4 )\n        RETURNING action_state_id\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "action_state_id",
+        "type_info": "Uuid"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Jsonb",
+        "Uuid",
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "6f250b57a44f03b9414afd389ef8e7f746aec64902115dea2b858b11abb7f0fe"
+}

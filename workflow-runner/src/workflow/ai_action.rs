@@ -90,7 +90,7 @@ pub struct AiAction {
 
 impl ActionExecutor for AiAction {
     /// Outputs: {"output": "<llm-response>"}
-    async fn execute(&self, context: &Context) -> Result<Option<serde_json::Value>> {
+    async fn execute(&self, context: &Context) -> Result<serde_json::Value> {
         let prompt = resolve_references(&json!(self.prompt), context).await?;
         let prompt = prompt.as_str().unwrap().to_string();
 
@@ -100,9 +100,9 @@ impl ActionExecutor for AiAction {
             .openai_chat_completion(&prompt, max_tokens)
             .await?;
 
-        Ok(Some(json!({
+        Ok(json!({
             "output": response
-        })))
+        }))
     }
 }
 

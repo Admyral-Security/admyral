@@ -29,7 +29,7 @@ pub struct SendEmail {
 }
 
 impl ActionExecutor for SendEmail {
-    async fn execute(&self, context: &Context) -> Result<Option<serde_json::Value>> {
+    async fn execute(&self, context: &Context) -> Result<serde_json::Value> {
         let recipients = self
             .recipients
             .iter()
@@ -81,6 +81,6 @@ impl ActionExecutor for SendEmail {
             return Err(anyhow!("Failed to send email!"));
         }
 
-        Ok(Some(body))
+        Ok(body)
     }
 }

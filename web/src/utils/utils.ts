@@ -27,8 +27,8 @@ export function transformObjectKeysToCamelCase(data: any): any {
 }
 
 function toSnakeCase(s: string): string {
-	return s.replace(/([a-z][A-Z])/g, ($2) => {
-		return `${$2[0].toLowerCase()}_${$2[1].toLowerCase()}`;
+	return s.replace(/([a-z][A-Z])/g, ($1) => {
+		return `${$1[0].toLowerCase()}_${$1[1].toLowerCase()}`;
 	});
 }
 

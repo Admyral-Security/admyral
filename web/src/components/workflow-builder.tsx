@@ -338,7 +338,9 @@ export default function WorkflowBuilder({ workflowId }: WorkflowBuilderProps) {
 
 			<Box height="100%" width="100%">
 				{view === "workflowBuilder" && <WorkflowBuilderEditor />}
-				{view === "runHistory" && <WorkflowBuilderRunHistory />}
+				{view === "runHistory" && (
+					<WorkflowBuilderRunHistory workflowId={workflowId} />
+				)}
 			</Box>
 
 			{openSettings && (
