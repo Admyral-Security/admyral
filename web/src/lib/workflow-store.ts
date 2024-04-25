@@ -17,7 +17,10 @@ import {
 import { ActionData, EdgeType } from "./types";
 import { DirectedEdge } from "@/components/workflow-graph/edge";
 import { cloneDeep } from "lodash";
-import { IF_CONDITION_TRUE_BRANCH_HANDLE_ID } from "@/components/workflow-graph/if-condition-node";
+import {
+	IF_CONDITION_FALSE_BRANCH_HANDLE_ID,
+	IF_CONDITION_TRUE_BRANCH_HANDLE_ID,
+} from "@/components/workflow-graph/if-condition-node";
 import { NEW_MARKER, initActionData } from "./workflows";
 
 type WorkflowState = {
@@ -97,7 +100,7 @@ const useWorkflowStore = create<WorkflowState>((set, get) => ({
 		if (connection.sourceHandle === IF_CONDITION_TRUE_BRANCH_HANDLE_ID) {
 			edgeType = EdgeType.TRUE;
 		}
-		if (connection.sourceHandle === IF_CONDITION_TRUE_BRANCH_HANDLE_ID) {
+		if (connection.sourceHandle === IF_CONDITION_FALSE_BRANCH_HANDLE_ID) {
 			edgeType = EdgeType.FALSE;
 		}
 
