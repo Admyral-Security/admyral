@@ -22,8 +22,6 @@
 
 </br>
 
-_Disclaimer_: Admyral is still in public alpha. If you'd like to use it within your company or try it out, reach out to us via [chris@admyral.dev](mailto:chris@admyral.dev) or directly on [Discord](https://discord.gg/GqbJZT9Hbf).
-
 Admyral is an open-source, drag-and-drop security workflow builder with integrated case management (Think Torq but open-source). Through the combination of case management, workflow automation, and AI, Admyral seeks to enable:
 
 1. A unified console to handle incidents 🖥️
@@ -132,6 +130,8 @@ We are open-source for the following reasons:
 We love open-source. Therfore, Admyral stays committed to keep all open-sourced features freely available under the same open-source terms and maintain them. However, future premium features may only be part of our enterprise version. For specific requirements, please reach out to us via [chris@admyral.dev](mailto:chris@admyral.dev).
 
 ## 🏙️ Enterprise Version
+
+_Disclaimer_: Admyral is still in public alpha. If you'd like to use it within your company or try it out, reach out to us via [chris@admyral.dev](mailto:chris@admyral.dev) or directly on [Discord](https://discord.gg/GqbJZT9Hbf).
 
 As of now, our project does not have a dedicated Enterprise version.
 If you represent an MSSP or an Enterprise and would like to discuss potential collaborations with Admyral, please do not hesitate to reach out directly at [chris@admyral.dev](mailto:chris@admyral.dev) to start a conversation.
