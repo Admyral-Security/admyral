@@ -1,0 +1,6 @@
+{
+    "webhook": "Webhook",
+    "http_request": "HTTP Request",
+    "condition": "Condition",
+    "ai_action": "AI Action"
+}
