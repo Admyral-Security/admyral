@@ -7,6 +7,7 @@
 
 <div align="center">
   <div>
+      <a href="https://admyral.dev/login"><strong>Login</strong></a> ·
       <a href="https://docs.admyral.dev/"><strong>Docs</strong></a> ·
       <a href="https://discord.gg/GqbJZT9Hbf"><strong>Discord</strong></a>
   </div>
@@ -29,6 +30,8 @@ Admyral is an open-source, drag-and-drop security workflow builder with integrat
 3. Automatic next step and workflow recommendations for individual cases 🤖
 
 This is what we call a next-gen Hyperautomation Platform. It is engineered to provide a new and more effective and scalable approach for tackling alert fatigue and automating security workflows.
+
+→ → → [Try out the free cloud version](https://admyral.dev/login) ← ← ←
 
 Here is a sneek-peak into the workflow builder:
 <img src="img/product_screen.svg" alt="admyral" />
