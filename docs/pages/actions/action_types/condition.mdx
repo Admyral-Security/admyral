@@ -1,0 +1,110 @@
+# If-Condition
+
+The If-Condition action serves as a decision node in the Workflow Builder, allowing for the branching of workflow paths based on evaluated conditions. 
+This is particularly useful in security workflows, where actions must be determined by the nature of the threat or status reported by a system.
+
+## Adding an If-Condition in Workflow Builder
+To implement decision-based logic in your workflows, the If-Condition action is used to create a fork in the process, directing the flow toward 
+different actions depending on whether the set condition evaluates to true or false.
+
+
+Each If-Condition in the Workflow Builder has two paths:
+
+- **True Path**: The direction the workflow takes if the condition evaluates to true.
+- **False Path**: The direction the workflow takes if the condition evaluates to false.
+
+*Note: It is possible to only use one of the above paths.*
+
+
+TODO: Add image 
+
+
+## Configurable Fields for If-Condition
+
+The following table lists the fields that can be configured for an If-Condition:
+
+| Field              | Description                                                                           | Configurable |
+|--------------------|---------------------------------------------------------------------------------------|:------------:|
+| **Name**           | Identifies the condition and its purpose within the workflow.                          |      Yes     |
+| **Reference Handle** | Serves as an identifier for the condition in code or integration points.              |      -     |
+| **Description**    | Provides details about the condition's purpose and how it influences the workflow.    |      Yes     |
+| **IF**             | The logical expression which compares two values (first text field, last text field) with operators such as 'equals', 'not equals', 'greater than', etc.    |      Yes     |
+
+
+### The IF-Field Explained
+
+TODO Add image
+
+* You enter the data point you are evaluating
+* Select a logical operator:
+    * equals
+    * does not equals
+    * is great than
+    * is great than or equal to
+    * is less than
+    * is less than or equal to
+* Below each logical operator, there is a value field where you define the value that the data point is being compared to.
+* Through clicking on the "+" on the bottom you can add more conditions. This is used to add additional conditions that must also be true for the action 
+to follow the 'True' path.
+
+
+
+## Examples of If-Condition
+
+### Example 1: Alert Severity Check
+
+* **Name**: `Check Alert Severity`
+* **Description**: `Determines if an alert's severity level is 'High' and directs the workflow based on this condition.`
+* **Value1**: `alert_severity`
+* **Condition**: `equals`
+* **Value2**: `High`
+
+Path in the Workflow:
+* **True Path**: `Immediate Escalation Action`
+* **False Path**: `Standard Review Process`
+
+
+### Example 2: Validate Incident Report Completion
+
+* **Name**: `Incident Report Completion Check`
+* **Description**: `Evaluates whether an incident report has been completed within the required timeframe.`
+* **Value1**: `status`
+* **Condition**: `equals`
+* **Value2**: `Completed`
+* **AND**
+* **Value1**: `completed_within_SLA`
+* **Condition**: `equals`
+* **Value2**: `true`
+
+Path in the Workflow:
+* **True Path**: `Close Incident Ticket`
+* **False Path**: `Escalate to Incident Manager`
+
+
+### Example 3: System Health status
+
+* **Name**: `System Health Check`
+* **Description**: `Assesses the system's health status and decides the next action based on stability.`
+* **Value1**: `system_status`
+* **Condition**: `equals`
+* **Value**: `Stable`
+
+Path in the Workflow:
+* **True Path**: `Maintain Normal Operations`
+* **False Path**: `Initiate Recovery Protocols`
+
+
+### Example 4: Check for Security Patch Application
+* **Name**: `Security Patch Application Verification`
+* **Description**: `Confirms if a security patch has been applied to vulnerable systems.`
+* **Value1**: `patch_status`
+* **Condition**: `equals`
+* **Value**: `Applied`
+
+Path in the Workflow:
+* **True Path**: `Log Patch Success`
+* **False Path**: `Attempt Patch Reapply`
+
+
+In these examples, the If-Condition action allows security workflows to make automated decisions based on the current status or outcome of a 
+given security process, enhancing the workflow's efficiency and effectiveness.
