@@ -48,7 +48,7 @@ export class AdmyralStack extends cdk.Stack {
 			"AdmyralBackendServiceCertificate",
 			{
 				domainName: backendServiceDomain,
-				validation: acm.CertificateValidation.fromDns(hostedZone),
+				validation: acm.CertificateValidation.fromDns(),
 			},
 		);
 
@@ -81,7 +81,7 @@ export class AdmyralStack extends cdk.Stack {
 					domainName: backendServiceDomain,
 					certificate: backendServiceCertificate,
 					domainZone: hostedZone,
-					redirectHTTP: true,
+					redirectHTTP: false,
 					protocol: elb2.ApplicationProtocol.HTTPS,
 				},
 			);
@@ -147,7 +147,7 @@ export class AdmyralStack extends cdk.Stack {
 					domainName: workflowRunnerServiceDomain,
 					certificate: workflowRunnerServiceCertificate,
 					domainZone: hostedZone,
-					redirectHTTP: true,
+					redirectHTTP: false,
 					protocol: elb2.ApplicationProtocol.HTTPS,
 				},
 			);

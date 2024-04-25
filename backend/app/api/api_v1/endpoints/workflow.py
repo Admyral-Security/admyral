@@ -115,7 +115,7 @@ class WorkflowListEntry(BaseModel):
     is_live: bool
 
 
-@router.get("/", status_code=status.HTTP_200_OK)
+@router.get("", status_code=status.HTTP_200_OK)
 async def get_workflows(
     db: AsyncSession = Depends(get_session),
     user: AuthenticatedUser = Depends(get_authenticated_user)

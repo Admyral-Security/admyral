@@ -5,10 +5,14 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 from sqlalchemy.orm import sessionmaker
 from sqlmodel import select
 from pydantic import BaseModel
+import logging
 
 from app.config import settings
 from app.db import engine
 from app.models import UserProfile
+
+
+logger = logging.getLogger(__name__)
 
 
 async def get_session() -> AsyncSession:
@@ -39,9 +43,11 @@ async def get_authenticated_user(
     )
 
     if not api_key:
+        logger.error("Missing API key")
         raise credentials_exception
     
     if not api_key.startswith("Bearer "):
+        logger.error("Invalid API key format. Does not start with Bearer")
         raise credentials_exception
     
     token = api_key.split(" ")[1]
@@ -64,7 +70,8 @@ async def get_authenticated_user(
             email=email,
             role=role
         )
-    except JWTError:
+    except JWTError as e:
+        logger.error(f"Error decoding token: {e}")
         raise credentials_exception
 
     # check whether the user exists in user_profile
@@ -72,12 +79,14 @@ async def get_authenticated_user(
     user_profile = results.one_or_none()
 
     if not user_profile:
+        logger.error("User does not exist in user_profile")
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="User does not exist"
         )
 
     if not user_profile.email_confirmed_at:
+        logger.error("Email not confirmed")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Email not confirmed"

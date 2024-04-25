@@ -74,7 +74,7 @@ async def delete_credential(
 
 
 @router.get(
-    "/",
+    "",
     status_code=status.HTTP_200_OK
 )
 async def list_credentials(

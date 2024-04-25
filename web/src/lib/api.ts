@@ -55,6 +55,7 @@ export async function listWorkflows() {
 	const result = await fetch(
 		`${process.env.BACKEND_API_URL}/api/v1/workflows`,
 		{
+			method: "GET",
 			cache: "no-store",
 			headers: {
 				Authorization: `Bearer ${token}`,
