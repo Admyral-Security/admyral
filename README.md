@@ -23,7 +23,7 @@
 
 </br>
 
-_Disclaimer_: Admyral is still in public alpha. If you'd like to use it within your company or try it out, reach out to us via [chris@admyral.com](mailto:chris@admyral.com) or directly on [Discord](https://discord.gg/GqbJZT9Hbf).
+_Disclaimer_: Admyral is still in public alpha. If you'd like to use it within your company or try it out, reach out to us via [chris@admyral.dev](mailto:chris@admyral.dev) or directly on [Discord](https://discord.gg/GqbJZT9Hbf).
 
 Admyral is an open-source, drag-and-drop security workflow builder with integrated case management (Think Torq but open-source). Through the combination of case management, workflow automation, and AI, Admyral seeks to enable:
 
@@ -118,7 +118,7 @@ Visit [SECURITY.md](https://github.com/Admyral-Security/admyral/blob/main/SECURI
 
 #### What does your pricing look like?
 
-As Admyral is still in its public alpha phase, we have not finalized a specific pricing structure yet. We invite interested organizations to reach out directly via email at [chris@admyral.com](mailto:chris@admyral.com) or [Discord](https://discord.gg/GqbJZT9Hbf) to discuss potential use cases and explore custom pricing options based on their needs and the scale of implementation.
+As Admyral is still in its public alpha phase, we have not finalized a specific pricing structure yet. We invite interested organizations to reach out directly via email at [chris@admyral.dev](mailto:chris@admyral.dev) or [Discord](https://discord.gg/GqbJZT9Hbf) to discuss potential use cases and explore custom pricing options based on their needs and the scale of implementation.
 
 #### Why is Admyral open-source?
 
@@ -130,12 +130,12 @@ We are open-source for the following reasons:
 
 #### Does Admyral stay open-source?
 
-We love open-source. Therfore, Admyral stays committed to keep all open-sourced features freely available under the same open-source terms and maintain them. However, future premium features may only be part of our enterprise version. For specific requirements, please reach out to us via [chris@admyral.com](mailto:chris@admyral.com).
+We love open-source. Therfore, Admyral stays committed to keep all open-sourced features freely available under the same open-source terms and maintain them. However, future premium features may only be part of our enterprise version. For specific requirements, please reach out to us via [chris@admyral.dev](mailto:chris@admyral.dev).
 
 ## 🏙️ Enterprise Version
 
 As of now, our project does not have a dedicated Enterprise version.
-If you represent an MSSP or an Enterprise and would like to discuss potential collaborations with Admyral, please do not hesitate to reach out directly at [chris@admyral.com](mailto:chris@admyral.com) to start a conversation.
+If you represent an MSSP or an Enterprise and would like to discuss potential collaborations with Admyral, please do not hesitate to reach out directly at [chris@admyral.dev](mailto:chris@admyral.dev) to start a conversation.
 We are excited about the possibility of working together to meet your specific business needs and to expand the capabilities of our project in a way that benefits your organization.
 
 ## 📃 License
