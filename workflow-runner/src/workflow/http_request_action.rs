@@ -54,10 +54,13 @@ impl ActionExecutor for HttpRequest {
             .iter()
             .map(|key_value_pair| async move {
                 let resolved_value =
-                    resolve_references(&json!(&key_value_pair.value), context).await?;
+                    resolve_references(&json!(&key_value_pair.value), context).await?
+                    .as_str()
+                    .expect("Header value must be a string!")
+                    .to_string();
                 Ok((
                     HeaderName::from_str(&key_value_pair.key),
-                    HeaderValue::from_str(&resolved_value.to_string()),
+                    HeaderValue::from_str(&resolved_value),
                 ))
             })
             .collect::<Vec<_>>();
