@@ -52,31 +52,46 @@ function WorkflowTemplateCard({
 		<Card
 			style={{
 				width: "500px",
-				height: "100px",
+				height: "130px",
 				cursor: "pointer",
 			}}
 			onClick={handleImportWorkflow}
 		>
-			<Grid columns="76px 1fr" height="100%" gap="4">
-				<Card
-					style={{
-						padding: 0,
-						borderRadius: "var(--Radius-2, 4px)",
-					}}
+			<Grid
+				columns="76px 1fr"
+				height="100%"
+				gap="4"
+				justify="center"
+				align="start"
+			>
+				<Flex
+					height="100%"
+					width="100%"
+					justify="center"
+					align="center"
 				>
-					<Flex
+					<Card
 						style={{
-							backgroundColor:
-								"var(--Semantic-colors-Warning-Alpha-2, rgba(255, 170, 1, 0.07))",
-							width: "100%",
-							height: "100%",
+							padding: 0,
+							borderRadius: "var(--Radius-2, 4px)",
+							height: "80px",
+							width: "80px",
 						}}
-						justify="center"
-						align="center"
 					>
-						{getIcon(icon)}
-					</Flex>
-				</Card>
+						<Flex
+							style={{
+								backgroundColor:
+									"var(--Semantic-colors-Warning-Alpha-2, rgba(255, 170, 1, 0.07))",
+								width: "100%",
+								height: "100%",
+							}}
+							justify="center"
+							align="center"
+						>
+							{getIcon(icon)}
+						</Flex>
+					</Card>
+				</Flex>
 
 				<Flex direction="column" gap="1" justify="start" align="start">
 					<Flex gap="4" justify="start" align="center">
