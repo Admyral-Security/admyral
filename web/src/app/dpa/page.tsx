@@ -30,20 +30,6 @@ export default function DPAPage() {
 					Admyral and Customer are parties to a SaaS Services
 					Agreement, Terms of Service (and its exhibits), Order
 					Form(s) and/or other services/ordering documents which may
-					be amended from time to time (together, the “Agreement”) and
-					which may involve Admyral processing personal data (as a
-					processor) for and on behalf of the Customer (as a
-					controller).
-				</Text>
-			</Flex>
-
-			<Flex direction="column" width="80%">
-				<Heading>1. Subject Matter and Duration</Heading>
-
-				<Text>
-					Admyral and Customer are parties to a SaaS Services
-					Agreement, Terms of Service (and its exhibits), Order
-					Form(s) and/or other services/ordering documents which may
 					be amended from time to time (together, the
 					&quot;Agreement&quot;) and which may involve Admyral
 					processing personal data (as a processor) for and on behalf
