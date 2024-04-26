@@ -188,7 +188,7 @@ export async function listCredentials() {
 	const accessToken = await getAccessToken();
 
 	const result = await fetch(
-		`${process.env.BACKEND_API_URL}/api/v1/credentials/`,
+		`${process.env.BACKEND_API_URL}/api/v1/credentials`,
 		{
 			method: "GET",
 			headers: {
