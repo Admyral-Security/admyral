@@ -8,19 +8,30 @@ function toCamelCase(s: string): string {
 	});
 }
 
-export function transformObjectKeysToCamelCase(data: any): any {
+export enum TransformType {
+	DEEP = "DEEP",
+	TOP_LEVEL_ONLY = "TOP_LEVEL_ONLY",
+}
+
+export function transformObjectKeysToCamelCase(
+	data: any,
+	transformType: TransformType = TransformType.DEEP,
+): any {
 	if (isObject(data)) {
 		const newObject = {} as Record<string, any>;
 		Object.keys(data).forEach((key) => {
-			newObject[toCamelCase(key)] = transformObjectKeysToCamelCase(
-				data[key],
-			);
+			newObject[toCamelCase(key)] =
+				transformType === TransformType.TOP_LEVEL_ONLY
+					? data[key]
+					: transformObjectKeysToCamelCase(data[key]);
 		});
 		return newObject;
 	}
 
 	if (Array.isArray(data) && data !== null) {
-		return data.map((datum) => transformObjectKeysToCamelCase(datum));
+		return data.map((element) =>
+			transformObjectKeysToCamelCase(element, transformType),
+		);
 	}
 
 	return data;
