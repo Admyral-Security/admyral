@@ -26,10 +26,20 @@ interface WorkflowTemplateCardProps {
 
 function getIcon(icon: string) {
 	switch (icon) {
+		case "VirusTotal":
+			return (
+				<Image
+					src="/virustotal-icon.svg"
+					alt="VirusTotal"
+					height="32"
+					width="32"
+				/>
+			);
+
 		default:
-			// TODO: use <Image />
-			// return <Image src="/logo.svg" alt="Admyral" />;
-			return <img src="/logo.svg" alt="Admyral" />;
+			return (
+				<Image src="/logo.svg" alt="Admyral" height="32" width="32" />
+			);
 	}
 }
 
