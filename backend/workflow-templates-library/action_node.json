@@ -1,0 +1,89 @@
+[
+	{
+		"action_id": "43a89fe6-87c4-46a9-8ac9-d1511a5e0b18",
+		"workflow_id": "593fff82-22cd-4b6d-b887-92a11d39546d",
+		"action_name": "Search hash in VirusTotal",
+		"reference_handle": "search_hash_in_virustotal",
+		"action_type": "HTTP_REQUEST",
+		"action_description": "TODOs to make this action work:\n\n1. Create a VirusTotal account (https://www.virustotal.com/) and get your API key (expand your profile in the top right corner and click on \"APIKey\")\n\n2. In Admyral, go to Settings and store the API key with the following name: virus_total_api_key",
+		"action_definition": {
+			"url": "https://www.virustotal.com/api/v3/files/<<webhook.body.hash>>",
+			"method": "GET",
+			"headers": [
+				{
+					"key": "x-apikey",
+					"value": "<<CREDENTIAL.virus_total_api_key>>"
+				}
+			],
+			"payload": "",
+			"content_type": "application/json"
+		},
+		"created_at": "2024-04-26 09:41:24.574773",
+		"x_position": 573,
+		"y_position": 292
+	},
+	{
+		"action_id": "491186dd-e578-4821-97b7-cd1edf099400",
+		"workflow_id": "593fff82-22cd-4b6d-b887-92a11d39546d",
+		"action_name": "Webhook",
+		"reference_handle": "webhook",
+		"action_type": "WEBHOOK",
+		"action_description": "The workflow expects the data to be triggered as a POST request with the following HTTP request body:\n\n{\n    \"hash\": \"<file-hash-here>\"\n}\n\nExample cURL:\n\ncurl -d '{\"hash\": \"8d3f68b16f0710f858d8c1d2c699260e6f43161a5510abb0e7ba567bd72c965b\"}' \\\n  -H \"Content-Type: application/json\" \"<webhook-url-here>\"",
+		"action_definition": {},
+		"created_at": "2024-04-26 09:41:24.553952",
+		"x_position": 571.527777004281,
+		"y_position": 95.6481486638126
+	},
+	{
+		"action_id": "35fdf04f-e87a-45eb-84b7-ab1d80b6df30",
+		"workflow_id": "593fff82-22cd-4b6d-b887-92a11d39546d",
+		"action_name": "Check if hash was found",
+		"reference_handle": "check_if_hash_was_found",
+		"action_type": "IF_CONDITION",
+		"action_description": "VirusTotal returns HTTP status 200 if the hash is found.",
+		"action_definition": {
+			"conditions": [
+				{
+					"lhs": "<<search_hash_in_virustotal.status>>",
+					"rhs": "200",
+					"operator": "EQUALS"
+				}
+			]
+		},
+		"created_at": "2024-04-26 09:43:27.962646",
+		"x_position": 571,
+		"y_position": 469
+	},
+	{
+		"action_id": "6643991d-a261-432f-bae0-bac4a382dac8",
+		"workflow_id": "593fff82-22cd-4b6d-b887-92a11d39546d",
+		"action_name": "Summarize VirusTotal Findings",
+		"reference_handle": "summarize_virustotal_findings",
+		"action_type": "AI_ACTION",
+		"action_description": "We use GPT-4 to summarize the result from VirusTotal as a report.",
+		"action_definition": {
+			"model": "gpt-4-turbo",
+			"prompt": "As a security analyst, create a high-level and short summary of the subsequent findings regarding a file hash.\n\nHere are the findings for the file hash:\n\n<<search_hash_in_virustotal.body>>\n"
+		},
+		"created_at": "2024-04-26 09:43:27.973654",
+		"x_position": 541,
+		"y_position": 659
+	},
+	{
+		"action_id": "d9a1a65e-0d14-41de-8967-fce331d5acfb",
+		"workflow_id": "593fff82-22cd-4b6d-b887-92a11d39546d",
+		"action_name": "Send File Hash Analysis Report",
+		"reference_handle": "send_file_hash_analysis_report",
+		"action_type": "SEND_EMAIL",
+		"action_description": "TODOs to make this action work:\n\n- put your email below into recipients\n",
+		"action_definition": {
+			"body": "Hi there!\n\nHere is the report for the file hash \"<<webhook.body.hash>>\":\n\n<<summarize_virustotal_findings.output>>",
+			"subject": "File Hash Analysis for <<webhook.body.hash>>",
+			"recipients": [],
+			"sender_name": "Admyral"
+		},
+		"created_at": "2024-04-26 09:43:27.98453",
+		"x_position": 540,
+		"y_position": 856
+	}
+]

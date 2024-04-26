@@ -1,0 +1,11 @@
+[
+	{
+		"workflow_id": "593fff82-22cd-4b6d-b887-92a11d39546d",
+		"workflow_name": "File Hash Analysis with VirusTotal",
+		"workflow_description": "",
+		"is_live": false,
+		"created_at": "2024-04-25 22:34:11.754249",
+		"user_id": null,
+		"is_template": true
+	}
+]

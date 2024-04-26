@@ -1,0 +1,9 @@
+[
+	{
+		"workflow_id": "593fff82-22cd-4b6d-b887-92a11d39546d",
+		"template_headline": "File Hash Analysis with VirusTotal",
+		"template_description": "Analyze your file hashes using VirusTotal and receive an AI-generated findings report via email",
+		"category": "Threat Intelligence",
+		"icon": "VirusTotal"
+	}
+]

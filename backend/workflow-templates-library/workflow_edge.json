@@ -1,0 +1,30 @@
+[
+	{
+		"parent_action_id": "491186dd-e578-4821-97b7-cd1edf099400",
+		"child_action_id": "43a89fe6-87c4-46a9-8ac9-d1511a5e0b18",
+		"edge_type": "DEFAULT",
+		"parent_node_handle": null,
+		"child_node_handle": null
+	},
+	{
+		"parent_action_id": "43a89fe6-87c4-46a9-8ac9-d1511a5e0b18",
+		"child_action_id": "35fdf04f-e87a-45eb-84b7-ab1d80b6df30",
+		"edge_type": "DEFAULT",
+		"parent_node_handle": null,
+		"child_node_handle": null
+	},
+	{
+		"parent_action_id": "35fdf04f-e87a-45eb-84b7-ab1d80b6df30",
+		"child_action_id": "6643991d-a261-432f-bae0-bac4a382dac8",
+		"edge_type": "TRUE",
+		"parent_node_handle": "ifConditionTrueBranch",
+		"child_node_handle": null
+	},
+	{
+		"parent_action_id": "6643991d-a261-432f-bae0-bac4a382dac8",
+		"child_action_id": "d9a1a65e-0d14-41de-8967-fce331d5acfb",
+		"edge_type": "DEFAULT",
+		"parent_node_handle": null,
+		"child_node_handle": null
+	}
+]
