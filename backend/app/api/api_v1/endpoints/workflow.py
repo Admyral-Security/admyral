@@ -302,7 +302,7 @@ async def update_workflow(
     workflow.is_live = request.workflow.is_live
 
     db.add(workflow)
-    await db.commit()
+    await db.flush()
 
     # 2) Update actions & webhooks
     output_actions = []
@@ -322,7 +322,7 @@ async def update_workflow(
                 y_position=action.y_position
             )
             db.add(new_action)
-            await db.commit()
+            await db.flush()
             temp_ids_to_new_action_ids[action.action_id] = new_action.action_id
 
             if action.action_type == ActionType.WEBHOOK:
@@ -332,7 +332,7 @@ async def update_workflow(
                     webhook_secret=action.secret
                 )
                 db.add(webhook)
-                await db.commit()
+                await db.flush()
 
             action.action_id = new_action.action_id
         else:
@@ -353,7 +353,7 @@ async def update_workflow(
             existing_action.y_position = action.y_position
 
             db.add(existing_action)
-            await db.commit()
+            await db.flush()
 
         output_actions.append(action)
 
@@ -374,7 +374,7 @@ async def update_workflow(
                 child_node_handle=edge.child_node_handle
             )
             db.add(workflow_edge)
-            await db.commit()
+            await db.flush()
 
             edge.parent_action_id = parent_action_id
             edge.child_action_id = child_action_id
@@ -386,14 +386,16 @@ async def update_workflow(
         existing_edge = await query_edge(db, parent_action_id, child_action_id, workflow_id, user.user_id)
         if existing_edge:
             await db.delete(existing_edge)
-            await db.commit()
+            await db.flush()
 
     # 5) Delete nodes incl. their involved edges
     for deleted_node in request.deleted_nodes:
         existing_action = await query_action(db, deleted_node, workflow_id, user.user_id)
         if existing_action:
             await db.delete(existing_action)
-            await db.commit()
+            await db.flush()
+
+    await db.commit()
 
     # Create updated workflow data
     workflow_data = request.workflow
