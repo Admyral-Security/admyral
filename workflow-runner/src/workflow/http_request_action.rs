@@ -34,19 +34,19 @@ pub struct HttpRequest {
     method: HttpMethod,
     content_type: String,
     headers: Vec<KeyValuePair>,
-    payload: Option<serde_json::Value>,
+    payload: Option<String>,
 }
 
 impl ActionExecutor for HttpRequest {
     /// Reference resolution possible in payload, headers value, url
     async fn execute(&self, context: &Context) -> Result<serde_json::Value> {
         // Resolve references in the URL for dynamic URL construction or secrets
-        let url = resolve_references(&json!(self.url), context)
+        let url = resolve_references(&self.url, context)
             .await?
             .as_str()
             .unwrap()
             .to_string();
-
+        
         let client = REQ_CLIENT.clone();
 
         let headers_futures = self
@@ -54,7 +54,7 @@ impl ActionExecutor for HttpRequest {
             .iter()
             .map(|key_value_pair| async move {
                 let resolved_value =
-                    resolve_references(&json!(&key_value_pair.value), context).await?
+                    resolve_references(&key_value_pair.value, context).await?
                     .as_str()
                     .expect("Header value must be a string!")
                     .to_string();

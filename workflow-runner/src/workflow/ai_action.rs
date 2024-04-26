@@ -91,7 +91,7 @@ pub struct AiAction {
 impl ActionExecutor for AiAction {
     /// Outputs: {"output": "<llm-response>"}
     async fn execute(&self, context: &Context) -> Result<serde_json::Value> {
-        let prompt = resolve_references(&json!(self.prompt), context).await?;
+        let prompt = resolve_references(&self.prompt, context).await?;
         let prompt = prompt.as_str().unwrap().to_string();
 
         let max_tokens = 500;

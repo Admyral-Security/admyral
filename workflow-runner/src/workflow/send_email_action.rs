@@ -33,7 +33,7 @@ impl ActionExecutor for SendEmail {
         let recipients = self
             .recipients
             .iter()
-            .map(|recipient| async move { resolve_references(&json!(recipient), context).await })
+            .map(|recipient| async move { resolve_references(&recipient, context).await })
             .collect::<Vec<_>>();
         let recipients = join_all(recipients).await;
         let recipients: Result<Vec<serde_json::Value>> = recipients.into_iter().collect();
@@ -43,11 +43,11 @@ impl ActionExecutor for SendEmail {
             .map(|recipient| recipient.as_str().unwrap().to_string())
             .collect::<Vec<String>>();
 
-        let subject = resolve_references(&json!(self.subject), context).await?;
+        let subject = resolve_references(&self.subject, context).await?;
 
-        let body = resolve_references(&json!(self.body), context).await?;
+        let body = resolve_references(&self.body, context).await?;
 
-        let sender_name = resolve_references(&json!(self.sender_name), context).await?;
+        let sender_name = resolve_references(&self.sender_name, context).await?;
 
         let client = REQ_CLIENT.clone();
 

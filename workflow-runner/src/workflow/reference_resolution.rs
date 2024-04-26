@@ -2,7 +2,7 @@ use crate::postgres::fetch_secret;
 
 use super::context::Context;
 use anyhow::Result;
-use futures::future::{join_all, BoxFuture, FutureExt};
+use futures::future::join_all;
 use lazy_static::lazy_static;
 use regex::Regex;
 use serde_json::json;
@@ -22,14 +22,29 @@ fn json_value_to_string(value: &serde_json::Value) -> String {
         serde_json::Value::Array(arr) => format!(
             "[{}]",
             arr.iter()
-                .map(json_value_to_string)
+                .map(|v| {
+                    // Edge case: strings are the only value which must we wrapped in \"\" again
+                    if let serde_json::Value::String(s) = v {
+                        format!("\"{s}\"")
+                    } else {
+                        json_value_to_string(v)
+                    }
+                })
                 .collect::<Vec<_>>()
                 .join(", ")
         ),
         serde_json::Value::Object(obj) => format!(
             "{{ {} }}",
             obj.iter()
-                .map(|(k, v)| format!("\"{}\": {}", k, json_value_to_string(v)))
+                .map(|(k, v)| {
+                    // Edge case: strings are the only value which must we wrapped in \"\" again
+                    let value = if let serde_json::Value::String(s) = v {
+                        format!("\"{s}\"")
+                    } else {
+                        json_value_to_string(v)
+                    };
+                    format!("\"{}\": {}", k, value)
+                })
                 .collect::<Vec<_>>()
                 .join(", ")
         ),
@@ -37,117 +52,187 @@ fn json_value_to_string(value: &serde_json::Value) -> String {
     }
 }
 
-// TODO: handle reference marker escaping
-pub fn resolve_references<'a>(
-    value: &'a serde_json::Value,
-    context: &'a Context,
-) -> BoxFuture<'a, Result<serde_json::Value>> {
-    async move {
-        // For Object and Array, we traverse recursively to the string values since they contain
-        // the references.
-        match value {
-            serde_json::Value::Object(map) => {
-                let futures = map
-                    .iter()
-                    .map(|(key, val)| async {
-                        let resolved_reference = resolve_references(val, context).await?;
-                        Ok((key.clone(), resolved_reference))
-                    })
-                    .collect::<Vec<_>>();
-                let result = join_all(futures).await;
-                let result: Result<Vec<_>> = result.into_iter().collect();
-                let result = result?;
-                return Ok(serde_json::Value::Object(result.into_iter().collect()));
-            }
-            serde_json::Value::Array(arr) => {
-                let futures = arr
-                    .iter()
-                    .map(|val| async { Ok(resolve_references(val, context).await?) })
-                    .collect::<Vec<_>>();
-                let result = join_all(futures).await;
-                let result: Result<Vec<_>> = result.into_iter().collect();
-                let result = result?;
-                return Ok(serde_json::Value::Array(result));
-            }
-            serde_json::Value::String(_) => {
-                // don't break. continue in this case.
-            }
-            _ => return Ok(value.clone()),
-        }
+fn string_to_json_value(s: &str) -> Result<serde_json::Value> {
+        // Attempt to parse the input directly as JSON
+        serde_json::from_str(s).or_else(|_| {
+            // If the direct parsing fails, we interpret it as string
+            Ok(json!(s))
+        })
+}
 
-        let s = value.as_str().unwrap();
+pub async fn resolve_references(value: &str, context: &Context) -> Result<serde_json::Value> {
+    let mut total_length_of_references = 0;
+    let references = REFERENCE_REGEX
+        .find_iter(value)
+        .map(|reference_match| {
+            let result = reference_match.as_str();
+            total_length_of_references += result.len();
+            result
+        })
+        .collect::<HashSet<&str>>();
 
-        let mut total_length_of_references = 0;
-        let references = REFERENCE_REGEX
-            .find_iter(s)
-            .map(|reference_match| {
-                let result = reference_match.as_str();
-                total_length_of_references += result.len();
-                result
-            })
-            .collect::<HashSet<&str>>();
-
-        if references.is_empty() {
-            // Nothing to do here.
-            return Ok(value.clone());
-        }
-
-        let futures = references
-            .into_iter()
-            .map(|reference| async move {
-                let cleaned_reference = reference
-                    .replace("<<", "")
-                    .replace(">>", "")
-                    .trim()
-                    .to_string();
-
-                // TODO: handle formulas
-
-                // Credential access
-                if cleaned_reference.starts_with(CREDENTIAL_PREFIX) {
-                    let credential_name = &cleaned_reference[CREDENTIAL_PREFIX.len()..];
-                    let secret =
-                        match fetch_secret(&context.pg_pool, &context.workflow_id, credential_name)
-                            .await?
-                        {
-                            Some(secret) => secret,
-                            None => "".to_string(),
-                        };
-                    return Ok((reference, json!(secret)));
-                }
-
-                // Data reference
-                let resolved_reference = match context
-                    .execution_state
-                    .get_from_access_path(cleaned_reference)
-                {
-                    Some(result) => result,
-                    None => json!(""),
-                };
-                Ok((reference, resolved_reference))
-            })
-            .collect::<Vec<_>>();
-
-        let result = join_all(futures).await;
-        let result: Result<Vec<_>> = result.into_iter().collect();
-        let resolved_references = result?
-            .into_iter()
-            .collect::<HashMap<&str, serde_json::Value>>();
-
-        // Check whether s is exactly a single reference. then, there is no need for constructing an output string.
-        // E.g. we might want to reference a number type, then we leave the number type as is.
-        if resolved_references.len() == 1 && s.len() == total_length_of_references {
-            return Ok(resolved_references.into_iter().next().unwrap().1);
-        }
-
-        // If the input s is not exactly a single reference, then there is some context around the
-        // reference which is a text. Hence, the result type is again a string.
-        // We construct the output by replacing the references with the resolved values transformed into a string.
-        let mut output = s.to_string();
-        for (reference_key, resolved) in resolved_references {
-            output = output.replace(reference_key, &json_value_to_string(&resolved));
-        }
-        Ok(serde_json::Value::String(output))
+    if references.is_empty() {
+        // Nothing to do here.
+        return Ok(json!(value));
     }
-    .boxed()
+
+    let futures = references
+        .into_iter()
+        .map(|reference| async move {
+            let cleaned_reference = reference
+                .replace("<<", "")
+                .replace(">>", "")
+                .trim()
+                .to_string();
+
+            // TODO: handle formulas
+
+            // Credential access
+            if cleaned_reference.starts_with(CREDENTIAL_PREFIX) {
+                let credential_name = &cleaned_reference[CREDENTIAL_PREFIX.len()..];
+                let secret =
+                    match fetch_secret(&context.pg_pool, &context.workflow_id, credential_name)
+                        .await?
+                    {
+                        Some(secret) => secret,
+                        None => "".to_string(),
+                    };
+                return Ok((reference, secret));
+            }
+
+            // Data reference
+            let resolved_reference = match context
+                .execution_state
+                .get_from_access_path(cleaned_reference)
+            {
+                Some(result) => json_value_to_string(&result),
+                None => "".to_string(),
+            };
+            Ok((reference, resolved_reference))
+        })
+        .collect::<Vec<_>>();
+
+    let result = join_all(futures).await;
+    let result: Result<Vec<_>> = result.into_iter().collect();
+    let resolved_references = result?
+        .into_iter()
+        .collect::<HashMap<&str, String>>();
+
+    // Replace references
+    let mut output = value.to_string();
+    for (reference_key, resolved) in resolved_references {
+        output = output.replace(reference_key, &resolved);
+    }
+
+    // We transform the output to JSON again
+    Ok(string_to_json_value(&output)?)    
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_json_value_to_string() {
+        let value = json!({
+            "a": "abc",
+            "b": 123,
+            "c": {
+                "abc": ["e", "f", "g"]
+            }
+        });
+        let expected = "{ \"a\": \"abc\", \"b\": 123, \"c\": { \"abc\": [\"e\", \"f\", \"g\"] } }";
+        let result = json_value_to_string(&value);
+        assert_eq!(expected, result);
+
+        let value = json!("abcdefg");
+        let expected = "abcdefg";
+        let result = json_value_to_string(&value);
+        assert_eq!(expected, result);
+
+        let value = json!(["a", "b"]);
+        let expected = "[\"a\", \"b\"]";
+        let result = json_value_to_string(&value);
+        assert_eq!(expected, result);
+
+        let value = json!([123, 123, 123]);
+        let expected = "[123, 123, 123]";
+        let result = json_value_to_string(&value);
+        assert_eq!(expected, result);
+
+        let value = json!([{"a": "cedf"}, {"b": true}, {"d": ["abc"]}]);
+        let expected = "[{ \"a\": \"cedf\" }, { \"b\": true }, { \"d\": [\"abc\"] }]";
+        let result = json_value_to_string(&value);
+        assert_eq!(expected, result);
+
+        let value = json!(true);
+        let expected = "true";
+        let result = json_value_to_string(&value);
+        assert_eq!(expected, result);
+
+        let value = json!(1.23);
+        let expected = "1.23";
+        let result = json_value_to_string(&value);
+        assert_eq!(expected, result);
+
+        let value = json!(123);
+        let expected = "123";
+        let result = json_value_to_string(&value);
+        assert_eq!(expected, result);
+    }
+
+    #[test]
+    fn test_string_to_json_value() {
+        let value = "hello world";
+        let result = string_to_json_value(&value);
+        assert!(result.is_ok());
+        assert_eq!(json!(value.to_string()), result.unwrap());
+
+        let value = "hello world\nwhat's up?";
+        let result = string_to_json_value(&value);
+        assert!(result.is_ok());
+        assert_eq!(json!(value.to_string()), result.unwrap());
+
+        let value = "true";
+        let result = string_to_json_value(&value);
+        assert!(result.is_ok());
+        assert_eq!(json!(true), result.unwrap());
+
+        let value = "\"true\"";
+        let result = string_to_json_value(&value);
+        assert!(result.is_ok());
+        assert_eq!(json!("true"), result.unwrap());
+
+        let value = "100";
+        let result = string_to_json_value(&value);
+        assert!(result.is_ok());
+        assert_eq!(json!(100), result.unwrap());
+
+        let value = "\"100\"";
+        let result = string_to_json_value(&value);
+        assert!(result.is_ok());
+        assert_eq!(json!("100"), result.unwrap());
+
+        let value = "100.111";
+        let result = string_to_json_value(&value);
+        assert!(result.is_ok());
+        assert_eq!(json!(100.111), result.unwrap());
+
+        let value = "[\"a\",\"b\",\"c\"]";
+        let result = string_to_json_value(&value);
+        assert!(result.is_ok());
+        assert_eq!(json!(vec!["a", "b", "c"]), result.unwrap());
+
+        let value = "{\"a\": { \"b\": [\"1\", \"2\"] }, \"c\": 3, \"d\": true, \"e\": \"abc\" }";
+        let result = string_to_json_value(&value);
+        assert!(result.is_ok());
+        assert_eq!(json!({
+            "a": {
+                "b": vec!["1", "2"]
+            },
+            "c": 3,
+            "d": true,
+            "e": "abc"
+        }), result.unwrap());
+    }
 }

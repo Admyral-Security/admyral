@@ -30,8 +30,8 @@ impl std::fmt::Display for Operator {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ConditionExpression {
-    lhs: serde_json::Value,
-    rhs: serde_json::Value,
+    lhs: String,
+    rhs: String,
     operator: Operator,
 }
 
