@@ -61,7 +61,7 @@ pub async fn fetch_workflow_data(
         r#"
         SELECT workflow_id, workflow_name, is_live
         FROM admyral.workflow
-        WHERE workflow_id = $1
+        WHERE workflow_id = $1 AND is_template = false AND user_id IS NOT NULL
         LIMIT 1
         "#,
         workflow_uuid
@@ -312,7 +312,7 @@ pub async fn is_workflow_owned_by_user(
         r#"
         SELECT workflow_id
         FROM admyral.workflow
-        WHERE workflow_id = $1 AND user_id = $2
+        WHERE workflow_id = $1 AND user_id = $2 AND is_template = false
         "#,
         workflow_uuid,
         user_uuid
@@ -379,7 +379,7 @@ pub async fn fetch_secret(
         SELECT c.encrypted_secret
         FROM admyral.workflow w
         JOIN admyral.credential c ON w.user_id = c.user_id
-        WHERE c.credential_name = $1 AND w.workflow_id = $2
+        WHERE c.credential_name = $1 AND w.workflow_id = $2 AND w.user_id IS NOT NULL AND w.is_template = false
         "#,
         credential_name,
         workflow_uuid
