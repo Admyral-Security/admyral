@@ -5,5 +5,33 @@
 		"template_description": "Analyze your file hashes using VirusTotal and receive an AI-generated findings report via email",
 		"category": "Threat Intelligence",
 		"icon": "VirusTotal"
+	},
+	{
+		"workflow_id": "5cad63e0-8832-40eb-b5b0-8a55c12d1841",
+		"template_headline": "Initiate a takedown request in Phish Report",
+		"template_description": "Submit an URL to initiate a takedown request and receive a report via email using Phish Report",
+		"category": "Phishing",
+		"icon": "PhishReport"
+	},
+	{
+		"workflow_id": "9b8ac1fc-6906-46af-98d2-bb1710343c34",
+		"template_headline": "Get latest cybersecurity news from Threatpost",
+		"template_description": "Receive a summary of the latest cybersecurity news directly in your mailbox",
+		"category": "Threat Intelligence",
+		"icon": "Threatpost"
+	},
+	{
+		"workflow_id": "6a7c608e-f5f1-4fff-bdf7-fd41d8d93640",
+		"template_headline": "Run an IP check through multiple services",
+		"template_description": "Submit a suspicious IP address to analyze it using AbuselPDB, VirusTotal, GreyNoise, and Pulsedive and get an AI-generated report delivered via emal.",
+		"category": "Threat Intelligence",
+		"icon": "Admyral"
+	},
+	{
+		"workflow_id": "d9a319d0-4f25-4fe4-b0c7-5da2491c1ab8",
+		"template_headline": "File Hash Analysis with YARAify",
+		"template_description": "Submit a file hash to analyze it using Abuse's YARAify and receive an AI-generated report via email.",
+		"category": "Threat Intelligence",
+		"icon": "YARAify"
 	}
 ]

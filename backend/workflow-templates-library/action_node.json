@@ -85,5 +85,360 @@
 		"created_at": "2024-04-26 09:43:27.98453",
 		"x_position": 540,
 		"y_position": 856
+	},
+	{
+		"action_id": "34add83c-0651-464e-9f56-49ec6f426ec9",
+		"workflow_id": "9b8ac1fc-6906-46af-98d2-bb1710343c34",
+		"action_name": "Retrieve Threatpost feed",
+		"reference_handle": "retrieve_threatpost_feed",
+		"action_type": "HTTP_REQUEST",
+		"action_description": "Retrieve the feed from Threatpost",
+		"action_definition": {
+			"url": "https://threatpost.com/feed/",
+			"method": "GET",
+			"headers": [],
+			"payload": "",
+			"content_type": "application/json"
+		},
+		"created_at": "2024-04-26 18:26:45.775991",
+		"x_position": 916.478987874293,
+		"y_position": 91.9369636228784
+	},
+	{
+		"action_id": "bf2bfc82-2516-4135-aadd-30958d018a9b",
+		"workflow_id": "9b8ac1fc-6906-46af-98d2-bb1710343c34",
+		"action_name": "Retrieve News Summary",
+		"reference_handle": "retrieve_news_summary",
+		"action_type": "SEND_EMAIL",
+		"action_description": "Send the summarized news via email\n\nTODO: Add recipient for the workflow to work",
+		"action_definition": {
+			"body": "Here are the latest news:\n\n<<summarize_the_news.output>>",
+			"subject": "Your Threatpost Summary",
+			"recipients": [""],
+			"sender_name": "Admyral Threatpost Summary"
+		},
+		"created_at": "2024-04-26 18:26:45.796971",
+		"x_position": 915.957975748586,
+		"y_position": 506.021012125707
+	},
+	{
+		"action_id": "dbcfc2ba-28ea-4001-8fcc-852b75b19c40",
+		"workflow_id": "9b8ac1fc-6906-46af-98d2-bb1710343c34",
+		"action_name": "Summarize the news",
+		"reference_handle": "summarize_the_news",
+		"action_type": "AI_ACTION",
+		"action_description": "Use GPT4 to summarize the results from the HTTP action (the Threatpost feed)",
+		"action_definition": {
+			"model": "gpt-4-turbo",
+			"prompt": "Extract and summarize articles from the response containing multiple news items about cybersecurity. Focus on key details like event descriptions, the impact on affected entities, and relevant multimedia content. The summary should be concise and suitable for an email newsletter format. Only answer with the extraction/summary. Do not explain how you do it!\n\nDo it for the following feed:\n<<retrieve_threatpost_feed.body>>"
+		},
+		"created_at": "2024-04-26 18:26:45.786181",
+		"x_position": 917,
+		"y_position": 291.5
+	},
+	{
+		"action_id": "b8dfc74e-0e57-475f-86bb-c2777bf28e28",
+		"workflow_id": "d9a319d0-4f25-4fe4-b0c7-5da2491c1ab8",
+		"action_name": "Summarize YARAify Findings",
+		"reference_handle": "summarize_yaraify_findings",
+		"action_type": "AI_ACTION",
+		"action_description": "We use GPT-4 to summarize the result from YARAify as a report.",
+		"action_definition": {
+			"model": "gpt-4-turbo",
+			"prompt": "As a security analyst, create a high-level and short summary of the subsequent findings regarding a file hash.\n\nHere are the findings for the file hash:\n\n<<search_hash_in_yaraify.body>>\n"
+		},
+		"created_at": "2024-04-26 13:20:16.485067",
+		"x_position": 872.643120724447,
+		"y_position": 671.827245445373
+	},
+	{
+		"action_id": "17f69904-37a7-464d-8397-b2e2151c145a",
+		"workflow_id": "d9a319d0-4f25-4fe4-b0c7-5da2491c1ab8",
+		"action_name": "Search hash in YARAify",
+		"reference_handle": "search_hash_in_yaraify",
+		"action_type": "HTTP_REQUEST",
+		"action_description": "Query the API for a SHA256 hash\n\nYARAify Documentation:\nhttps://yaraify.abuse.ch/api/#query-filehash",
+		"action_definition": {
+			"url": "https://yaraify-api.abuse.ch/api/v1/",
+			"method": "POST",
+			"headers": [],
+			"payload": "{\n  \"query\": \"lookup_hash\",\n  \"search_term\": \"<<webhook.body.hash>>\"\n}",
+			"content_type": "application/json"
+		},
+		"created_at": "2024-04-26 13:20:16.464633",
+		"x_position": 923.595703769923,
+		"y_position": 286.230394618646
+	},
+	{
+		"action_id": "c29150b0-6d5d-4d36-aa6c-737fceb48b7a",
+		"workflow_id": "d9a319d0-4f25-4fe4-b0c7-5da2491c1ab8",
+		"action_name": "Send File Hash Not Found",
+		"reference_handle": "send_file_hash_not_found",
+		"action_type": "SEND_EMAIL",
+		"action_description": "TODOs to make this action work:\n\n- put your email below into recipients\n",
+		"action_definition": {
+			"body": "Hi there!\n\nThe file hash <<webhook.body.hash>> couldn't be found in YARAify.\n",
+			"subject": "File Hash <<webhook.body.hash>> not found",
+			"recipients": [],
+			"sender_name": "Admyral"
+		},
+		"created_at": "2024-04-26 13:20:16.504954",
+		"x_position": 1258.57896914481,
+		"y_position": 699.703160706405
+	},
+	{
+		"action_id": "6b1415bc-ee98-42de-a665-37a2daa370ad",
+		"workflow_id": "d9a319d0-4f25-4fe4-b0c7-5da2491c1ab8",
+		"action_name": "Check if hash was found",
+		"reference_handle": "check_if_hash_was_found",
+		"action_type": "IF_CONDITION",
+		"action_description": "YARAify returns HTTP status 200 if the hash is found.\n\n",
+		"action_definition": {
+			"conditions": [
+				{
+					"lhs": "<<search_hash_in_yaraify.body.query_status>>",
+					"rhs": "ok",
+					"operator": "EQUALS"
+				}
+			]
+		},
+		"created_at": "2024-04-26 13:20:16.474939",
+		"x_position": 926.794668642579,
+		"y_position": 465.977547775002
+	},
+	{
+		"action_id": "3cd48f79-0bb1-4c50-9300-c15910eb963e",
+		"workflow_id": "d9a319d0-4f25-4fe4-b0c7-5da2491c1ab8",
+		"action_name": "Webhook",
+		"reference_handle": "webhook",
+		"action_type": "WEBHOOK",
+		"action_description": "The workflow expects the data to be triggered as a POST request with the following HTTP request body:\n\n{\n    \"hash\": \"<file-hash-here>\"\n}\n\nExample cURL:\n\ncurl -d '{\"hash\": \"8d3f68b16f0710f858d8c1d2c699260e6f43161a5510abb0e7ba567bd72c965b\"}' \\\n  -H \"Content-Type: application/json\" \"<webhook-url-here>\"",
+		"action_definition": {},
+		"created_at": "2024-04-26 13:20:16.444028",
+		"x_position": 924.237730385716,
+		"y_position": 93.1070425054829
+	},
+	{
+		"action_id": "827cef39-7a66-4069-b1e6-e0ee32517410",
+		"workflow_id": "5cad63e0-8832-40eb-b5b0-8a55c12d1841",
+		"action_name": "Submit URL",
+		"reference_handle": "submit_url",
+		"action_type": "WEBHOOK",
+		"action_description": "The workflow expects the data to be triggered as a POST request with the following HTTP request body:\n\n{\n    \"url\": \"<url-here>\"\n}\n\nExample cURL:\n\ncurl -d '{\"url\": \"www.google.com\"}' \\\n  -H \"Content-Type: application/json\" \"<webhook-url-here>\"",
+		"action_definition": {},
+		"created_at": "2024-04-26 19:29:45.449391",
+		"x_position": 965.001847035694,
+		"y_position": 123.222946852498
+	},
+	{
+		"action_id": "e8444c34-88be-44dd-bdac-66970b597009",
+		"workflow_id": "6a7c608e-f5f1-4fff-bdf7-fd41d8d93640",
+		"action_name": "Webhook",
+		"reference_handle": "webhook",
+		"action_type": "WEBHOOK",
+		"action_description": "The workflow expects the data to be triggered as a POST request with the following HTTP request body:\n\n{\n    \"ip\": \"<ip-here>\"\n}\n\nExample cURL:\n\ncurl -d '{\"ip\": \"118.25.6.39\"}' \\\n  -H \"Content-Type: application/json\" \"<webhook-url-here>\"",
+		"action_definition": {},
+		"created_at": "2024-04-26 13:47:42.308224",
+		"x_position": 1275.78184689399,
+		"y_position": 39.6378514715199
+	},
+	{
+		"action_id": "3668418e-07c0-46ef-b5c6-5efd6f8dd36c",
+		"workflow_id": "5cad63e0-8832-40eb-b5b0-8a55c12d1841",
+		"action_name": "Send Email",
+		"reference_handle": "send_email",
+		"action_type": "SEND_EMAIL",
+		"action_description": "TODO to make this action work:\\n\\nSet a recipient who should receive the report",
+		"action_definition": {
+			"body": "Here is your reported case: \n\nCase ID: <<retrieve_case_from_phish_report.body.id>>\n\nPending Actions: \nDescription:<<retrieve_case_from_phish_report.body[0].pending_actions[0].description>>\n\nReport URI: <<retrieve_case_from_phish_report.body[0].pending_actions[0].report_uri>>\n\nRole:<<retrieve_case_from_phish_report.body.pending_actions[0].params.role>>",
+			"subject": "Phish Report Case",
+			"recipients": [],
+			"sender_name": "Admyral Reported URL Case"
+		},
+		"created_at": "2024-04-26 20:34:12.870337",
+		"x_position": 960.258815100966,
+		"y_position": 714.824988059702
+	},
+	{
+		"action_id": "c1b6eecd-ec4e-4eba-8877-b63349696fc0",
+		"workflow_id": "6a7c608e-f5f1-4fff-bdf7-fd41d8d93640",
+		"action_name": "Look up IP address in AbuseIPDB",
+		"reference_handle": "look_up_ip_address_in_abuseipdb",
+		"action_type": "HTTP_REQUEST",
+		"action_description": "TODOs to make this action work:\n\n1. Navigate to https://www.abuseipdb.com/ and click \"Sign up\" to create a new account. Existing AbuseIPDB users can click \"Login\"\n\n2. Click \"API\" and then \"Create Key\" in the middle panel\n\n3. Give the key a name and then copy the key\n\n4. In Admyral, store the key in Admyral Credential (within your account settings) and name it abuseipdb_api_key.",
+		"action_definition": {
+			"url": "https://api.abuseipdb.com/api/v2/check?ipAddress=<<webhook.body.ip>>&maxAgeInDays=90&verbose",
+			"method": "GET",
+			"headers": [
+				{
+					"key": "key",
+					"value": "<<CREDENTIAL.abuseipdb_api_key>>"
+				}
+			],
+			"payload": "",
+			"content_type": "application/json"
+		},
+		"created_at": "2024-04-26 14:11:34.178444",
+		"x_position": 951.110207416951,
+		"y_position": 317.731551064965
+	},
+	{
+		"action_id": "c0138ac6-928f-4045-a79d-2dd50aaa7375",
+		"workflow_id": "6a7c608e-f5f1-4fff-bdf7-fd41d8d93640",
+		"action_name": "Look up IP address in VirusTotal",
+		"reference_handle": "look_up_ip_address_in_virustotal",
+		"action_type": "HTTP_REQUEST",
+		"action_description": "TODOs to make this action work:\n\n1. Create a VirusTotal account (https://www.virustotal.com/) and get your API key (expand your profile in the top right corner and click on \"APIKey\")\n\n2. In Admyral, go to Settings and store the API key with the following name: virus_total_api_key",
+		"action_definition": {
+			"url": "https://www.virustotal.com/api/v3/ip_addresses/<<webhook.body.ip>>",
+			"method": "GET",
+			"headers": [
+				{
+					"key": "x-apikey",
+					"value": "<<CREDENTIAL.virus_total_api_key>>"
+				}
+			],
+			"payload": "",
+			"content_type": "application/json"
+		},
+		"created_at": "2024-04-26 14:31:31.430637",
+		"x_position": 1260.11020741695,
+		"y_position": 320.110207416951
+	},
+	{
+		"action_id": "5cfb9d62-5c9c-4179-8a62-fd1658e0a440",
+		"workflow_id": "6a7c608e-f5f1-4fff-bdf7-fd41d8d93640",
+		"action_name": "Summarize Findings",
+		"reference_handle": "summarize_findings",
+		"action_type": "AI_ACTION",
+		"action_description": "We use GPT-4 to summarize the result as a report.",
+		"action_definition": {
+			"model": "gpt-4-turbo",
+			"prompt": "As a security analyst, create a high-level and short summary of the subsequent findings regarding an IP.\n\nHere are the findings for the IP from AbuseIPDB:\n<<look_up_ip_address_in_abuseipdb.body>>\n\nHere are the findings for the IP from VirusTotal:\n<<look_up_ip_address_in_virustotal.body>>\n\nHere are the findings for the IP from GreyNoise:\n<<look_up_ip_address_in_greynoise.body>>\n\nHere are the findings for the IP from PulseDive:\n<<look_up_ip_address_in_pulsedive.body>>\n\n"
+		},
+		"created_at": "2024-04-26 15:11:48.565596",
+		"x_position": 1266.98234507915,
+		"y_position": 630.801764221721
+	},
+	{
+		"action_id": "8a0044a8-82a5-4487-b5ef-834414d00285",
+		"workflow_id": "d9a319d0-4f25-4fe4-b0c7-5da2491c1ab8",
+		"action_name": "Send File Hash Analysis Report",
+		"reference_handle": "send_file_hash_analysis_report",
+		"action_type": "SEND_EMAIL",
+		"action_description": "TODOs to make this action work:\n\n- put your email below into recipients\n",
+		"action_definition": {
+			"body": "Hi there!\n\nHere is the report for the file hash \"<<webhook.body.hash>>\":\n\n<<summarize_yaraify_findings.output>>",
+			"subject": "File Hash Analysis for <<webhook.body.hash>>",
+			"recipients": [],
+			"sender_name": "Admyral"
+		},
+		"created_at": "2024-04-26 13:20:16.494722",
+		"x_position": 867.786987229552,
+		"y_position": 869.201097892444
+	},
+	{
+		"action_id": "696162bd-5b47-4697-9bb3-a174887117a7",
+		"workflow_id": "5cad63e0-8832-40eb-b5b0-8a55c12d1841",
+		"action_name": "Submit a takedown case in Phish Report",
+		"reference_handle": "submit_a_takedown_case_in_phish_report",
+		"action_type": "HTTP_REQUEST",
+		"action_description": "Submits a takedown case in Phish Report of the given URL\\nTODOs to make this action work:\\n1. Create a Phish Report account (https://phish.report/) and get your API key (on the bottom of your profile page)\\n2. In Admyral, go to Settings and store the API key with the following name: phish_report_api_key",
+		"action_definition": {
+			"url": "https://phish.report/api/v0/cases",
+			"method": "POST",
+			"headers": [
+				{
+					"key": "Authorization",
+					"value": "Bearer <<CREDENTIAL.phish_report_api_key>>"
+				}
+			],
+			"payload": "{\n  \"url\": \"<<submit_url.body.url>>\"\n}",
+			"content_type": "application/json"
+		},
+		"created_at": "2024-04-26 19:40:50.184161",
+		"x_position": 965.20116842133,
+		"y_position": 304.142070634282
+	},
+	{
+		"action_id": "5aa07a9c-6ed5-4f1e-a4fe-683ebdd28476",
+		"workflow_id": "5cad63e0-8832-40eb-b5b0-8a55c12d1841",
+		"action_name": "Retrieve Case from Phish Report",
+		"reference_handle": "retrieve_case_from_phish_report",
+		"action_type": "HTTP_REQUEST",
+		"action_description": "TODOs to make this action work:\\n1. Create a Phish Report account (https://phish.report/) and get your API key (on the bottom of your profile page)\\n2. In Admyral, go to Settings and store the API key with the following name: phish_report_api_key",
+		"action_definition": {
+			"url": "https://phish.report/api/v0/cases/<<submit_a_takedown_case_in_phish_report.body.id>>",
+			"method": "GET",
+			"headers": [
+				{
+					"key": "Authorization",
+					"value": "Bearer <<CREDENTIAL.phish_report_api_key>>"
+				}
+			],
+			"payload": "",
+			"content_type": "application/json"
+		},
+		"created_at": "2024-04-26 19:40:50.20509",
+		"x_position": 963.650111003413,
+		"y_position": 504.8635739223
+	},
+	{
+		"action_id": "3a2685b4-c36a-484f-bd73-1e29cd9aef79",
+		"workflow_id": "6a7c608e-f5f1-4fff-bdf7-fd41d8d93640",
+		"action_name": "Look up IP address in Pulsedive",
+		"reference_handle": "look_up_ip_address_in_pulsedive",
+		"action_type": "HTTP_REQUEST",
+		"action_description": "Looks up to 10 results in pulsedive\n\nNOTE: \nIn case you want to look up more results, you have to create an account at https://pulsedive.com/",
+		"action_definition": {
+			"url": "https://pulsedive.com/api/explore.php?limit=10&pretty=1&q=ioc=<<webhook.body.ip>>",
+			"method": "GET",
+			"headers": [],
+			"payload": "",
+			"content_type": "application/json"
+		},
+		"created_at": "2024-04-26 15:03:06.662384",
+		"x_position": 1946.62172407239,
+		"y_position": 320.492870561816
+	},
+	{
+		"action_id": "4ab82c4f-ba9e-4a7f-84d4-d395ea24b255",
+		"workflow_id": "6a7c608e-f5f1-4fff-bdf7-fd41d8d93640",
+		"action_name": "Send IP Analysis Report",
+		"reference_handle": "send_ip_analysis_report",
+		"action_type": "SEND_EMAIL",
+		"action_description": "TODOs to make this action work:\n\n- put your email below into recipients\n",
+		"action_definition": {
+			"body": "Hi there!\n\nHere is the report for the IP \"<<webhook.body.ip>>\":\n\n<<summarize_findings.output>>",
+			"subject": "IP Analysis for <<webhook.body.ip>>",
+			"recipients": [],
+			"sender_name": "Admyral"
+		},
+		"created_at": "2024-04-26 15:11:48.577563",
+		"x_position": 1267.92244638639,
+		"y_position": 829.16361561732
+	},
+	{
+		"action_id": "dca08a4d-270b-4f3e-9dbd-96ac8a9b8bf8",
+		"workflow_id": "6a7c608e-f5f1-4fff-bdf7-fd41d8d93640",
+		"action_name": "Look up IP address in GreyNoise",
+		"reference_handle": "look_up_ip_address_in_greynoise",
+		"action_type": "HTTP_REQUEST",
+		"action_description": "TODOs to make this action work:\n\n1. Create a GreyNoise account (https://viz.greynoise.io/) and get your API key (expand your profile in the top right corner and click on \"APIKey\")\n\n2. In Admyral, go to Settings and store the API key with the following name: greynoise_api_key\n\nNOTE: \nIn case you want to use the enterprise instead of the community version, change the URL to: \nhttps://api.greynoise.io/v2/noise/context/<<webhook.body.ip>>",
+		"action_definition": {
+			"url": "https://api.greynoise.io/v3/community/<<webhook.body.ip>>",
+			"method": "GET",
+			"headers": [
+				{
+					"key": "x-apikey",
+					"value": "<<CREDENTIAL.greynoise_api_key>>"
+				}
+			],
+			"payload": "",
+			"content_type": "application/json"
+		},
+		"created_at": "2024-04-26 14:31:31.452277",
+		"x_position": 1615.3231425476,
+		"y_position": 319.341825389239
 	}
 ]

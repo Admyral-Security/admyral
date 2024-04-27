@@ -379,6 +379,10 @@ export async function importWorkflowFromTemplate(
 		},
 	);
 	if (result.status !== 201) {
+		const error = await result.text();
+		console.error(
+			`Received the following error while importing workflow: ${error}`,
+		);
 		throw new Error("Failed to import workflow from template!");
 	}
 

@@ -46,8 +46,8 @@ async def async_main() -> None:
         with open(os.path.join(workflow_templates_library_directory, data_file_name)) as f:
             workflow_data = json.load(f)
 
-        async with engine.begin() as conn:
-            for line in workflow_data:
+        for line in workflow_data:
+            async with engine.begin() as conn:
                 if "created_at" in line:
                     line["created_at"] = datetime.strptime(line["created_at"], "%Y-%m-%d %H:%M:%S.%f")
                 if "action_definition" in line:

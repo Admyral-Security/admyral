@@ -26,6 +26,33 @@ interface WorkflowTemplateCardProps {
 
 function getIcon(icon: string) {
 	switch (icon) {
+		case "YARAify":
+			return (
+				<Image
+					src="/abusech_yaraify_logo.svg"
+					alt="YARAify"
+					height="32"
+					width="64"
+				/>
+			);
+		case "Threatpost":
+			return (
+				<Image
+					src="/threatpost_logo.svg"
+					alt="Threatpost"
+					height="32"
+					width="64"
+				/>
+			);
+		case "PhishReport":
+			return (
+				<Image
+					src="/phish_report.svg"
+					alt="PhishReport"
+					height="32"
+					width="32"
+				/>
+			);
 		case "VirusTotal":
 			return (
 				<Image
