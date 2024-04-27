@@ -147,7 +147,12 @@ function WorkflowBuilderEditor() {
 				edgeTypes={edgeTypes}
 				connectionLineComponent={ConnectionLine}
 			>
-				<Background variant={BackgroundVariant.Dots} gap={8} size={1} />
+				<Background
+					variant={BackgroundVariant.Dots}
+					gap={8}
+					size={1}
+					style={{ backgroundColor: "#FDFDFE" }}
+				/>
 				<Controls />
 			</ReactFlow>
 
