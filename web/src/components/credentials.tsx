@@ -110,7 +110,7 @@ export default function Credentials() {
 			})
 			.catch((error) => {
 				setError(
-					"Failed to load credentials. If the problem persists, please contact us on Discord or via email support@admyral.com.",
+					`Failed to load credentials. If the problem persists, please contact us on Discord or via email ${process.env.NEXT_PUBLIC_SUPPORT_EMAIL}.`,
 				);
 			});
 	}, []);
