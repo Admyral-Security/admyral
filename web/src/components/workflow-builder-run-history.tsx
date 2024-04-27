@@ -115,7 +115,16 @@ function TraceEvent({ event }: { event: WorkflowRunEvent }) {
 							color: "#3E63DD",
 						}}
 					>
-						<pre>{JSON.stringify(event.actionState, null, 4)}</pre>
+						<Flex style={{ width: "100%" }}>
+							<pre
+								style={{
+									// whiteSpace: "pre-wrap",
+									overflowX: "auto",
+								}}
+							>
+								{JSON.stringify(event.actionState, null, 4)}
+							</pre>
+						</Flex>
 					</Card>
 				</Flex>
 			</Card>

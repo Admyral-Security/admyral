@@ -41,9 +41,11 @@ export default function NodeBase({
 		<>
 			<Card size="1" style={cardStyle}>
 				<Flex width="237px" align="center" justify="start" gap="2">
-					{icon}
+					<Flex width="32px" justify="start" align="center">
+						{icon}
+					</Flex>
 
-					<Flex direction="column">
+					<Flex direction="column" width="205px">
 						<Text size="3" weight="bold">
 							{name}
 						</Text>

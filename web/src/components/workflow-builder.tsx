@@ -241,7 +241,7 @@ export default function WorkflowBuilder({ workflowId }: WorkflowBuilderProps) {
 					pt="2"
 					pl="4"
 					pr="4"
-					columns="3"
+					columns="1fr 200px 1fr"
 					className="border-b-2 border-gray-200"
 					align="center"
 					height="56px"
@@ -258,7 +258,10 @@ export default function WorkflowBuilder({ workflowId }: WorkflowBuilderProps) {
 						</Text>
 
 						<Text size="4" color="gray">
-							{workflowData.workflowName}
+							{workflowData.workflowName.length > 38
+								? workflowData.workflowName.substring(0, 35) +
+									"..."
+								: workflowData.workflowName}
 						</Text>
 					</Flex>
 
