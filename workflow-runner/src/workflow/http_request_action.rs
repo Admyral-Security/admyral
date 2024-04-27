@@ -46,15 +46,15 @@ impl ActionExecutor for HttpRequest {
             .as_str()
             .unwrap()
             .to_string();
-        
+
         let client = REQ_CLIENT.clone();
 
         let headers_futures = self
             .headers
             .iter()
             .map(|key_value_pair| async move {
-                let resolved_value =
-                    resolve_references(&key_value_pair.value, context).await?
+                let resolved_value = resolve_references(&key_value_pair.value, context)
+                    .await?
                     .as_str()
                     .expect("Header value must be a string!")
                     .to_string();

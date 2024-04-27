@@ -53,11 +53,11 @@ fn json_value_to_string(value: &serde_json::Value) -> String {
 }
 
 fn string_to_json_value(s: &str) -> Result<serde_json::Value> {
-        // Attempt to parse the input directly as JSON
-        serde_json::from_str(s).or_else(|_| {
-            // If the direct parsing fails, we interpret it as string
-            Ok(json!(s))
-        })
+    // Attempt to parse the input directly as JSON
+    serde_json::from_str(s).or_else(|_| {
+        // If the direct parsing fails, we interpret it as string
+        Ok(json!(s))
+    })
 }
 
 pub async fn resolve_references(value: &str, context: &Context) -> Result<serde_json::Value> {
@@ -114,9 +114,7 @@ pub async fn resolve_references(value: &str, context: &Context) -> Result<serde_
 
     let result = join_all(futures).await;
     let result: Result<Vec<_>> = result.into_iter().collect();
-    let resolved_references = result?
-        .into_iter()
-        .collect::<HashMap<&str, String>>();
+    let resolved_references = result?.into_iter().collect::<HashMap<&str, String>>();
 
     // Replace references
     let mut output = value.to_string();
@@ -125,7 +123,7 @@ pub async fn resolve_references(value: &str, context: &Context) -> Result<serde_
     }
 
     // We transform the output to JSON again
-    Ok(string_to_json_value(&output)?)    
+    Ok(string_to_json_value(&output)?)
 }
 
 #[cfg(test)]
@@ -226,13 +224,16 @@ mod tests {
         let value = "{\"a\": { \"b\": [\"1\", \"2\"] }, \"c\": 3, \"d\": true, \"e\": \"abc\" }";
         let result = string_to_json_value(&value);
         assert!(result.is_ok());
-        assert_eq!(json!({
-            "a": {
-                "b": vec!["1", "2"]
-            },
-            "c": 3,
-            "d": true,
-            "e": "abc"
-        }), result.unwrap());
+        assert_eq!(
+            json!({
+                "a": {
+                    "b": vec!["1", "2"]
+                },
+                "c": 3,
+                "d": true,
+                "e": "abc"
+            }),
+            result.unwrap()
+        );
     }
 }
