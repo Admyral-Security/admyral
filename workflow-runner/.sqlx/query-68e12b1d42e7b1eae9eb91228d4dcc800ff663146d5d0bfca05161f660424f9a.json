@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n        SELECT workflow_id\n        FROM admyral.workflow\n        WHERE workflow_id = $1 AND user_id = $2\n        ",
+  "query": "\n        SELECT workflow_id\n        FROM admyral.workflow\n        WHERE workflow_id = $1 AND user_id = $2 AND is_template = false\n        ",
   "describe": {
     "columns": [
       {
@@ -19,5 +19,5 @@
       false
     ]
   },
-  "hash": "402f2e985c6c3cd04fd2c5632d457b6b539cd5d6b5c2f10d2b55199d6794c242"
+  "hash": "68e12b1d42e7b1eae9eb91228d4dcc800ff663146d5d0bfca05161f660424f9a"
 }

@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n        SELECT workflow_id, workflow_name, is_live\n        FROM admyral.workflow\n        WHERE workflow_id = $1\n        LIMIT 1\n        ",
+  "query": "\n        SELECT workflow_id, workflow_name, is_live\n        FROM admyral.workflow\n        WHERE workflow_id = $1 AND is_template = false AND user_id IS NOT NULL\n        LIMIT 1\n        ",
   "describe": {
     "columns": [
       {
@@ -30,5 +30,5 @@
       false
     ]
   },
-  "hash": "054c28c070be33830a469e98a2910eea262386a38e14e492d7e98e0c40ffa304"
+  "hash": "6d2025fb94bc0334bf9c1874d8348ed6e2d66954b9672d3d8a076c89c9739acd"
 }
