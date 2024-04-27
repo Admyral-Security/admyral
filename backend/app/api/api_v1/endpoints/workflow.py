@@ -204,21 +204,22 @@ async def get_workflow_impl(
     )
 
     # Enrich webhook actions with webhook data
-    for action in action_nodes:
-        if action.action_type == ActionType.WEBHOOK:
-            result = await db.exec(
-                select(Webhook)
-                    .where(Webhook.action_id == action.action_id)
-                    .limit(1)
-                )
-            webhook = result.one_or_none()
-            if not webhook:
-                raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND,
-                    detail="Webhook does not exist"
-                )
-            action.webhook_id = webhook.webhook_id
-            action.secret = webhook.webhook_secret
+    if not is_template:
+        for action in action_nodes:
+            if action.action_type == ActionType.WEBHOOK:
+                result = await db.exec(
+                    select(Webhook)
+                        .where(Webhook.action_id == action.action_id)
+                        .limit(1)
+                    )
+                webhook = result.one_or_none()
+                if not webhook:
+                    raise HTTPException(
+                        status_code=status.HTTP_404_NOT_FOUND,
+                        detail="Webhook does not exist"
+                    )
+                action.webhook_id = webhook.webhook_id
+                action.secret = webhook.webhook_secret
 
     # Fetch all related edges
     parent_action = aliased(ActionNode, name="parent_action")
