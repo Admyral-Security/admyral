@@ -212,7 +212,6 @@ export default function WorkflowBuilderRunHistory({
 
 				<Flex
 					direction="column"
-					// height="100%"
 					height="calc(100vh - 54px - 56px)"
 					style={{ flex: 1, overflowY: "auto" }}
 				>

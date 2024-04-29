@@ -10,12 +10,12 @@ import {
 	Spinner,
 	Text,
 } from "@radix-ui/themes";
-import CreateNewWorkflowButton from "./create-new-workflow-button";
 import RightArrowIcon from "./icons/right-arrow-icon";
 import PublishWorkflowToggle from "./publish-workflow-toggle";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { listWorkflows } from "@/lib/api";
+import useGettingStartedStore from "@/lib/getting-started-store";
 
 function NoWorkflowExists() {
 	return (
@@ -29,9 +29,9 @@ function NoWorkflowExists() {
 				</Callout.Text>
 			</Callout.Root>
 
-			<Box pt="4">
+			{/* <Box pt="4">
 				<CreateNewWorkflowButton size="4" />
-			</Box>
+			</Box> */}
 		</Card>
 	);
 }
@@ -93,11 +93,19 @@ export default function WorkflowsList() {
 	const [loading, setLoading] = useState(true);
 	const [workflows, setWorkflows] = useState<WorkflowListEntry[]>([]);
 	const [error, setError] = useState<string | null>();
+	const { showGettingStarted } = useGettingStartedStore((state) => ({
+		showGettingStarted: () => state.setShowGettingStarted(true),
+	}));
 
 	useEffect(() => {
 		setError(null);
 		listWorkflows()
-			.then((workflows) => setWorkflows(workflows))
+			.then((workflows) => {
+				setWorkflows(workflows);
+				if (workflows.length < 2) {
+					showGettingStarted();
+				}
+			})
 			.catch((err) =>
 				setError(
 					`Failed to load workflow list. Please refresh the page. If the issue persists, please contact us on Discord or via email ${process.env.NEXT_PUBLIC_SUPPORT_EMAIL}.`,
