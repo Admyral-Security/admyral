@@ -62,8 +62,8 @@ Here is a sneek-peak into the workflow builder:
 ### Next-Gen Hyperautomation Features
 
 -   [ ] Natural Language to Workflow
--   [ ] Investigation Copilot
--   [ ] Next steps recommendation for cases
+-   [ ] Incident Investigation Copilot
+-   [ ] AI-proposed next steps on handling an incident/a case
 -   [ ] Customized workflow recommendations
 
 ### Hosting
@@ -74,7 +74,7 @@ Here is a sneek-peak into the workflow builder:
 
 ### Misc
 
--   [ ] Multi-tenancy
+-   [ ] Multi-tenancy for MSSPs
 
 ### Admyral in <5 Minutes
 
@@ -88,7 +88,7 @@ Here is a sneek-peak into the workflow builder:
 
 We value your feedback and contributions! If you have suggestions, questions, or would like to discuss anything related to Admyral, just text us on [Discord](https://discord.gg/GqbJZT9Hbf).
 
-You can best support us and this project by:
+You can best support this project by:
 
 1. Giving it a star on GitHub
 2. Joining our active community on [Discord](https://discord.gg/GqbJZT9Hbf)
@@ -100,6 +100,7 @@ You can best support us and this project by:
 
 1. **Challenges of Staffing in Security Automation Implementation**:
    Security automation platforms promised to reduce the burden on security teams. However, they still require a dedicated team for building and managing automations, not addressing the ongoing issue of a skilled worker shortage.
+
 2. **Automation Builders & Requesters vs. Automation Users**:
    Security Engineers are tasked with building automations while Managers drive their development based on input from the end users, aka Security Analysts. To complicate this, there's a lack of a feedback loop among these groups.
 
