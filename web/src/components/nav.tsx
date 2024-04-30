@@ -8,6 +8,7 @@ import WorkflowOverviewIcon from "./icons/workflow-overview-icon";
 import DashboardIcon from "./icons/dashboard-icon";
 import CaseManagementIcon from "./icons/case-management-icon";
 import { usePathname } from "next/navigation";
+import Image from "next/image";
 
 interface NavLinkProps {
 	pageName: string;
@@ -124,15 +125,35 @@ export default function Nav() {
 							</Badge>
 						</HoverCard.Content>
 					</HoverCard.Root>
+
+					<HoverCard.Root>
+						<HoverCard.Trigger>
+							<Link href="https://discord.com/invite/GqbJZT9Hbf">
+								<Image
+									src="/discord_logo.svg"
+									alt="Discord"
+									width={18}
+									height={18}
+								/>
+							</Link>
+						</HoverCard.Trigger>
+						<HoverCard.Content style={{ padding: 0 }}>
+							<Badge size="3" color="green">
+								Join us on Discord!
+							</Badge>
+						</HoverCard.Content>
+					</HoverCard.Root>
 				</Flex>
 			</Flex>
 
-			<NavLink
-				pageName="Settings"
-				linkHref="/settings"
-				icon={<SettingsIcon color="#1C2024" />}
-				selectionCriteria={["/settings"]}
-			/>
+			<Flex direction="column" align="center" justify="center">
+				<NavLink
+					pageName="Settings"
+					linkHref="/settings"
+					icon={<SettingsIcon color="#1C2024" />}
+					selectionCriteria={["/settings"]}
+				/>
+			</Flex>
 		</Flex>
 	);
 }
