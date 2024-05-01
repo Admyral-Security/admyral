@@ -58,7 +58,7 @@ export class AdmyralStack extends cdk.Stack {
 			WEBHOOK_SIGNING_SECRET: process.env.WEBHOOK_SIGNING_SECRET!,
 		};
 		if (process.env.WORKFLOW_RUN_HOURLY_QUOTA !== undefined) {
-			backendServiceEnvironment.WORKFLOW_RUN_TIMEOUT_IN_MINUTES =
+			backendServiceEnvironment.WORKFLOW_RUN_HOURLY_QUOTA =
 				process.env.WORKFLOW_RUN_HOURLY_QUOTA;
 		}
 		if (process.env.WORKFLOW_RUN_TIMEOUT_IN_MINUTES !== undefined) {
@@ -132,7 +132,7 @@ export class AdmyralStack extends cdk.Stack {
 			RESEND_EMAIL: process.env.RESEND_EMAIL!,
 		};
 		if (process.env.WORKFLOW_RUN_HOURLY_QUOTA !== undefined) {
-			workflowRunnerServiceEnvironment.WORKFLOW_RUN_TIMEOUT_IN_MINUTES =
+			workflowRunnerServiceEnvironment.WORKFLOW_RUN_HOURLY_QUOTA =
 				process.env.WORKFLOW_RUN_HOURLY_QUOTA;
 		}
 		if (process.env.WORKFLOW_RUN_TIMEOUT_IN_MINUTES !== undefined) {
