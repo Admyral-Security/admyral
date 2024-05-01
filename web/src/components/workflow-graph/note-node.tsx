@@ -180,15 +180,14 @@ function NoteNode({
 					<ReactMarkdown
 						remarkPlugins={[remarkGfm]}
 						className="markdown"
-						children={
-							data.actionDefinition.note.length === 0
-								? "Double click to edit"
-								: data.actionDefinition.note
-						}
 						components={{
 							a: LinkRenderer,
 						}}
-					/>
+					>
+						{data.actionDefinition.note.length === 0
+							? "Double click to edit"
+							: data.actionDefinition.note}
+					</ReactMarkdown>
 				</Flex>
 			</Card>
 		);
