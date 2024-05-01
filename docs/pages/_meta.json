@@ -1,12 +1,21 @@
 {
 	"index": "Introduction",
 	"quickstart": "Quickstart",
-	"setup": "Setup",
+	"setup": "Self-host",
+	"-- Workflows": {
+		"type": "separator",
+		"title": "Workflow building"
+	},
 	"workflows": "Workflows",
 	"actions": "Actions",
-	"credentials": "Credentials",
+	"credentials": "Credential Management",
 	"account_settings": "Account Settings",
+	"-- More": {
+		"type": "separator",
+		"title": "More"
+	},
 	"security": "Security",
+	"open-source": "Open-Source",
 	"contact": {
 		"title": "Contact Us ↗",
 		"type": "page",
