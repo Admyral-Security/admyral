@@ -43,7 +43,7 @@ Here is a sneek-peak into the workflow builder:
 -   [ ] Workflow Actions
     -   [x] HTTP request
     -   [x] Webhook
-    -   [x] Credentials for Webhook
+    -   [x] Credential Management for HTTP Requests
     -   [x] If-Condition
     -   [x] AI Actions
     -   [x] Send Emails
