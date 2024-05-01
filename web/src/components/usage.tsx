@@ -53,13 +53,11 @@ export default function Usage() {
 
 					<Flex direction="column">
 						<Text>
-							For security reasons, there are usage limits in
-							place:
+							Currently, the following usage limits are in place:
 						</Text>
 						<Flex p="4">
 							<ul className="list-disc">
-								{quota.workflowRunTimeoutInMinutes !==
-									undefined && (
+								{quota.workflowRunTimeoutInMinutes !== null && (
 									<li>
 										<Text>
 											{quota.workflowRunTimeoutInMinutes}{" "}
@@ -67,7 +65,7 @@ export default function Usage() {
 										</Text>
 									</li>
 								)}
-								{quota.workflowRunHourlyQuota !== undefined && (
+								{quota.workflowRunHourlyQuota !== null && (
 									<li>
 										<Text>
 											{quota.workflowRunHourlyQuota}{" "}
@@ -86,7 +84,7 @@ export default function Usage() {
 						</Text>
 					</Flex>
 
-					{quota.workflowRunHourlyQuota !== undefined && (
+					{quota.workflowRunHourlyQuota !== null && (
 						<Callout.Root variant="surface" size="3" highContrast>
 							<Callout.Icon>
 								<InfoCircledIcon />
