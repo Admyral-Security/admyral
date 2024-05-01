@@ -53,7 +53,7 @@ export class AdmyralStack extends cdk.Stack {
 		);
 
 		const backendServiceEnvironment: Record<string, string> = {
-			DATABASE_URL: process.env.DATABASE_URL!,
+			DATABASE_URL: process.env.DATABASE_URL_WITH_ASYNCPG!,
 			JWT_SECRET: process.env.JWT_SECRET!,
 			WEBHOOK_SIGNING_SECRET: process.env.WEBHOOK_SIGNING_SECRET!,
 		};
