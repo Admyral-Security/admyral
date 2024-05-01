@@ -31,6 +31,7 @@ import { initActionData } from "@/lib/workflows";
 import useWorkflowStore from "@/lib/workflow-store";
 import EditorSideBar from "./workflow-builder-editor-side-bar";
 import ActionNodeIcon from "./action-node-icon";
+import NoteNode from "./workflow-graph/note-node";
 
 const nodeTypes = {
 	[ActionNode.WEBHOOK]: WebhookNode,
@@ -38,6 +39,7 @@ const nodeTypes = {
 	[ActionNode.AI_ACTION]: AiActionNode,
 	[ActionNode.SEND_EMAIL]: SendEmailNode,
 	[ActionNode.IF_CONDITION]: IfConditionNode,
+	[ActionNode.NOTE]: NoteNode,
 };
 
 const edgeTypes = {
@@ -158,45 +160,50 @@ function WorkflowBuilderEditor() {
 
 			<EditorSideBar />
 
-			{selectNodeIdx !== -1 && selectNodeIdx < nodes.length && (
-				<WorkflowBuilderRightPanelBase
-					title={getActionNodeLabel(
-						nodes[selectNodeIdx].type as ActionNode,
-					)}
-					titleIcon={
-						<ActionNodeIcon
-							actionType={nodes[selectNodeIdx].type as ActionNode}
-						/>
-					}
-					onIconClick={closeActionDefinitionPanel}
-					zIndex={100}
-				>
-					{(nodes[selectNodeIdx].type as ActionNode) ===
-						ActionNode.WEBHOOK && (
-						<Webhook id={nodes[selectNodeIdx].id} />
-					)}
+			{selectNodeIdx !== -1 &&
+				selectNodeIdx < nodes.length &&
+				(nodes[selectNodeIdx].type as ActionNode) !==
+					ActionNode.NOTE && (
+					<WorkflowBuilderRightPanelBase
+						title={getActionNodeLabel(
+							nodes[selectNodeIdx].type as ActionNode,
+						)}
+						titleIcon={
+							<ActionNodeIcon
+								actionType={
+									nodes[selectNodeIdx].type as ActionNode
+								}
+							/>
+						}
+						onIconClick={closeActionDefinitionPanel}
+						zIndex={100}
+					>
+						{(nodes[selectNodeIdx].type as ActionNode) ===
+							ActionNode.WEBHOOK && (
+							<Webhook id={nodes[selectNodeIdx].id} />
+						)}
 
-					{(nodes[selectNodeIdx].type as ActionNode) ===
-						ActionNode.HTTP_REQUEST && (
-						<HttpRequest id={nodes[selectNodeIdx].id} />
-					)}
+						{(nodes[selectNodeIdx].type as ActionNode) ===
+							ActionNode.HTTP_REQUEST && (
+							<HttpRequest id={nodes[selectNodeIdx].id} />
+						)}
 
-					{(nodes[selectNodeIdx].type as ActionNode) ===
-						ActionNode.AI_ACTION && (
-						<AiAction id={nodes[selectNodeIdx].id} />
-					)}
+						{(nodes[selectNodeIdx].type as ActionNode) ===
+							ActionNode.AI_ACTION && (
+							<AiAction id={nodes[selectNodeIdx].id} />
+						)}
 
-					{(nodes[selectNodeIdx].type as ActionNode) ===
-						ActionNode.IF_CONDITION && (
-						<IfCondition id={nodes[selectNodeIdx].id} />
-					)}
+						{(nodes[selectNodeIdx].type as ActionNode) ===
+							ActionNode.IF_CONDITION && (
+							<IfCondition id={nodes[selectNodeIdx].id} />
+						)}
 
-					{(nodes[selectNodeIdx].type as ActionNode) ===
-						ActionNode.SEND_EMAIL && (
-						<SendEmail id={nodes[selectNodeIdx].id} />
-					)}
-				</WorkflowBuilderRightPanelBase>
-			)}
+						{(nodes[selectNodeIdx].type as ActionNode) ===
+							ActionNode.SEND_EMAIL && (
+							<SendEmail id={nodes[selectNodeIdx].id} />
+						)}
+					</WorkflowBuilderRightPanelBase>
+				)}
 		</>
 	);
 }

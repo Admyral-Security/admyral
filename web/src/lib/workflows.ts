@@ -88,6 +88,14 @@ export async function initActionData(
 			// TODO:
 			return { ...base, actionDefinition: {} };
 
+		case ActionNode.NOTE:
+			return {
+				...base,
+				actionDefinition: {
+					note: "",
+				},
+			};
+
 		default:
 			throw new Error("Unhandled action type: " + actionType);
 	}

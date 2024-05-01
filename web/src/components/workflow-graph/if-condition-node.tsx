@@ -1,16 +1,10 @@
 import { memo } from "react";
-import { Node, NodeProps, Handle, Position } from "reactflow";
+import { NodeProps, Handle, Position } from "reactflow";
 import NodeBase from "./node-base";
 import { Box, Flex, Text } from "@radix-ui/themes";
 import IfConditionActionIcon from "../icons/if-condition-action-icon";
 import { ibmPlexMono } from "@/app/fonts";
-
-type IfConditionData = {
-	actionName: string;
-	deleteAction: () => void;
-};
-
-export type IfConditionNode = Node<IfConditionData>;
+import { IfConditionData } from "@/lib/types";
 
 export const IF_CONDITION_TRUE_BRANCH_HANDLE_ID: string =
 	"ifConditionTrueBranch";

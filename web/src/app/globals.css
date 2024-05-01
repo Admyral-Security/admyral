@@ -18,3 +18,11 @@
 	-ms-overflow-style: none; /* IE and Edge */
 	scrollbar-width: none; /* Firefox */
 }
+
+/* Tailwind takes out all default styles applied to html elements which causes problems for ReactMarkdown. 
+To fix this, we need to revert all styles applied to the markdown elements.
+https://stackoverflow.com/questions/74607419/react-markdown-don%C2%B4t-render-markdown */
+.markdown > * {
+	all: revert;
+	width: 100%;
+}

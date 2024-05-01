@@ -7,6 +7,7 @@ class ActionType(Enum):
     IF_CONDITION = "IF_CONDITION"
     AI_ACTION = "AI_ACTION"
     SEND_EMAIL = "SEND_EMAIL"
+    NOTE = "NOTE"
 
 
 class EdgeType(Enum):

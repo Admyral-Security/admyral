@@ -1,14 +1,9 @@
 import { memo } from "react";
-import { Node, NodeProps, Handle, Position } from "reactflow";
+import { NodeProps, Handle, Position } from "reactflow";
 import NodeBase from "./node-base";
 import { Flex } from "@radix-ui/themes";
 import AiActionsIcon from "../icons/ai-actions-icon";
-
-type AiActionData = {
-	actionName: string;
-};
-
-export type AiActionNode = Node<AiActionData>;
+import { AiActionData } from "@/lib/types";
 
 type AiActionNodeProps = NodeProps<AiActionData>;
 

@@ -1,15 +1,9 @@
 import { memo } from "react";
-import { Node, NodeProps, Handle, Position } from "reactflow";
+import { NodeProps, Handle, Position } from "reactflow";
 import NodeBase from "./node-base";
 import { Flex } from "@radix-ui/themes";
 import SendEmailActionIcon from "../icons/send-email-action-icon";
-
-type SendEmailData = {
-	actionName: string;
-	deleteAction: () => void;
-};
-
-export type SendEmailNode = Node<SendEmailData>;
+import { SendEmailData } from "@/lib/types";
 
 type SendEmailNodeProps = NodeProps<SendEmailData>;
 

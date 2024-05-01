@@ -74,7 +74,7 @@ pub async fn fetch_workflow_data(
         r#"
         SELECT action_id, workflow_id, action_name, reference_handle, action_type::text as "action_type!: String", action_definition
         FROM admyral.action_node
-        WHERE workflow_id = $1
+        WHERE workflow_id = $1 AND action_type <> 'NOTE'::admyral.actiontype
         "#,
         workflow_uuid
     )

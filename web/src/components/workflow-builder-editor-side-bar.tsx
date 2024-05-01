@@ -13,6 +13,7 @@ import QueryCasesIcon from "./icons/query-cases-icon";
 import CaseTriggerIcon from "./icons/case-trigger-icon";
 import { EnterIcon } from "@radix-ui/react-icons";
 import WorkflowTemplates from "./workflow-templates";
+import NoteActionIcon from "./icons/note-action-icon";
 
 interface EditorCardProps {
 	icon: React.ReactNode;
@@ -192,6 +193,17 @@ export default function EditorSideBar() {
 								)}
 								isComingSoon
 							/>
+
+							<div
+								onDragStart={(event) =>
+									onDragStart(event, ActionNode.NOTE)
+								}
+							>
+								<EditorCard
+									icon={<NoteActionIcon />}
+									label={getActionNodeLabel(ActionNode.NOTE)}
+								/>
+							</div>
 						</Flex>
 					</Flex>
 

@@ -22,6 +22,7 @@ export enum ActionNode {
 	AI_ACTION = "AI_ACTION",
 	SEND_EMAIL = "SEND_EMAIL",
 	RECEIVE_EMAIL = "RECEIVE_EMAIL",
+	NOTE = "NOTE",
 }
 
 export function getActionNodeLabel(actionNode: ActionNode) {
@@ -40,6 +41,8 @@ export function getActionNodeLabel(actionNode: ActionNode) {
 			return "Send Email";
 		case ActionNode.RECEIVE_EMAIL:
 			return "Receive Email";
+		case ActionNode.NOTE:
+			return "Note";
 	}
 }
 
@@ -135,13 +138,16 @@ export type SendEmailData = ActionDataBase<{
 // TODO:
 export type ReceiveEmailData = ActionDataBase<{}>;
 
+export type NoteData = ActionDataBase<{ note: string }>;
+
 export type ActionData =
 	| AiActionData
 	| HttpRequestData
 	| WebhookData
 	| IfConditionData
 	| SendEmailData
-	| ReceiveEmailData;
+	| ReceiveEmailData
+	| NoteData;
 
 export type EdgeData = {
 	parentActionId: string;

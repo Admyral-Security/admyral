@@ -128,7 +128,10 @@ export default function Nav() {
 
 					<HoverCard.Root>
 						<HoverCard.Trigger>
-							<Link href="https://discord.com/invite/GqbJZT9Hbf">
+							<Link
+								href="https://discord.com/invite/GqbJZT9Hbf"
+								target="_blank"
+							>
 								<Image
 									src="/discord_logo.svg"
 									alt="Discord"

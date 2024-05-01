@@ -1,17 +1,11 @@
 import { memo } from "react";
-import { Node, NodeProps, Handle, Position } from "reactflow";
+import { NodeProps, Handle, Position } from "reactflow";
 import WebhookActionIcon from "../icons/webhook-action-icon";
 import NodeBase from "./node-base";
 import { Flex } from "@radix-ui/themes";
+import { WebhookData } from "@/lib/types";
 
-type WebhookNodeData = {
-	actionName: string;
-	deleteAction: () => void;
-};
-
-export type WebhookNode = Node<WebhookNodeData>;
-
-type WebhookNodeProps = NodeProps<WebhookNodeData>;
+type WebhookNodeProps = NodeProps<WebhookData>;
 
 function WebhookNodeComponent({ id, data, selected }: WebhookNodeProps) {
 	return (

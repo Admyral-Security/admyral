@@ -1,14 +1,9 @@
 import { memo } from "react";
-import { Node, NodeProps, Handle, Position } from "reactflow";
+import { NodeProps, Handle, Position } from "reactflow";
 import NodeBase from "./node-base";
 import HttpRequestActionIcon from "../icons/http-request-action-icon";
 import { Flex } from "@radix-ui/themes";
-
-type HttpRequestData = {
-	actionName: string;
-};
-
-export type HttpRequestNode = Node<HttpRequestData>;
+import { HttpRequestData } from "@/lib/types";
 
 type HttpRequestNodeProps = NodeProps<HttpRequestData>;
 
