@@ -89,7 +89,8 @@ pub async fn fetch_workflow_data(
         JOIN admyral.action_node parent ON parent.action_id = we.parent_action_id
         JOIN admyral.action_node child ON child.action_id = we.child_action_id
         JOIN admyral.workflow w ON w.workflow_id = parent.workflow_id AND w.workflow_id = child.workflow_id
-        WHERE w.workflow_id = $1"#,
+        WHERE w.workflow_id = $1
+        "#,
         workflow_uuid
     ).fetch_all(pool).await?;
 
@@ -137,6 +138,7 @@ pub async fn persist_action_run_state(
     action_id: &str,
     prev_action_state_id: Option<&str>,
     action_state: serde_json::Value,
+    is_error: bool,
 ) -> Result<String> {
     tracing::info!("Persisting action run state - run_id = {run_id}, action_id = {action_id}");
 
@@ -150,13 +152,14 @@ pub async fn persist_action_run_state(
     let row: WorkflowRunActionStateRow = sqlx::query_as!(
         WorkflowRunActionStateRow,
         r#"
-        INSERT INTO admyral.workflow_run_action_state ( action_state, run_id, action_id, prev_action_state_id)
-        VALUES ( $1, $2, $3, $4 )
+        INSERT INTO admyral.workflow_run_action_state ( action_state, run_id, action_id, is_error, prev_action_state_id)
+        VALUES ( $1, $2, $3, $4, $5 )
         RETURNING action_state_id
         "#,
         action_state,
         run_uuid,
         action_uuid,
+        is_error,
         prev_action_state_uuid
     )
     .fetch_one(pool)
@@ -313,6 +316,7 @@ pub async fn is_workflow_owned_by_user(
         SELECT workflow_id
         FROM admyral.workflow
         WHERE workflow_id = $1 AND user_id = $2 AND is_template = false
+        LIMIT 1
         "#,
         workflow_uuid,
         user_uuid
@@ -342,9 +346,10 @@ pub async fn fetch_action(
     let action: Option<ActionRow> = sqlx::query_as!(
         ActionRow,
         r#"
-        SELECT action_id, workflow_id, action_name, reference_handle, action_type::text as "action_type!: String", action_definition
+        SELECT action_id, workflow_id, action_name, reference_handle, action_type::text AS "action_type!: String", action_definition
         FROM admyral.action_node
         WHERE workflow_id = $1 AND action_id = $2
+        LIMIT 1
         "#,
         workflow_uuid,
         action_uuid
@@ -380,6 +385,7 @@ pub async fn fetch_secret(
         FROM admyral.workflow w
         JOIN admyral.credential c ON w.user_id = c.user_id
         WHERE c.credential_name = $1 AND w.workflow_id = $2 AND w.user_id IS NOT NULL AND w.is_template = false
+        LIMIT 1
         "#,
         credential_name,
         workflow_uuid
@@ -396,4 +402,69 @@ pub async fn fetch_secret(
             Ok(Some(decrypted_secret))
         }
     }
+}
+
+#[derive(sqlx::FromRow, Debug)]
+struct WorkflowOwner {
+    user_id: String,
+}
+
+pub async fn get_workflow_owner(pool: &Pool<Postgres>, workflow_id: &str) -> Result<String> {
+    tracing::info!("Fetching workflow owner - workflow id = {workflow_id}");
+
+    let workflow_uuid = str_to_uuid(workflow_id)?;
+
+    let owner: WorkflowOwner = sqlx::query_as!(
+        WorkflowOwner,
+        r#"
+        SELECT user_id::TEXT AS "user_id!: String"
+        FROM admyral.workflow
+        WHERE workflow_id = $1 AND is_template = false AND user_id IS NOT NULL
+        LIMIT 1
+        "#,
+        workflow_uuid
+    )
+    .fetch_one(pool)
+    .await?;
+
+    let owner_id = owner.user_id;
+
+    tracing::info!(
+        "Finished fetching workflow owner - workflow_id = {workflow_id}, user_id = {owner_id}"
+    );
+
+    Ok(owner_id)
+}
+
+#[derive(sqlx::FromRow, Debug)]
+struct WorkflowRunAggregation {
+    count: i64,
+}
+
+pub async fn count_workflow_runs_of_account_last_hour(
+    pool: &Pool<Postgres>,
+    user_id: &str,
+) -> Result<i64> {
+    tracing::info!("Counting workflow runs during the last last hour - user_id = {user_id}");
+
+    let user_uuid = str_to_uuid(user_id)?;
+
+    let result: WorkflowRunAggregation = sqlx::query_as!(
+        WorkflowRunAggregation,
+        r#"
+        SELECT COUNT(*) AS "count!: i64"
+        FROM admyral.workflow_run run
+        JOIN admyral.workflow w on run.workflow_id = w.workflow_id
+        WHERE
+            w.user_id = $1
+            AND run.started_timestamp >= (NOW()::TIMESTAMP - INTERVAL '1 hour')
+        "#,
+        user_uuid
+    )
+    .fetch_one(pool)
+    .await?;
+
+    tracing::info!("Finished counting workflow runs during the last hour - user_id = {user_id}");
+
+    Ok(result.count)
 }

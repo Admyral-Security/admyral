@@ -1,3 +1,4 @@
+from typing import Optional
 from pydantic_settings import BaseSettings
 
 
@@ -13,6 +14,9 @@ class Settings(BaseSettings):
     JWT_SECRET: str
     JWT_ALGORITHM: str = "HS256"
     WEBHOOK_SIGNING_SECRET: str
+
+    WORKFLOW_RUN_HOURLY_QUOTA: Optional[int] = None
+    WORKFLOW_RUN_TIMEOUT_IN_MINUTES: Optional[int] = None
 
     
 settings = Settings()

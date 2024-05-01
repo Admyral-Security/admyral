@@ -1,6 +1,7 @@
 "use client";
 
 import { loadUserProfile, updateUserProfile } from "@/lib/api";
+import { UserProfile } from "@/lib/types";
 import { InfoCircledIcon } from "@radix-ui/react-icons";
 import {
 	Box,
@@ -20,7 +21,7 @@ import { useEffect, useState } from "react";
  */
 export default function Account() {
 	const [error, setError] = useState<string | null>(null);
-	const [userProfile, setUserProfile] = useState<Record<string, string>>({
+	const [userProfile, setUserProfile] = useState<UserProfile>({
 		firstName: "",
 		lastName: "",
 		company: "",

@@ -11,12 +11,28 @@ mod webhook_action;
 use self::executor::WorkflowExecutor;
 use crate::postgres::fetch_workflow_data;
 use anyhow::{anyhow, Result};
+use async_once::AsyncOnce;
 use enum_dispatch::enum_dispatch;
+use lazy_static::lazy_static;
 use serde::{Deserialize, Serialize};
 use sqlx::{Pool, Postgres};
 use std::borrow::Borrow;
 use std::collections::HashMap;
 use std::sync::Arc;
+
+lazy_static! {
+    static ref WORKFLOW_RUN_TIMEOUT_IN_SECONDS: AsyncOnce<Option<u64>> = AsyncOnce::new(async {
+        match std::env::var("WORKFLOW_RUN_TIMEOUT_IN_MINUTES") {
+            Err(_) => None,
+            Ok(timeout) => Some(
+                timeout
+                    .parse::<u64>()
+                    .expect("WORKFLOW_RUN_TIMEOUT_IN_MINUTES is not a valid number!")
+                    * 60,
+            ),
+        }
+    });
+}
 
 pub type ReferenceHandle = String;
 
@@ -163,6 +179,7 @@ pub async fn run_workflow(
 
     if !workflow.is_live {
         // Workflow is offline
+        tracing::info!("Workflow {workflow_id} could not be executed because it is offline.");
         return Ok(());
     }
 
@@ -182,8 +199,15 @@ pub async fn run_workflow(
         }
     }
 
-    let mut executor =
-        WorkflowExecutor::init(pg_pool, workflow, start_node_reference_handle).await?;
+    let timeout_in_seconds = WORKFLOW_RUN_TIMEOUT_IN_SECONDS.get().await.clone();
+
+    let mut executor = WorkflowExecutor::init(
+        pg_pool,
+        workflow,
+        start_node_reference_handle,
+        timeout_in_seconds,
+    )
+    .await?;
     executor.execute().await?;
     Ok(())
 }

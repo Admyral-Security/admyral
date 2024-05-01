@@ -187,4 +187,18 @@ export type WorkflowRunEvent = {
 	actionName: string;
 	actionState: Record<string, any>;
 	prevActionStateId: string | null;
+	isError: boolean;
+};
+
+export type Quota = {
+	workflowRunsLastHour: number;
+	workflowRunHourlyQuota: number | undefined;
+	workflowRunTimeoutInMinutes: number | undefined;
+};
+
+export type UserProfile = {
+	firstName: string;
+	lastName: string;
+	company: string;
+	email: string;
 };

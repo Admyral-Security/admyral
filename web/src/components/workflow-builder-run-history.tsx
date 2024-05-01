@@ -4,6 +4,7 @@ import { Badge, Box, Card, Flex, Text } from "@radix-ui/themes";
 import { useEffect, useState } from "react";
 import "@/components/workflow-builder-run-history.css";
 import ActionNodeIcon from "./action-node-icon";
+import Image from "next/image";
 
 const MONTHS = [
 	"Jan",
@@ -90,12 +91,22 @@ function TraceEvent({ event }: { event: WorkflowRunEvent }) {
 	return (
 		<Flex direction="column" gap="1" width="100%">
 			<Card>
-				<Flex gap="4" justify="start" align="center">
-					<ActionNodeIcon actionType={event.actionType} />
-					<Text size="3" weight="medium">
-						{" "}
-						{event.actionName}
-					</Text>
+				<Flex justify="between" align="center" width="100%">
+					<Flex gap="4" justify="start" align="center">
+						<ActionNodeIcon actionType={event.actionType} />
+						<Text size="3" weight="medium">
+							{event.actionName}
+						</Text>
+					</Flex>
+
+					{event.isError && (
+						<Image
+							src="/error_icon.svg"
+							alt="Error"
+							height="16"
+							width="16"
+						/>
+					)}
 				</Flex>
 			</Card>
 
@@ -118,7 +129,6 @@ function TraceEvent({ event }: { event: WorkflowRunEvent }) {
 						<Flex style={{ width: "100%" }}>
 							<pre
 								style={{
-									// whiteSpace: "pre-wrap",
 									overflowX: "auto",
 								}}
 							>
@@ -245,7 +255,6 @@ export default function WorkflowBuilderRunHistory({
 			</Box>
 
 			<Box
-				// height="calc(100vh - 140px)"
 				height="100%"
 				width="290px"
 				left="256px"
@@ -265,7 +274,6 @@ export default function WorkflowBuilderRunHistory({
 
 				<Flex
 					direction="column"
-					// height="100%"
 					height="calc(100vh - 54px - 56px)"
 					style={{ flex: 1, overflowY: "auto" }}
 				>
@@ -285,16 +293,33 @@ export default function WorkflowBuilderRunHistory({
 							>
 								<Flex
 									align="center"
-									justify="start"
+									justify="between"
 									width="100%"
 									gap="4"
 								>
-									<ActionNodeIcon
-										actionType={workflowRunEvent.actionType}
-									/>
-									<Text size="2">
-										{workflowRunEvent.actionName}
-									</Text>
+									<Flex
+										align="center"
+										justify="start"
+										gap="2"
+									>
+										<ActionNodeIcon
+											actionType={
+												workflowRunEvent.actionType
+											}
+										/>
+										<Text size="2">
+											{workflowRunEvent.actionName}
+										</Text>
+									</Flex>
+
+									{workflowRunEvent.isError && (
+										<Image
+											src="/error_icon.svg"
+											alt="Error"
+											height="16"
+											width="16"
+										/>
+									)}
 								</Flex>
 							</Row>
 						),
@@ -303,7 +328,6 @@ export default function WorkflowBuilderRunHistory({
 			</Box>
 
 			<Box
-				// height="calc(100vh - 140px)"
 				height="100%"
 				width="calc(100vw - 546px)"
 				left="546px"

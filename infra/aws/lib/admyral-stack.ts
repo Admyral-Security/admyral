@@ -52,6 +52,20 @@ export class AdmyralStack extends cdk.Stack {
 			},
 		);
 
+		const backendServiceEnvironment: Record<string, string> = {
+			DATABASE_URL: process.env.DATABASE_URL!,
+			JWT_SECRET: process.env.JWT_SECRET!,
+			WEBHOOK_SIGNING_SECRET: process.env.WEBHOOK_SIGNING_SECRET!,
+		};
+		if (process.env.WORKFLOW_RUN_HOURLY_QUOTA !== undefined) {
+			backendServiceEnvironment.WORKFLOW_RUN_TIMEOUT_IN_MINUTES =
+				process.env.WORKFLOW_RUN_HOURLY_QUOTA;
+		}
+		if (process.env.WORKFLOW_RUN_TIMEOUT_IN_MINUTES !== undefined) {
+			backendServiceEnvironment.WORKFLOW_RUN_TIMEOUT_IN_MINUTES =
+				process.env.WORKFLOW_RUN_TIMEOUT_IN_MINUTES;
+		}
+
 		const backendService =
 			new ecsPatterns.ApplicationLoadBalancedFargateService(
 				this,
@@ -61,13 +75,7 @@ export class AdmyralStack extends cdk.Stack {
 						image: ecs.ContainerImage.fromAsset("../../backend"),
 						containerPort: 80,
 						enableLogging: true,
-						environment: {
-							DATABASE_URL:
-								process.env.DATABASE_URL_WITH_ASYNCPG!,
-							JWT_SECRET: process.env.JWT_SECRET!,
-							WEBHOOK_SIGNING_SECRET:
-								process.env.WEBHOOK_SIGNING_SECRET!,
-						},
+						environment: backendServiceEnvironment,
 					},
 					cpu: 512,
 					memoryLimitMiB: 1024,
@@ -113,6 +121,25 @@ export class AdmyralStack extends cdk.Stack {
 			},
 		);
 
+		const workflowRunnerServiceEnvironment: Record<string, string> = {
+			JWT_SECRET: process.env.JWT_SECRET!,
+			DATABASE_URL: process.env.DATABASE_URL!,
+			DATABASE_CONNECTION_POOL_SIZE:
+				process.env.DATABASE_CONNECTION_POOL_SIZE!,
+			CREDENTIALS_SECRET: process.env.CREDENTIALS_SECRET!,
+			OPENAI_API_KEY: process.env.OPENAI_API_KEY!,
+			RESEND_API_KEY: process.env.RESEND_API_KEY!,
+			RESEND_EMAIL: process.env.RESEND_EMAIL!,
+		};
+		if (process.env.WORKFLOW_RUN_HOURLY_QUOTA !== undefined) {
+			workflowRunnerServiceEnvironment.WORKFLOW_RUN_TIMEOUT_IN_MINUTES =
+				process.env.WORKFLOW_RUN_HOURLY_QUOTA;
+		}
+		if (process.env.WORKFLOW_RUN_TIMEOUT_IN_MINUTES !== undefined) {
+			workflowRunnerServiceEnvironment.WORKFLOW_RUN_TIMEOUT_IN_MINUTES =
+				process.env.WORKFLOW_RUN_TIMEOUT_IN_MINUTES;
+		}
+
 		const workflowRunnerService =
 			new ecsPatterns.ApplicationLoadBalancedFargateService(
 				this,
@@ -124,16 +151,7 @@ export class AdmyralStack extends cdk.Stack {
 						),
 						containerPort: 80,
 						enableLogging: true,
-						environment: {
-							JWT_SECRET: process.env.JWT_SECRET!,
-							DATABASE_URL: process.env.DATABASE_URL!,
-							DATABASE_CONNECTION_POOL_SIZE:
-								process.env.DATABASE_CONNECTION_POOL_SIZE!,
-							CREDENTIALS_SECRET: process.env.CREDENTIALS_SECRET!,
-							OPENAI_API_KEY: process.env.OPENAI_API_KEY!,
-							RESEND_API_KEY: process.env.RESEND_API_KEY!,
-							RESEND_EMAIL: process.env.RESEND_EMAIL!,
-						},
+						environment: workflowRunnerServiceEnvironment,
 					},
 					cpu: 512,
 					memoryLimitMiB: 1024,

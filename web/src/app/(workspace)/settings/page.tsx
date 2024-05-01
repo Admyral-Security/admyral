@@ -2,6 +2,7 @@ import Account from "@/components/account";
 import Credentials from "@/components/credentials";
 import DeleteAccountButton from "@/components/delete-account-button";
 import LogoutButton from "@/components/logout-button";
+import Usage from "@/components/usage";
 import { Box, Flex, Grid, Text } from "@radix-ui/themes";
 
 export default function SettingsPage() {
@@ -41,6 +42,7 @@ export default function SettingsPage() {
 			>
 				<Account />
 				<Credentials />
+				<Usage />
 				<Flex width="50%" justify="start" gap="5">
 					<LogoutButton />
 					<DeleteAccountButton />

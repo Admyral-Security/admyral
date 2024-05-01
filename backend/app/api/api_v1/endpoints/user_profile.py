@@ -2,11 +2,13 @@ from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel.ext.asyncio.session import AsyncSession
-from sqlmodel import select
+from sqlmodel import select, func
 from pydantic import BaseModel
+from datetime import datetime, timedelta
 
 from app.deps import AuthenticatedUser, get_authenticated_user, get_session
-from app.models import UserProfile
+from app.models import UserProfile, WorkflowRun, Workflow
+from app.config import settings
 
 
 router = APIRouter()
@@ -21,6 +23,44 @@ async def query_user_profile(user_id: int, db: AsyncSession) -> UserProfile:
             detail="User profile not found."
         )
     return user_profile
+
+
+async def count_workflow_runs_last_hour(user_id: int, db: AsyncSession) -> int:
+    result = await db.exec(
+        select(func.count(WorkflowRun.run_id))
+        .join(Workflow)
+        .where(Workflow.user_id == user_id)
+        .where(WorkflowRun.started_timestamp >= func.now() - timedelta(hours=1))
+    )
+    return result.one()
+
+
+class UserQuota(BaseModel):
+    workflow_runs_last_hour: int
+    workflow_run_hourly_quota: Optional[int]
+    workflow_run_timeout_in_minutes: Optional[int]
+
+
+@router.get(
+    "/{user_id}/quota",
+    status_code=status.HTTP_200_OK
+)
+async def get_user_quota(
+    user_id: str,
+    db: AsyncSession = Depends(get_session),
+    user: AuthenticatedUser = Depends(get_authenticated_user)
+) -> UserQuota:
+    if user.user_id != user_id:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="You are not authorized to view this user's profile."
+        )
+    workflow_runs_last_hour = await count_workflow_runs_last_hour(user_id, db)
+    return UserQuota(
+        workflow_runs_last_hour=workflow_runs_last_hour,
+        workflow_run_hourly_quota=settings.WORKFLOW_RUN_HOURLY_QUOTA,
+        workflow_run_timeout_in_minutes=settings.WORKFLOW_RUN_TIMEOUT_IN_MINUTES
+    )
 
 
 class UserProfileResponse(BaseModel):

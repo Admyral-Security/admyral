@@ -2,9 +2,11 @@ use crate::workflow::EdgeType;
 
 use super::{context::Context, ActionExecutor, ReferenceHandle, Workflow};
 use anyhow::Result;
+use serde_json::json;
 use sqlx::{Pool, Postgres};
 use std::collections::VecDeque;
 use std::sync::Arc;
+use std::time::Instant;
 
 #[derive(Debug, Clone)]
 struct QueueElement {
@@ -24,8 +26,14 @@ impl WorkflowExecutor {
         pg_pool: Arc<Pool<Postgres>>,
         workflow: Workflow,
         start_node_reference_handle: ReferenceHandle,
+        execution_time_limit_in_sec: Option<u64>,
     ) -> Result<Self> {
-        let context = Context::init(workflow.workflow_id.clone(), pg_pool).await?;
+        let context = Context::init(
+            workflow.workflow_id.clone(),
+            execution_time_limit_in_sec,
+            pg_pool,
+        )
+        .await?;
         Ok(Self {
             workflow,
             context,
@@ -33,7 +41,10 @@ impl WorkflowExecutor {
         })
     }
 
+    // TODO: if an error occurrs, we do not execute complete run
     pub async fn execute(&mut self) -> Result<()> {
+        let start_time = Instant::now();
+
         let mut queue = VecDeque::new();
         queue.push_back(QueueElement {
             reference_handle: self.start_node_reference_handle.clone(),
@@ -48,6 +59,33 @@ impl WorkflowExecutor {
                 .actions
                 .get(&queue_element.reference_handle)
                 .expect("Failed to dereference reference handle!");
+
+            if self.context.execution_time_limit_in_sec.is_some()
+                && start_time.elapsed().as_secs()
+                    >= self.context.execution_time_limit_in_sec.unwrap()
+            {
+                // Stop execution. Execution time was exceeded.
+                tracing::info!(
+                    "Workflow {} exceeded timeout limit of {}",
+                    self.workflow.workflow_id,
+                    self.context.execution_time_limit_in_sec.unwrap()
+                );
+
+                self.context
+                    .persist_run_state(
+                        &queue_element.reference_handle,
+                        &action.id,
+                        queue_element
+                            .prev_action_state_id
+                            .as_ref()
+                            .map(|s| s.as_str()),
+                        json!({"error": "Workflow time limit exceeded"}),
+                        true,
+                    )
+                    .await?;
+
+                break;
+            }
 
             tracing::info!(
                 "Executing action of type {} with action id {} of workflow {}",
@@ -87,6 +125,7 @@ impl WorkflowExecutor {
                         .as_ref()
                         .map(|s| s.as_str()),
                     output,
+                    false,
                 )
                 .await?;
 

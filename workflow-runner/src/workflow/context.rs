@@ -10,17 +10,23 @@ pub struct Context {
     pub workflow_id: String,
     pub execution_state: ExecutionState,
     pub pg_pool: Arc<Pool<Postgres>>,
-    run_id: String,
+    pub run_id: String,
+    pub execution_time_limit_in_sec: Option<u64>,
 }
 
 impl Context {
-    pub async fn init(workflow_id: String, pg_pool: Arc<Pool<Postgres>>) -> Result<Self> {
+    pub async fn init(
+        workflow_id: String,
+        execution_time_limit_in_sec: Option<u64>,
+        pg_pool: Arc<Pool<Postgres>>,
+    ) -> Result<Self> {
         let run_id = init_run_state(pg_pool.borrow(), &workflow_id).await?;
         Ok(Self {
             workflow_id,
             execution_state: ExecutionState::default(),
             pg_pool,
             run_id,
+            execution_time_limit_in_sec,
         })
     }
 
@@ -30,6 +36,7 @@ impl Context {
         action_id: &str,
         prev_action_state_id: Option<&str>,
         output: serde_json::Value,
+        is_error: bool,
     ) -> Result<String> {
         self.execution_state
             .store(reference_handle.clone(), output.clone());
@@ -39,6 +46,7 @@ impl Context {
             action_id,
             prev_action_state_id,
             output,
+            is_error,
         )
         .await?;
         Ok(action_state_id)

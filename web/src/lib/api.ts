@@ -9,6 +9,8 @@ import {
 import { redirect } from "next/navigation";
 import { encrypt } from "./crypto";
 import {
+	Quota,
+	UserProfile,
 	WorkflowData,
 	WorkflowRun,
 	WorkflowRunEvent,
@@ -116,7 +118,7 @@ export async function publishWorkflow(workflowId: string, isLive: boolean) {
 	}
 }
 
-export async function loadUserProfile() {
+export async function loadUserProfile(): Promise<UserProfile> {
 	const [userId, accessToken] = await getUserIdAndAccessToken();
 
 	const result = await fetch(
@@ -134,6 +136,26 @@ export async function loadUserProfile() {
 
 	const userProfile = await result.json();
 	return transformObjectKeysToCamelCase(userProfile);
+}
+
+export async function loadUserQuota(): Promise<Quota> {
+	const [userId, accessToken] = await getUserIdAndAccessToken();
+
+	const result = await fetch(
+		`${process.env.BACKEND_API_URL}/api/v1/profile/${userId}/quota`,
+		{
+			method: "GET",
+			headers: {
+				Authorization: `Bearer ${accessToken}`,
+			},
+		},
+	);
+	if (result.status !== 200) {
+		throw new Error("Failed to load quota!");
+	}
+
+	const quota = await result.json();
+	return transformObjectKeysToCamelCase(quota);
 }
 
 export async function updateUserProfile(
@@ -340,6 +362,13 @@ export async function triggerWorkflowFromAction(
 		},
 	);
 	if (result.status !== 202) {
+		const error = await result.text();
+		if (
+			result.status === 403 &&
+			error === "Workflow run quota limit exceeded"
+		) {
+			throw new Error("Workflow run quota limit exceeded!");
+		}
 		throw new Error("Failed to trigger workflow!");
 	}
 }

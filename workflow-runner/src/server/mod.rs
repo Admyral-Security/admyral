@@ -2,6 +2,7 @@ mod auth;
 mod shared_state;
 
 use anyhow::Result;
+use async_once::AsyncOnce;
 use auth::authenticate_webhook;
 use axum::{
     extract::{Json, Path, State},
@@ -10,6 +11,7 @@ use axum::{
     routing::{get, post},
     Router,
 };
+use lazy_static::lazy_static;
 use serde::Deserialize;
 use serde_json::json;
 use shared_state::SharedState;
@@ -19,12 +21,28 @@ use std::{borrow::Borrow, sync::Arc};
 use tower_http::cors::CorsLayer;
 
 use crate::{
-    postgres::{fetch_action, fetch_webhook, is_workflow_owned_by_user},
+    postgres::{
+        count_workflow_runs_of_account_last_hour, fetch_action, fetch_webhook, get_workflow_owner,
+        is_workflow_owned_by_user,
+    },
     server::shared_state::setup_state,
     workflow::run_workflow,
 };
 
 use self::auth::JwtClaims;
+
+lazy_static! {
+    static ref WORKFLOW_RUN_HOURLY_QUOTA: AsyncOnce<Option<i64>> = AsyncOnce::new(async {
+        match std::env::var("WORKFLOW_RUN_HOURLY_QUOTA") {
+            Err(_) => None,
+            Ok(limit) => Some(
+                limit
+                    .parse::<i64>()
+                    .expect("WORKFLOW_RUN_HOURLY_QUOTA is not a valid number!"),
+            ),
+        }
+    });
+}
 
 async fn health_check() -> impl IntoResponse {
     (StatusCode::OK, "Healthy")
@@ -51,6 +69,34 @@ async fn enqueue_workflow_job(
     });
 }
 
+async fn is_quota_limit_exceeded(
+    user_id: Option<&str>,
+    workflow_id: &str,
+    quota_limit: Option<i64>,
+    db_pool: &Pool<Postgres>,
+) -> Result<bool> {
+    let quota = match quota_limit {
+        None => return Ok(false),
+        Some(quota_limit) => quota_limit,
+    };
+
+    let user_id = match user_id {
+        Some(user_id) => user_id.to_string(),
+        None => get_workflow_owner(db_pool, &workflow_id).await?,
+    };
+
+    let runs = count_workflow_runs_of_account_last_hour(db_pool, &user_id).await?;
+    let exceeded_quota = runs >= quota;
+    if exceeded_quota {
+        tracing::info!("User {user_id} exceeded workflow run quota. Executed {runs} workflows in the last hour. Quota is {quota}.");
+    } else {
+        tracing::info!(
+            "User {user_id} executed {runs} workflows in the last hour. Quota is {quota}."
+        )
+    }
+    Ok(exceeded_quota)
+}
+
 async fn webhook_handler(
     webhook_id: String,
     secret: String,
@@ -61,7 +107,7 @@ async fn webhook_handler(
 
     match authenticate_webhook(db_pool.borrow(), &webhook_id, &secret).await {
         Err(e) => {
-            tracing::error!("Error verifying webhook: {}", e);
+            tracing::error!("Error verifying webhook: {e}");
             return (
                 StatusCode::INTERNAL_SERVER_ERROR,
                 "Error: Internal server error. Try again later.",
@@ -79,18 +125,34 @@ async fn webhook_handler(
         Ok(webhook_opt) => match webhook_opt {
             Some(webhook) => webhook,
             None => {
-                tracing::error!("The webhook {} does not exist.", webhook_id);
+                tracing::error!("The webhook {webhook_id} does not exist.");
                 return (StatusCode::NOT_FOUND, "Webhook does not exis.");
             }
         },
         Err(e) => {
-            tracing::error!("Error fetching webhook {}: {}", webhook_id, e);
+            tracing::error!("Error fetching webhook {webhook_id}: {e}");
             return (
                 StatusCode::INTERNAL_SERVER_ERROR,
                 "Error: Internal server error. Try again later.",
             );
         }
     };
+
+    let quota_limit = WORKFLOW_RUN_HOURLY_QUOTA.get().await.clone();
+    match is_quota_limit_exceeded(None, &webhook.workflow_id, quota_limit, db_pool.borrow()).await {
+        Err(e) => {
+            tracing::error!("Error checking workflow run quota limit exceeded check: {e}");
+            return (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "Error: Internal server error. Try again later.",
+            );
+        }
+        Ok(is_quota_exceeded) => {
+            if is_quota_exceeded {
+                return (StatusCode::FORBIDDEN, "Workflow run quota limit exceeded");
+            }
+        }
+    }
 
     enqueue_workflow_job(
         webhook.workflow_id,
@@ -159,6 +221,22 @@ async fn post_trigger_workflow_handler(
         Err(e) => {
             tracing::error!("Error validating workflow ownership: {e}");
             return (StatusCode::INTERNAL_SERVER_ERROR, "Internal server error");
+        }
+    }
+
+    let quota_limit = WORKFLOW_RUN_HOURLY_QUOTA.get().await.clone();
+    match is_quota_limit_exceeded(None, &workflow_id, quota_limit, state.db_pool.borrow()).await {
+        Err(e) => {
+            tracing::error!("Error checking workflow run quota limit exceeded check: {e}");
+            return (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "Error: Internal server error. Try again later.",
+            );
+        }
+        Ok(is_quota_exceeded) => {
+            if is_quota_exceeded {
+                return (StatusCode::FORBIDDEN, "Workflow run quota limit exceeded");
+            }
         }
     }
 

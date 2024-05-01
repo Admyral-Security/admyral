@@ -157,7 +157,13 @@ export default function WorkflowBuilder({ workflowId }: WorkflowBuilderProps) {
 				alert("Workflow triggered successfully.");
 			})
 			.catch((error) => {
-				alert("Failed to trigger workflow. Please try again.");
+				if (error.message === "Workflow run quota limit exceeded!") {
+					alert(
+						"You exceeded your workflow run quota limit. For more details about your quota limit, please go to the Settings page.",
+					);
+				} else {
+					alert("Failed to trigger workflow. Please try again.");
+				}
 			});
 	}, [triggerNodeId, setTriggerNodeId]);
 

@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n        SELECT action_id, workflow_id, action_name, reference_handle, action_type::text as \"action_type!: String\", action_definition\n        FROM admyral.action_node\n        WHERE workflow_id = $1 AND action_id = $2\n        ",
+  "query": "\n        SELECT action_id, workflow_id, action_name, reference_handle, action_type::text as \"action_type!: String\", action_definition\n        FROM admyral.action_node\n        WHERE workflow_id = $1 AND action_id = $2\n        LIMIT 1\n        ",
   "describe": {
     "columns": [
       {
@@ -49,5 +49,5 @@
       false
     ]
   },
-  "hash": "805417f4fbde08fdcfc80ca461a44299412ee57c5bbcfc1527822bef5e96c0bf"
+  "hash": "86eb8191f6512ca07c62e68eecc2c50b25c28f2796660991dc53e758a38e43bc"
 }
