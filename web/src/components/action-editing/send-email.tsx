@@ -2,7 +2,7 @@ import { Flex, IconButton, Text, TextArea, TextField } from "@radix-ui/themes";
 import CopyText from "../copy-text";
 import { MinusIcon, PlusIcon } from "@radix-ui/react-icons";
 import { SendEmailData } from "@/lib/types";
-import { generateReferenceHandle } from "@/lib/workflows";
+import { generateReferenceHandle } from "@/lib/workflow-node";
 import { cloneDeep } from "lodash";
 import useWorkflowStore from "@/lib/workflow-store";
 

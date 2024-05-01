@@ -8,7 +8,7 @@ import {
 } from "@radix-ui/themes";
 import CopyText from "../copy-text";
 import { MinusIcon, PlusIcon } from "@radix-ui/react-icons";
-import { generateReferenceHandle } from "@/lib/workflows";
+import { generateReferenceHandle } from "@/lib/workflow-node";
 import { cloneDeep } from "lodash";
 import { HttpRequestData } from "@/lib/types";
 import useWorkflowStore from "@/lib/workflow-store";

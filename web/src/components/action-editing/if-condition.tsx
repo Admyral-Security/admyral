@@ -17,7 +17,7 @@ import {
 } from "@/lib/types";
 import { MinusIcon, PlusIcon } from "@radix-ui/react-icons";
 import { cloneDeep } from "lodash";
-import { generateReferenceHandle } from "@/lib/workflows";
+import { generateReferenceHandle } from "@/lib/workflow-node";
 import useWorkflowStore from "@/lib/workflow-store";
 
 export interface IfConditionProps {

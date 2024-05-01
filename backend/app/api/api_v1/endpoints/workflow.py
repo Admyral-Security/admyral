@@ -515,6 +515,10 @@ async def import_workflow_template(
             action_definition=action.action_definition
         )
 
+        # Set default user email as default recipient for SEND_EMAIL actions
+        if new_action.action_type == ActionType.SEND_EMAIL:
+            new_action.action_definition["recipients"] = [user.email]
+
         db.add(new_action)
         await db.flush()
 

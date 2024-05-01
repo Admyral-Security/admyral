@@ -1,7 +1,7 @@
 import { Flex, Select, Text, TextArea, TextField } from "@radix-ui/themes";
 import CopyText from "../copy-text";
 import { cloneDeep } from "lodash";
-import { generateReferenceHandle } from "@/lib/workflows";
+import { generateReferenceHandle } from "@/lib/workflow-node";
 import { AiActionData, LLM, LLM_MODELS, getLLMLabel } from "@/lib/types";
 import useWorkflowStore from "@/lib/workflow-store";
 

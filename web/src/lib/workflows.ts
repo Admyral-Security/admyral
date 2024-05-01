@@ -1,19 +1,8 @@
-import { createWebhookSecret } from "./crypto";
+"use server";
+
+import { createClient } from "@/utils/supabase/server";
 import { ActionNode, ActionData, LLM } from "./types";
-
-export function generateReferenceHandle(actionName: string): string {
-	// TODO: make sure that reference handle is unique within a workflow
-	return actionName.toLowerCase().replaceAll(" ", "_");
-}
-
-export async function generateWebhook(): Promise<{
-	webhookId: string;
-	secret: string;
-}> {
-	const webhookId = crypto.randomUUID();
-	const secret = await createWebhookSecret(webhookId);
-	return { webhookId, secret };
-}
+import { generateReferenceHandle, generateWebhook } from "./workflow-node";
 
 export async function initActionData(
 	actionType: ActionNode,
@@ -73,16 +62,29 @@ export async function initActionData(
 				},
 			};
 
-		case ActionNode.SEND_EMAIL:
+		case ActionNode.SEND_EMAIL: {
+			// Get the current user's email to initialize recipients
+			const supbase = createClient();
+			const {
+				data: { user },
+				error,
+			} = await supbase.auth.getUser();
+
+			const recipients = [];
+			if (!error && user) {
+				recipients.push(user.email);
+			}
+
 			return {
 				...base,
 				actionDefinition: {
-					recipients: [],
+					recipients,
 					subject: "",
 					body: "",
 					senderName: "",
 				},
 			};
+		}
 
 		case ActionNode.RECEIVE_EMAIL:
 			// TODO:
@@ -100,5 +102,3 @@ export async function initActionData(
 			throw new Error("Unhandled action type: " + actionType);
 	}
 }
-
-export const NEW_MARKER = "new_";

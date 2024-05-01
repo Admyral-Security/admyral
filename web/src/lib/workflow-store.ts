@@ -21,7 +21,8 @@ import {
 	IF_CONDITION_FALSE_BRANCH_HANDLE_ID,
 	IF_CONDITION_TRUE_BRANCH_HANDLE_ID,
 } from "@/components/workflow-graph/if-condition-node";
-import { NEW_MARKER, initActionData } from "./workflows";
+import { NEW_MARKER } from "./workflow-node";
+import { initActionData } from "./workflows";
 
 type WorkflowState = {
 	nextId: number;

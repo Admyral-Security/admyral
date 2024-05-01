@@ -30,7 +30,7 @@ export default function CreateNewWorkflowButton({
 				setTemplates(templates);
 			})
 			.catch((error) => {
-				alert("Failed to load workflow templates!");
+				// alert("Failed to load workflow templates!");
 			});
 	}, []);
 

@@ -1,6 +1,6 @@
 import { Flex, Text, TextArea, TextField } from "@radix-ui/themes";
 import CopyText from "../copy-text";
-import { generateReferenceHandle } from "@/lib/workflows";
+import { generateReferenceHandle } from "@/lib/workflow-node";
 import { cloneDeep } from "lodash";
 import { WebhookData } from "@/lib/types";
 import useWorkflowStore from "@/lib/workflow-store";
