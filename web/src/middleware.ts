@@ -24,6 +24,6 @@ export const config = {
 		 * - /terms-of-service
 		 * - /privacy-policy
 		 */
-		"/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$|auth/confirm|auth/callback|terms-of-service|privacy-policy|dpa|impressum|password/forgot*|error|login|signup-success).*)",
+		"/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$|auth/confirm|auth/callback|terms-of-service|privacy-policy|dpa|impressum|password/forgot*|error|login|signup-success|.well-known/microsoft-identity-association.json).*)",
 	],
 };
