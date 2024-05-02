@@ -23,13 +23,15 @@
 
 </br>
 
-Admyral is an open-source, drag-and-drop security workflow builder with integrated case management (Think Torq but open-source). Through the combination of case management, workflow automation, and AI, Admyral seeks to enable:
 
-1. A unified console to handle incidents 🖥️
+Admyral is an open-source Cybersecurity Automation & Investigation Copilot. Admyral's Copilot enjoys a deep integration into Admyral's case management and workflow automation. Through this triangulation, SOC teams can benefit from:
+1. A unified console to perform investigations and handle incidents 📺
 2. A seamless workflow creation -- even during incident triage, investigation, or response 👷
-3. Automatic next step and workflow recommendations for individual cases 🤖
+3. Automatic alert investigation as well as next step suggestions for analysts 🧑‍✈️
+4. Workflow recommendations for individual cases as well as workflow creation through natural language 🤖
 
-This is what we call a next-gen Hyperautomation Platform. It is engineered to provide a new and more effective and scalable approach for tackling alert fatigue and automating security workflows.
+Through Admyral's Copilot functionality, Admyral seeks to provide a new, more effective, and scalable approach for tackling alert fatigue and automating security workflows.
+
 
 → → → [Try out the free cloud version](https://admyral.dev/login) ← ← ←
 
