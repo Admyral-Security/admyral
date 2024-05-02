@@ -30,6 +30,8 @@ import { Node, MarkerType } from "reactflow";
 import { DirectedEdge } from "./workflow-graph/edge";
 import useWorkflowStore from "@/lib/workflow-store";
 import RunWorkflow from "./run-workflow";
+import BackIcon from "./icons/back-icon";
+import Link from "next/link";
 
 function buildInitialWorkflowGraph(
 	actionData: ActionData[],
@@ -269,6 +271,10 @@ export default function WorkflowBuilder({ workflowId }: WorkflowBuilderProps) {
 					}}
 				>
 					<Flex justify="start" align="center" gap="4">
+						<Link href="/">
+							<BackIcon />
+						</Link>
+
 						<Text size="4" weight="medium">
 							Workflow Builder
 						</Text>
