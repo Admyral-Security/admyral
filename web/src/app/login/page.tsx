@@ -15,8 +15,9 @@ import GoogleIcon from "@/components/icons/google-icon";
 import GithubIcon from "@/components/icons/github-icon";
 import LogoWithName from "@/components/icons/logo-with-name";
 import { createClient } from "@/utils/supabase/client";
+import Image from "next/image";
 
-type OAuthProvider = "google" | "github";
+type OAuthProvider = "google" | "github" | "azure";
 
 export default function LoginPage() {
 	const supabase = createClient();
@@ -43,6 +44,9 @@ export default function LoginPage() {
 				provider,
 				options: {
 					redirectTo: `${window.location.origin}/auth/callback`,
+					// Offline access is required to refresh access tokens
+					// https://supabase.com/docs/guides/auth/social-login/auth-azure#obtain-the-provider-refresh-token
+					scopes: "email offline_access",
 				},
 			});
 			if (error) throw error;
@@ -109,7 +113,7 @@ export default function LoginPage() {
 				<div className="sm:mx-auto sm:w-full sm:max-w-sm">
 					<form className="space-y-4" onSubmit={handleSubmit}>
 						<div>
-							<label htmlFor="email">Email</label>
+							<label htmlFor="email">Business Email</label>
 							<div className="mt-2">
 								<TextField.Root
 									size="3"
@@ -198,9 +202,44 @@ export default function LoginPage() {
 								color: "var(--Tokens-Colors-text, #1C2024)",
 							}}
 						>
-							{isSignIn
-								? "Log in with Google"
-								: "Sign up with Google"}
+							Continue with Google
+						</Text>
+					</Button>
+				</div>
+
+				<div className="sm:mx-auto sm:w-full sm:max-w-sm">
+					<Button
+						style={{
+							width: "100%",
+							height: "auto",
+							display: "flex",
+							padding: "12px var(--Space-5, 24px)",
+							alignItems: "center",
+							justifyContent: "start",
+							gap: "var(--Space-5, 24px)",
+							alignSelf: "stretch",
+							borderRadius: "var(--Radius-4, 8px)",
+							border: "1px solid var(--Neutral-color-Neutral-5, #E4E4E9)",
+							background: "var(--Panel-solid, #FFF)",
+							boxShadow:
+								"0px 0px 3px 0px rgba(0, 0, 0, 0.08), 0px 2px 3px 0px rgba(0, 0, 0, 0.17)",
+							cursor: "pointer",
+						}}
+						onClick={() => handleOAuthLogin("azure")}
+					>
+						<Image
+							src="/microsoft_logo.svg"
+							alt="Microsoft"
+							width={24}
+							height={24}
+						/>
+						<Text
+							size="4"
+							style={{
+								color: "var(--Tokens-Colors-text, #1C2024)",
+							}}
+						>
+							Continue with Microsoft
 						</Text>
 					</Button>
 				</div>
@@ -232,9 +271,7 @@ export default function LoginPage() {
 								color: "var(--Tokens-Colors-text, #1C2024)",
 							}}
 						>
-							{isSignIn
-								? "Log in with GitHub"
-								: "Sign up with GitHub"}
+							Continue with GitHub
 						</Text>
 					</Button>
 				</div>
