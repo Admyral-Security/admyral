@@ -16,7 +16,7 @@ import {
 } from "reactflow";
 import { ActionData, EdgeType } from "./types";
 import { DirectedEdge } from "@/components/workflow-graph/edge";
-import { cloneDeep } from "lodash";
+import { cloneDeep, isEqual } from "lodash";
 import {
 	IF_CONDITION_FALSE_BRANCH_HANDLE_ID,
 	IF_CONDITION_TRUE_BRANCH_HANDLE_ID,
@@ -26,8 +26,10 @@ import { initActionData } from "./workflows";
 
 type WorkflowState = {
 	nextId: number;
+	persistedNodes: Node<ActionData>[];
 	nodes: Node<ActionData>[];
 	deletedNodes: string[];
+	persistedEdges: DirectedEdge[];
 	edges: DirectedEdge[];
 	deletedEdges: [string, string][];
 	triggerNodeId: string | null;
@@ -45,12 +47,16 @@ type WorkflowState = {
 	getId: () => string;
 	clear: () => void;
 	hasUnsavedChanges: () => boolean;
+	setPersistedNodes: (nodes: Node<ActionData>[]) => void;
+	setPersistedEdges: (edges: DirectedEdge[]) => void;
 };
 
 const useWorkflowStore = create<WorkflowState>((set, get) => ({
 	nextId: 0,
+	persistedNodes: [],
 	nodes: [],
 	deletedNodes: [],
+	persistedEdges: [],
 	edges: [],
 	deletedEdges: [],
 	triggerNodeId: null,
@@ -229,13 +235,64 @@ const useWorkflowStore = create<WorkflowState>((set, get) => ({
 			deletedEdges: [],
 		});
 	},
+	setPersistedNodes: (nodes: Node<ActionData>[]) => {
+		set({ persistedNodes: nodes });
+	},
+	setPersistedEdges: (edges: DirectedEdge[]) => {
+		set({ persistedEdges: edges });
+	},
 	hasUnsavedChanges: () => {
-		return (
+		// We first check the workflow graph structure whether it has changed.
+		const didWorkflowGraphChange =
 			get().deletedNodes.length > 0 ||
 			get().deletedEdges.length > 0 ||
+			get().nodes.length !== get().persistedNodes.length ||
+			get().edges.length !== get().persistedEdges.length ||
 			get().nodes.some((node) => node.id.startsWith(NEW_MARKER)) ||
-			get().edges.some((edge) => edge.id.startsWith(NEW_MARKER))
+			get().edges.some((edge) => edge.id.startsWith(NEW_MARKER));
+		if (didWorkflowGraphChange) {
+			return true;
+		}
+
+		// Did the content of the nodes or edges change?
+		const persistedNodeLookup = new Map(
+			get().persistedNodes.map((node) => [node.id, node]),
 		);
+		if (
+			get().nodes.some((node: Node<ActionData>) => {
+				const persistedNode = persistedNodeLookup.get(node.id);
+				if (
+					persistedNode === undefined ||
+					!isEqual(persistedNode.data, node.data)
+				) {
+					return true;
+				}
+			})
+		) {
+			return true;
+		}
+
+		const persistedEdgeLookup = new Map(
+			get().persistedEdges.map((edge) => [edge.id, edge]),
+		);
+		if (
+			get().edges.some((edge: DirectedEdge) => {
+				const persistedEdge = persistedEdgeLookup.get(edge.id);
+				if (
+					persistedEdge === undefined ||
+					!isEqual(persistedEdge.source, edge.source) ||
+					!isEqual(persistedEdge.target, edge.target) ||
+					!isEqual(persistedEdge.type, edge.type) ||
+					!isEqual(persistedEdge.sourceHandle, edge.sourceHandle) ||
+					!isEqual(persistedEdge.targetHandle, edge.targetHandle)
+				) {
+					return true;
+				}
+			})
+		) {
+		}
+
+		return false;
 	},
 }));
 

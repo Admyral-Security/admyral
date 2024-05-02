@@ -15,6 +15,7 @@ export function getLLMLabel(model: LLM) {
 export const LLM_MODELS = [LLM.GPT4_TURBO, LLM.GPT3_5_TURBO];
 
 export enum ActionNode {
+	MANUAL_START = "MANUAL_START",
 	WEBHOOK = "WEBHOOK",
 	HTTP_REQUEST = "HTTP_REQUEST",
 	TRANSFORM = "TRANSFORM",
@@ -28,7 +29,8 @@ export enum ActionNode {
 export function getActionNodeLabel(actionNode: ActionNode) {
 	switch (actionNode) {
 		case ActionNode.WEBHOOK:
-			return "Webhook";
+		case ActionNode.MANUAL_START:
+			return "Start Workflow";
 		case ActionNode.HTTP_REQUEST:
 			return "HTTP Request";
 		case ActionNode.TRANSFORM:
@@ -120,6 +122,8 @@ export type WebhookData = ActionDataBase<{}> & {
 	secret: string;
 };
 
+export type ManualStartData = WebhookData;
+
 export type IfConditionData = ActionDataBase<{
 	conditions: {
 		lhs: string;
@@ -144,6 +148,7 @@ export type ActionData =
 	| AiActionData
 	| HttpRequestData
 	| WebhookData
+	| ManualStartData
 	| IfConditionData
 	| SendEmailData
 	| ReceiveEmailData

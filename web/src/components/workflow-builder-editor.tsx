@@ -8,7 +8,7 @@ import ReactFlow, {
 } from "reactflow";
 import "reactflow/dist/style.css";
 import { useCallback, useState } from "react";
-import WebhookNode from "./workflow-graph/webhook-node";
+import StartWorkflowNode from "./workflow-graph/start-workflow-node";
 import HttpRequestNode from "./workflow-graph/http-request-node";
 import DirectedEdgeComponent from "./workflow-graph/edge";
 import AiActionNode from "./workflow-graph/ai-action-node";
@@ -22,7 +22,6 @@ import {
 	getActionNodeLabel,
 	EdgeType,
 } from "@/lib/types";
-import Webhook from "./action-editing/webhook";
 import HttpRequest from "./action-editing/http-request";
 import AiAction from "./action-editing/ai-action";
 import IfCondition from "./action-editing/if-condition";
@@ -32,9 +31,11 @@ import useWorkflowStore from "@/lib/workflow-store";
 import EditorSideBar from "./workflow-builder-editor-side-bar";
 import ActionNodeIcon from "./action-node-icon";
 import NoteNode from "./workflow-graph/note-node";
+import StartWorkflow from "./action-editing/start-workflow";
 
 const nodeTypes = {
-	[ActionNode.WEBHOOK]: WebhookNode,
+	[ActionNode.WEBHOOK]: StartWorkflowNode,
+	[ActionNode.MANUAL_START]: StartWorkflowNode,
 	[ActionNode.HTTP_REQUEST]: HttpRequestNode,
 	[ActionNode.AI_ACTION]: AiActionNode,
 	[ActionNode.SEND_EMAIL]: SendEmailNode,
@@ -178,9 +179,11 @@ function WorkflowBuilderEditor() {
 						onIconClick={closeActionDefinitionPanel}
 						zIndex={100}
 					>
-						{(nodes[selectNodeIdx].type as ActionNode) ===
-							ActionNode.WEBHOOK && (
-							<Webhook id={nodes[selectNodeIdx].id} />
+						{((nodes[selectNodeIdx].type as ActionNode) ===
+							ActionNode.WEBHOOK ||
+							(nodes[selectNodeIdx].type as ActionNode) ===
+								ActionNode.MANUAL_START) && (
+							<StartWorkflow id={nodes[selectNodeIdx].id} />
 						)}
 
 						{(nodes[selectNodeIdx].type as ActionNode) ===

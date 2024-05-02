@@ -1,6 +1,5 @@
 import { ActionNode, getActionNodeLabel } from "@/lib/types";
 import { Badge, Box, Card, Flex, HoverCard, Text } from "@radix-ui/themes";
-import WebhookActionIcon from "./icons/webhook-action-icon";
 import HttpRequestActionIcon from "./icons/http-request-action-icon";
 import TransformActionIcon from "./icons/transform-action-icon";
 import IfConditionActionIcon from "./icons/if-condition-action-icon";
@@ -14,6 +13,7 @@ import CaseTriggerIcon from "./icons/case-trigger-icon";
 import { EnterIcon } from "@radix-ui/react-icons";
 import WorkflowTemplates from "./workflow-templates";
 import NoteActionIcon from "./icons/note-action-icon";
+import StartWorkflowActionIcon from "./icons/start-workflow-action-icon";
 
 interface EditorCardProps {
 	icon: React.ReactNode;
@@ -117,13 +117,13 @@ export default function EditorSideBar() {
 						<Flex direction="column" gap="2">
 							<div
 								onDragStart={(event) =>
-									onDragStart(event, ActionNode.WEBHOOK)
+									onDragStart(event, ActionNode.MANUAL_START)
 								}
 							>
 								<EditorCard
-									icon={<WebhookActionIcon />}
+									icon={<StartWorkflowActionIcon />}
 									label={getActionNodeLabel(
-										ActionNode.WEBHOOK,
+										ActionNode.MANUAL_START,
 									)}
 								/>
 							</div>

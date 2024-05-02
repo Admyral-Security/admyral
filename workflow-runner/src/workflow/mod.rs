@@ -4,6 +4,7 @@ mod execution_state;
 pub mod executor;
 mod http_request_action;
 mod if_condition_action;
+mod manual_start_action;
 mod reference_resolution;
 mod send_email_action;
 mod webhook_action;
@@ -67,6 +68,7 @@ pub enum ActionNode {
     IfCondition(if_condition_action::IfCondition),
     AiAction(ai_action::AiAction),
     SendEmail(send_email_action::SendEmail),
+    ManualStart(manual_start_action::ManualStart),
 }
 
 impl ActionNode {
@@ -85,6 +87,9 @@ impl ActionNode {
             "SEND_EMAIL" => Ok(Self::SendEmail(serde_json::from_value::<
                 send_email_action::SendEmail,
             >(action_definition)?)),
+            "MANUAL_START" => Ok(Self::ManualStart(
+                manual_start_action::ManualStart::default(),
+            )),
             _ => Err(anyhow!("Unknown action type: {action_type}")),
         }
     }
@@ -96,6 +101,7 @@ impl ActionNode {
             Self::IfCondition(_) => "IF_CONDITION",
             Self::AiAction(_) => "AI_ACTION",
             Self::SendEmail(_) => "SEND_EMAIL",
+            Self::ManualStart(_) => "MANUAL_START",
         }
     }
 
@@ -183,7 +189,7 @@ pub async fn run_workflow(
         return Ok(());
     }
 
-    // if a trigger event exists, inject trigger event into webhook (note: only possible from webhooks for now)
+    // if a trigger event exists, inject trigger event into start workflow node (webhook, manual start)
     if let Some(initial_event) = trigger_event {
         let action = workflow
             .actions
@@ -191,10 +197,12 @@ pub async fn run_workflow(
             .expect("Start node reference handle does not exist!");
         if let ActionNode::Webhook(webhook_action) = &mut action.node {
             webhook_action.set_input(initial_event);
+        } else if let ActionNode::ManualStart(manual_start_action) = &mut action.node {
+            manual_start_action.set_input(initial_event);
         } else {
-            tracing::error!("Trying to run workflow {workflow_id} from non-webhook action type with initial data!");
+            tracing::error!("Trying to run workflow {workflow_id} from non-start workflow node (not a webhook or manual start) with initial data!");
             return Err(anyhow!(
-                "Trying to run workflow from non-webhook action type with initial data!"
+                "Trying to run workflow from non-start workflow action type (not a webhook or manual start) with initial data!"
             ));
         }
     }

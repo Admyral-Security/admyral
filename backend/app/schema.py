@@ -8,6 +8,7 @@ class ActionType(Enum):
     AI_ACTION = "AI_ACTION"
     SEND_EMAIL = "SEND_EMAIL"
     NOTE = "NOTE"
+    MANUAL_START = "MANUAL_START"
 
 
 class EdgeType(Enum):

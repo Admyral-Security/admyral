@@ -29,6 +29,7 @@ import { ActionNode, ActionData, EdgeData, EdgeType } from "@/lib/types";
 import { Node, MarkerType } from "reactflow";
 import { DirectedEdge } from "./workflow-graph/edge";
 import useWorkflowStore from "@/lib/workflow-store";
+import RunWorkflow from "./run-workflow";
 
 function buildInitialWorkflowGraph(
 	actionData: ActionData[],
@@ -90,6 +91,8 @@ export default function WorkflowBuilder({ workflowId }: WorkflowBuilderProps) {
 		triggerNodeId,
 		setTriggerNodeId,
 		hasUnsavedChanges,
+		setPersistedNodes,
+		setPersistedEdges,
 	} = useWorkflowStore((state) => ({
 		nodes: state.nodes,
 		deletedNodes: state.deletedNodes,
@@ -103,6 +106,8 @@ export default function WorkflowBuilder({ workflowId }: WorkflowBuilderProps) {
 		triggerNodeId: state.triggerNodeId,
 		setTriggerNodeId: state.setTriggerNodeId,
 		hasUnsavedChanges: state.hasUnsavedChanges,
+		setPersistedNodes: state.setPersistedNodes,
+		setPersistedEdges: state.setPersistedEdges,
 	}));
 
 	const [isSavingWorkflow, setIsSavingWorkflow] = useState<boolean>(false);
@@ -112,6 +117,7 @@ export default function WorkflowBuilder({ workflowId }: WorkflowBuilderProps) {
 	const [openSettings, setOpenSettings] = useState<boolean>(false);
 
 	useEffect(() => {
+		// Initial load of the persisted workflow
 		getWorkflow(workflowId)
 			.then((workflow) => {
 				setWorkflowData({
@@ -129,6 +135,8 @@ export default function WorkflowBuilder({ workflowId }: WorkflowBuilderProps) {
 				);
 				setNodes(n);
 				setEdges(e);
+				setPersistedNodes(n);
+				setPersistedEdges(e);
 			})
 			.catch((error) => {
 				alert(
@@ -226,6 +234,8 @@ export default function WorkflowBuilder({ workflowId }: WorkflowBuilderProps) {
 			);
 			setNodes(n);
 			setEdges(e);
+			setPersistedNodes(n);
+			setPersistedEdges(e);
 
 			setWorkflowData({
 				workflowName: update.workflowName,
@@ -294,6 +304,11 @@ export default function WorkflowBuilder({ workflowId }: WorkflowBuilderProps) {
 					</Flex>
 
 					<Flex justify="end" align="center" gap="3">
+						<RunWorkflow
+							workflowId={workflowId}
+							isWorkflowLive={workflowData.isLive}
+						/>
+
 						<Button
 							variant="solid"
 							size="2"

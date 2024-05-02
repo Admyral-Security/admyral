@@ -9,6 +9,7 @@ import {
 import { redirect } from "next/navigation";
 import { encrypt } from "./crypto";
 import {
+	ActionNode,
 	Quota,
 	UserProfile,
 	WorkflowData,
@@ -16,6 +17,7 @@ import {
 	WorkflowRunEvent,
 	WorkflowTemplate,
 } from "./types";
+import { generateWebhook } from "./workflow-node";
 
 async function getAccessToken() {
 	const supabase = createClient();
@@ -271,7 +273,7 @@ export async function deleteCredential(credentialName: string) {
 	}
 }
 
-export async function getWorkflow(workflowId: string) {
+export async function getWorkflow(workflowId: string): Promise<WorkflowData> {
 	const accessToken = await getAccessToken();
 
 	const result = await fetch(
@@ -287,8 +289,20 @@ export async function getWorkflow(workflowId: string) {
 		throw new Error("Failed to get workflow!");
 	}
 
-	const workflow = await result.json();
-	return transformObjectKeysToCamelCase(workflow);
+	const rawWorkflow = await result.json();
+	let workflow = transformObjectKeysToCamelCase(rawWorkflow);
+
+	// If we have a manual start action, we proactively generate a webhook for it,
+	// so that the user can easily switch between manual and webhook start types.
+	for (let action of workflow.actions) {
+		if (action.actionType === ActionNode.MANUAL_START) {
+			const webhookData = await generateWebhook();
+			action.webhookId = webhookData.webhookId;
+			action.secret = webhookData.secret;
+		}
+	}
+
+	return workflow;
 }
 
 export async function deleteWorkflow(workflowId: string) {
@@ -345,6 +359,7 @@ export async function updateWorkflowAndCreateIfNotExists(
 export async function triggerWorkflowFromAction(
 	workflowId: string,
 	actionId: string,
+	payload: string | null = null,
 ): Promise<void> {
 	const accessToken = await getAccessToken();
 
@@ -357,7 +372,7 @@ export async function triggerWorkflowFromAction(
 				"Content-Type": "application/json",
 			},
 			body: JSON.stringify({
-				payload: null,
+				payload,
 			}),
 		},
 	);
@@ -462,4 +477,30 @@ export async function loadWorkflowRunEvents(
 
 	const traces = await result.json();
 	return transformObjectKeysToCamelCase(traces, TransformType.TOP_LEVEL_ONLY);
+}
+
+export async function triggerWorkflowWebhook(
+	webhookId: string,
+	secret: string,
+	data: string | null,
+) {
+	const init =
+		data !== null
+			? {
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+					},
+					body: data,
+				}
+			: {
+					method: "GET",
+				};
+	const result = await fetch(
+		`${process.env.NEXT_PUBLIC_WORKFLOW_RUNNER_API_URL}/webhook/${webhookId}/${secret}`,
+		init,
+	);
+	if (result.status !== 201) {
+		throw new Error("Failed to trigger webhook!");
+	}
 }

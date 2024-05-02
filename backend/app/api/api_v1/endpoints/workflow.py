@@ -345,6 +345,27 @@ async def update_workflow(
                     detail="Action node not found"
                 )
 
+            # It might that we switch the type of a start workflow node. Therefore, we must
+            # consider the following cases: webhhook -> manual action or manual action --> webhook
+            if existing_action.action_type == ActionType.WEBHOOK and action.action_type != ActionType.WEBHOOK:
+                # we need to delete the webhook
+                result = await db.exec(
+                    select(Webhook)
+                        .where(Webhook.action_id == existing_action.action_id)
+                )
+                webhook = result.one()
+                await db.delete(webhook)
+                await db.flush()
+            elif existing_action.action_type != ActionType.WEBHOOK and action.action_type == ActionType.WEBHOOK:
+                # we need to create a new webhook
+                webhook = Webhook(
+                    webhook_id=action.webhook_id,
+                    action_id=action.action_id,
+                    webhook_secret=action.secret
+                )
+                db.add(webhook)
+                await db.flush()
+
             existing_action.action_name = action.action_name
             existing_action.reference_handle = action.reference_handle
             existing_action.action_type = action.action_type

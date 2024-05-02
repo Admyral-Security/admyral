@@ -24,7 +24,14 @@ export async function initActionData(
 	};
 
 	switch (actionType) {
+		case ActionNode.MANUAL_START:
 		case ActionNode.WEBHOOK:
+			base.actionName =
+				actionType === ActionNode.MANUAL_START
+					? "Manual Start"
+					: "Webhook";
+			base.referenceHandle = generateReferenceHandle(base.actionName);
+
 			const webhookData = await generateWebhook();
 			return {
 				...base,

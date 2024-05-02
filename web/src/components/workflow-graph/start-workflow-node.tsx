@@ -1,21 +1,21 @@
 import { memo } from "react";
 import { NodeProps, Handle, Position } from "reactflow";
-import WebhookActionIcon from "../icons/webhook-action-icon";
 import NodeBase from "./node-base";
 import { Flex } from "@radix-ui/themes";
-import { WebhookData } from "@/lib/types";
+import { ManualStartData, WebhookData } from "@/lib/types";
+import StartWorkflowActionIcon from "../icons/start-workflow-action-icon";
 
-type WebhookNodeProps = NodeProps<WebhookData>;
+type StartWorkflowProps = NodeProps<WebhookData | ManualStartData>;
 
-function WebhookNodeComponent({ id, data, selected }: WebhookNodeProps) {
+function StartWorkflowComponent({ id, data, selected }: StartWorkflowProps) {
 	return (
 		<>
 			<NodeBase
 				nodeId={id}
 				selected={selected}
-				icon={<WebhookActionIcon />}
+				icon={<StartWorkflowActionIcon />}
 				name={data.actionName}
-				type="Webhook"
+				type="Start Workflow"
 			/>
 			<Handle
 				type="source"
@@ -54,4 +54,4 @@ function WebhookNodeComponent({ id, data, selected }: WebhookNodeProps) {
 	);
 }
 
-export default memo(WebhookNodeComponent);
+export default memo(StartWorkflowComponent);
