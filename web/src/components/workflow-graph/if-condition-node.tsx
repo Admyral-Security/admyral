@@ -140,16 +140,16 @@ function IfConditionNodeComponent({
 								cx="8"
 								cy="8"
 								r="7"
-								stroke="#D9E2FC"
+								stroke="#AEC0F5"
 								stroke-width="2"
 								stroke-dasharray="4 4"
 							/>
 							<path
 								d="M2 8C2 4.68629 4.68629 2 8 2C11.3137 2 14 4.68629 14 8C14 11.3137 11.3137 14 8 14C4.68629 14 2 11.3137 2 8Z"
-								fill="#C6D4F9"
+								fill="#3E63DD"
 							/>
 							<path
-								d="M8.3335 8H10.6668L8.00016 10.6667L5.3335 8H7.66683V5.33334H8.3335V8Z"
+								d="M8.33301 8H10.6663L7.99967 10.6667L5.33301 8H7.66634V5.33333H8.33301V8Z"
 								fill="white"
 							/>
 						</svg>
