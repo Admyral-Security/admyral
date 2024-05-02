@@ -33,7 +33,7 @@ export default function Error({
 					<Callout.Text size="2">
 						Oops, something went wrong. If the problem persists,
 						please contact us on Discord or via email
-						support@adymral.com
+						chris@adymral.dev
 					</Callout.Text>
 				</Flex>
 			</Callout.Root>
