@@ -1,15 +1,13 @@
 <p align="center">
 <img src="img/banner.svg" alt="admyral" />
 </p>
-<div align="center">
-  <h3>An AI-Powered, Open-Source Torq</h3>
-</div>
 
 <div align="center">
   <div>
       <a href="https://admyral.dev/login"><strong>Login</strong></a> ·
       <a href="https://docs.admyral.dev/"><strong>Docs</strong></a> ·
-      <a href="https://discord.gg/GqbJZT9Hbf"><strong>Discord</strong></a>
+      <a href="https://discord.gg/GqbJZT9Hbf"><strong>Discord</strong></a> ·
+      <a href="https://join.slack.com/t/admyralcommunity/shared_invite/zt-2hqxj1xrr-YoWXYq7t8l3i5GyTCzEwPg"><strong>Slack</strong></a>
   </div>
   <div>
 
@@ -24,18 +22,18 @@
 </br>
 
 
-Admyral is an open-source Cybersecurity Automation & Investigation Copilot. Admyral's Copilot enjoys a deep integration into Admyral's case management and workflow automation. Through this triangulation, SOC teams can benefit from:
+Admyral is an open-source Cybersecurity Automation & Investigation Assistant. Admyral's Assistant enjoys a deep integration into Admyral's case management and workflow automation. Through this triangulation, SOC teams can benefit from:
 1. A unified console to perform investigations and handle incidents 📺
-2. A seamless workflow creation -- even during incident triage, investigation, or response 👷
+2. A seamless workflow automation creation -- even during incident triage, investigation, or response 👷
 3. Automatic alert investigation as well as next step suggestions for analysts 🧑‍✈️
-4. Workflow recommendations for individual cases as well as workflow creation through natural language 🤖
+4. Workflow automation recommendations for individual cases as well as workflow automation creation through natural language 🤖
 
-Through Admyral's Copilot functionality, Admyral seeks to provide a new, more effective, and scalable approach for tackling alert fatigue and automating security workflows.
+Through Admyral's Assistant functionality, Admyral seeks to provide a new, more effective, and scalable approach for tackling alert fatigue and automating security workflows.
 
 
 → → → [Try out the free cloud version](https://admyral.dev/login) ← ← ←
 
-Here is a sneek-peak into the workflow builder:
+Here is a sneek-peak into the workflow automation builder:
 <img src="img/product_screen.svg" alt="admyral" />
 
 ## 🗺️ Key Features & Roadmap
@@ -44,7 +42,7 @@ Here is a sneek-peak into the workflow builder:
 
 -   [ ] Workflow Actions
     -   [x] HTTP request
-    -   [x] Webhook
+    -   [x] Manual and event-based workflow start
     -   [x] Credential Management for HTTP Requests
     -   [x] If-Condition
     -   [x] AI Actions
@@ -63,10 +61,10 @@ Here is a sneek-peak into the workflow builder:
 
 ### Next-Gen Hyperautomation Features
 
--   [ ] Natural Language to Workflow
--   [ ] Incident Investigation Copilot
+-   [ ] Natural Language to Workflow Automation
+-   [ ] Incident Investigation Assistant
 -   [ ] AI-proposed next steps on handling an incident/a case
--   [ ] Customized workflow recommendations
+-   [ ] Customized workflow automation recommendations
 
 ### Hosting
 
@@ -88,12 +86,12 @@ Here is a sneek-peak into the workflow builder:
 
 ## 💬 Feedback & Contributing to Admyral
 
-We value your feedback and contributions! If you have suggestions, questions, or would like to discuss anything related to Admyral, just text us on [Discord](https://discord.gg/GqbJZT9Hbf).
+We value your feedback and contributions! If you have suggestions, questions, or would like to discuss anything related to Admyral, just text us on [Discord](https://discord.gg/GqbJZT9Hbf) or [Slack](https://join.slack.com/t/admyralcommunity/shared_invite/zt-2hqxj1xrr-YoWXYq7t8l3i5GyTCzEwPg).
 
 You can best support this project by:
 
 1. Giving it a star on GitHub
-2. Joining our active community on [Discord](https://discord.gg/GqbJZT9Hbf)
+2. Joining our active community on [Discord](https://discord.gg/GqbJZT9Hbf) and/or [Slack](https://join.slack.com/t/admyralcommunity/shared_invite/zt-2hqxj1xrr-YoWXYq7t8l3i5GyTCzEwPg)
 3. And giving us feedback
 
 ## ❓ FAQ
@@ -121,7 +119,7 @@ Visit [SECURITY.md](https://github.com/Admyral-Security/admyral/blob/main/SECURI
 
 #### What does your pricing look like?
 
-As Admyral is still in its public alpha phase, we have not finalized a specific pricing structure yet. We invite interested organizations to reach out directly via email at [chris@admyral.dev](mailto:chris@admyral.dev) or [Discord](https://discord.gg/GqbJZT9Hbf) to discuss potential use cases and explore custom pricing options based on their needs and the scale of implementation.
+As Admyral is still in its public alpha phase, we have not finalized a specific pricing structure yet. We invite interested organizations to reach out directly via email at [chris@admyral.dev](mailto:chris@admyral.dev) or [Discord](https://discord.gg/GqbJZT9Hbf)/[Slack](https://join.slack.com/t/admyralcommunity/shared_invite/zt-2hqxj1xrr-YoWXYq7t8l3i5GyTCzEwPg) to discuss potential use cases and explore custom pricing options based on their needs and the scale of implementation.
 
 #### Why is Admyral open-source?
 
@@ -129,7 +127,8 @@ We are open-source for the following reasons:
 
 -   To establish transparency and trust with our users
 -   To enable the community to self-host and contribute to Admyral
--   To collaborate on integrations and features with the community because users know best what a security automation platform should look like
+-   To collaborate on integrations and features with the community because users know best what a Cybersecurity Automation & Investigation Assistant should look like
+-   To secure small- and medium-sized businesses, that have no budget for security
 
 #### Does Admyral stay open-source?
 
@@ -137,7 +136,7 @@ We love open-source. Therfore, Admyral stays committed to keep all open-sourced 
 
 ## 🏙️ Enterprise Version
 
-_Disclaimer_: Admyral is still in public alpha. If you'd like to use it within your company or try it out, reach out to us via [chris@admyral.dev](mailto:chris@admyral.dev) or directly on [Discord](https://discord.gg/GqbJZT9Hbf).
+_Disclaimer_: Admyral is still in public alpha. If you'd like to use it within your company or try it out, reach out to us via [chris@admyral.dev](mailto:chris@admyral.dev) or directly on [Discord](https://discord.gg/GqbJZT9Hbf)/[Slack](https://join.slack.com/t/admyralcommunity/shared_invite/zt-2hqxj1xrr-YoWXYq7t8l3i5GyTCzEwPg).
 
 As of now, our project does not have a dedicated Enterprise version.
 If you represent an MSSP or an Enterprise and would like to discuss potential collaborations with Admyral, please do not hesitate to reach out directly at [chris@admyral.dev](mailto:chris@admyral.dev) to start a conversation.
