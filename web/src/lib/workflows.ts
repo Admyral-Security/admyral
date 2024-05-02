@@ -21,6 +21,7 @@ export async function initActionData(
 		yPosition,
 		webhookId: null,
 		secret: null,
+		inputTemplates: null,
 	};
 
 	switch (actionType) {

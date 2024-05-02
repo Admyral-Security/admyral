@@ -98,6 +98,24 @@ class ActionNode(Base, table=True):
     parent_actions: list["WorkflowEdge"] = Relationship(back_populates="parent_action", sa_relationship_kwargs=dict(cascade="all, delete", foreign_keys="[WorkflowEdge.parent_action_id]"))
     child_actions: list["WorkflowEdge"] = Relationship(back_populates="child_action", sa_relationship_kwargs=dict(cascade="all, delete", foreign_keys="[WorkflowEdge.child_action_id]"))
     workflow_run_action_states: list["WorkflowRunActionState"] = Relationship(back_populates="action_node", sa_relationship_kwargs=dict(cascade="all, delete"))
+    action_input_templates: list["ActionInputTemplate"] = Relationship(back_populates="action", sa_relationship_kwargs=dict(cascade="all, delete"))
+
+
+class ActionInputTemplate(Base, table=True):
+    __tablename__ = "action_input_template"
+
+    action_input_template_id: str = Field(primary_key=True, sa_type=UUID(as_uuid=False), sa_column_kwargs=dict(server_default=func.gen_random_uuid()))
+    template_name: str = Field(sa_type=TEXT())
+    template: str = Field(sa_type=TEXT())
+    action_id: str = Field(
+        sa_column=Column(
+            UUID(as_uuid=False),
+            ForeignKey("admyral.action_node.action_id", ondelete="CASCADE"),
+            nullable=False,
+        )
+    )
+
+    action: ActionNode = Relationship(back_populates="action_input_templates")
 
 
 class Webhook(Base, table=True):

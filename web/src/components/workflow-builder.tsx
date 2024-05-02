@@ -319,7 +319,7 @@ export default function WorkflowBuilder({ workflowId }: WorkflowBuilderProps) {
 							loading={isSavingWorkflow}
 						>
 							<DiscIcon />
-							Save Workflow
+							Save
 						</Button>
 
 						<Button

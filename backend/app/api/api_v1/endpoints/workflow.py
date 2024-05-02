@@ -11,7 +11,7 @@ import hashlib
 from datetime import datetime
 
 from app.deps import AuthenticatedUser, get_authenticated_user, get_session
-from app.models import Workflow, ActionNode, Webhook, WorkflowEdge, WorkflowTemplateMetadata, WorkflowRun, WorkflowRunActionState
+from app.models import Workflow, ActionNode, Webhook, WorkflowEdge, WorkflowTemplateMetadata, WorkflowRun, WorkflowRunActionState, ActionInputTemplate
 from app.schema import ActionType, EdgeType
 from app.config import settings
 
@@ -137,6 +137,11 @@ async def get_workflows(
     )
 
 
+class InputTemplate(BaseModel):
+    template_name: str
+    template: str
+
+
 class ActionData(BaseModel):
     action_id: str
     action_name: str
@@ -146,6 +151,7 @@ class ActionData(BaseModel):
     x_position: float 
     y_position: float
     action_definition: dict
+    input_templates: Optional[list[InputTemplate]] = None
     # Webhook specific fields
     webhook_id: Optional[str] = None
     secret: Optional[str] = None
@@ -202,6 +208,22 @@ async def get_workflow_impl(
             result.all()
         )
     )
+
+    # Enrich action data with input templates
+    for action in action_nodes:
+        result = await db.exec(
+            select(ActionInputTemplate)
+                .where(ActionInputTemplate.action_id == action.action_id)
+        )
+        action.input_templates = list(
+            map(
+                lambda template: InputTemplate(
+                    template_name=template.template_name,
+                    template=template.template
+                ),
+                result.all()
+            )
+        )
 
     # Enrich webhook actions with webhook data
     if not is_template:
@@ -542,6 +564,17 @@ async def import_workflow_template(
 
         db.add(new_action)
         await db.flush()
+
+        # Copy input templates
+        if action.input_templates:
+            for template in action.input_templates:
+                action_input_template = ActionInputTemplate(
+                    template_name=template.template_name,
+                    template=template.template,
+                    action_id=new_action.action_id
+                )
+                db.add(action_input_template)
+                await db.flush()
 
         if action.action_type == ActionType.WEBHOOK:
             # Generate a new webhook

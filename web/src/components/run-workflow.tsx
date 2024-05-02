@@ -33,28 +33,26 @@ export default function RunWorkflow({
 		hasUnsavedChanges: state.hasUnsavedChanges,
 	}));
 
-	const [startNodeId, setStartNodeId] = useState<string | null>(null);
+	const [startNodeIdx, setStartNodeIdx] = useState<number | null>(null);
 	const [showModal, setShowModal] = useState<boolean>(false);
 	const [error, setError] = useState<string | null>(null);
 	const [triggerPayload, setTriggerPayload] = useState<string>("");
 
 	useEffect(() => {
-		if (startNodes.length > 0 && startNodeId === null) {
-			setStartNodeId(startNodes[0].data.actionId);
-		} else if (startNodes.length === 0 && startNodeId !== null) {
-			setStartNodeId(null);
+		if (startNodes.length > 0 && startNodeIdx === null) {
+			setStartNodeIdx(0);
+		} else if (startNodes.length === 0 && startNodeIdx !== null) {
+			setStartNodeIdx(null);
 		}
 	}, [startNodes]);
 
 	const executeWorkflow = async () => {
 		setError(null);
 
-		const node = startNodes.find(
-			(node) => node.data.actionId === startNodeId,
-		);
-		if (!node) {
+		if (startNodeIdx === null || startNodeIdx >= startNodes.length) {
 			return;
 		}
+		const node = startNodes[startNodeIdx];
 
 		try {
 			if (node.data.actionType === ActionNode.WEBHOOK) {
@@ -94,7 +92,7 @@ export default function RunWorkflow({
 					}}
 				>
 					<PlayIcon />
-					Run Workflow
+					Run
 				</Button>
 			</Dialog.Trigger>
 
@@ -129,7 +127,7 @@ export default function RunWorkflow({
 						</Text>
 					</Flex>
 
-					{startNodeId === null && (
+					{startNodeIdx === null && (
 						<Callout.Root
 							color="red"
 							variant="surface"
@@ -147,7 +145,7 @@ export default function RunWorkflow({
 						</Callout.Root>
 					)}
 
-					{startNodeId !== null &&
+					{startNodeIdx !== null &&
 						(unsavedChangesOrNotLive ? (
 							<Callout.Root
 								color="red"
@@ -174,9 +172,11 @@ export default function RunWorkflow({
 
 									<Flex width="70%" align="center">
 										<Select.Root
-											value={startNodeId}
+											value={`${startNodeIdx}`}
 											onValueChange={(value) =>
-												setStartNodeId(value)
+												setStartNodeIdx(
+													parseInt(value, 10),
+												)
 											}
 										>
 											<Select.Trigger
@@ -184,16 +184,19 @@ export default function RunWorkflow({
 												style={{ width: "100%" }}
 											/>
 											<Select.Content>
-												{startNodes.map((node) => (
-													<Select.Item
-														key={node.id}
-														value={
-															node.data.actionId
-														}
-													>
-														{node.data.actionName}
-													</Select.Item>
-												))}
+												{startNodes.map(
+													(node, index) => (
+														<Select.Item
+															key={node.id}
+															value={`${index}`}
+														>
+															{
+																node.data
+																	.actionName
+															}
+														</Select.Item>
+													),
+												)}
 											</Select.Content>
 										</Select.Root>
 									</Flex>
@@ -209,8 +212,56 @@ export default function RunWorkflow({
 										run the workflow with.
 									</Text>
 
+									{startNodes[startNodeIdx].data
+										.inputTemplates !== null &&
+										startNodes[startNodeIdx].data
+											.inputTemplates!.length > 0 && (
+											<Flex direction="column" gap="2">
+												<Text weight="medium">
+													Input Parameter Templates
+												</Text>
+												<Select.Root
+													value={""}
+													onValueChange={(value) =>
+														setTriggerPayload(value)
+													}
+												>
+													<Select.Trigger
+														placeholder="Select a template"
+														style={{
+															width: "100%",
+														}}
+													/>
+													<Select.Content>
+														{startNodes[
+															startNodeIdx
+														].data.inputTemplates!.map(
+															(
+																template,
+																index,
+															) => (
+																<Select.Item
+																	key={index}
+																	value={
+																		template.template
+																	}
+																>
+																	{
+																		template.templateName
+																	}
+																</Select.Item>
+															),
+														)}
+													</Select.Content>
+												</Select.Root>
+											</Flex>
+										)}
+
 									<Flex direction="column" gap="2">
-										<Text>Input Parameters</Text>
+										<Text weight="medium">
+											Enter parameters expected by your
+											workflow.
+										</Text>
 										<TextArea
 											value={triggerPayload}
 											onChange={(event) =>

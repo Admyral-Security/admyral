@@ -91,6 +91,11 @@ export enum EdgeType {
 	DEFAULT = "DEFAULT",
 }
 
+export type InputTemplate = {
+	templateName: string;
+	template: string;
+};
+
 export type ActionDataBase<T> = {
 	actionId: string;
 	actionName: string;
@@ -102,6 +107,7 @@ export type ActionDataBase<T> = {
 	actionDefinition: T;
 	webhookId: string | null;
 	secret: string | null;
+	inputTemplates: InputTemplate[] | null;
 };
 
 export type AiActionData = ActionDataBase<{ model: LLM; prompt: string }>;
