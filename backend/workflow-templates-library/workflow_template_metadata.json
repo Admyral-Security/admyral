@@ -7,7 +7,7 @@
 		"icon": "VirusTotal"
 	},
 	{
-		"workflow_id": "5cad63e0-8832-40eb-b5b0-8a55c12d1841",
+		"workflow_id": "b721bc3e-97cf-4b64-a14f-9ce8afe521e8",
 		"template_headline": "Initiate a takedown request in Phish Report",
 		"template_description": "Submit an URL to initiate a takedown request and receive a report via email using Phish Report",
 		"category": "Phishing",

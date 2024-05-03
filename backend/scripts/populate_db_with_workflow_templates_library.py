@@ -9,6 +9,11 @@ from datetime import datetime
 async def async_main() -> None:
     engine = create_async_engine(os.environ["DATABASE_URL"], echo=True, future=True, pool_pre_ping=True)
 
+    # Delete template workflows
+    async with engine.begin() as conn:
+        await conn.execute(text("DELETE FROM admyral.workflow WHERE is_template = true AND user_id IS NULL"))
+
+    # Insert new template workflows
     workflow_templates_library_directory = os.path.join(os.path.dirname(__file__), "..", "workflow-templates-library")
 
     queries = [
@@ -38,6 +43,13 @@ async def async_main() -> None:
             text("""
                  INSERT INTO admyral.workflow_template_metadata (workflow_id, template_headline, template_description, category, icon)
                  VALUES (:workflow_id, :template_headline, :template_description, :category, :icon)
+                 """)
+        ),
+        (
+            "action_input_template.json",
+            text("""
+                 INSERT INTO admyral.action_input_template (action_input_template_id, template_name, template, action_id)
+                 VALUES (:action_input_template_id, :template_name, :template, :action_id)
                  """)
         )
     ]

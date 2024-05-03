@@ -109,5 +109,38 @@ mod tests {
         let access_path = "test.data[2]".to_string();
         let result = state.get_from_access_path(access_path);
         assert!(result.is_none());
+
+        let data = json!({
+                "body": {
+                    "id": "case_dkj7kmgpkbgg",
+                    "url": "http://iujdhsndjfks.com",
+                    "tags": [],
+                    "created": "2024-05-02T22:10:26.972271Z",
+                    "resolved": false,
+                    "pending_actions": [
+                        {
+                            "params": {
+                                "role": "hosting"
+                            },
+                            "report_uri": "mailto:abuse@trellian.com",
+                            "description": "Report to TRELLIAN-AS-AP"
+                        }
+                    ]
+                }
+        });
+        let mut state = ExecutionState::default();
+        state.store("retrieve_case_from_phish_report".to_string(), data);
+
+        let access_path =
+            "retrieve_case_from_phish_report.body[0].pending_actions[0].description".to_string();
+        let result = state.get_from_access_path(access_path);
+        assert!(result.is_some());
+        assert_eq!(json!("Report to TRELLIAN-AS-AP"), result.unwrap());
+
+        let access_path =
+            "retrieve_case_from_phish_report.body[0].pending_actions[0].report_uri".to_string();
+        let result = state.get_from_access_path(access_path);
+        assert!(result.is_some());
+        assert_eq!(json!("mailto:abuse@trellian.com"), result.unwrap());
     }
 }

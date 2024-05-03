@@ -219,18 +219,6 @@
 		"y_position": 93.1070425054829
 	},
 	{
-		"action_id": "827cef39-7a66-4069-b1e6-e0ee32517410",
-		"workflow_id": "5cad63e0-8832-40eb-b5b0-8a55c12d1841",
-		"action_name": "Submit URL",
-		"reference_handle": "submit_url",
-		"action_type": "WEBHOOK",
-		"action_description": "The workflow expects the data to be triggered as a POST request with the following HTTP request body:\n\n{\n    \"url\": \"<url-here>\"\n}\n\nExample cURL:\n\ncurl -d '{\"url\": \"www.google.com\"}' \\\n  -H \"Content-Type: application/json\" \"<webhook-url-here>\"",
-		"action_definition": {},
-		"created_at": "2024-04-26 19:29:45.449391",
-		"x_position": 965.001847035694,
-		"y_position": 123.222946852498
-	},
-	{
 		"action_id": "e8444c34-88be-44dd-bdac-66970b597009",
 		"workflow_id": "6a7c608e-f5f1-4fff-bdf7-fd41d8d93640",
 		"action_name": "Webhook",
@@ -241,23 +229,6 @@
 		"created_at": "2024-04-26 13:47:42.308224",
 		"x_position": 1275.78184689399,
 		"y_position": 39.6378514715199
-	},
-	{
-		"action_id": "3668418e-07c0-46ef-b5c6-5efd6f8dd36c",
-		"workflow_id": "5cad63e0-8832-40eb-b5b0-8a55c12d1841",
-		"action_name": "Send Email",
-		"reference_handle": "send_email",
-		"action_type": "SEND_EMAIL",
-		"action_description": "TODO to make this action work:\\n\\nSet a recipient who should receive the report",
-		"action_definition": {
-			"body": "Here is your reported case: \n\nCase ID: <<retrieve_case_from_phish_report.body.id>>\n\nPending Actions: \nDescription:<<retrieve_case_from_phish_report.body[0].pending_actions[0].description>>\n\nReport URI: <<retrieve_case_from_phish_report.body[0].pending_actions[0].report_uri>>\n\nRole:<<retrieve_case_from_phish_report.body.pending_actions[0].params.role>>",
-			"subject": "Phish Report Case",
-			"recipients": [],
-			"sender_name": "Admyral Reported URL Case"
-		},
-		"created_at": "2024-04-26 20:34:12.870337",
-		"x_position": 960.258815100966,
-		"y_position": 714.824988059702
 	},
 	{
 		"action_id": "c1b6eecd-ec4e-4eba-8877-b63349696fc0",
@@ -338,52 +309,6 @@
 		"y_position": 869.201097892444
 	},
 	{
-		"action_id": "696162bd-5b47-4697-9bb3-a174887117a7",
-		"workflow_id": "5cad63e0-8832-40eb-b5b0-8a55c12d1841",
-		"action_name": "Submit a takedown case in Phish Report",
-		"reference_handle": "submit_a_takedown_case_in_phish_report",
-		"action_type": "HTTP_REQUEST",
-		"action_description": "Submits a takedown case in Phish Report of the given URL\\nTODOs to make this action work:\\n1. Create a Phish Report account (https://phish.report/) and get your API key (on the bottom of your profile page)\\n2. In Admyral, go to Settings and store the API key with the following name: phish_report_api_key",
-		"action_definition": {
-			"url": "https://phish.report/api/v0/cases",
-			"method": "POST",
-			"headers": [
-				{
-					"key": "Authorization",
-					"value": "Bearer <<CREDENTIAL.phish_report_api_key>>"
-				}
-			],
-			"payload": "{\n  \"url\": \"<<submit_url.body.url>>\"\n}",
-			"content_type": "application/json"
-		},
-		"created_at": "2024-04-26 19:40:50.184161",
-		"x_position": 965.20116842133,
-		"y_position": 304.142070634282
-	},
-	{
-		"action_id": "5aa07a9c-6ed5-4f1e-a4fe-683ebdd28476",
-		"workflow_id": "5cad63e0-8832-40eb-b5b0-8a55c12d1841",
-		"action_name": "Retrieve Case from Phish Report",
-		"reference_handle": "retrieve_case_from_phish_report",
-		"action_type": "HTTP_REQUEST",
-		"action_description": "TODOs to make this action work:\\n1. Create a Phish Report account (https://phish.report/) and get your API key (on the bottom of your profile page)\\n2. In Admyral, go to Settings and store the API key with the following name: phish_report_api_key",
-		"action_definition": {
-			"url": "https://phish.report/api/v0/cases/<<submit_a_takedown_case_in_phish_report.body.id>>",
-			"method": "GET",
-			"headers": [
-				{
-					"key": "Authorization",
-					"value": "Bearer <<CREDENTIAL.phish_report_api_key>>"
-				}
-			],
-			"payload": "",
-			"content_type": "application/json"
-		},
-		"created_at": "2024-04-26 19:40:50.20509",
-		"x_position": 963.650111003413,
-		"y_position": 504.8635739223
-	},
-	{
 		"action_id": "3a2685b4-c36a-484f-bd73-1e29cd9aef79",
 		"workflow_id": "6a7c608e-f5f1-4fff-bdf7-fd41d8d93640",
 		"action_name": "Look up IP address in Pulsedive",
@@ -440,5 +365,199 @@
 		"created_at": "2024-04-26 14:31:31.452277",
 		"x_position": 1615.3231425476,
 		"y_position": 319.341825389239
+	},
+	{
+		"action_id": "8378e0f5-99aa-4522-8dc9-fde5c45c3b7c",
+		"workflow_id": "593fff82-22cd-4b6d-b887-92a11d39546d",
+		"action_name": "Note",
+		"reference_handle": "note",
+		"action_type": "NOTE",
+		"action_description": "",
+		"action_definition": {
+			"note": "### How can I run the workflow?\n\n1. Go to [VirusTotal](https://www.virustotal.com/). Create an account and get your API key\n2. In Admyral, go to **Settings** and store the API key with the \\\nname `virus_total_api_key`\n3. Click the top-right toggle to set the workflow to active\n4. Click `Run`\n5. Select an example input from the input parameter \\\ntemplates\n6. Go to `Run History` and view the workflow events"
+		},
+		"created_at": "2024-05-02 20:55:50.83408",
+		"x_position": 74.0539729748,
+		"y_position": 91.898907997593
+	},
+	{
+		"action_id": "fb626935-23db-4d55-b4b9-6f1cda49f2ad",
+		"workflow_id": "d9a319d0-4f25-4fe4-b0c7-5da2491c1ab8",
+		"action_name": "Note",
+		"reference_handle": "note",
+		"action_type": "NOTE",
+		"action_description": "",
+		"action_definition": {
+			"note": "### How can I run the workflow?\n\n1. Click the top-right toggle to set the workflow as active\n2. Click the `Run` button\n3. Select an input example from the drop-down\n4. Click `Run workflow`\n5. Checkout the `Run History` to view the workflow events"
+		},
+		"created_at": "2024-05-02 20:35:38.189277",
+		"x_position": 421.694697334983,
+		"y_position": 92.702707748842
+	},
+	{
+		"action_id": "52cfd5d9-8ebb-45ff-84e6-5eb94cda6925",
+		"workflow_id": "b721bc3e-97cf-4b64-a14f-9ce8afe521e8",
+		"action_name": "Submit URL",
+		"reference_handle": "submit_url",
+		"action_type": "WEBHOOK",
+		"action_description": "The workflow expects the data to be triggered as a POST request with the following HTTP request body:\n\n{\n    \"url\": \"<url-here>\"\n}\n\nExample cURL:\n\ncurl -d '{\"url\": \"www.google.com\"}' \\\n  -H \"Content-Type: application/json\" \"<webhook-url-here>\"",
+		"action_definition": {},
+		"created_at": "2024-05-02 21:17:31.400048",
+		"x_position": 965.001847035694,
+		"y_position": 123.222946852498
+	},
+	{
+		"action_id": "94ba1baa-6d0f-4c50-bfc9-975a9d25b5d4",
+		"workflow_id": "b721bc3e-97cf-4b64-a14f-9ce8afe521e8",
+		"action_name": "Submit a takedown case in Phish Report",
+		"reference_handle": "submit_a_takedown_case_in_phish_report",
+		"action_type": "HTTP_REQUEST",
+		"action_description": "Submits a takedown case in Phish Report of the given URL\n\nTODOs to make this action work:\n\n1. Create a Phish Report account (https://phish.report/) and get your API key (on the bottom of your profile page)\n\n2. In Admyral, go to Settings and store the API key with the following name: phish_report_api_key",
+		"action_definition": {
+			"url": "https://phish.report/api/v0/cases",
+			"method": "POST",
+			"headers": [
+				{
+					"key": "Authorization",
+					"value": "Bearer <<CREDENTIAL.phish_report_api_key>>"
+				}
+			],
+			"payload": "{\n  \"url\": \"<<submit_url.body.url>>\"\n}",
+			"content_type": "application/json"
+		},
+		"created_at": "2024-05-02 21:17:31.400048",
+		"x_position": 964.20116842133,
+		"y_position": 305.142070634282
+	},
+	{
+		"action_id": "b19a83c2-6eb4-4cc6-a1aa-aa89ac5ecae0",
+		"workflow_id": "b721bc3e-97cf-4b64-a14f-9ce8afe521e8",
+		"action_name": "Send Takedown Request Report",
+		"reference_handle": "send_takedown_request_report",
+		"action_type": "SEND_EMAIL",
+		"action_description": "",
+		"action_definition": {
+			"body": "Here is your reported case: \n\nCase ID: <<retrieve_case_from_phish_report.body.id>>\n\nPending Actions: \nDescription:<<retrieve_case_from_phish_report.body.pending_actions[0].description>>\n\nReport URI: <<retrieve_case_from_phish_report.body.pending_actions[0].report_uri>>\n\nRole:<<retrieve_case_from_phish_report.body.pending_actions[0].params.role>>",
+			"subject": "Phish Report Case",
+			"recipients": ["chris@admyral.dev"],
+			"sender_name": "Admyral"
+		},
+		"created_at": "2024-05-02 21:17:31.400048",
+		"x_position": 832.287359573861,
+		"y_position": 869.621182129983
+	},
+	{
+		"action_id": "86de0bbd-7507-4f06-b89d-22e4848c2cc9",
+		"workflow_id": "9b8ac1fc-6906-46af-98d2-bb1710343c34",
+		"action_name": "Manual Start",
+		"reference_handle": "manual_start",
+		"action_type": "MANUAL_START",
+		"action_description": "",
+		"action_definition": {},
+		"created_at": "2024-05-02 21:52:49.789627",
+		"x_position": 916,
+		"y_position": -83
+	},
+	{
+		"action_id": "f25e3e56-8276-4e8c-9fe7-8af96e5d3a55",
+		"workflow_id": "9b8ac1fc-6906-46af-98d2-bb1710343c34",
+		"action_name": "Note",
+		"reference_handle": "note",
+		"action_type": "NOTE",
+		"action_description": "",
+		"action_definition": {
+			"note": "### How can you run the workflow?\n\n1. Click the top-right toggle to activate the workflow\n2. Click `Run`\n3. Click `Run workflow`\n4. Go to `Run History` to view the workflow events\n5. Check your mailbox"
+		},
+		"created_at": "2024-05-02 21:52:49.789627",
+		"x_position": 400,
+		"y_position": 78
+	},
+	{
+		"action_id": "8e2b66e8-5daa-4cde-a94a-4472a1228a8c",
+		"workflow_id": "b721bc3e-97cf-4b64-a14f-9ce8afe521e8",
+		"action_name": "Retrieve Case from Phish Report",
+		"reference_handle": "retrieve_case_from_phish_report",
+		"action_type": "HTTP_REQUEST",
+		"action_description": "TODOs to make this action work:\n\n1. Create a Phish Report account (https://phish.report/) and get your API key (on the bottom of your profile page)\n\n2. In Admyral, go to Settings and store the API key with the following name: phish_report_api_key",
+		"action_definition": {
+			"url": "https://phish.report/api/v0/cases/<<submit_a_takedown_case_in_phish_report.body.id>>",
+			"method": "GET",
+			"headers": [
+				{
+					"key": "Authorization",
+					"value": "Bearer <<CREDENTIAL.phish_report_api_key>>"
+				}
+			],
+			"payload": "",
+			"content_type": "application/json"
+		},
+		"created_at": "2024-05-02 21:17:31.400048",
+		"x_position": 833.664033120042,
+		"y_position": 676.880602114551
+	},
+	{
+		"action_id": "c27c75ad-96b3-4814-9406-94235ea76c2d",
+		"workflow_id": "b721bc3e-97cf-4b64-a14f-9ce8afe521e8",
+		"action_name": "Note",
+		"reference_handle": "note",
+		"action_type": "NOTE",
+		"action_description": "",
+		"action_definition": {
+			"note": "### How can you run the workflow?\n\n1. Create a [Phish Report](https://phish.report/) account and get your API key (on \\\nthe bottom of your profile page)\n2. In Admyral, go to **Settings** and store the API key with the following name: `phish_report_api_key`\n3. Click the top-right toggle to activate the workflow\n4. Click `Run`\n5. Select an input example\n6. Click `Run workflow`\n7. Go to `Run History` to view the workflow events\n8. Check your mailbox for the report"
+		},
+		"created_at": "2024-05-02 22:03:47.212159",
+		"x_position": 465.008132553189,
+		"y_position": 316.571160438969
+	},
+	{
+		"action_id": "fd69d8fa-8cd5-4daa-af01-93e3179aa604",
+		"workflow_id": "b721bc3e-97cf-4b64-a14f-9ce8afe521e8",
+		"action_name": "Takedown submission successful?",
+		"reference_handle": "takedown_submission_successful?",
+		"action_type": "IF_CONDITION",
+		"action_description": "",
+		"action_definition": {
+			"conditions": [
+				{
+					"lhs": "<<submit_a_takedown_case_in_phish_report.status>>",
+					"rhs": "200",
+					"operator": "EQUALS"
+				}
+			]
+		},
+		"created_at": "2024-05-02 22:34:08.082934",
+		"x_position": 963,
+		"y_position": 498
+	},
+	{
+		"action_id": "79430684-03ae-471a-8646-894ba40786bf",
+		"workflow_id": "b721bc3e-97cf-4b64-a14f-9ce8afe521e8",
+		"action_name": "Send Takedown Failure Reason",
+		"reference_handle": "send_takedown_failure_reason",
+		"action_type": "SEND_EMAIL",
+		"action_description": "",
+		"action_definition": {
+			"body": "The takedown request for <<submit_url.url>> did not succeed!\n\nReason: <<submit_a_takedown_case_in_phish_report.body.message>>",
+			"subject": "Phish Report Case",
+			"recipients": ["chris@admyral.dev"],
+			"sender_name": "Admyral"
+		},
+		"created_at": "2024-05-02 22:36:28.993581",
+		"x_position": 1163.13000707368,
+		"y_position": 696.841282723562
+	},
+	{
+		"action_id": "48a3ac99-92f1-4365-a5c3-cb30da8f0df2",
+		"workflow_id": "6a7c608e-f5f1-4fff-bdf7-fd41d8d93640",
+		"action_name": "Note",
+		"reference_handle": "note",
+		"action_type": "NOTE",
+		"action_description": "",
+		"action_definition": {
+			"note": "### How can you run the workflow?\n\n1. **AbuseIPDB Setup** \\\n1.1 Go to [AbuseIPDB](https://www.abuseipdb.com/), create an account, and obtain your \\\nAPI key (Profile > API) \\\n1.2 In Admyral, go to the **Settings** page and save the API \\\nkey with the name `abuseipdb_api_key`\n\n2. **VirusTotal Setup** \\\n2.1 Go to [VirusTotal](https://www.virustotal.com/) and get your API key (expand your \\\nprofile in the top right corner and click on \"APIKey\") \\\n2.2 In Admyral, go to **Settings** and store the API key with \\\nthe following name: `virus_total_api_key`\n\n3. **GreyNoise Setup** \\\n3.1 Create a [GreyNoise](https://viz.greynoise.io/) account and get your API key \\\n(expand your profile in the top right corner and click on \"APIKey\") \\\n3.2 In Admyral, go to **Settings** and store the API key with \\\nthe following name: `greynoise_api_key`\n\n4. Click the top-right toggle to active the workflow\n5. Click `Run`\n6. Select an example input from the dropdown\n7. Click `Run workflow`\n8. Go to `Run History` to view the workflow events\n9. Check your mailbox for the report"
+		},
+		"created_at": "2024-05-02 22:58:32.973819",
+		"x_position": 662.658627831231,
+		"y_position": 470.337124096258
 	}
 ]

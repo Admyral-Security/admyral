@@ -1,0 +1,32 @@
+[
+	{
+		"action_input_template_id": "dc7dfc89-5f00-4377-bb7f-9248dd17a03c",
+		"template_name": "Example File Hash",
+		"template": "{ \"hash\": \"9582f2a26aec4395386082b4a4d5642d530a2ae847f48401bc9615f9cb436954\" }",
+		"action_id": "3cd48f79-0bb1-4c50-9300-c15910eb963e"
+	},
+	{
+		"action_input_template_id": "ba5e18ab-8245-4cda-a298-3f4100dcd5aa",
+		"template_name": "Example File Hash",
+		"template": "{ \"hash\": \"8d3f68b16f0710f858d8c1d2c699260e6f43161a5510abb0e7ba567bd72c965b\" }",
+		"action_id": "491186dd-e578-4821-97b7-cd1edf099400"
+	},
+	{
+		"action_input_template_id": "477212a1-949a-461e-afbb-d00a700ff4cf",
+		"template_name": "Example URL",
+		"template": "{ \"url\": \"qeqeeqnsen.info\" }",
+		"action_id": "52cfd5d9-8ebb-45ff-84e6-5eb94cda6925"
+	},
+	{
+		"action_input_template_id": "e2c0ba5d-d8d1-460b-a29e-729a7c3690d1",
+		"template_name": "Example URL 2",
+		"template": "{ \"url\": \"catalogobrasil.net\" }",
+		"action_id": "52cfd5d9-8ebb-45ff-84e6-5eb94cda6925"
+	},
+	{
+		"action_input_template_id": "f2d27fde-2793-488f-86df-d36bbf2c1169",
+		"template_name": "Example IP",
+		"template": "{\"ip\": \"118.25.6.39\"}",
+		"action_id": "e8444c34-88be-44dd-bdac-66970b597009"
+	}
+]
