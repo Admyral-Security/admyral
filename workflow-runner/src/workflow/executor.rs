@@ -95,7 +95,30 @@ impl WorkflowExecutor {
             );
 
             let mut allowed_edge_type = EdgeType::Default;
-            let output = action.node.execute(&self.context).await?;
+            let output = match action.node.execute(&self.context).await {
+                Ok(value) => value,
+                Err(e) => {
+                    tracing::error!(
+                        "Error during execution of action {} for workflow {}: {e}",
+                        action.name,
+                        self.workflow.workflow_id,
+                    );
+                    // TODO: propagate good error messages for displaying to the user
+                    self.context
+                        .persist_run_state(
+                            &queue_element.reference_handle,
+                            &action.id,
+                            queue_element
+                                .prev_action_state_id
+                                .as_ref()
+                                .map(|s| s.as_str()),
+                            json!({"error": format!("Failed to execute action {}", action.name)}),
+                            true,
+                        )
+                        .await?;
+                    break;
+                }
+            };
 
             // If the current action node is an if-condition, we must decide which
             // path the execution should follow.
