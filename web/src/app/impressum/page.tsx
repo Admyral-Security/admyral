@@ -28,9 +28,10 @@ export default function ImpressumPage() {
 			</Flex>
 
 			<Flex direction="column" width="80%">
-				<Text>Christopher Grittner</Text>
+				<Text>Admyral Technologies GmbH</Text>
 				<Text>Augustenstr. 74</Text>
 				<Text>80333 München</Text>
+				<Text>chris@admyral.dev</Text>
 				<Text>Vertreten durch:</Text>
 				<Text>Christopher Grittner</Text>
 				<Text>Daniel Grittner</Text>
@@ -45,8 +46,7 @@ export default function ImpressumPage() {
 					Verantwortlich für den Inhalt nach § 55 Abs. 2 RStV:
 				</Text>
 				<Text>Christopher Grittner</Text>
-				<Text>Augustenstr. 74</Text>
-				<Text>80333 München</Text>
+				<Text>chris@admyral.dev</Text>
 			</Flex>
 
 			<Flex direction="column" width="80%">

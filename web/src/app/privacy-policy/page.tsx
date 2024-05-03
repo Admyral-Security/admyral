@@ -211,7 +211,7 @@ export default function PrivacyPolicyPage() {
 					Business units within Admyral (e.g. sales, marketing, legal,
 					system administration and/or management); External service
 					providers who provide services to the Website or our
-					business (e.g. Slack, Google, Inc. (Google Analytics);
+					business (e.g. Slack, Google, Inc., Posthog;
 					and/or Professional advisors who provide professional
 					services to us such as legal advisors and consultants.
 				</Text>
@@ -355,7 +355,39 @@ export default function PrivacyPolicyPage() {
 			</Flex>
 
 			<Flex direction="column" width="80%">
-				<Heading>10. CONTACT US</Heading>
+				<Heading>10. COOKIES</Heading>
+
+				<Text>
+				Cookies and similar technologies
+				We use cookies and similar technologies (e.g. pixels) on our website or 
+				platform. Cookies are text files that your browser automatically creates 
+				and stores on your end device. Different information is stored in these 
+				cookies. Some of the cookies are deleted when you end your browser session 
+				(“session cookies”). In some cases, the cookies remain stored on your end 
+				device, for example to recognize you as a returning user the next time you 
+				visit our website or our platform.
+				You can prevent the use of cookies by adjusting the settings of the browser 
+				you are using. 
+				<br />
+				Necessary cookies
+				These are cookies that are absolutely necessary for the functionality 
+				or provision of our website. The legal basis for accessing or storing 
+				information on your end device is Section 25 (2) No. 2 of the GDPR; the 
+				legal basis for the associated data processing is our legitimate interest 
+				in the provision and convenient use of our website within the meaning of 
+				Art. 6 (1) (f) GDPR.
+				<br />
+				Analysis & statistics
+				We also use certain cookies to statistically analyze and improve the use 
+				of our website and platform. The legal basis for accessing or storing 
+				information on your end device is your consent in accordance with Section 
+				25 (1) of the GDPR; the legal basis for the associated data processing is 
+				your consent in accordance with Art. 6 (1) (a) of the GDPR.
+				</Text>
+			</Flex>
+
+			<Flex direction="column" width="80%">
+				<Heading>11. CONTACT US</Heading>
 
 				<Text>
 					If you have any questions, comments or concerns about the
