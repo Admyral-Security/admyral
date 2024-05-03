@@ -1,7 +1,9 @@
 "use client";
 
+import { createClient } from "@/utils/supabase/client";
 import posthog from "posthog-js";
 import { PostHogProvider } from "posthog-js/react";
+import { useEffect } from "react";
 
 if (
 	typeof window !== "undefined" &&
@@ -16,9 +18,41 @@ if (
 				posthog.debug();
 			}
 		},
+		// Following: https://posthog.com/tutorials/cookieless-tracking
+		persistence: "memory",
+		ip: false,
 	});
 }
 
 export function CSPostHogProvider({ children }: { children: React.ReactNode }) {
 	return <PostHogProvider client={posthog}>{children}</PostHogProvider>;
+}
+
+export const posthogHelpers = {
+	identify: async () => {
+		const supabase = createClient();
+		const {
+			data: { user },
+			error,
+		} = await supabase.auth.getUser();
+		if (error || !user) {
+			return;
+		}
+		posthog.identify(user.id);
+	},
+	logout: () => {
+		posthog.reset();
+	},
+};
+
+export default function PostHogIdentifierProvider({
+	children,
+}: {
+	children: React.ReactNode;
+}) {
+	useEffect(() => {
+		posthogHelpers.identify();
+	}, []);
+
+	return children;
 }

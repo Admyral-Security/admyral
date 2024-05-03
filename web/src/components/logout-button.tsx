@@ -1,4 +1,7 @@
+"use client";
+
 import { Button } from "@radix-ui/themes";
+import { posthogHelpers } from "@/app/providers";
 
 export default function LogoutButton() {
 	return (
@@ -8,6 +11,7 @@ export default function LogoutButton() {
 				variant="solid"
 				color="red"
 				style={{ cursor: "pointer" }}
+				onClick={() => posthogHelpers.logout()}
 			>
 				Logout
 			</Button>

@@ -4,7 +4,7 @@ export interface WorkflowPageProps {
 	params: { workflowId: string };
 }
 
-export default async function WorkflowPage({
+export default function WorkflowPage({
 	params: { workflowId },
 }: WorkflowPageProps) {
 	return <WorkflowBuilder workflowId={workflowId} />;
