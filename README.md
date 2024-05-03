@@ -150,6 +150,6 @@ This repository is licensed under Apache License 2.0. See LICENSE for more detai
 
 Admyral automatically collects telemetry data **anonymously** using PostHog with hosting in the EU. This helps us to understand how Admyral is used and improve our most relevant features as well as track the overall usage for internal and external reporting.
 
-None of data is shared with third parties and does not include any sensitive information. If you would like to opt-out of telemetry or have questions, please reach out to us via [chris@admyral.com][mailto:chris@admyral.dev] or contact us either in Discord or Slack, as we want to be transparent and respect your privacy.
+None of data is shared with third parties and does not include any sensitive information. If you would like to opt-out of telemetry or have questions, please reach out to us via [chris@admyral.com](mailto:chris@admyral.dev) or contact us either in Discord or Slack, as we want to be transparent and respect your privacy.
 
 For self-hosting, you can opt-out by simply removing `NEXT_PUBLIC_POSTHOG_KEY` and `NEXT_PUBLIC_POSTHOG_HOST` from the environment variables.
