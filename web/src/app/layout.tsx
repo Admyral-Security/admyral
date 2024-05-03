@@ -3,6 +3,7 @@ import "./globals.css";
 import "@radix-ui/themes/styles.css";
 import { Theme } from "@radix-ui/themes";
 import { inter } from "./fonts";
+import { CSPostHogProvider } from "@/app/providers";
 
 export const metadata: Metadata = {
 	title: "Admyral",
@@ -30,9 +31,11 @@ export default function RootLayout({
 }>) {
 	return (
 		<html lang="en" className="h-full">
-			<body className={`${inter.className} h-full`}>
-				<Theme>{children}</Theme>
-			</body>
+			<CSPostHogProvider>
+				<body className={`${inter.className} h-full`}>
+					<Theme>{children}</Theme>
+				</body>
+			</CSPostHogProvider>
 		</html>
 	);
 }

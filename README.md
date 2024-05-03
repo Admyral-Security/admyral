@@ -21,15 +21,14 @@
 
 </br>
 
-
 Admyral is an open-source Cybersecurity Automation & Investigation Assistant. Admyral's Assistant enjoys a deep integration into Admyral's case management and workflow automation. Through this triangulation, SOC teams can benefit from:
+
 1. A unified console to perform investigations and handle incidents 📺
 2. A seamless workflow automation creation -- even during incident triage, investigation, or response 👷
 3. Automatic alert investigation as well as next step suggestions for analysts 🧑‍✈️
 4. Workflow automation recommendations for individual cases as well as workflow automation creation through natural language 🤖
 
 Through Admyral's Assistant functionality, Admyral seeks to provide a new, more effective, and scalable approach for tackling alert fatigue and automating security workflows.
-
 
 → → → [Try out the free cloud version](https://admyral.dev/login) ← ← ←
 
@@ -68,9 +67,8 @@ Here is a sneek-peak into the workflow automation builder:
 
 ### Hosting
 
--   [X] Cloud version
+-   [x] Cloud version
 -   [ ] Self-hosting
-
 
 ### Misc
 
@@ -145,3 +143,13 @@ We are excited about the possibility of working together to meet your specific b
 ## 📃 License
 
 This repository is licensed under Apache License 2.0. See LICENSE for more details.
+
+## Misc
+
+### Telemetry
+
+Admyral automatically collects telemetry data **anonymously** using PostHog with hosting in the EU. This helps us to understand how Admyral is used and improve our most relevant features as well as track the overall usage for internal and external reporting.
+
+None of data is shared with third parties and does not include any sensitive information. If you would like to opt-out of telemetry or have questions, please reach out to us via [chris@admyral.com][mailto:chris@admyral.dev] or contact us either in Discord or Slack, as we want to be transparent and respect your privacy.
+
+For self-hosting, you can opt-out by simply removing `NEXT_PUBLIC_POSTHOG_KEY` and `NEXT_PUBLIC_POSTHOG_HOST` from the environment variables.
