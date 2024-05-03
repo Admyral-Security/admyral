@@ -64,7 +64,7 @@ export default function NodeBase({
 			<NodeToolbar isVisible={selected} position={Position.Right}>
 				<Card style={{ padding: 0, paddingLeft: 2, paddingRight: 2 }}>
 					<Flex align="center" width="auto">
-						<Flex
+						{/* <Flex
 							width="32px"
 							height="32px"
 							justify="center"
@@ -92,7 +92,7 @@ export default function NodeBase({
 									</Badge>
 								</HoverCard.Content>
 							</HoverCard.Root>
-						</Flex>
+						</Flex> */}
 
 						<Flex
 							width="32px"
