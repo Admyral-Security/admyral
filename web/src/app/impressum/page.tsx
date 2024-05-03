@@ -160,80 +160,23 @@ export default function ImpressumPage() {
 					vor.
 				</Text>
 				<br />
-				<Text>Google Analytics</Text>
+				<Text>Posthog</Text>
 				<br />
 				<Text>
-					Diese Website benutzt Google Analytics, einen
-					Webanalysedienst der Google Inc.
-					(&apos;&apos;Google&apos;&apos;). Google Analytics verwendet
-					sog. &apos;&apos;Cookies&apos;&apos;, Textdateien, die auf
-					Ihrem Computer gespeichert werden und die eine Analyse der
-					Benutzung der Website durch Sie ermöglicht. Die durch den
-					Cookie erzeugten Informationen über Ihre Benutzung dieser
-					Website (einschließlich Ihrer IP-Adresse) wird an einen
-					Server von Google in den USA übertragen und dort
-					gespeichert. Google wird diese Informationen benutzen, um
-					Ihre Nutzung der Website auszuwerten, um Reports über die
-					Websiteaktivitäten für die Websitebetreiber
-					zusammenzustellen und um weitere mit der Websitenutzung und
-					der Internetnutzung verbundene Dienstleistungen zu
-					erbringen. Auch wird Google diese Informationen
-					gegebenenfalls an Dritte übertragen, sofern dies gesetzlich
-					vorgeschrieben oder soweit Dritte diese Daten im Auftrag von
-					Google verarbeiten. Google wird in keinem Fall Ihre
-					IP-Adresse mit anderen Daten der Google in Verbindung
-					bringen. Sie können die Installation der Cookies durch eine
-					entsprechende Einstellung Ihrer Browser Software verhindern;
-					wir weisen Sie jedoch darauf hin, dass Sie in diesem Fall
-					gegebenenfalls nicht sämtliche Funktionen dieser Website
-					voll umfänglich nutzen können. Durch die Nutzung dieser
-					Website erklären Sie sich mit der Bearbeitung der über Sie
-					erhobenen Daten durch Google in der zuvor beschriebenen Art
-					und Weise und zu dem zuvor benannten Zweck einverstanden.
-				</Text>
-				<br />
-				<Text>Google AdSense</Text>
-				<br />
-				<Text>
-					Diese Website benutzt Google Adsense, einen
-					Webanzeigendienst der Google Inc., USA
-					(&apos;&apos;Google&apos;&apos;). Google Adsense verwendet
-					sog. &apos;&apos;Cookies&apos;&apos; (Textdateien), die auf
-					Ihrem Computer gespeichert werden und die eine Analyse der
-					Benutzung der Website durch Sie ermöglicht. Google Adsense
-					verwendet auch sog. &apos;&apos;Web Beacons&apos;&apos;
-					(kleine unsichtbare Grafiken) zur Sammlung von
-					Informationen. Durch die Verwendung des Web Beacons können
-					einfache Aktionen wie der Besucherverkehr auf der Webseite
-					aufgezeichnet und gesammelt werden. Die durch den Cookie
-					und/oder Web Beacon erzeugten Informationen über Ihre
-					Benutzung dieser Website (einschließlich Ihrer IP-Adresse)
-					werden an einen Server von Google in den USA übertragen und
-					dort gespeichert. Google wird diese Informationen benutzen,
-					um Ihre Nutzung der Website im Hinblick auf die Anzeigen
-					auszuwerten, um Reports über die Websiteaktivitäten und
-					Anzeigen für die Websitebetreiber zusammenzustellen und um
-					weitere mit der Websitenutzung und der Internetnutzung
-					verbundene Dienstleistungen zu erbringen. Auch wird Google
-					diese Informationen gegebenenfalls an Dritte übertragen,
-					sofern dies gesetzlich vorgeschrieben oder soweit Dritte
-					diese Daten im Auftrag von Google verarbeiten. Google wird
-					in keinem Fall Ihre IP-Adresse mit anderen Daten der Google
-					in Verbindung bringen. Das Speichern von Cookies auf Ihrer
-					Festplatte und die Anzeige von Web Beacons können Sie
-					verhindern, indem Sie in Ihren Browser-Einstellungen
-					&apos;&apos;keine Cookies akzeptieren&apos;&apos; wählen (Im
-					MS Internet-Explorer unter &apos;&apos;Extras &gt;
-					Internetoptionen &gt; Datenschutz &gt;
-					Einstellung&apos;&apos;; im Firefox unter &apos;&apos;Extras
-					&gt; Einstellungen &gt; Datenschutz &gt;
-					Cookies&apos;&apos;); wir weisen Sie jedoch darauf hin, dass
-					Sie in diesem Fall gegebenenfalls nicht sämtliche Funktionen
-					dieser Website voll umfänglich nutzen können. Durch die
-					Nutzung dieser Website erklären Sie sich mit der Bearbeitung
-					der über Sie erhobenen Daten durch Google in der zuvor
-					beschriebenen Art und Weise und zu dem zuvor benannten Zweck
-					einverstanden.
+					Wir verwenden auf unserer Plattform außerdem den Service von 
+					PostHog, der von der PostHog, Inc., 965 Mission Street, San Francisco, 
+					CA 94103, USA („Posthog“) bereitgestellt wird. PostHog hilft uns dabei, 
+					die Nutzung unserer Plattform besser zu verstehen und verbessern zu können.
+					Für die Analyse können die folgenden Daten verarbeitet werden: Name und 
+					Nutzername, E-Mail-Adresse, IP- und MAC-Adresse, Browser Footprint, 
+					geografische Informationen (Land, gebiet, Stadt) und Informationen über die 
+					Nutzung der Plattform, wie Seitenaufrufe, Klicks oder Browsing-Verhalten. 
+					Wir haben mit PostHog einen Auftragsverarbeitungsvertrag gemäß Art. 28 (3) 
+					DSGVO geschlossen sowie die EU-Standardvertragsklauseln für die Übermittlung 
+					personenbezogener Daten an Auftragsverarbeiter in Drittländern vom 04. Juni 
+					2021 vereinbart. Die Datenschutzhinweise von PostHog können Sie hier 
+					abrufen: https://posthog.com/privacy. 
+					Die von PostHog genutzten Cookies haben eine Lebensdauer von höchstens zwei Jahren.
 				</Text>
 			</Flex>
 		</Flex>
