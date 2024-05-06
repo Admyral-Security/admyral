@@ -162,7 +162,7 @@ export default function WorkflowBuilder({ workflowId }: WorkflowBuilderProps) {
 			return;
 		}
 
-		triggerWorkflowFromAction(workflowId, triggerNodeId)
+		triggerWorkflowFromAction(workflowId, triggerNodeId, null)
 			.then(() => {
 				alert("Workflow triggered successfully.");
 			})
