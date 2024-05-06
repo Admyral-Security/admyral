@@ -49,6 +49,7 @@ type WorkflowState = {
 	hasUnsavedChanges: () => boolean;
 	setPersistedNodes: (nodes: Node<ActionData>[]) => void;
 	setPersistedEdges: (edges: DirectedEdge[]) => void;
+	deleteWorkflow: () => void;
 };
 
 const useWorkflowStore = create<WorkflowState>((set, get) => ({
@@ -62,7 +63,7 @@ const useWorkflowStore = create<WorkflowState>((set, get) => ({
 	triggerNodeId: null,
 	onNodesChange: (changes: NodeChange[]) => {
 		// Track deleted nodes which were already persisted
-		const deletedNodeIds = changes
+		const newlyDeletedNodeIds = changes
 			.filter(
 				(change) =>
 					change.type === "remove" &&
@@ -70,8 +71,8 @@ const useWorkflowStore = create<WorkflowState>((set, get) => ({
 			)
 			.map((change) => (change as NodeRemoveChange).id);
 		let deletedNodes = cloneDeep(get().deletedNodes);
-		if (deletedNodeIds.length > 0) {
-			deletedNodes = [...deletedNodes, ...deletedNodeIds];
+		if (newlyDeletedNodeIds.length > 0) {
+			deletedNodes = [...deletedNodes, ...newlyDeletedNodeIds];
 		}
 
 		set({
@@ -81,7 +82,7 @@ const useWorkflowStore = create<WorkflowState>((set, get) => ({
 	},
 	onEdgesChange: (changes: EdgeChange[]) => {
 		// Track deleted edges which were already persisted
-		const deletedEdgeIds = changes
+		const newlyDeletedEdgeIds = changes
 			.filter(
 				(change) =>
 					change.type === "remove" &&
@@ -89,12 +90,12 @@ const useWorkflowStore = create<WorkflowState>((set, get) => ({
 			)
 			.map((change) => (change as EdgeRemoveChange).id);
 		let deletedEdges = cloneDeep(get().deletedEdges);
-		if (deletedEdgeIds.length > 0) {
-			const deletedEdgeIdsLookup = new Set(deletedEdgeIds);
-			const deletedEdgesUpdate = get()
-				.edges.filter((edge) => deletedEdgeIdsLookup.has(edge.id))
+		if (newlyDeletedEdgeIds.length > 0) {
+			const newlyDeletedEdgeIdsLookup = new Set(newlyDeletedEdgeIds);
+			const newlyDeletedEdgesUpdate = get()
+				.edges.filter((edge) => newlyDeletedEdgeIdsLookup.has(edge.id))
 				.map((edge) => [edge.source, edge.target] as [string, string]);
-			deletedEdges = [...deletedEdges, ...deletedEdgesUpdate];
+			deletedEdges = [...deletedEdges, ...newlyDeletedEdgesUpdate];
 		}
 
 		set({
@@ -293,6 +294,26 @@ const useWorkflowStore = create<WorkflowState>((set, get) => ({
 		}
 
 		return false;
+	},
+	deleteWorkflow: () => {
+		const deletedNodes = [
+			...get().deletedNodes,
+			...get()
+				.nodes.filter((node) => !node.id.startsWith(NEW_MARKER))
+				.map((node) => node.id),
+		];
+		const deletedEdges = [
+			...get().deletedEdges,
+			...get()
+				.edges.filter((edge) => !edge.id.startsWith(NEW_MARKER))
+				.map((edge) => [edge.source, edge.target] as [string, string]),
+		];
+		set({
+			nodes: [],
+			edges: [],
+			deletedNodes,
+			deletedEdges,
+		});
 	},
 }));
 

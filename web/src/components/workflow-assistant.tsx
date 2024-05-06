@@ -16,11 +16,14 @@ export default function WorkflowAssistant() {
 		closeAssistant: () => state.setOpenAssistant(false),
 	}));
 
-	const { setNodes, setEdges, getId } = useWorkflowStore((state) => ({
-		setNodes: state.setNodes,
-		setEdges: state.setEdges,
-		getId: state.getId,
-	}));
+	const { setNodes, setEdges, getId, deleteWorkflow } = useWorkflowStore(
+		(state) => ({
+			setNodes: state.setNodes,
+			setEdges: state.setEdges,
+			getId: state.getId,
+			deleteWorkflow: state.deleteWorkflow,
+		}),
+	);
 
 	const handleGenerateWorkflow = async () => {
 		setIsLoading(true);
@@ -28,21 +31,26 @@ export default function WorkflowAssistant() {
 			const [generatedNodes, generatedEdges] =
 				await generateWorkflowGraph(userInput);
 
+			// we need to remap the node and edge ids to mark them as new, i.e.,
+			// mark them as not yet persisted
 			const nodeIdRemapping: Record<string, string> = {};
-			const nodes = generatedNodes.map((node) => {
+			const newNodes = generatedNodes.map((node) => {
 				let id = getId();
 				nodeIdRemapping[node.id] = id;
 				return { ...node, id, data: { ...node.data, actionId: id } };
 			});
-			const edges = generatedEdges.map((edge) => ({
+			const newEdges = generatedEdges.map((edge) => ({
 				...edge,
 				id: getId(),
 				source: nodeIdRemapping[edge.source],
 				target: nodeIdRemapping[edge.target],
 			}));
 
-			setNodes(nodes);
-			setEdges(edges);
+			// We first need to delete the current workflow before setting the new one
+			// otherwise this could lead to inconsistencies with the already persisted state
+			deleteWorkflow();
+			setNodes(newNodes);
+			setEdges(newEdges);
 
 			closeAssistant();
 		} catch (error: any) {
