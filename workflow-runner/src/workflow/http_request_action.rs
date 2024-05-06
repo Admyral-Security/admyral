@@ -43,6 +43,7 @@ impl ActionExecutor for HttpRequest {
         // Resolve references in the URL for dynamic URL construction or secrets
         let url = resolve_references(&self.url, context)
             .await?
+            .value
             .as_str()
             .unwrap()
             .to_string();
@@ -55,6 +56,7 @@ impl ActionExecutor for HttpRequest {
             .map(|key_value_pair| async move {
                 let resolved_value = resolve_references(&key_value_pair.value, context)
                     .await?
+                    .value
                     .as_str()
                     .expect("Header value must be a string!")
                     .to_string();
@@ -80,7 +82,7 @@ impl ActionExecutor for HttpRequest {
                 let mut builder = client.post(url).headers(headers);
                 if let Some(payload) = self.payload.as_ref() {
                     // Resolve references in the POST request payload
-                    let resolved_payload = resolve_references(payload, context).await?;
+                    let resolved_payload = resolve_references(payload, context).await?.value;
                     builder = builder.json(&resolved_payload);
                 }
                 builder.send().await?

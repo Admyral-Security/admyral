@@ -6,7 +6,11 @@ use reqwest::header::HeaderMap;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 
-use super::{context::Context, reference_resolution::resolve_references, ActionExecutor};
+use super::{
+    context::Context,
+    reference_resolution::{resolve_references, ResolveReferenceResult},
+    ActionExecutor,
+};
 
 lazy_static! {
     static ref REQ_CLIENT: reqwest::Client = reqwest::Client::new();
@@ -36,18 +40,18 @@ impl ActionExecutor for SendEmail {
             .map(|recipient| async move { resolve_references(&recipient, context).await })
             .collect::<Vec<_>>();
         let recipients = join_all(recipients).await;
-        let recipients: Result<Vec<serde_json::Value>> = recipients.into_iter().collect();
+        let recipients: Result<Vec<ResolveReferenceResult>> = recipients.into_iter().collect();
         let recipients = recipients?
             .into_iter()
-            .filter(|recipient| recipient.is_string())
-            .map(|recipient| recipient.as_str().unwrap().to_string())
+            .filter(|recipient| recipient.value.is_string())
+            .map(|recipient| recipient.value.as_str().unwrap().to_string())
             .collect::<Vec<String>>();
 
-        let subject = resolve_references(&self.subject, context).await?;
+        let subject = resolve_references(&self.subject, context).await?.value;
 
-        let body = resolve_references(&self.body, context).await?;
+        let body = resolve_references(&self.body, context).await?.value;
 
-        let sender_name = resolve_references(&self.sender_name, context).await?;
+        let sender_name = resolve_references(&self.sender_name, context).await?.value;
 
         let client = REQ_CLIENT.clone();
 

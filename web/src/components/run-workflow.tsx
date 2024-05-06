@@ -37,6 +37,7 @@ export default function RunWorkflow({
 	const [showModal, setShowModal] = useState<boolean>(false);
 	const [error, setError] = useState<string | null>(null);
 	const [triggerPayload, setTriggerPayload] = useState<string>("");
+	const [isExecuting, setIsExecuting] = useState<boolean>(false);
 
 	useEffect(() => {
 		if (startNodes.length > 0 && startNodeIdx === null) {
@@ -48,6 +49,7 @@ export default function RunWorkflow({
 
 	const executeWorkflow = async () => {
 		setError(null);
+		setIsExecuting(true);
 
 		if (startNodeIdx === null || startNodeIdx >= startNodes.length) {
 			return;
@@ -76,6 +78,8 @@ export default function RunWorkflow({
 			setError(
 				`Failed to execute workflow. Please try again. If the problem persists, please contact us on Discord or via email ${process.env.NEXT_PUBLIC_SUPPORT_EMAIL}.`,
 			);
+		} finally {
+			setIsExecuting(false);
 		}
 	};
 
@@ -312,6 +316,7 @@ export default function RunWorkflow({
 												cursor: "pointer",
 											}}
 											onClick={executeWorkflow}
+											loading={isExecuting}
 										>
 											Run Workflow
 										</Button>

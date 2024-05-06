@@ -60,7 +60,16 @@ fn string_to_json_value(s: &str) -> Result<serde_json::Value> {
     })
 }
 
-pub async fn resolve_references(value: &str, context: &Context) -> Result<serde_json::Value> {
+#[derive(Debug, Clone)]
+pub struct ResolveReferenceResult {
+    pub value: serde_json::Value,
+    /// true if we have an input such as "<<some_reference>>" and <<some_reference>> does not exist
+    pub does_not_exist_and_is_single_reference_only: bool,
+}
+
+pub async fn resolve_references(value: &str, context: &Context) -> Result<ResolveReferenceResult> {
+    let value = value.trim();
+
     let mut total_length_of_references = 0;
     let references = REFERENCE_REGEX
         .find_iter(value)
@@ -73,7 +82,10 @@ pub async fn resolve_references(value: &str, context: &Context) -> Result<serde_
 
     if references.is_empty() {
         // Nothing to do here.
-        return Ok(json!(value));
+        return Ok(ResolveReferenceResult {
+            value: json!(value),
+            does_not_exist_and_is_single_reference_only: false,
+        });
     }
 
     let futures = references
@@ -97,33 +109,49 @@ pub async fn resolve_references(value: &str, context: &Context) -> Result<serde_
                         Some(secret) => secret,
                         None => "".to_string(),
                     };
-                return Ok((reference, secret));
+                return Ok((reference, (secret, false)));
             }
 
             // Data reference
-            let resolved_reference = match context
+            let (resolved_reference, does_not_exist) = match context
                 .execution_state
                 .get_from_access_path(cleaned_reference)
             {
-                Some(result) => json_value_to_string(&result),
-                None => "".to_string(),
+                Some(result) => (json_value_to_string(&result), false),
+                None => ("".to_string(), true),
             };
-            Ok((reference, resolved_reference))
+            Ok((reference, (resolved_reference, does_not_exist)))
         })
         .collect::<Vec<_>>();
 
     let result = join_all(futures).await;
     let result: Result<Vec<_>> = result.into_iter().collect();
-    let resolved_references = result?.into_iter().collect::<HashMap<&str, String>>();
+    let resolved_references = result?
+        .into_iter()
+        .collect::<HashMap<&str, (String, bool)>>();
+
+    let num_of_references = resolved_references.len();
 
     // Replace references
+    let mut does_not_exist = false;
     let mut output = value.to_string();
-    for (reference_key, resolved) in resolved_references {
+    for (reference_key, (resolved, resolved_does_not_exist)) in resolved_references {
         output = output.replace(reference_key, &resolved);
+        does_not_exist = does_not_exist || resolved_does_not_exist;
     }
 
     // We transform the output to JSON again
-    Ok(string_to_json_value(&output)?)
+    let output_value = string_to_json_value(&output)?;
+
+    let does_not_exist_and_is_single_reference_only = does_not_exist
+        && num_of_references == 1
+        && value.starts_with("<<")
+        && value.ends_with(">>");
+
+    Ok(ResolveReferenceResult {
+        value: output_value,
+        does_not_exist_and_is_single_reference_only,
+    })
 }
 
 #[cfg(test)]

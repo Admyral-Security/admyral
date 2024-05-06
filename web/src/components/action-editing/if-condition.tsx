@@ -20,6 +20,15 @@ import { cloneDeep } from "lodash";
 import { generateReferenceHandle } from "@/lib/workflow-node";
 import useWorkflowStore from "@/lib/workflow-store";
 
+function isUnaryOperator(operator: IfConditionOperator) {
+	return (
+		operator === IfConditionOperator.IS_EMPTY ||
+		operator === IfConditionOperator.IS_NOT_EMPTY ||
+		operator === IfConditionOperator.EXISTS ||
+		operator === IfConditionOperator.DOES_NOT_EXIST
+	);
+}
+
 export interface IfConditionProps {
 	id: string;
 }
@@ -134,18 +143,21 @@ export default function IfCondition({ id }: IfConditionProps) {
 										</Select.Root>
 									</Flex>
 
-									<TextField.Root
-										variant="surface"
-										value={condition.rhs}
-										onChange={(event) => {
-											const clonedData = cloneDeep(data);
-											clonedData.actionDefinition.conditions[
-												idx
-											].rhs = event.target.value;
-											updateData(clonedData);
-										}}
-										style={{ width: "100%" }}
-									/>
+									{!isUnaryOperator(condition.operator) && (
+										<TextField.Root
+											variant="surface"
+											value={condition.rhs}
+											onChange={(event) => {
+												const clonedData =
+													cloneDeep(data);
+												clonedData.actionDefinition.conditions[
+													idx
+												].rhs = event.target.value;
+												updateData(clonedData);
+											}}
+											style={{ width: "100%" }}
+										/>
+									)}
 								</Flex>
 
 								{idx + 1 <

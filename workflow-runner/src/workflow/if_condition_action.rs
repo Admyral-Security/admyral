@@ -1,10 +1,11 @@
+use super::reference_resolution::ResolveReferenceResult;
 use super::ActionExecutor;
 use super::{context::Context, reference_resolution::resolve_references};
 use anyhow::{anyhow, Result};
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 
-#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum Operator {
     Equals,
@@ -13,6 +14,19 @@ pub enum Operator {
     GreaterThanOrEqual,
     LessThan,
     LessThanOrEqual,
+    IsEmpty,
+    IsNotEmpty,
+    Exists,
+    DoesNotExist,
+}
+
+impl Operator {
+    pub fn is_unary_operator(&self) -> bool {
+        match self {
+            Self::IsEmpty | Self::IsNotEmpty | Self::Exists | Self::DoesNotExist => true,
+            _ => false,
+        }
+    }
 }
 
 impl std::fmt::Display for Operator {
@@ -24,6 +38,10 @@ impl std::fmt::Display for Operator {
             Self::GreaterThanOrEqual => write!(f, ">="),
             Self::LessThan => write!(f, "<"),
             Self::LessThanOrEqual => write!(f, "<="),
+            Self::IsEmpty => write!(f, "is empty"),
+            Self::IsNotEmpty => write!(f, "is not empty"),
+            Self::Exists => write!(f, "exists"),
+            Self::DoesNotExist => write!(f, "does not exist"),
         }
     }
 }
@@ -173,7 +191,7 @@ fn to_string(value: serde_json::Value) -> String {
     }
 }
 
-fn execute_condition(
+fn execute_binary_condition(
     lhs: serde_json::Value,
     rhs: serde_json::Value,
     operator: Operator,
@@ -231,12 +249,40 @@ fn execute_condition(
     Ok(result)
 }
 
+fn execute_unary_condition(lhs: ResolveReferenceResult, operator: Operator) -> Result<bool> {
+    match operator {
+        Operator::IsEmpty | Operator::IsNotEmpty => {
+            let is_empty = match lhs.value {
+                serde_json::Value::String(s) => s.is_empty(),
+                serde_json::Value::Array(arr) => arr.is_empty(),
+                serde_json::Value::Object(obj) => obj.is_empty(),
+                _ => {
+                    return Err(anyhow!(
+                        "Is Empty comparison only supports String, Array, and Object data type!"
+                    ))
+                }
+            };
+            Ok((is_empty && operator == Operator::IsEmpty)
+                || (!is_empty && operator == Operator::IsNotEmpty))
+        }
+        Operator::DoesNotExist | Operator::Exists => Ok((lhs
+            .does_not_exist_and_is_single_reference_only
+            && operator == Operator::DoesNotExist)
+            || (!lhs.does_not_exist_and_is_single_reference_only && operator == Operator::Exists)),
+        _ => unreachable!("Invalid comparison: {} {operator}", lhs.value),
+    }
+}
+
 impl ConditionExpression {
     pub async fn evaluate(&self, context: &Context) -> Result<bool> {
         let lhs = resolve_references(&self.lhs, context).await?;
-        let rhs = resolve_references(&self.rhs, context).await?;
 
-        execute_condition(lhs, rhs, self.operator)
+        if self.operator.is_unary_operator() {
+            execute_unary_condition(lhs, self.operator)
+        } else {
+            let rhs = resolve_references(&self.rhs, context).await?.value;
+            execute_binary_condition(lhs.value, rhs, self.operator)
+        }
     }
 }
 
@@ -277,22 +323,22 @@ mod tests {
         let rhs = json!(20);
         // Input: 10 < 20
         assert_eq!(
-            execute_condition(lhs.clone(), rhs.clone(), Operator::LessThan).unwrap(),
+            execute_binary_condition(lhs.clone(), rhs.clone(), Operator::LessThan).unwrap(),
             true
         );
         // Input: 10 > 20
         assert_eq!(
-            execute_condition(lhs.clone(), rhs.clone(), Operator::GreaterThan).unwrap(),
+            execute_binary_condition(lhs.clone(), rhs.clone(), Operator::GreaterThan).unwrap(),
             false
         );
         // Input: 10 == 20
         assert_eq!(
-            execute_condition(lhs.clone(), rhs.clone(), Operator::Equals).unwrap(),
+            execute_binary_condition(lhs.clone(), rhs.clone(), Operator::Equals).unwrap(),
             false
         );
         // Input: 10 == 10
         assert_eq!(
-            execute_condition(lhs.clone(), lhs.clone(), Operator::Equals).unwrap(),
+            execute_binary_condition(lhs.clone(), lhs.clone(), Operator::Equals).unwrap(),
             true
         );
 
@@ -301,37 +347,38 @@ mod tests {
         let rhs = json!("34");
         // Input: "20" < "34"
         assert_eq!(
-            execute_condition(lhs.clone(), rhs.clone(), Operator::LessThan).unwrap(),
+            execute_binary_condition(lhs.clone(), rhs.clone(), Operator::LessThan).unwrap(),
             true
         );
         // Input: "20" <= "34"
         assert_eq!(
-            execute_condition(lhs.clone(), rhs.clone(), Operator::LessThanOrEqual).unwrap(),
+            execute_binary_condition(lhs.clone(), rhs.clone(), Operator::LessThanOrEqual).unwrap(),
             true
         );
         // Input: "20" > "34"
         assert_eq!(
-            execute_condition(lhs.clone(), rhs.clone(), Operator::GreaterThan).unwrap(),
+            execute_binary_condition(lhs.clone(), rhs.clone(), Operator::GreaterThan).unwrap(),
             false
         );
         // Input: "20" >= "34"
         assert_eq!(
-            execute_condition(lhs.clone(), rhs.clone(), Operator::GreaterThanOrEqual).unwrap(),
+            execute_binary_condition(lhs.clone(), rhs.clone(), Operator::GreaterThanOrEqual)
+                .unwrap(),
             false
         );
         // Input: "20" == "34"
         assert_eq!(
-            execute_condition(lhs.clone(), rhs.clone(), Operator::Equals).unwrap(),
+            execute_binary_condition(lhs.clone(), rhs.clone(), Operator::Equals).unwrap(),
             false
         );
         // Input: "20" < "20"
         assert_eq!(
-            execute_condition(lhs.clone(), lhs.clone(), Operator::Equals).unwrap(),
+            execute_binary_condition(lhs.clone(), lhs.clone(), Operator::Equals).unwrap(),
             true
         );
         // Input: "20" != "34"
         assert_eq!(
-            execute_condition(lhs.clone(), rhs.clone(), Operator::NotEquals).unwrap(),
+            execute_binary_condition(lhs.clone(), rhs.clone(), Operator::NotEquals).unwrap(),
             true
         );
     }
@@ -346,32 +393,33 @@ mod tests {
 
         // Input: "test" == "test"
         assert_eq!(
-            execute_condition(lhs.clone(), rhs.clone(), Operator::Equals).unwrap(),
+            execute_binary_condition(lhs.clone(), rhs.clone(), Operator::Equals).unwrap(),
             true
         );
         // Input: "test" != "diff"
         assert_eq!(
-            execute_condition(lhs.clone(), diff_rhs.clone(), Operator::NotEquals).unwrap(),
+            execute_binary_condition(lhs.clone(), diff_rhs.clone(), Operator::NotEquals).unwrap(),
             true
         );
         // Input: "test" < "diff"
         assert_eq!(
-            execute_condition(lhs.clone(), diff_rhs.clone(), Operator::LessThan).unwrap(),
+            execute_binary_condition(lhs.clone(), diff_rhs.clone(), Operator::LessThan).unwrap(),
             false
         );
         // Input: "test" <= "diff"
         assert_eq!(
-            execute_condition(lhs.clone(), diff_rhs.clone(), Operator::LessThanOrEqual).unwrap(),
+            execute_binary_condition(lhs.clone(), diff_rhs.clone(), Operator::LessThanOrEqual)
+                .unwrap(),
             false
         );
         // Input: "test" == "1234"
         assert_eq!(
-            execute_condition(lhs.clone(), number_string.clone(), Operator::Equals).unwrap(),
+            execute_binary_condition(lhs.clone(), number_string.clone(), Operator::Equals).unwrap(),
             false
         );
         // Input: "test" == "true"
         assert_eq!(
-            execute_condition(lhs.clone(), bool_string.clone(), Operator::Equals).unwrap(),
+            execute_binary_condition(lhs.clone(), bool_string.clone(), Operator::Equals).unwrap(),
             false
         );
     }
@@ -382,17 +430,17 @@ mod tests {
         let rhs = json!(false);
         // Input: true == false
         assert_eq!(
-            execute_condition(lhs.clone(), rhs.clone(), Operator::Equals).unwrap(),
+            execute_binary_condition(lhs.clone(), rhs.clone(), Operator::Equals).unwrap(),
             false
         );
         // Input: true == true
         assert_eq!(
-            execute_condition(lhs.clone(), json!(true), Operator::Equals).unwrap(),
+            execute_binary_condition(lhs.clone(), json!(true), Operator::Equals).unwrap(),
             true
         );
         // Input: true > false
         assert_eq!(
-            execute_condition(lhs.clone(), rhs.clone(), Operator::GreaterThan).unwrap(),
+            execute_binary_condition(lhs.clone(), rhs.clone(), Operator::GreaterThan).unwrap(),
             true
         );
     }
@@ -401,19 +449,22 @@ mod tests {
     fn test_promoted_number_comparison() {
         let lhs = json!(10.0);
         let rhs = json!(10);
-        assert_eq!(execute_condition(lhs, rhs, Operator::Equals).unwrap(), true);
+        assert_eq!(
+            execute_binary_condition(lhs, rhs, Operator::Equals).unwrap(),
+            true
+        );
 
         let lhs = json!(false);
         let rhs = json!(10);
         assert_eq!(
-            execute_condition(lhs, rhs, Operator::LessThan).unwrap(),
+            execute_binary_condition(lhs, rhs, Operator::LessThan).unwrap(),
             true
         );
 
         let lhs = json!(true);
         let rhs = json!(0);
         assert_eq!(
-            execute_condition(lhs, rhs, Operator::GreaterThan).unwrap(),
+            execute_binary_condition(lhs, rhs, Operator::GreaterThan).unwrap(),
             true
         );
     }
@@ -422,21 +473,152 @@ mod tests {
     fn test_mixed_type_comparison() {
         let lhs = json!("10");
         let rhs = json!(10);
-        assert_eq!(execute_condition(lhs, rhs, Operator::Equals).unwrap(), true);
+        assert_eq!(
+            execute_binary_condition(lhs, rhs, Operator::Equals).unwrap(),
+            true
+        );
 
         let lhs = json!(true);
         let rhs = json!("true");
-        assert_eq!(execute_condition(lhs, rhs, Operator::Equals).unwrap(), true);
+        assert_eq!(
+            execute_binary_condition(lhs, rhs, Operator::Equals).unwrap(),
+            true
+        );
 
         let lhs = json!(true);
         let rhs = json!("TRUE");
-        assert_eq!(execute_condition(lhs, rhs, Operator::Equals).unwrap(), true);
+        assert_eq!(
+            execute_binary_condition(lhs, rhs, Operator::Equals).unwrap(),
+            true
+        );
     }
 
     #[test]
     fn test_invalid_comparison() {
         let lhs = json!([1, 2, 3]);
         let rhs = json!([1, 2, 3]);
-        assert!(execute_condition(lhs, rhs, Operator::Equals).is_err());
+        assert!(execute_binary_condition(lhs, rhs, Operator::Equals).is_err());
+    }
+
+    #[test]
+    fn test_execute_unary_condition() {
+
+        // IS_EMPTY/IS_NOT_EMPTY - Object
+        
+        let lhs = ResolveReferenceResult {
+            value: json!({}),
+            does_not_exist_and_is_single_reference_only: false,
+        };
+        assert!(execute_unary_condition(lhs, Operator::IsEmpty).unwrap());
+
+        let lhs = ResolveReferenceResult {
+            value: json!({"abc": 123}),
+            does_not_exist_and_is_single_reference_only: false,
+        };
+        assert!(!execute_unary_condition(lhs, Operator::IsEmpty).unwrap());
+
+        let lhs = ResolveReferenceResult {
+            value: json!({}),
+            does_not_exist_and_is_single_reference_only: false,
+        };
+        assert!(!execute_unary_condition(lhs, Operator::IsNotEmpty).unwrap());
+
+        let lhs = ResolveReferenceResult {
+            value: json!({"abc": 123}),
+            does_not_exist_and_is_single_reference_only: false,
+        };
+        assert!(execute_unary_condition(lhs, Operator::IsNotEmpty).unwrap());
+
+        // IS_EMPTY/IS_NOT_EMPTY - Array
+        
+        let lhs = ResolveReferenceResult {
+            value: json!([]),
+            does_not_exist_and_is_single_reference_only: false,
+        };
+        assert!(execute_unary_condition(lhs, Operator::IsEmpty).unwrap());
+
+        let lhs = ResolveReferenceResult {
+            value: json!(["abc"]),
+            does_not_exist_and_is_single_reference_only: false,
+        };
+        assert!(!execute_unary_condition(lhs, Operator::IsEmpty).unwrap());
+
+        let lhs = ResolveReferenceResult {
+            value: json!([]),
+            does_not_exist_and_is_single_reference_only: false,
+        };
+        assert!(!execute_unary_condition(lhs, Operator::IsNotEmpty).unwrap());
+
+        let lhs = ResolveReferenceResult {
+            value: json!(["abc"]),
+            does_not_exist_and_is_single_reference_only: false,
+        };
+        assert!(execute_unary_condition(lhs, Operator::IsNotEmpty).unwrap());
+
+        // IS_EMPTY/IS_NOT_EMPTY - String
+        
+        let lhs = ResolveReferenceResult {
+            value: json!(""),
+            does_not_exist_and_is_single_reference_only: false,
+        };
+        assert!(execute_unary_condition(lhs, Operator::IsEmpty).unwrap());
+
+        let lhs = ResolveReferenceResult {
+            value: json!("abc"),
+            does_not_exist_and_is_single_reference_only: false,
+        };
+        assert!(!execute_unary_condition(lhs, Operator::IsEmpty).unwrap());
+
+        let lhs = ResolveReferenceResult {
+            value: json!(""),
+            does_not_exist_and_is_single_reference_only: false,
+        };
+        assert!(!execute_unary_condition(lhs, Operator::IsNotEmpty).unwrap());
+
+        let lhs = ResolveReferenceResult {
+            value: json!("abc"),
+            does_not_exist_and_is_single_reference_only: false,
+        };
+        assert!(execute_unary_condition(lhs, Operator::IsNotEmpty).unwrap());
+
+        // IS_EMPTY/IS_NOT_EMPTY - Other data types
+        
+        let lhs = ResolveReferenceResult {
+            value: json!(true),
+            does_not_exist_and_is_single_reference_only: false,
+        };
+        assert!(execute_unary_condition(lhs, Operator::IsEmpty).is_err());
+
+        let lhs = ResolveReferenceResult {
+            value: json!(true),
+            does_not_exist_and_is_single_reference_only: false,
+        };
+        assert!(execute_unary_condition(lhs, Operator::IsNotEmpty).is_err());
+
+        // EXISTS/DOES_NOT_EXIST
+        
+        let lhs = ResolveReferenceResult {
+            value: json!({}),
+            does_not_exist_and_is_single_reference_only: false,
+        };
+        assert!(execute_unary_condition(lhs, Operator::Exists).unwrap());
+
+        let lhs = ResolveReferenceResult {
+            value: json!({}),
+            does_not_exist_and_is_single_reference_only: true,
+        };
+        assert!(!execute_unary_condition(lhs, Operator::Exists).unwrap());
+
+        let lhs = ResolveReferenceResult {
+            value: json!({}),
+            does_not_exist_and_is_single_reference_only: false,
+        };
+        assert!(!execute_unary_condition(lhs, Operator::DoesNotExist).unwrap());
+
+        let lhs = ResolveReferenceResult {
+            value: json!({}),
+            does_not_exist_and_is_single_reference_only: true,
+        };
+        assert!(execute_unary_condition(lhs, Operator::DoesNotExist).unwrap());
     }
 }

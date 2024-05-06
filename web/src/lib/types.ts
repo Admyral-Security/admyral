@@ -55,6 +55,10 @@ export enum IfConditionOperator {
 	GREATER_THAN_OR_EQUAL = "GREATER_THAN_OR_EQUAL",
 	LESS_THAN = "LESS_THAN",
 	LESS_THAN_OR_EQUAL = "LESS_THAN_OR_EQUAL",
+	IS_EMPTY = "IS_EMPTY",
+	IS_NOT_EMPTY = "IS_NOT_EMPTY",
+	EXISTS = "EXISTS",
+	DOES_NOT_EXIST = "DOES_NOT_EXIST",
 }
 
 export const IF_CONDITION_OPERATORS = [
@@ -64,6 +68,10 @@ export const IF_CONDITION_OPERATORS = [
 	IfConditionOperator.GREATER_THAN_OR_EQUAL,
 	IfConditionOperator.LESS_THAN,
 	IfConditionOperator.LESS_THAN_OR_EQUAL,
+	IfConditionOperator.IS_EMPTY,
+	IfConditionOperator.IS_NOT_EMPTY,
+	IfConditionOperator.EXISTS,
+	IfConditionOperator.DOES_NOT_EXIST,
 ];
 
 export function getIfConditionOperatorLabel(
@@ -82,6 +90,14 @@ export function getIfConditionOperatorLabel(
 			return "is less than";
 		case IfConditionOperator.LESS_THAN_OR_EQUAL:
 			return "is less than or equal to";
+		case IfConditionOperator.IS_EMPTY:
+			return "is empty";
+		case IfConditionOperator.IS_NOT_EMPTY:
+			return "is not empty";
+		case IfConditionOperator.EXISTS:
+			return "exists";
+		case IfConditionOperator.DOES_NOT_EXIST:
+			return "does not exist";
 	}
 }
 

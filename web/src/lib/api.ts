@@ -360,22 +360,32 @@ export async function updateWorkflowAndCreateIfNotExists(
 export async function triggerWorkflowFromAction(
 	workflowId: string,
 	actionId: string,
-	payload: string | null = null,
+	payload: string | null,
 ): Promise<void> {
 	const accessToken = await getAccessToken();
 
+	const init =
+		payload === null
+			? {
+					method: "POST",
+					headers: {
+						Authorization: `Bearer ${accessToken}`,
+						"Content-Type": "application/json",
+					},
+					body: JSON.stringify(null),
+				}
+			: {
+					method: "POST",
+					headers: {
+						Authorization: `Bearer ${accessToken}`,
+						"Content-Type": "application/json",
+					},
+					body: payload,
+				};
+
 	const result = await fetch(
 		`${process.env.NEXT_PUBLIC_WORKFLOW_RUNNER_API_URL}/trigger/${workflowId}/${actionId}`,
-		{
-			method: "POST",
-			headers: {
-				Authorization: `Bearer ${accessToken}`,
-				"Content-Type": "application/json",
-			},
-			body: JSON.stringify({
-				payload,
-			}),
-		},
+		init as any,
 	);
 	if (result.status !== 202) {
 		const error = await result.text();

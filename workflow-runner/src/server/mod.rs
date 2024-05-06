@@ -12,7 +12,6 @@ use axum::{
     Router,
 };
 use lazy_static::lazy_static;
-use serde::Deserialize;
 use serde_json::json;
 use shared_state::SharedState;
 use sqlx::{Pool, Postgres};
@@ -198,16 +197,11 @@ async fn post_webhook_handler(
     webhook_handler(webhook_id, secret, state.db_pool.clone(), trigger_event).await
 }
 
-#[derive(Debug, Deserialize)]
-struct TriggerWorkflowRequest {
-    payload: Option<serde_json::Value>,
-}
-
 async fn post_trigger_workflow_handler(
     claim: JwtClaims, // implements endpoint authentication
     Path((workflow_id, action_id)): Path<(String, String)>,
     State(state): State<SharedState>,
-    Json(request): Json<TriggerWorkflowRequest>,
+    Json(request): Json<serde_json::Value>,
 ) -> impl IntoResponse {
     // verify that the workflow is owned by the requesting user
     let user_id = &claim.sub;
@@ -250,7 +244,10 @@ async fn post_trigger_workflow_handler(
     let start_reference_handle = match action_opt {
         None => return (StatusCode::NOT_FOUND, "Action does not exist."),
         Some(action) => {
-            if action.action_type != "WEBHOOK" && request.payload.is_some() {
+            if action.action_type != "WEBHOOK"
+                && action.action_type != "MANUAL_START"
+                && !request.is_null()
+            {
                 return (StatusCode::BAD_REQUEST, "Triggering workflow action with initial payload is only allowed with webhook actions!");
             }
 
@@ -258,10 +255,16 @@ async fn post_trigger_workflow_handler(
         }
     };
 
+    let trigger_event = if request.is_null() {
+        None
+    } else {
+        Some(request)
+    };
+
     enqueue_workflow_job(
         workflow_id,
         start_reference_handle,
-        request.payload,
+        trigger_event,
         state.db_pool.clone(),
     )
     .await;
