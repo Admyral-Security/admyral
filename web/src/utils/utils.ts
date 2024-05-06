@@ -3,7 +3,7 @@ function isObject(data: any): boolean {
 }
 
 function toCamelCase(s: string): string {
-	return s.replace(/([-_][a-z])/gi, ($1) => {
+	return s.replace(/([-_][a-z0-9])/gi, ($1) => {
 		return $1.toUpperCase().replace("-", "").replace("_", "");
 	});
 }
@@ -38,7 +38,7 @@ export function transformObjectKeysToCamelCase(
 }
 
 function toSnakeCase(s: string): string {
-	return s.replace(/([a-z][A-Z])/g, ($1) => {
+	return s.replace(/([a-z0-9][A-Z])/g, ($1) => {
 		return `${$1[0].toLowerCase()}_${$1[1].toLowerCase()}`;
 	});
 }

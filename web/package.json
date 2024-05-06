@@ -13,6 +13,7 @@
 		"@radix-ui/themes": "^3.0.2",
 		"@supabase/ssr": "^0.1.0",
 		"@supabase/supabase-js": "^2.41.1",
+		"dagre": "^0.8.5",
 		"lodash": "^4.17.21",
 		"next": "14.1.4",
 		"postgres": "^3.4.4",
@@ -27,6 +28,7 @@
 		"zustand": "^4.5.2"
 	},
 	"devDependencies": {
+		"@types/dagre": "^0.7.52",
 		"@types/lodash": "^4.17.0",
 		"@types/node": "^20",
 		"@types/react": "^18",

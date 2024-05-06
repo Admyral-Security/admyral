@@ -1,7 +1,7 @@
 from enum import Enum
 
 
-class ActionType(Enum):
+class ActionType(str, Enum):
     HTTP_REQUEST = "HTTP_REQUEST"
     WEBHOOK = "WEBHOOK"
     IF_CONDITION = "IF_CONDITION"
@@ -11,7 +11,7 @@ class ActionType(Enum):
     MANUAL_START = "MANUAL_START"
 
 
-class EdgeType(Enum):
+class EdgeType(str, Enum):
     TRUE = "TRUE"
     FALSE = "FALSE"
     DEFAULT = "DEFAULT"

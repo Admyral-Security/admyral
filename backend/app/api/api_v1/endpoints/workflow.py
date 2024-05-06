@@ -513,7 +513,10 @@ async def publish_workflow(
     await db.commit()
 
 
-@router.get("/templates/list", status_code=status.HTTP_200_OK)
+@router.get(
+    "/templates/list",
+    status_code=status.HTTP_200_OK
+)
 async def get_workflow_templates(
     db: AsyncSession = Depends(get_session),
     _user: AuthenticatedUser = Depends(get_authenticated_user)
@@ -524,7 +527,10 @@ async def get_workflow_templates(
     return result.all()
 
 
-@router.post("/templates/import/{workflow_id}", status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/templates/import/{workflow_id}",
+    status_code=status.HTTP_201_CREATED
+)
 async def import_workflow_template(
     workflow_id: str,
     db: AsyncSession = Depends(get_session),
@@ -618,7 +624,10 @@ class WorkflowRunEntry(BaseModel):
     action_state_count: int
 
 
-@router.get("/{workflow_id}/runs", status_code=status.HTTP_200_OK)
+@router.get(
+    "/{workflow_id}/runs",
+    status_code=status.HTTP_200_OK
+)
 async def get_workflow_runs(
     workflow_id: str,
     db: AsyncSession = Depends(get_session),
@@ -661,7 +670,10 @@ class WorkflowRunEvent(BaseModel):
     is_error: bool
 
 
-@router.get("/{workflow_id}/runs/{run_id}", status_code=status.HTTP_200_OK)
+@router.get(
+    "/{workflow_id}/runs/{run_id}",
+    status_code=status.HTTP_200_OK
+)
 async def get_workflow_run_events(
     workflow_id: str,
     run_id: str,

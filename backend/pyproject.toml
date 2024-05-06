@@ -18,8 +18,18 @@ pydantic = "^2.6.4"
 pydantic-settings = "^2.2.1"
 python-jose = {extras = ["cryptography"], version = "^3.3.0"}
 alembic-postgresql-enum = "^1.2.0"
+openai = "^1.25.1"
 
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.2.0"
+pytest-asyncio = "^0.23.6"
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = "app"
+asyncio_mode = "auto"

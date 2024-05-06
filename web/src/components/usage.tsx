@@ -12,6 +12,8 @@ export default function Usage() {
 		workflowRunsLastHour: 0,
 		workflowRunHourlyQuota: undefined,
 		workflowRunTimeoutInMinutes: undefined,
+		workflowGenerationsLast24h: 0,
+		workflowAssistantQuota: undefined,
 	});
 	const [isLoaded, setIsLoaded] = useState<boolean>(false);
 
@@ -29,6 +31,7 @@ export default function Usage() {
 	const noQuotaExists =
 		quota.workflowRunHourlyQuota === undefined &&
 		quota.workflowRunTimeoutInMinutes === undefined &&
+		quota.workflowAssistantQuota === undefined &&
 		error === null;
 	if (!isLoaded || noQuotaExists) {
 		return <></>;
@@ -73,6 +76,16 @@ export default function Usage() {
 										</Text>
 									</li>
 								)}
+								{quota.workflowAssistantQuota !== null && (
+									<li>
+										<Text>
+											{quota.workflowAssistantQuota}{" "}
+											workflow generations using the{" "}
+											<b>Workflow Assistant</b> per 24
+											hours
+										</Text>
+									</li>
+								)}
 							</ul>
 						</Flex>
 					</Flex>
@@ -93,6 +106,19 @@ export default function Usage() {
 								{quota.workflowRunsLastHour} of{" "}
 								{quota.workflowRunHourlyQuota} workflow
 								executions in the last hour.
+							</Callout.Text>
+						</Callout.Root>
+					)}
+
+					{quota.workflowAssistantQuota !== null && (
+						<Callout.Root variant="surface" size="3" highContrast>
+							<Callout.Icon>
+								<InfoCircledIcon />
+							</Callout.Icon>
+							<Callout.Text size="3">
+								{quota.workflowGenerationsLast24h} of{" "}
+								{quota.workflowAssistantQuota} workflow
+								generations in the last 24 hours.
 							</Callout.Text>
 						</Callout.Root>
 					)}

@@ -10,6 +10,7 @@ import { redirect } from "next/navigation";
 import { encrypt } from "./crypto";
 import {
 	ActionNode,
+	GenerateWorkflowResult,
 	Quota,
 	UserProfile,
 	WorkflowData,
@@ -503,4 +504,35 @@ export async function triggerWorkflowWebhook(
 	if (result.status !== 201) {
 		throw new Error("Failed to trigger webhook!");
 	}
+}
+
+export async function generateWorkflow(
+	userInput: string,
+): Promise<GenerateWorkflowResult> {
+	const accessToken = await getAccessToken();
+
+	const result = await fetch(
+		`${process.env.BACKEND_API_URL}/api/v1/workflow-generation/generate`,
+		{
+			method: "POST",
+			headers: {
+				Authorization: `Bearer ${accessToken}`,
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify({
+				user_input: userInput,
+			}),
+		},
+	);
+	if (result.status !== 200) {
+		const error = await result.json();
+		if (result.status === 403 && error.detail === "Quota limit exceeded") {
+			throw new Error(
+				"Quota limit exceeded. You have reached the maximum number of workflow generations per day.",
+			);
+		}
+		throw new Error("Failed to generate workflow");
+	}
+	const workflow = await result.json();
+	return transformObjectKeysToCamelCase(workflow);
 }

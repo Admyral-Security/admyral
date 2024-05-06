@@ -132,13 +132,13 @@ mod tests {
         state.store("retrieve_case_from_phish_report".to_string(), data);
 
         let access_path =
-            "retrieve_case_from_phish_report.body[0].pending_actions[0].description".to_string();
+            "retrieve_case_from_phish_report.body.pending_actions[0].description".to_string();
         let result = state.get_from_access_path(access_path);
         assert!(result.is_some());
         assert_eq!(json!("Report to TRELLIAN-AS-AP"), result.unwrap());
 
         let access_path =
-            "retrieve_case_from_phish_report.body[0].pending_actions[0].report_uri".to_string();
+            "retrieve_case_from_phish_report.body.pending_actions[0].report_uri".to_string();
         let result = state.get_from_access_path(access_path);
         assert!(result.is_some());
         assert_eq!(json!("mailto:abuse@trellian.com"), result.unwrap());

@@ -205,6 +205,8 @@ export type Quota = {
 	workflowRunsLastHour: number;
 	workflowRunHourlyQuota: number | undefined;
 	workflowRunTimeoutInMinutes: number | undefined;
+	workflowGenerationsLast24h: number;
+	workflowAssistantQuota: number | undefined;
 };
 
 export type UserProfile = {
@@ -212,4 +214,21 @@ export type UserProfile = {
 	lastName: string;
 	company: string;
 	email: string;
+};
+
+export type GenerateWorkflowAction = {
+	actionId: string;
+	actionType: ActionNode;
+	actionName: string;
+};
+
+export type GenerateWorkflowConnection = {
+	source: string;
+	target: string;
+	connectionType: EdgeType;
+};
+
+export type GenerateWorkflowResult = {
+	actions: GenerateWorkflowAction[];
+	connections: GenerateWorkflowConnection[];
 };

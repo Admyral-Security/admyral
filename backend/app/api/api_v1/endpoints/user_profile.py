@@ -4,11 +4,13 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel.ext.asyncio.session import AsyncSession
 from sqlmodel import select, func
 from pydantic import BaseModel
-from datetime import datetime, timedelta
+from datetime import timedelta
+import asyncio
 
 from app.deps import AuthenticatedUser, get_authenticated_user, get_session
 from app.models import UserProfile, WorkflowRun, Workflow
 from app.config import settings
+from app.shared_queries import count_workflow_generations_last_24h
 
 
 router = APIRouter()
@@ -39,6 +41,8 @@ class UserQuota(BaseModel):
     workflow_runs_last_hour: int
     workflow_run_hourly_quota: Optional[int]
     workflow_run_timeout_in_minutes: Optional[int]
+    workflow_generations_last_24h: int
+    workflow_assistant_quota: Optional[int]
 
 
 @router.get(
@@ -55,11 +59,46 @@ async def get_user_quota(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="You are not authorized to view this user's profile."
         )
-    workflow_runs_last_hour = await count_workflow_runs_last_hour(user_id, db)
+
+    if settings.WORKFLOW_RUN_HOURLY_QUOTA is None and settings.WORKFLOW_ASSISTANT_DAILY_QUOTA is None:
+        return UserQuota(
+            workflow_runs_last_hour=0,
+            workflow_run_hourly_quota=None,
+            workflow_run_timeout_in_minutes=settings.WORKFLOW_RUN_TIMEOUT_IN_MINUTES,
+            workflow_generations_last_24h=0,
+            workflow_assistant_quota=None
+        )
+
+    if settings.WORKFLOW_RUN_HOURLY_QUOTA is not None and settings.WORKFLOW_ASSISTANT_DAILY_QUOTA is None:
+        workflow_runs_last_hour = await count_workflow_runs_last_hour(user_id, db)
+        return UserQuota(
+            workflow_runs_last_hour=workflow_runs_last_hour,
+            workflow_run_hourly_quota=settings.WORKFLOW_RUN_HOURLY_QUOTA,
+            workflow_run_timeout_in_minutes=settings.WORKFLOW_RUN_TIMEOUT_IN_MINUTES,
+            workflow_generations_last_24h=0,
+            workflow_assistant_quota=None
+        )
+
+    if settings.WORKFLOW_RUN_HOURLY_QUOTA is None and settings.WORKFLOW_ASSISTANT_DAILY_QUOTA is not None:
+        workflow_generations_last_24h = await count_workflow_generations_last_24h(user_id, db)
+        return UserQuota(
+            workflow_runs_last_hour=0,
+            workflow_run_hourly_quota=None,
+            workflow_run_timeout_in_minutes=settings.WORKFLOW_RUN_TIMEOUT_IN_MINUTES,
+            workflow_generations_last_24h=workflow_generations_last_24h,
+            workflow_assistant_quota=settings.WORKFLOW_ASSISTANT_DAILY_QUOTA
+        )
+
+    workflow_runs_last_hour, workflow_generations_last_24h = await asyncio.gather(
+        count_workflow_runs_last_hour(user_id, db),
+        count_workflow_generations_last_24h(user_id, db)
+    )
     return UserQuota(
         workflow_runs_last_hour=workflow_runs_last_hour,
         workflow_run_hourly_quota=settings.WORKFLOW_RUN_HOURLY_QUOTA,
-        workflow_run_timeout_in_minutes=settings.WORKFLOW_RUN_TIMEOUT_IN_MINUTES
+        workflow_run_timeout_in_minutes=settings.WORKFLOW_RUN_TIMEOUT_IN_MINUTES,
+        workflow_generations_last_24h=workflow_generations_last_24h,
+        workflow_assistant_quota=settings.WORKFLOW_ASSISTANT_DAILY_QUOTA
     )
 
 

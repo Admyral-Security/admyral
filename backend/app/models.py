@@ -31,6 +31,7 @@ class UserProfile(Base, table=True):
 
     workflows: list["Workflow"] = Relationship(back_populates="user", sa_relationship_kwargs=dict(cascade="all, delete"))
     credentials: list["Credential"] = Relationship(back_populates="user", sa_relationship_kwargs=dict(cascade="all, delete"))
+    workflow_generations: list["WorkflowGeneration"] = Relationship(back_populates="user", sa_relationship_kwargs=dict(cascade="all, delete"))
 
 
 class Credential(Base, table=True):
@@ -223,3 +224,28 @@ class WorkflowTemplateMetadata(Base, table=True):
     icon: str = Field(sa_type=TEXT())
 
     workflow: Workflow = Relationship(back_populates="workflow_template_metadata")
+
+
+class WorkflowGeneration(Base, table=True):
+    __tablename__ = "workflow_generation"
+
+    generation_id: str = Field(primary_key=True, sa_type=UUID(as_uuid=False), sa_column_kwargs=dict(server_default=func.gen_random_uuid()))
+    # Note: we have a template workflow iff is_template is True and user_id is NULL
+    user_id: str = Field(
+        sa_column=Column(
+            UUID(as_uuid=False),
+            ForeignKey("admyral.user_profile.user_id", ondelete="CASCADE"),
+        ),
+    )
+
+    total_tokens: int
+    prompt_tokens: int
+    completion_tokens: int
+
+    user_input: str = Field(sa_type=TEXT())
+    generated_actions: list[dict] = Field(sa_type=JSONB())
+    generated_edges: list[dict] = Field(sa_type=JSONB())
+
+    created_at: datetime = Field(sa_type=TIMESTAMP(), sa_column_kwargs=dict(server_default=func.now()))
+
+    user: UserProfile = Relationship(back_populates="workflow_generations")

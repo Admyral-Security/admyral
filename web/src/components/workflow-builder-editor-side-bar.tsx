@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import { ActionNode, getActionNodeLabel } from "@/lib/types";
 import { Badge, Box, Card, Flex, HoverCard, Text } from "@radix-ui/themes";
 import HttpRequestActionIcon from "./icons/http-request-action-icon";
@@ -14,6 +17,9 @@ import { EnterIcon } from "@radix-ui/react-icons";
 import WorkflowTemplates from "./workflow-templates";
 import NoteActionIcon from "./icons/note-action-icon";
 import StartWorkflowActionIcon from "./icons/start-workflow-action-icon";
+import WorkflowAssistantButton from "./workflow-assistant-button";
+import WorkflowAssistant from "./workflow-assistant";
+import useWorkflowAssistantStore from "@/lib/workflow-assistant-store";
 
 interface EditorCardProps {
 	icon: React.ReactNode;
@@ -71,193 +77,229 @@ function EditorCard({ icon, label, isComingSoon = false }: EditorCardProps) {
 }
 
 export default function EditorSideBar() {
+	const { isAssistantOpen, setIsAssistantOpen } = useWorkflowAssistantStore(
+		(state) => ({
+			isAssistantOpen: state.openAssistant,
+			setIsAssistantOpen: state.setOpenAssistant,
+		}),
+	);
+
 	const onDragStart = (event: any, nodeType: string) => {
 		event.dataTransfer.setData("application/reactflow", nodeType);
 		event.dataTransfer.effectAllowed = "move";
 	};
 
 	return (
-		<Card
-			style={{
-				position: "fixed",
-				left: "68px",
-				top: "68px",
-				zIndex: 50,
-				width: "232px",
-				backgroundColor: "white",
-				height: "calc(99vh - 68px)",
-				padding: 0,
-			}}
-			size="4"
-		>
-			<Flex
-				direction="column"
-				justify="between"
-				height="100%"
-				pt="5"
-				pl="4"
-				pr="4"
-				pb="4"
+		<>
+			<Card
 				style={{
-					display: "flex",
-					flexDirection: "column",
+					position: "fixed",
+					left: "68px",
+					top: "68px",
+					zIndex: 50,
+					width: "232px",
+					backgroundColor: "white",
+					height: "calc(99vh - 68px)",
+					padding: 0,
 				}}
+				size="4"
 			>
 				<Flex
 					direction="column"
-					gap="4"
+					justify="between"
 					height="100%"
-					style={{ flex: 1, overflowY: "auto" }}
+					pt="5"
+					pl="4"
+					pr="4"
+					pb="4"
+					style={{
+						display: "flex",
+						flexDirection: "column",
+					}}
 				>
-					<Flex direction="column" gap="3">
-						<Text size="3" weight="medium">
-							Workflow Actions
-						</Text>
-
-						<Flex direction="column" gap="2">
-							<div
-								onDragStart={(event) =>
-									onDragStart(event, ActionNode.MANUAL_START)
+					<Flex
+						direction="column"
+						gap="4"
+						height="100%"
+						style={{ flex: 1, overflowY: "auto" }}
+					>
+						<Flex>
+							<WorkflowAssistantButton
+								clicked={isAssistantOpen}
+								onClick={() =>
+									setIsAssistantOpen(!isAssistantOpen)
 								}
-							>
-								<EditorCard
-									icon={<StartWorkflowActionIcon />}
-									label={getActionNodeLabel(
-										ActionNode.MANUAL_START,
-									)}
-								/>
-							</div>
-
-							<div
-								onDragStart={(event) =>
-									onDragStart(event, ActionNode.HTTP_REQUEST)
-								}
-							>
-								<EditorCard
-									icon={<HttpRequestActionIcon />}
-									label={getActionNodeLabel(
-										ActionNode.HTTP_REQUEST,
-									)}
-								/>
-							</div>
-
-							<EditorCard
-								icon={<TransformActionIcon />}
-								label={getActionNodeLabel(ActionNode.TRANSFORM)}
-								isComingSoon
 							/>
+						</Flex>
 
-							<div
-								onDragStart={(event) =>
-									onDragStart(event, ActionNode.IF_CONDITION)
-								}
-							>
+						<Flex direction="column" gap="3">
+							<Text size="3" weight="medium">
+								Workflow Actions
+							</Text>
+
+							<Flex direction="column" gap="2">
+								<div
+									onDragStart={(event) =>
+										onDragStart(
+											event,
+											ActionNode.MANUAL_START,
+										)
+									}
+								>
+									<EditorCard
+										icon={<StartWorkflowActionIcon />}
+										label={getActionNodeLabel(
+											ActionNode.MANUAL_START,
+										)}
+									/>
+								</div>
+
+								<div
+									onDragStart={(event) =>
+										onDragStart(
+											event,
+											ActionNode.HTTP_REQUEST,
+										)
+									}
+								>
+									<EditorCard
+										icon={<HttpRequestActionIcon />}
+										label={getActionNodeLabel(
+											ActionNode.HTTP_REQUEST,
+										)}
+									/>
+								</div>
+
 								<EditorCard
-									icon={<IfConditionActionIcon />}
+									icon={<TransformActionIcon />}
 									label={getActionNodeLabel(
-										ActionNode.IF_CONDITION,
+										ActionNode.TRANSFORM,
 									)}
+									isComingSoon
 								/>
-							</div>
 
-							<div
-								onDragStart={(event) =>
-									onDragStart(event, ActionNode.AI_ACTION)
-								}
-							>
+								<div
+									onDragStart={(event) =>
+										onDragStart(
+											event,
+											ActionNode.IF_CONDITION,
+										)
+									}
+								>
+									<EditorCard
+										icon={<IfConditionActionIcon />}
+										label={getActionNodeLabel(
+											ActionNode.IF_CONDITION,
+										)}
+									/>
+								</div>
+
+								<div
+									onDragStart={(event) =>
+										onDragStart(event, ActionNode.AI_ACTION)
+									}
+								>
+									<EditorCard
+										icon={<AiActionsIcon />}
+										label={getActionNodeLabel(
+											ActionNode.AI_ACTION,
+										)}
+									/>
+								</div>
+
+								<div
+									onDragStart={(event) =>
+										onDragStart(
+											event,
+											ActionNode.SEND_EMAIL,
+										)
+									}
+								>
+									<EditorCard
+										icon={<SendEmailActionIcon />}
+										label={getActionNodeLabel(
+											ActionNode.SEND_EMAIL,
+										)}
+									/>
+								</div>
+
 								<EditorCard
-									icon={<AiActionsIcon />}
+									icon={<ReceiveEmailActionIcon />}
 									label={getActionNodeLabel(
-										ActionNode.AI_ACTION,
+										ActionNode.RECEIVE_EMAIL,
 									)}
+									isComingSoon
 								/>
-							</div>
 
-							<div
-								onDragStart={(event) =>
-									onDragStart(event, ActionNode.SEND_EMAIL)
-								}
-							>
+								<div
+									onDragStart={(event) =>
+										onDragStart(event, ActionNode.NOTE)
+									}
+								>
+									<EditorCard
+										icon={<NoteActionIcon />}
+										label={getActionNodeLabel(
+											ActionNode.NOTE,
+										)}
+									/>
+								</div>
+							</Flex>
+						</Flex>
+
+						<Flex direction="column" gap="4">
+							<Text size="3" weight="medium">
+								Case Actions
+							</Text>
+
+							<Flex direction="column" gap="2">
 								<EditorCard
-									icon={<SendEmailActionIcon />}
-									label={getActionNodeLabel(
-										ActionNode.SEND_EMAIL,
-									)}
+									icon={<CreateCaseIcon />}
+									label="Create Case"
+									isComingSoon
 								/>
-							</div>
 
-							<EditorCard
-								icon={<ReceiveEmailActionIcon />}
-								label={getActionNodeLabel(
-									ActionNode.RECEIVE_EMAIL,
-								)}
-								isComingSoon
-							/>
-
-							<div
-								onDragStart={(event) =>
-									onDragStart(event, ActionNode.NOTE)
-								}
-							>
 								<EditorCard
-									icon={<NoteActionIcon />}
-									label={getActionNodeLabel(ActionNode.NOTE)}
+									icon={<UpdateCaseIcon />}
+									label="Update Case"
+									isComingSoon
 								/>
-							</div>
+
+								<EditorCard
+									icon={<QueryCasesIcon />}
+									label="Query Cases"
+									isComingSoon
+								/>
+
+								<EditorCard
+									icon={<CaseTriggerIcon />}
+									label="Case Trigger"
+									isComingSoon
+								/>
+							</Flex>
+						</Flex>
+
+						<Flex direction="column" gap="4">
+							<Text size="3" weight="medium">
+								Integrations
+							</Text>
+
+							<Flex direction="column" gap="2">
+								<EditorCard
+									icon={<EnterIcon width="24" height="24" />}
+									label="Coming soon"
+									isComingSoon
+								/>
+							</Flex>
 						</Flex>
 					</Flex>
 
-					<Flex direction="column" gap="4">
-						<Text size="3" weight="medium">
-							Case Actions
-						</Text>
-
-						<Flex direction="column" gap="2">
-							<EditorCard
-								icon={<CreateCaseIcon />}
-								label="Create Case"
-								isComingSoon
-							/>
-
-							<EditorCard
-								icon={<UpdateCaseIcon />}
-								label="Update Case"
-								isComingSoon
-							/>
-
-							<EditorCard
-								icon={<QueryCasesIcon />}
-								label="Query Cases"
-								isComingSoon
-							/>
-
-							<EditorCard
-								icon={<CaseTriggerIcon />}
-								label="Case Trigger"
-								isComingSoon
-							/>
-						</Flex>
-					</Flex>
-
-					<Flex direction="column" gap="4">
-						<Text size="3" weight="medium">
-							Integrations
-						</Text>
-
-						<Flex direction="column" gap="2">
-							<EditorCard
-								icon={<EnterIcon width="24" height="24" />}
-								label="Coming soon"
-								isComingSoon
-							/>
-						</Flex>
-					</Flex>
+					<Box pt="4" width="95%">
+						<WorkflowTemplates />
+					</Box>
 				</Flex>
+			</Card>
 
-				<Box pt="4" width="95%">
-					<WorkflowTemplates />
-				</Box>
-			</Flex>
-		</Card>
+			{isAssistantOpen && <WorkflowAssistant />}
+		</>
 	);
 }

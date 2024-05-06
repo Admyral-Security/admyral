@@ -56,6 +56,7 @@ export class AdmyralStack extends cdk.Stack {
 			DATABASE_URL: process.env.DATABASE_URL_WITH_ASYNCPG!,
 			JWT_SECRET: process.env.JWT_SECRET!,
 			WEBHOOK_SIGNING_SECRET: process.env.WEBHOOK_SIGNING_SECRET!,
+			OPENAI_API_KEY: process.env.OPENAI_API_KEY!,
 		};
 		if (process.env.WORKFLOW_RUN_HOURLY_QUOTA !== undefined) {
 			backendServiceEnvironment.WORKFLOW_RUN_HOURLY_QUOTA =
@@ -64,6 +65,10 @@ export class AdmyralStack extends cdk.Stack {
 		if (process.env.WORKFLOW_RUN_TIMEOUT_IN_MINUTES !== undefined) {
 			backendServiceEnvironment.WORKFLOW_RUN_TIMEOUT_IN_MINUTES =
 				process.env.WORKFLOW_RUN_TIMEOUT_IN_MINUTES;
+		}
+		if (process.env.WORKFLOW_ASSISTANT_DAILY_QUOTA !== undefined) {
+			backendServiceEnvironment.WORKFLOW_ASSISTANT_DAILY_QUOTA =
+				process.env.WORKFLOW_ASSISTANT_DAILY_QUOTA;
 		}
 
 		const backendService =

@@ -12,6 +12,27 @@
 			"args": [],
 			"cwd": "${workspaceFolder}",
 			"envFile": "${workspaceFolder}/workflow-runner/.env"
+		},
+		{
+			"name": "pytest",
+			"type": "debugpy",
+			"request": "launch",
+			"cwd": "${workspaceFolder}/backend",
+			"python": "${workspaceFolder}/backend/.venv/bin/python",
+			"module": "pytest",
+			"console": "integratedTerminal",
+			"justMyCode": true
+		},
+		{
+			"name": "pytest: Current File",
+			"type": "debugpy",
+			"request": "launch",
+			"cwd": "${workspaceFolder}/backend",
+			"python": "${workspaceFolder}/backend/.venv/bin/python",
+			"module": "pytest",
+			"console": "integratedTerminal",
+			"justMyCode": true,
+			"args": ["${file}"]
 		}
 	]
 }
