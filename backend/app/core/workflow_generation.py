@@ -82,7 +82,7 @@ tools = [
 examples = [
     {
         "name": "File Hash Analysis with VirusTotal",
-        "input": "Generate me a workflow which receives as input file hashes, analyzes them with VirusTotal, generates a summary of the results, and finally sends me a report via email.",
+        "input": "Generate me a workflow which receives as input file hashes, analyzes them with VirusTotal, and if the file hashes exist, generates a summary of the results, and finally sends me a report via email.",
         "few_shot_example": """
             build_workflow_layout({{
                 "actions": [
