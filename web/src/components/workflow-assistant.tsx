@@ -115,7 +115,7 @@ export default function WorkflowAssistant() {
 						value={userInput}
 						onChange={(e) => setUserInput(e.target.value)}
 						style={{ width: "100%", height: "100%" }}
-						placeholder="Describe your process or click on the suggestions below!"
+						placeholder="Describe your process..."
 					/>
 				</Flex>
 
@@ -125,12 +125,13 @@ export default function WorkflowAssistant() {
 							style={{
 								backgroundColor: "#6E56CF",
 								width: "100%",
+								color: "white",
 							}}
 							onClick={handleGenerateWorkflow}
 							loading={isLoading}
 						>
 							<AssistantIcon fill="white" />
-							<Text>Generate Workflow</Text>
+							<Text>Generate New Workflow</Text>
 						</Button>
 					</Flex>
 				</Flex>
