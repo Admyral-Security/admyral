@@ -1,7 +1,10 @@
+# Usage
+#   Start:          docker compose up
+#   Stop:           docker compose down
+#   Destroy:        docker compose down -v --remove-orphans
+
 name: "admyral"
 version: "3.8"
-
-# TODO: add supabase
 
 services:
     backend:
@@ -48,7 +51,7 @@ services:
         build:
             context: ../../web
             args:
-                NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL} # TODO: we need to do this based on the supabase container
+                NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL}
                 NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}
                 NEXT_PUBLIC_SUPPORT_EMAIL: ${NEXT_PUBLIC_SUPPORT_EMAIL}
                 NEXT_PUBLIC_WORKFLOW_RUNNER_API_URL: http://localhost:4000
@@ -68,3 +71,17 @@ services:
                 condition: service_healthy
             workflow-runner:
                 condition: service_healthy
+        healthcheck:
+            test:
+                [
+                    "CMD",
+                    "wget",
+                    "--no-verbose",
+                    "--tries=1",
+                    "--spider",
+                    "http://localhost:3000/health",
+                ]
+            interval: 1m30s
+            timeout: 30s
+            retries: 5
+            start_period: 30s
