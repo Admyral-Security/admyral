@@ -490,32 +490,6 @@ export async function loadWorkflowRunEvents(
 	return transformObjectKeysToCamelCase(traces, TransformType.TOP_LEVEL_ONLY);
 }
 
-export async function triggerWorkflowWebhook(
-	webhookId: string,
-	secret: string,
-	data: string | null,
-) {
-	const init =
-		data !== null
-			? {
-					method: "POST",
-					headers: {
-						"Content-Type": "application/json",
-					},
-					body: data,
-				}
-			: {
-					method: "GET",
-				};
-	const result = await fetch(
-		`${process.env.NEXT_PUBLIC_WORKFLOW_RUNNER_API_URL}/webhook/${webhookId}/${secret}`,
-		init,
-	);
-	if (result.status !== 201) {
-		throw new Error("Failed to trigger webhook!");
-	}
-}
-
 export async function generateWorkflow(
 	userInput: string,
 ): Promise<GenerateWorkflowResult> {

@@ -90,9 +90,9 @@ export default function WorkflowBuilder({ workflowId }: WorkflowBuilderProps) {
 		setDeletedNodes,
 		setDeletedEdges,
 		clearWorkflowState,
-		triggerNodeId,
-		setTriggerNodeId,
-		hasUnsavedChanges,
+		// triggerNodeId,
+		// setTriggerNodeId,
+		// hasUnsavedChanges,
 		setPersistedNodes,
 		setPersistedEdges,
 	} = useWorkflowStore((state) => ({
@@ -105,9 +105,9 @@ export default function WorkflowBuilder({ workflowId }: WorkflowBuilderProps) {
 		setDeletedNodes: state.setDeletedNodes,
 		setDeletedEdges: state.setDeletedEdges,
 		clearWorkflowState: state.clear,
-		triggerNodeId: state.triggerNodeId,
-		setTriggerNodeId: state.setTriggerNodeId,
-		hasUnsavedChanges: state.hasUnsavedChanges,
+		// triggerNodeId: state.triggerNodeId,
+		// setTriggerNodeId: state.setTriggerNodeId,
+		// hasUnsavedChanges: state.hasUnsavedChanges,
 		setPersistedNodes: state.setPersistedNodes,
 		setPersistedEdges: state.setPersistedEdges,
 	}));
@@ -148,34 +148,34 @@ export default function WorkflowBuilder({ workflowId }: WorkflowBuilderProps) {
 		return () => clearWorkflowState();
 	}, [workflowId, setNodes, setEdges]);
 
-	useEffect(() => {
-		if (triggerNodeId === null) {
-			return;
-		}
+	// useEffect(() => {
+	// 	if (triggerNodeId === null) {
+	// 		return;
+	// 	}
 
-		setTriggerNodeId(null);
+	// 	setTriggerNodeId(null);
 
-		if (hasUnsavedChanges()) {
-			alert(
-				"There are unsaved changes. Please save the workflow before running it.",
-			);
-			return;
-		}
+	// 	if (hasUnsavedChanges()) {
+	// 		alert(
+	// 			"There are unsaved changes. Please save the workflow before running it.",
+	// 		);
+	// 		return;
+	// 	}
 
-		triggerWorkflowFromAction(workflowId, triggerNodeId, null)
-			.then(() => {
-				alert("Workflow triggered successfully.");
-			})
-			.catch((error) => {
-				if (error.message === "Workflow run quota limit exceeded!") {
-					alert(
-						"You exceeded your workflow run quota limit. For more details about your quota limit, please go to the Settings page.",
-					);
-				} else {
-					alert("Failed to trigger workflow. Please try again.");
-				}
-			});
-	}, [triggerNodeId, setTriggerNodeId]);
+	// 	triggerWorkflowFromAction(workflowId, triggerNodeId, null)
+	// 		.then(() => {
+	// 			alert("Workflow triggered successfully.");
+	// 		})
+	// 		.catch((error) => {
+	// 			if (error.message === "Workflow run quota limit exceeded!") {
+	// 				alert(
+	// 					"You exceeded your workflow run quota limit. For more details about your quota limit, please go to the Settings page.",
+	// 				);
+	// 			} else {
+	// 				alert("Failed to trigger workflow. Please try again.");
+	// 			}
+	// 		});
+	// }, [triggerNodeId, setTriggerNodeId]);
 
 	const handleDeleteWorkflow = async () => {
 		setIsDeletingWorkflow(true);

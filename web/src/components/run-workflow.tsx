@@ -13,7 +13,8 @@ import {
 	Text,
 	TextArea,
 } from "@radix-ui/themes";
-import { triggerWorkflowFromAction, triggerWorkflowWebhook } from "@/lib/api";
+import { triggerWorkflowFromAction } from "@/lib/api";
+import { triggerWorkflowWebhook } from "@/lib/clientside-api";
 
 export interface RunWorkflowProps {
 	workflowId: string;

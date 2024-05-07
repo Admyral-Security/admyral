@@ -10,7 +10,7 @@ class Settings(BaseSettings):
     API_V1_STR: str = "/api/v1"
     DATABASE_SCHEMA: str = "admyral"
 
-    DATABASE_URL: str
+    DATABASE_URL_ASYNCPG: str
     JWT_SECRET: str
     JWT_ALGORITHM: str = "HS256"
     WEBHOOK_SIGNING_SECRET: str

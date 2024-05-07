@@ -1,24 +1,65 @@
 version: "3.8"
 
-# TODO: setup
+# TODO: add supabase
+
 services:
     backend:
         build: ./backend
-        ports:
-            - 8000:8000
         environment:
-            - DATABASE_URL=postgresql+asyncpg://....
+            DATABASE_URL_ASYNCPG: ${DATABASE_URL_ASYNCPG}
+            JWT_SECRET: ${JWT_SECRET}
+            WEBHOOK_SIGNING_SECRET: ${WEBHOOK_SIGNING_SECRET}
+            OPENAI_API_KEY: ${OPENAI_API_KEY}
+            WORKFLOW_RUN_HOURLY_QUOTA: ${WORKFLOW_RUN_HOURLY_QUOTA}
+            WORKFLOW_RUN_TIMEOUT_IN_MINUTES: ${WORKFLOW_RUN_TIMEOUT_IN_MINUTES}
+            WORKFLOW_ASSISTANT_DAILY_QUOTA: ${WORKFLOW_ASSISTANT_DAILY_QUOTA}
+        healthcheck:
+            test: ["CMD", "curl", "-f", "http://0.0.0.0:80/health"]
+            timeout: 5s
+            interval: 5s
+            retries: 3
+        restart: unless-stopped
 
     workflow-runner:
         build: ./workflow-runner
         ports:
-            - 4000:8000
+            - 4000:80
         environment:
-            # TODO:
+            JWT_SECRET: ${JWT_SECRET}
+            DATABASE_URL: ${DATABASE_URL}
+            DATABASE_CONNECTION_POOL_SIZE: ${DATABASE_CONNECTION_POOL_SIZE}
+            CREDENTIALS_SECRET: ${CREDENTIALS_SECRET}
+            OPENAI_API_KEY: ${OPENAI_API_KEY}
+            RESEND_API_KEY: ${RESEND_API_KEY}
+            RESEND_EMAIL: ${RESEND_EMAIL}
+            WORKFLOW_RUN_HOURLY_QUOTA: ${WORKFLOW_RUN_HOURLY_QUOTA}
+            WORKFLOW_RUN_TIMEOUT_IN_MINUTES: ${WORKFLOW_RUN_TIMEOUT_IN_MINUTES}
+        healthcheck:
+            test: ["CMD", "curl", "-f", "http://0.0.0.0:80/health"]
+            timeout: 5s
+            interval: 5s
+            retries: 3
+        restart: unless-stopped
 
     web:
-        build: ./web
+        build:
+            context: ./web
+            args:
+                NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL} # TODO: we need to do this based on the supabase container
+                NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}
+                NEXT_PUBLIC_SUPPORT_EMAIL: ${NEXT_PUBLIC_SUPPORT_EMAIL}
+                NEXT_PUBLIC_WORKFLOW_RUNNER_API_URL: http://localhost:4000
+                NEXT_PUBLIC_POSTHOG_KEY: ${NEXT_PUBLIC_POSTHOG_KEY}
+                NEXT_PUBLIC_POSTHOG_HOST: ${NEXT_PUBLIC_POSTHOG_HOST}
         ports:
             - 3000:3000
         environment:
-            # TODO:
+            BACKEND_API_URL: http://backend
+            CREDENTIALS_SECRET: ${CREDENTIALS_SECRET}
+            WEBHOOK_SIGNING_SECRET: ${WEBHOOK_SIGNING_SECRET}
+
+        depends_on:
+            backend:
+                condition: service_healthy
+            workflow-runner:
+                condition: service_healthy

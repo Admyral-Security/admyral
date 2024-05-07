@@ -7,7 +7,7 @@ from datetime import datetime
 
 
 async def async_main() -> None:
-    engine = create_async_engine(os.environ["DATABASE_URL"], echo=True, future=True, pool_pre_ping=True)
+    engine = create_async_engine(os.environ["DATABASE_URL_ASYNCPG"], echo=True, future=True, pool_pre_ping=True)
 
     # Delete template workflows
     async with engine.begin() as conn:

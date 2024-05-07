@@ -5,11 +5,7 @@ use anyhow::Result;
 use async_once::AsyncOnce;
 use auth::authenticate_webhook;
 use axum::{
-    extract::{Json, Path, State},
-    http::{HeaderMap, StatusCode},
-    response::IntoResponse,
-    routing::{get, post},
-    Router,
+    extract::{Json, Path, State}, http::{HeaderMap, StatusCode}, response::IntoResponse, routing::{get, post}, Router
 };
 use lazy_static::lazy_static;
 use serde_json::json;
@@ -17,7 +13,8 @@ use shared_state::SharedState;
 use sqlx::{Pool, Postgres};
 use std::collections::HashMap;
 use std::{borrow::Borrow, sync::Arc};
-use tower_http::cors::CorsLayer;
+use tower_http::{cors::CorsLayer, trace::TraceLayer};
+use tower::ServiceBuilder;
 
 use crate::{
     postgres::{
@@ -285,6 +282,10 @@ pub async fn run_server() -> Result<()> {
         }
     }
 
+    tracing_subscriber::fmt()
+        .with_max_level(tracing::Level::DEBUG)
+        .init();
+
     let state = setup_state().await?;
 
     let app = Router::new()
@@ -295,7 +296,11 @@ pub async fn run_server() -> Result<()> {
             "/trigger/:workflow_id/:action_id",
             post(post_trigger_workflow_handler),
         )
-        .layer(CorsLayer::permissive())
+        .layer(
+            ServiceBuilder::new()
+            .layer(TraceLayer::new_for_http())
+            .layer(CorsLayer::permissive())
+        )
         .with_state(state);
 
     // Run app with hyper

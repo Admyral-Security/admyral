@@ -17,9 +17,9 @@ ENV PYTHONDONTWRITEBYTECODE 1
 # prevent python from buffering stdout and stderr
 ENV PYTHONUNBUFFERED 1
 
-# install system dependencies
+# Install curl since it is needed for the healthcheck
 RUN apt-get update \
-  && apt-get -y install netcat gcc postgresql \
+  && apt-get -y install curl \
   && apt-get clean
 
 # install python dependencies
