@@ -1,7 +1,7 @@
 {
 	"index": "Introduction",
 	"quickstart": "Quickstart",
-	"setup": "Self-host",
+	"setup": "Setup",
 	"-- Workflows": {
 		"type": "separator",
 		"title": "Workflow building"
