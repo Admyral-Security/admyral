@@ -158,123 +158,133 @@ export default function LoginPage() {
 					<Link href="/password/forgot">Forgot password?</Link>
 				</div>
 
-				<div className="sm:mx-auto sm:w-full sm:max-w-sm">
-					<Grid columns="1fr 38px 1fr" justify="center">
-						<Separator my="3" size="4" />
-						<Flex justify="center" align="start">
+				{(!!!process.env.NEXT_PUBLIC_DISABLE_GOOGLE_AUTH ||
+					!!!process.env.NEXT_PUBLIC_DISABLE_MICROSOFT_AUTH ||
+					!!!process.env.NEXT_PUBLIC_DISABLE_GITHUB_AUTH) && (
+					<div className="sm:mx-auto sm:w-full sm:max-w-sm">
+						<Grid columns="1fr 38px 1fr" justify="center">
+							<Separator my="3" size="4" />
+							<Flex justify="center" align="start">
+								<Text
+									size="4"
+									style={{
+										color: "var(--Neutral-color-Neutral-Alpha-6, rgba(1, 1, 46, 0.13))",
+									}}
+								>
+									or
+								</Text>
+							</Flex>
+							<Separator my="3" size="4" />
+						</Grid>
+					</div>
+				)}
+
+				{!!!process.env.NEXT_PUBLIC_DISABLE_GOOGLE_AUTH && (
+					<div className="sm:mx-auto sm:w-full sm:max-w-sm">
+						<Button
+							style={{
+								width: "100%",
+								height: "auto",
+								display: "flex",
+								padding: "12px var(--Space-5, 24px)",
+								alignItems: "center",
+								justifyContent: "start",
+								gap: "var(--Space-5, 24px)",
+								alignSelf: "stretch",
+								borderRadius: "var(--Radius-4, 8px)",
+								border: "1px solid var(--Neutral-color-Neutral-5, #E4E4E9)",
+								background: "var(--Panel-solid, #FFF)",
+								boxShadow:
+									"0px 0px 3px 0px rgba(0, 0, 0, 0.08), 0px 2px 3px 0px rgba(0, 0, 0, 0.17)",
+								cursor: "pointer",
+							}}
+							onClick={() => handleOAuthLogin("google")}
+						>
+							<GoogleIcon />
 							<Text
 								size="4"
 								style={{
-									color: "var(--Neutral-color-Neutral-Alpha-6, rgba(1, 1, 46, 0.13))",
+									color: "var(--Tokens-Colors-text, #1C2024)",
 								}}
 							>
-								or
+								Continue with Google
 							</Text>
-						</Flex>
-						<Separator my="3" size="4" />
-					</Grid>
-				</div>
+						</Button>
+					</div>
+				)}
 
-				<div className="sm:mx-auto sm:w-full sm:max-w-sm">
-					<Button
-						style={{
-							width: "100%",
-							height: "auto",
-							display: "flex",
-							padding: "12px var(--Space-5, 24px)",
-							alignItems: "center",
-							justifyContent: "start",
-							gap: "var(--Space-5, 24px)",
-							alignSelf: "stretch",
-							borderRadius: "var(--Radius-4, 8px)",
-							border: "1px solid var(--Neutral-color-Neutral-5, #E4E4E9)",
-							background: "var(--Panel-solid, #FFF)",
-							boxShadow:
-								"0px 0px 3px 0px rgba(0, 0, 0, 0.08), 0px 2px 3px 0px rgba(0, 0, 0, 0.17)",
-							cursor: "pointer",
-						}}
-						onClick={() => handleOAuthLogin("google")}
-					>
-						<GoogleIcon />
-						<Text
-							size="4"
+				{!!!process.env.NEXT_PUBLIC_DISABLE_MICROSOFT_AUTH && (
+					<div className="sm:mx-auto sm:w-full sm:max-w-sm">
+						<Button
 							style={{
-								color: "var(--Tokens-Colors-text, #1C2024)",
+								width: "100%",
+								height: "auto",
+								display: "flex",
+								padding: "12px var(--Space-5, 24px)",
+								alignItems: "center",
+								justifyContent: "start",
+								gap: "var(--Space-5, 24px)",
+								alignSelf: "stretch",
+								borderRadius: "var(--Radius-4, 8px)",
+								border: "1px solid var(--Neutral-color-Neutral-5, #E4E4E9)",
+								background: "var(--Panel-solid, #FFF)",
+								boxShadow:
+									"0px 0px 3px 0px rgba(0, 0, 0, 0.08), 0px 2px 3px 0px rgba(0, 0, 0, 0.17)",
+								cursor: "pointer",
 							}}
+							onClick={() => handleOAuthLogin("azure")}
 						>
-							Continue with Google
-						</Text>
-					</Button>
-				</div>
+							<Image
+								src="/microsoft_logo.svg"
+								alt="Microsoft"
+								width={24}
+								height={24}
+							/>
+							<Text
+								size="4"
+								style={{
+									color: "var(--Tokens-Colors-text, #1C2024)",
+								}}
+							>
+								Continue with Microsoft
+							</Text>
+						</Button>
+					</div>
+				)}
 
-				<div className="sm:mx-auto sm:w-full sm:max-w-sm">
-					<Button
-						style={{
-							width: "100%",
-							height: "auto",
-							display: "flex",
-							padding: "12px var(--Space-5, 24px)",
-							alignItems: "center",
-							justifyContent: "start",
-							gap: "var(--Space-5, 24px)",
-							alignSelf: "stretch",
-							borderRadius: "var(--Radius-4, 8px)",
-							border: "1px solid var(--Neutral-color-Neutral-5, #E4E4E9)",
-							background: "var(--Panel-solid, #FFF)",
-							boxShadow:
-								"0px 0px 3px 0px rgba(0, 0, 0, 0.08), 0px 2px 3px 0px rgba(0, 0, 0, 0.17)",
-							cursor: "pointer",
-						}}
-						onClick={() => handleOAuthLogin("azure")}
-					>
-						<Image
-							src="/microsoft_logo.svg"
-							alt="Microsoft"
-							width={24}
-							height={24}
-						/>
-						<Text
-							size="4"
+				{!!!process.env.NEXT_PUBLIC_DISABLE_GITHUB_AUTH && (
+					<div className="sm:mx-auto sm:w-full sm:max-w-sm">
+						<Button
 							style={{
-								color: "var(--Tokens-Colors-text, #1C2024)",
+								width: "100%",
+								height: "auto",
+								display: "flex",
+								padding: "12px var(--Space-5, 24px)",
+								alignItems: "center",
+								justifyContent: "start",
+								gap: "var(--Space-5, 24px)",
+								alignSelf: "stretch",
+								borderRadius: "var(--Radius-4, 8px)",
+								border: "1px solid var(--Neutral-color-Neutral-5, #E4E4E9)",
+								background: "var(--Panel-solid, #FFF)",
+								boxShadow:
+									"0px 0px 3px 0px rgba(0, 0, 0, 0.08), 0px 2px 3px 0px rgba(0, 0, 0, 0.17)",
+								cursor: "pointer",
 							}}
+							onClick={() => handleOAuthLogin("github")}
 						>
-							Continue with Microsoft
-						</Text>
-					</Button>
-				</div>
-
-				<div className="sm:mx-auto sm:w-full sm:max-w-sm">
-					<Button
-						style={{
-							width: "100%",
-							height: "auto",
-							display: "flex",
-							padding: "12px var(--Space-5, 24px)",
-							alignItems: "center",
-							justifyContent: "start",
-							gap: "var(--Space-5, 24px)",
-							alignSelf: "stretch",
-							borderRadius: "var(--Radius-4, 8px)",
-							border: "1px solid var(--Neutral-color-Neutral-5, #E4E4E9)",
-							background: "var(--Panel-solid, #FFF)",
-							boxShadow:
-								"0px 0px 3px 0px rgba(0, 0, 0, 0.08), 0px 2px 3px 0px rgba(0, 0, 0, 0.17)",
-							cursor: "pointer",
-						}}
-						onClick={() => handleOAuthLogin("github")}
-					>
-						<GithubIcon />
-						<Text
-							size="4"
-							style={{
-								color: "var(--Tokens-Colors-text, #1C2024)",
-							}}
-						>
-							Continue with GitHub
-						</Text>
-					</Button>
-				</div>
+							<GithubIcon />
+							<Text
+								size="4"
+								style={{
+									color: "var(--Tokens-Colors-text, #1C2024)",
+								}}
+							>
+								Continue with GitHub
+							</Text>
+						</Button>
+					</div>
+				)}
 
 				<div className="sm:mx-auto sm:w-full sm:max-w-sm">
 					<Text size="2">

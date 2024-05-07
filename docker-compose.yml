@@ -5,6 +5,8 @@ version: "3.8"
 services:
     backend:
         build: ./backend
+        command: >
+            sh -c "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 80"
         environment:
             DATABASE_URL_ASYNCPG: ${DATABASE_URL_ASYNCPG}
             JWT_SECRET: ${JWT_SECRET}
@@ -41,6 +43,7 @@ services:
             retries: 3
         restart: unless-stopped
 
+    # TODO: healthcheck for web
     web:
         build:
             context: ./web
@@ -51,6 +54,9 @@ services:
                 NEXT_PUBLIC_WORKFLOW_RUNNER_API_URL: http://localhost:4000
                 NEXT_PUBLIC_POSTHOG_KEY: ${NEXT_PUBLIC_POSTHOG_KEY}
                 NEXT_PUBLIC_POSTHOG_HOST: ${NEXT_PUBLIC_POSTHOG_HOST}
+                NEXT_PUBLIC_DISABLE_GOOGLE_AUTH: ${NEXT_PUBLIC_DISABLE_GOOGLE_AUTH}
+                NEXT_PUBLIC_DISABLE_MICROSOFT_AUTH: ${NEXT_PUBLIC_DISABLE_MICROSOFT_AUTH}
+                NEXT_PUBLIC_DISABLE_GITHUB_AUTH: ${NEXT_PUBLIC_DISABLE_GITHUB_AUTH}
         ports:
             - 3000:3000
         environment:
