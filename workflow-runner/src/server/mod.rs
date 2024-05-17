@@ -31,11 +31,16 @@ lazy_static! {
     static ref WORKFLOW_RUN_HOURLY_QUOTA: AsyncOnce<Option<i64>> = AsyncOnce::new(async {
         match std::env::var("WORKFLOW_RUN_HOURLY_QUOTA") {
             Err(_) => None,
-            Ok(limit) => Some(
-                limit
-                    .parse::<i64>()
-                    .expect("WORKFLOW_RUN_HOURLY_QUOTA is not a valid number!"),
-            ),
+            Ok(limit) => {
+                if limit.is_empty() {
+                    return None;
+                }
+                Some(
+                    limit
+                        .parse::<i64>()
+                        .expect("WORKFLOW_RUN_HOURLY_QUOTA is not a valid number!"),
+                )
+            }
         }
     });
 }

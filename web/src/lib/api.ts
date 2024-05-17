@@ -384,7 +384,7 @@ export async function triggerWorkflowFromAction(
 				};
 
 	const result = await fetch(
-		`${process.env.NEXT_PUBLIC_WORKFLOW_RUNNER_API_URL}/trigger/${workflowId}/${actionId}`,
+		`${process.env.WORKFLOW_RUNNER_API_URL}/trigger/${workflowId}/${actionId}`,
 		init as any,
 	);
 	if (result.status !== 202) {
@@ -519,4 +519,35 @@ export async function generateWorkflow(
 	}
 	const workflow = await result.json();
 	return transformObjectKeysToCamelCase(workflow);
+}
+
+export async function triggerWorkflowWebhook(
+	webhookId: string,
+	secret: string,
+	data: string | null,
+) {
+	const init =
+		data !== null
+			? {
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+					},
+					body: data,
+					cache: "no-store",
+				}
+			: {
+					method: "GET",
+					cache: "no-store",
+				};
+	console.log(
+		`WORKFLOW_RUNNER_API_URL = ${process.env.WORKFLOW_RUNNER_API_URL}`,
+	); // FIXME:
+	const result = await fetch(
+		`${process.env.WORKFLOW_RUNNER_API_URL}/webhook/${webhookId}/${secret}`,
+		init as any,
+	);
+	if (result.status !== 201) {
+		throw new Error("Failed to trigger webhook!");
+	}
 }

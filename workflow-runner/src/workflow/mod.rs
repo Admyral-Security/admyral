@@ -25,12 +25,17 @@ lazy_static! {
     static ref WORKFLOW_RUN_TIMEOUT_IN_SECONDS: AsyncOnce<Option<u64>> = AsyncOnce::new(async {
         match std::env::var("WORKFLOW_RUN_TIMEOUT_IN_MINUTES") {
             Err(_) => None,
-            Ok(timeout) => Some(
-                timeout
-                    .parse::<u64>()
-                    .expect("WORKFLOW_RUN_TIMEOUT_IN_MINUTES is not a valid number!")
-                    * 60,
-            ),
+            Ok(timeout) => {
+                if timeout.is_empty() {
+                    return None;
+                }
+                Some(
+                    timeout
+                        .parse::<u64>()
+                        .expect("WORKFLOW_RUN_TIMEOUT_IN_MINUTES is not a valid number!")
+                        * 60,
+                )
+            }
         }
     });
 }

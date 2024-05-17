@@ -14,7 +14,7 @@ import {
 	TextArea,
 } from "@radix-ui/themes";
 import { triggerWorkflowFromAction } from "@/lib/api";
-import { triggerWorkflowWebhook } from "@/lib/clientside-api";
+import { triggerWorkflowWebhook } from "@/lib/api";
 
 export interface RunWorkflowProps {
 	workflowId: string;
@@ -87,7 +87,13 @@ export default function RunWorkflow({
 	const unsavedChangesOrNotLive = !isWorkflowLive || hasUnsavedChanges();
 
 	return (
-		<Dialog.Root open={showModal} onOpenChange={setShowModal}>
+		<Dialog.Root
+			open={showModal}
+			onOpenChange={(isOpen) => {
+				setShowModal(isOpen);
+				setError(null);
+			}}
+		>
 			<Dialog.Trigger>
 				<Button
 					variant="solid"
