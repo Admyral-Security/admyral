@@ -29,12 +29,12 @@ export default function Usage() {
 	}, []);
 
 	const noQuotaExists =
-		quota.workflowRunHourlyQuota === undefined &&
-		quota.workflowRunTimeoutInMinutes === undefined &&
-		quota.workflowAssistantQuota === undefined &&
+		quota.workflowRunHourlyQuota === null &&
+		quota.workflowRunTimeoutInMinutes === null &&
+		quota.workflowAssistantQuota === null &&
 		error === null;
 	if (!isLoaded || noQuotaExists) {
-		return <></>;
+		return null;
 	}
 
 	return (
