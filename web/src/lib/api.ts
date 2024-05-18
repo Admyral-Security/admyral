@@ -540,9 +540,7 @@ export async function triggerWorkflowWebhook(
 					method: "GET",
 					cache: "no-store",
 				};
-	console.log(
-		`WORKFLOW_RUNNER_API_URL = ${process.env.WORKFLOW_RUNNER_API_URL}`,
-	); // FIXME:
+
 	const result = await fetch(
 		`${process.env.WORKFLOW_RUNNER_API_URL}/webhook/${webhookId}/${secret}`,
 		init as any,

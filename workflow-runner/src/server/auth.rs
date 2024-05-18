@@ -56,7 +56,7 @@ pub struct JwtClaims {
     pub sub: String,
     pub exp: usize,
     pub iat: usize,
-    pub iss: String,
+    pub iss: Option<String>,
     pub aud: String,
     pub email: String,
     pub phone: String,

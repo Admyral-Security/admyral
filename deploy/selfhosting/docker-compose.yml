@@ -1,7 +1,3 @@
-# Usage
-#   Start:          docker compose up
-#   Stop:           docker compose down
-
 name: admyral
 version: "3.8"
 
@@ -11,7 +7,7 @@ services:
         env_file:
             - ./.env
         command: >
-            sh -c "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 80"
+            sh -c "alembic upgrade head && python scripts/populate_db_with_workflow_templates_library.py && uvicorn app.main:app --host 0.0.0.0 --port 80"
         environment:
             DATABASE_URL_ASYNCPG: postgresql+asyncpg://postgres:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
             JWT_SECRET: ${JWT_SECRET}
@@ -48,8 +44,10 @@ services:
             OPENAI_API_KEY: ${OPENAI_API_KEY}
             RESEND_API_KEY: ${RESEND_API_KEY}
             RESEND_EMAIL: ${RESEND_EMAIL}
-            WORKFLOW_RUN_HOURLY_QUOTA: ${WORKFLOW_RUN_HOURLY_QUOTA}
-            WORKFLOW_RUN_TIMEOUT_IN_MINUTES: ${WORKFLOW_RUN_TIMEOUT_IN_MINUTES}
+
+            # Uncomment to enable quotas - the quotas can be set in the .env file
+            # WORKFLOW_RUN_HOURLY_QUOTA: ${WORKFLOW_RUN_HOURLY_QUOTA}
+            # WORKFLOW_RUN_TIMEOUT_IN_MINUTES: ${WORKFLOW_RUN_TIMEOUT_IN_MINUTES}
         healthcheck:
             test: ["CMD", "curl", "-f", "http://0.0.0.0:80/health"]
             timeout: 5s
@@ -66,11 +64,10 @@ services:
         build:
             context: ../../web
             args:
-                # NEXT_PUBLIC_SUPABASE_URL: ${SUPABASE_PUBLIC_URL}
-                NEXT_PUBLIC_SUPABASE_URL_CLIENT: ${SUPABASE_PUBLIC_URL}
+                NEXT_PUBLIC_SUPABASE_URL_CLIENT: ${SUPABASE_URL}
                 NEXT_PUBLIC_SUPABASE_ANON_KEY: ${ANON_KEY}
-                NEXT_PUBLIC_SUPPORT_EMAIL: ${NEXT_PUBLIC_SUPPORT_EMAIL}
-                NEXT_PUBLIC_WORKFLOW_RUNNER_API_URL: http://localhost:5000
+                NEXT_PUBLIC_SUPPORT_EMAIL: ${SUPPORT_EMAIL}
+                NEXT_PUBLIC_WORKFLOW_RUNNER_API_URL: ${ADMYRAL_WORKFLOW_RUNNER_API_URL}
                 NEXT_PUBLIC_POSTHOG_KEY: ${NEXT_PUBLIC_POSTHOG_KEY}
                 NEXT_PUBLIC_POSTHOG_HOST: ${NEXT_PUBLIC_POSTHOG_HOST}
                 NEXT_PUBLIC_DISABLE_GOOGLE_AUTH: true
@@ -132,11 +129,11 @@ services:
             STUDIO_PG_META_URL: http://meta:8080
             POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
 
-            DEFAULT_ORGANIZATION_NAME: ${STUDIO_DEFAULT_ORGANIZATION}
-            DEFAULT_PROJECT_NAME: ${STUDIO_DEFAULT_PROJECT}
+            DEFAULT_ORGANIZATION_NAME: Admyral
+            DEFAULT_PROJECT_NAME: Admyral
 
             SUPABASE_URL: http://kong:8000
-            SUPABASE_PUBLIC_URL: ${SUPABASE_PUBLIC_URL}
+            SUPABASE_PUBLIC_URL: ${SUPABASE_URL}
             SUPABASE_ANON_KEY: ${ANON_KEY}
             SUPABASE_SERVICE_KEY: ${SERVICE_ROLE_KEY}
 
@@ -155,8 +152,10 @@ services:
         # https://unix.stackexchange.com/a/294837
         entrypoint: bash -c 'eval "echo \"$$(cat ~/temp.yml)\"" > ~/kong.yml && /docker-entrypoint.sh kong docker-start'
         ports:
-            - ${KONG_HTTP_PORT}:8000/tcp
-            - ${KONG_HTTPS_PORT}:8443/tcp
+            - 8000:8000/tcp
+            - 8443:8443/tcp
+            # - ${KONG_HTTP_PORT}:8000/tcp
+            # - ${KONG_HTTPS_PORT}:8443/tcp
         depends_on:
             analytics:
                 condition: service_healthy
@@ -202,39 +201,41 @@ services:
         environment:
             GOTRUE_API_HOST: 0.0.0.0
             GOTRUE_API_PORT: 9999
-            API_EXTERNAL_URL: ${API_EXTERNAL_URL}
+            API_EXTERNAL_URL: ${SUPABASE_URL}
 
             GOTRUE_DB_DRIVER: postgres
             GOTRUE_DB_DATABASE_URL: postgres://supabase_auth_admin:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
 
-            GOTRUE_SITE_URL: ${SITE_URL}
-            GOTRUE_URI_ALLOW_LIST: ${ADDITIONAL_REDIRECT_URLS}
-            GOTRUE_DISABLE_SIGNUP: ${DISABLE_SIGNUP}
+            GOTRUE_SITE_URL: ${ADMYRAL_SITE_URL}
+            GOTRUE_URI_ALLOW_LIST: ""
+            GOTRUE_DISABLE_SIGNUP: "false"
 
             GOTRUE_JWT_ADMIN_ROLES: service_role
             GOTRUE_JWT_AUD: authenticated
             GOTRUE_JWT_DEFAULT_GROUP_NAME: authenticated
-            GOTRUE_JWT_EXP: ${JWT_EXPIRY}
+            GOTRUE_JWT_EXP: 3600
             GOTRUE_JWT_SECRET: ${JWT_SECRET}
 
             GOTRUE_EXTERNAL_EMAIL_ENABLED: ${ENABLE_EMAIL_SIGNUP}
-            GOTRUE_EXTERNAL_ANONYMOUS_USERS_ENABLED: ${ENABLE_ANONYMOUS_USERS}
+            GOTRUE_EXTERNAL_ANONYMOUS_USERS_ENABLED: "false"
             GOTRUE_MAILER_AUTOCONFIRM: ${ENABLE_EMAIL_AUTOCONFIRM}
             # GOTRUE_MAILER_SECURE_EMAIL_CHANGE_ENABLED: true
             # GOTRUE_SMTP_MAX_FREQUENCY: 1s
+
             GOTRUE_SMTP_ADMIN_EMAIL: ${SMTP_ADMIN_EMAIL}
             GOTRUE_SMTP_HOST: ${SMTP_HOST}
             GOTRUE_SMTP_PORT: ${SMTP_PORT}
             GOTRUE_SMTP_USER: ${SMTP_USER}
             GOTRUE_SMTP_PASS: ${SMTP_PASS}
             GOTRUE_SMTP_SENDER_NAME: ${SMTP_SENDER_NAME}
-            GOTRUE_MAILER_URLPATHS_INVITE: ${MAILER_URLPATHS_INVITE}
-            GOTRUE_MAILER_URLPATHS_CONFIRMATION: ${MAILER_URLPATHS_CONFIRMATION}
-            GOTRUE_MAILER_URLPATHS_RECOVERY: ${MAILER_URLPATHS_RECOVERY}
-            GOTRUE_MAILER_URLPATHS_EMAIL_CHANGE: ${MAILER_URLPATHS_EMAIL_CHANGE}
 
-            GOTRUE_EXTERNAL_PHONE_ENABLED: ${ENABLE_PHONE_SIGNUP}
-            GOTRUE_SMS_AUTOCONFIRM: ${ENABLE_PHONE_AUTOCONFIRM}
+            GOTRUE_MAILER_URLPATHS_INVITE: "/auth/v1/verify"
+            GOTRUE_MAILER_URLPATHS_CONFIRMATION: "/auth/v1/verify"
+            GOTRUE_MAILER_URLPATHS_RECOVERY: "/auth/v1/verify"
+            GOTRUE_MAILER_URLPATHS_EMAIL_CHANGE: "/auth/v1/verify"
+
+            GOTRUE_EXTERNAL_PHONE_ENABLED: "false"
+            GOTRUE_SMS_AUTOCONFIRM: "false"
 
             # Uncomment to enable custom access token hook. You'll need to create a public.custom_access_token_hook function and grant necessary permissions.
             # See: https://supabase.com/docs/guides/auth/auth-hooks#hook-custom-access-token for details
@@ -259,12 +260,12 @@ services:
         restart: unless-stopped
         environment:
             PGRST_DB_URI: postgres://authenticator:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
-            PGRST_DB_SCHEMAS: ${PGRST_DB_SCHEMAS}
+            PGRST_DB_SCHEMAS: "public,storage,graphql_public"
             PGRST_DB_ANON_ROLE: anon
             PGRST_JWT_SECRET: ${JWT_SECRET}
             PGRST_DB_USE_LEGACY_GUCS: "false"
             PGRST_APP_SETTINGS_JWT_SECRET: ${JWT_SECRET}
-            PGRST_APP_SETTINGS_JWT_EXP: ${JWT_EXPIRY}
+            PGRST_APP_SETTINGS_JWT_EXP: 3600
         command: "postgrest"
 
     realtime:
@@ -369,7 +370,7 @@ services:
             IMGPROXY_BIND: ":5001"
             IMGPROXY_LOCAL_FILESYSTEM_ROOT: /
             IMGPROXY_USE_ETAG: "true"
-            IMGPROXY_ENABLE_WEBP_DETECTION: ${IMGPROXY_ENABLE_WEBP_DETECTION}
+            IMGPROXY_ENABLE_WEBP_DETECTION: "true"
         volumes:
             - ./volumes/storage:/var/lib/storage:z
 
@@ -405,7 +406,7 @@ services:
             SUPABASE_SERVICE_ROLE_KEY: ${SERVICE_ROLE_KEY}
             SUPABASE_DB_URL: postgresql://postgres:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
             # TODO: Allow configuring VERIFY_JWT per function. This PR might help: https://github.com/supabase/cli/pull/786
-            VERIFY_JWT: "${FUNCTIONS_VERIFY_JWT}"
+            VERIFY_JWT: "false"
         volumes:
             - ./volumes/functions:/home/deno/functions:Z
         command:
@@ -486,7 +487,7 @@ services:
             PGDATABASE: ${POSTGRES_DB}
             POSTGRES_DB: ${POSTGRES_DB}
             JWT_SECRET: ${JWT_SECRET}
-            JWT_EXP: ${JWT_EXPIRY}
+            JWT_EXP: 3600
         volumes:
             - ./volumes/db/realtime.sql:/docker-entrypoint-initdb.d/migrations/99-realtime.sql:Z
             # Must be superuser to create event trigger
