@@ -1,3 +1,96 @@
-# Docker Setup Instructions
+# Self-Hosting with Docker
 
-_Coming in May 2024_
+Docker is the easiest way to get started with self-hosted Admyral. This guide assumes you are running the command from the machine you intend to host from.
+
+If you need any support with setting up Admyral, please join us on [Discord](https://discord.gg/GqbJZT9Hbf).
+
+## Prerequisites
+
+You need to have the following installed on the machine you intend to host from:
+
+-   [Git](https://git-scm.com/downloads)
+-   Docker ([Windows](https://docs.docker.com/desktop/install/windows-install/), [MacOS](https://docs.docker.com/desktop/install/mac-install/), or [Linux](https://docs.docker.com/desktop/install/linux-install/))
+
+## Running Admyral
+
+Follow these steps to start Admyral:
+
+```bash
+# Clone the repository
+git clone https://github.com/Admyral-Security/admyral.git
+
+# Change directory to docker self-hosting
+cd deploy/selfhosting
+
+# Copy the env vars
+cp .env.example .env
+
+# Start the services in detached mode
+docker compose up -d
+```
+
+After Admyral has started, you can see the containers running in the background:
+
+```bash
+docker compose ps
+```
+
+## Accessing Admyral
+
+Admyral is now running on your machine on port `3000`. For example, `http://<your-ip>:8000` or `http://localhost:8000` if you are running Docker locally.
+
+You will be asked to create an account. After creating an account, you can directly go to the login page and log in.
+
+## Securing Admyral
+
+We provided you with some example secrets for getting easily started. However, you should change these secrets to secure your Admyral instance as soon as possible.
+
+To generate new secrets, you can run the following commands from the project root directory:
+
+```bash
+# Change directory to scripts
+cd scripts
+
+# Generate new secrets
+./generate-secrets.sh
+```
+
+After generating new secrets, you need to update the top of the `.env` file inside `deploy/selfhosting` with the new secrets. Afterwards, you need to restart the Admyral.
+
+## Restarting all services
+
+To restart all services, run the following command inside the `deploy/selfhosting` directory:
+
+```bash
+# Stop and remove the containers
+docker compose down
+
+# Recreate and start the containers
+docker compose up -d
+```
+
+## Stopping all services
+
+To stop all services, run the following command inside the `deploy/selfhosting` directory:
+
+```bash
+docker compose down
+```
+
+## Uninstalling Admyral
+
+To uninstall Admyral, run the following command inside the `deploy/selfhosting` directory:
+
+```bash
+# Stop docker and remove volumes:
+docker compose down -v
+
+# Remove Postgres data:
+rm -rf volumes/db/data/
+```
+
+## Troubleshooting
+
+### dependency failed to start
+
+Run the following command: `docker compose restart`
