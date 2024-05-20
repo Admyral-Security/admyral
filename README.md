@@ -56,19 +56,23 @@ Here is a sneek-peak into the workflow automation builder:
 -   [ ] Case Management
 -   [ ] Alert Handling
 -   [ ] Dashboard
--   [ ] Integrations - do you need any integration? let us know!
 
 ### Next-Gen Hyperautomation Features
 
--   [ ] Natural Language to Workflow Automation
+-   [x] Natural Language to Workflow Automation
 -   [ ] Incident Investigation Assistant
 -   [ ] AI-proposed next steps on handling an incident/a case
 -   [ ] Customized workflow automation recommendations
 
+### Integrations
+Many integrations are coming such as VirusTotal, AlienVault, URLHaus, URLScan, Phish Report, GreyNoise, AbuseIPDB, Slack, Jira, MS Defender for Endpoint, SentinelOne, AWS Cloudtrail to name a few.
+What integrations are missing for you? Let us know on [Discord](https://discord.gg/GqbJZT9Hbf) or [chris@admyral.dev](mailto:chris@admyral.dev) about your use-case and we will build it within one week! 
+
+
 ### Hosting
 
 -   [x] Cloud version
--   [ ] Self-hosting
+-   [x] Self-hosting
 
 ### Misc
 
@@ -76,7 +80,7 @@ Here is a sneek-peak into the workflow automation builder:
 
 ### Admyral in <5 Minutes
 
-// A demo is coming at the end of April 2024
+// A demo is coming at the end of May 2024
 
 ## 🚀 Get Started
 
