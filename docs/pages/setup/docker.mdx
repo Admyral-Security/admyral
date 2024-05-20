@@ -20,13 +20,19 @@ Follow these steps to start Admyral:
 git clone https://github.com/Admyral-Security/admyral.git
 
 # Change directory to docker self-hosting
-cd deploy/selfhosting
+cd admyral/deploy/selfhosting
 
 # Copy the env vars
 cp .env.example .env
 
 # Start the services in detached mode
 docker compose up -d
+```
+
+**Hint:** Supabase sometimes might fail to start. If you see a service failing to start, simply run the following command to resolve the issue:
+
+```bash
+docker compose restart
 ```
 
 After Admyral has started, you can see the containers running in the background:
@@ -37,13 +43,24 @@ docker compose ps
 
 ## Accessing Admyral
 
-Admyral is now running on your machine on port `3000`. For example, `http://<your-ip>:8000` or `http://localhost:8000` if you are running Docker locally.
+Admyral is now running on your machine on port `3000`. For example, `http://<your-ip>:3000` or `http://localhost:3000` if you are running Docker locally.
 
-You will be asked to create an account. After creating an account, you can directly go to the login page and log in.
+You will be asked to create an account. After creating an account, you can directly go to the login page and log in because accounts are confirmed automatically by default.
 
 ## Securing Admyral
 
-We provided you with some example secrets for getting easily started. However, you should change these secrets to secure your Admyral instance as soon as possible.
+Inside the `.env` file, we provided you with some example secrets for getting easily started. However, you should change these secrets to secure your Admyral instance as soon as possible.
+You can find the example secrets on top of the `.env` file inside the `deploy/selfhosting` directory:
+
+```bash
+POSTGRES_PASSWORD=...
+JWT_SECRET=...
+ANON_KEY=...
+SERVICE_ROLE_KEY=...
+CREDENTIALS_SECRET=...
+WEBHOOK_SIGNING_SECRET=...
+DASHBOARD_PASSWORD=...
+```
 
 To generate new secrets, you can run the following commands from the project root directory:
 
@@ -52,10 +69,10 @@ To generate new secrets, you can run the following commands from the project roo
 cd scripts
 
 # Generate new secrets
-./generate-secrets.sh
+./generate_secrets.sh
 ```
 
-After generating new secrets, you need to update the top of the `.env` file inside `deploy/selfhosting` with the new secrets. Afterwards, you need to restart the Admyral.
+After generating new secrets, you need to update the top of the `.env` file inside `deploy/selfhosting` with the new secrets. Afterwards, you need to restart Admyral.
 
 ## Restarting all services
 
