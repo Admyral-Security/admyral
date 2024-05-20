@@ -80,7 +80,31 @@ Here is a sneek-peak into the workflow automation builder:
 
 ## 🚀 Get Started
 
-// coming at the end of April 2024
+### Admyral Cloud
+Managed deployment by the Admyral team, free, no credit card required.
+
+**[» Admyral Cloud](https://admyral.dev/)**
+
+
+### Self-hosting with Docker
+
+```bash
+# Clone the repository
+git clone https://github.com/Admyral-Security/admyral.git
+ 
+# Change directory to docker self-hosting
+cd admyral/deploy/selfhosting
+ 
+# Copy the env vars
+cp .env.example .env
+ 
+# Start the services in detached mode
+docker compose up -d
+```
+
+[» Learn more about deploying locally](https://docs.admyral.dev/setup/docker)
+
+
 
 ## 💬 Feedback & Contributing to Admyral
 
