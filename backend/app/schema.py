@@ -9,6 +9,7 @@ class ActionType(str, Enum):
     SEND_EMAIL = "SEND_EMAIL"
     NOTE = "NOTE"
     MANUAL_START = "MANUAL_START"
+    INTEGRATION = "INTEGRATION"
 
 
 class EdgeType(str, Enum):

@@ -1,9 +1,7 @@
 "use client";
 
-import { useState } from "react";
 import { ActionNode, getActionNodeLabel } from "@/lib/types";
 import { Badge, Box, Card, Flex, HoverCard, Text } from "@radix-ui/themes";
-import HttpRequestActionIcon from "./icons/http-request-action-icon";
 import TransformActionIcon from "./icons/transform-action-icon";
 import IfConditionActionIcon from "./icons/if-condition-action-icon";
 import AiActionsIcon from "./icons/ai-actions-icon";
@@ -13,13 +11,13 @@ import CreateCaseIcon from "./icons/create-case-icon";
 import UpdateCaseIcon from "./icons/update-case-icon";
 import QueryCasesIcon from "./icons/query-cases-icon";
 import CaseTriggerIcon from "./icons/case-trigger-icon";
-import { EnterIcon } from "@radix-ui/react-icons";
 import WorkflowTemplates from "./workflow-templates";
 import NoteActionIcon from "./icons/note-action-icon";
 import StartWorkflowActionIcon from "./icons/start-workflow-action-icon";
 import WorkflowAssistantButton from "./workflow-assistant-button";
 import WorkflowAssistant from "./workflow-assistant";
 import useWorkflowAssistantStore from "@/lib/workflow-assistant-store";
+import IntegrationIcon from "./icons/integration-icon";
 
 interface EditorCardProps {
 	icon: React.ReactNode;
@@ -158,14 +156,14 @@ export default function EditorSideBar() {
 									onDragStart={(event) =>
 										onDragStart(
 											event,
-											ActionNode.HTTP_REQUEST,
+											ActionNode.INTEGRATION,
 										)
 									}
 								>
 									<EditorCard
-										icon={<HttpRequestActionIcon />}
+										icon={<IntegrationIcon />}
 										label={getActionNodeLabel(
-											ActionNode.HTTP_REQUEST,
+											ActionNode.INTEGRATION,
 										)}
 									/>
 								</div>
@@ -273,20 +271,6 @@ export default function EditorSideBar() {
 								<EditorCard
 									icon={<CaseTriggerIcon />}
 									label="Case Trigger"
-									isComingSoon
-								/>
-							</Flex>
-						</Flex>
-
-						<Flex direction="column" gap="4">
-							<Text size="3" weight="medium">
-								Integrations
-							</Text>
-
-							<Flex direction="column" gap="2">
-								<EditorCard
-									icon={<EnterIcon width="24" height="24" />}
-									label="Coming soon"
 									isComingSoon
 								/>
 							</Flex>

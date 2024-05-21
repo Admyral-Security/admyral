@@ -14,6 +14,55 @@ export function getLLMLabel(model: LLM) {
 
 export const LLM_MODELS = [LLM.GPT4_TURBO, LLM.GPT3_5_TURBO];
 
+export enum IntegrationType {
+	VIRUSTOTAL = "VIRUS_TOTAL",
+	ALIENVAULT_OTX = "ALIENVAULT_OTX",
+	YARAIFY = "YARAIFY",
+	THREATPOST = "THREATPOST",
+	PHISH_REPORT = "PHISH_REPORT",
+}
+
+export function getIntegrationTypeLabel(integrationType: IntegrationType) {
+	switch (integrationType) {
+		case IntegrationType.VIRUSTOTAL:
+			return "VirusTotal";
+		case IntegrationType.ALIENVAULT_OTX:
+			return "AlienVault OTX";
+		case IntegrationType.YARAIFY:
+			return "YARAify";
+		case IntegrationType.THREATPOST:
+			return "Threatpost";
+		case IntegrationType.PHISH_REPORT:
+			return "PhishReport";
+	}
+}
+
+export const INTEGRATION_TYPES = [
+	IntegrationType.VIRUSTOTAL,
+	IntegrationType.ALIENVAULT_OTX,
+];
+
+export type IntegrationApiParameter = {
+	id: string;
+	displayName: string;
+	description: string;
+	required: boolean;
+};
+
+export type IntegrationApiDefinition = {
+	id: string;
+	name: string;
+	description: string;
+	documentationUrl?: string;
+	parameters: IntegrationApiParameter[];
+};
+
+export type IntegrationDefinition = {
+	name: string;
+	integrationType: IntegrationType;
+	apis: IntegrationApiDefinition[];
+};
+
 export enum ActionNode {
 	MANUAL_START = "MANUAL_START",
 	WEBHOOK = "WEBHOOK",
@@ -24,6 +73,7 @@ export enum ActionNode {
 	SEND_EMAIL = "SEND_EMAIL",
 	RECEIVE_EMAIL = "RECEIVE_EMAIL",
 	NOTE = "NOTE",
+	INTEGRATION = "INTEGRATION",
 }
 
 export function getActionNodeLabel(actionNode: ActionNode) {
@@ -33,6 +83,8 @@ export function getActionNodeLabel(actionNode: ActionNode) {
 			return "Start Workflow";
 		case ActionNode.HTTP_REQUEST:
 			return "HTTP Request";
+		case ActionNode.INTEGRATION:
+			return "Integration";
 		case ActionNode.TRANSFORM:
 			return "Transform";
 		case ActionNode.IF_CONDITION:
@@ -166,6 +218,15 @@ export type ReceiveEmailData = ActionDataBase<{}>;
 
 export type NoteData = ActionDataBase<{ note: string }>;
 
+export type IntegrationData = ActionDataBase<
+	| {
+			integrationType: IntegrationType;
+			api: string;
+			params: Record<string, any>;
+	  }
+	| {}
+>;
+
 export type ActionData =
 	| AiActionData
 	| HttpRequestData
@@ -174,7 +235,8 @@ export type ActionData =
 	| IfConditionData
 	| SendEmailData
 	| ReceiveEmailData
-	| NoteData;
+	| NoteData
+	| IntegrationData;
 
 export type EdgeData = {
 	parentActionId: string;
@@ -212,6 +274,7 @@ export type WorkflowRunEvent = {
 	createdAt: string;
 	actionType: ActionNode;
 	actionName: string;
+	actionDefinition: Record<string, any>;
 	actionState: Record<string, any>;
 	prevActionStateId: string | null;
 	isError: boolean;

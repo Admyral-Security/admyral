@@ -41,6 +41,12 @@ export async function initActionData(
 				secret: webhookData.secret,
 			};
 
+		case ActionNode.INTEGRATION:
+			return {
+				...base,
+				actionDefinition: {},
+			};
+
 		case ActionNode.HTTP_REQUEST:
 			return {
 				...base,

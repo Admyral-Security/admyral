@@ -21,6 +21,7 @@ import {
 	ActionData,
 	getActionNodeLabel,
 	EdgeType,
+	IntegrationData,
 } from "@/lib/types";
 import HttpRequest from "./action-editing/http-request";
 import AiAction from "./action-editing/ai-action";
@@ -32,6 +33,24 @@ import EditorSideBar from "./workflow-builder-editor-side-bar";
 import ActionNodeIcon from "./action-node-icon";
 import NoteNode from "./workflow-graph/note-node";
 import StartWorkflow from "./action-editing/start-workflow";
+import IntegrationNode from "./workflow-graph/integration-node";
+import IntegrationSelection from "./action-editing/integration-selection";
+import _ from "lodash";
+import Integration from "./action-editing/integration";
+
+interface IntegrationDetailsProps {
+	id: string;
+	integrationData: IntegrationData;
+}
+
+function IntegrationDetails({ id, integrationData }: IntegrationDetailsProps) {
+	const isIntegrationSelection = _.isEmpty(integrationData.actionDefinition);
+	return isIntegrationSelection ? (
+		<IntegrationSelection id={id} />
+	) : (
+		<Integration id={id} />
+	);
+}
 
 const nodeTypes = {
 	[ActionNode.WEBHOOK]: StartWorkflowNode,
@@ -41,6 +60,7 @@ const nodeTypes = {
 	[ActionNode.SEND_EMAIL]: SendEmailNode,
 	[ActionNode.IF_CONDITION]: IfConditionNode,
 	[ActionNode.NOTE]: NoteNode,
+	[ActionNode.INTEGRATION]: IntegrationNode,
 };
 
 const edgeTypes = {
@@ -184,6 +204,14 @@ function WorkflowBuilderEditor() {
 							(nodes[selectNodeIdx].type as ActionNode) ===
 								ActionNode.MANUAL_START) && (
 							<StartWorkflow id={nodes[selectNodeIdx].id} />
+						)}
+
+						{(nodes[selectNodeIdx].type as ActionNode) ===
+							ActionNode.INTEGRATION && (
+							<IntegrationDetails
+								id={nodes[selectNodeIdx].id}
+								integrationData={nodes[selectNodeIdx].data}
+							/>
 						)}
 
 						{(nodes[selectNodeIdx].type as ActionNode) ===

@@ -6,6 +6,7 @@ import AiActionsIcon from "./icons/ai-actions-icon";
 import SendEmailActionIcon from "./icons/send-email-action-icon";
 import ReceiveEmailActionIcon from "./icons/receive-email-action-icon";
 import StartWorkflowActionIcon from "./icons/start-workflow-action-icon";
+import IntegrationIcon from "./icons/integration-icon";
 
 export interface ActionNodeIconProps {
 	actionType: ActionNode;
@@ -28,6 +29,8 @@ export default function ActionNodeIcon({ actionType }: ActionNodeIconProps) {
 			return <SendEmailActionIcon />;
 		case ActionNode.RECEIVE_EMAIL:
 			return <ReceiveEmailActionIcon />;
+		case ActionNode.INTEGRATION:
+			return <IntegrationIcon />;
 		default:
 			return null;
 	}

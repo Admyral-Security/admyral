@@ -665,6 +665,7 @@ class WorkflowRunEvent(BaseModel):
     created_at: datetime
     action_name: str
     action_type: ActionType
+    action_definition: dict
     action_state: dict
     prev_action_state_id: Optional[str]
     is_error: bool
@@ -699,6 +700,7 @@ async def get_workflow_run_events(
                 created_at=action_state.WorkflowRunActionState.created_at,
                 action_name=action_state.ActionNode.action_name,
                 action_type=action_state.ActionNode.action_type,
+                action_definition=action_state.ActionNode.action_definition,
                 action_state=action_state.WorkflowRunActionState.action_state,
                 prev_action_state_id=action_state.WorkflowRunActionState.prev_action_state_id,
                 is_error=action_state.WorkflowRunActionState.is_error

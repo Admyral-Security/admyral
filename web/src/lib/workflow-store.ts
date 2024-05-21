@@ -141,6 +141,7 @@ const useWorkflowStore = create<WorkflowState>((set, get) => ({
 		}
 		const nodes = cloneDeep(get().nodes);
 		nodes[idx].data = data;
+		nodes[idx].type = data.actionType;
 		set({ nodes });
 	},
 	deleteNode: (nodeId: string) => {

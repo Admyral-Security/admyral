@@ -2,7 +2,6 @@
 
 import { createClient } from "@/utils/supabase/server";
 import {
-	TransformType,
 	transformObjectKeysToCamelCase,
 	transformObjectKeysToSnakeCase,
 } from "@/utils/utils";
@@ -487,7 +486,7 @@ export async function loadWorkflowRunEvents(
 	}
 
 	const traces = await result.json();
-	return transformObjectKeysToCamelCase(traces, TransformType.TOP_LEVEL_ONLY);
+	return transformObjectKeysToCamelCase(traces, new Set(["action_state"]));
 }
 
 export async function generateWorkflow(

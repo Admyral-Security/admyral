@@ -502,9 +502,8 @@ mod tests {
 
     #[test]
     fn test_execute_unary_condition() {
-
         // IS_EMPTY/IS_NOT_EMPTY - Object
-        
+
         let lhs = ResolveReferenceResult {
             value: json!({}),
             does_not_exist_and_is_single_reference_only: false,
@@ -530,7 +529,7 @@ mod tests {
         assert!(execute_unary_condition(lhs, Operator::IsNotEmpty).unwrap());
 
         // IS_EMPTY/IS_NOT_EMPTY - Array
-        
+
         let lhs = ResolveReferenceResult {
             value: json!([]),
             does_not_exist_and_is_single_reference_only: false,
@@ -556,7 +555,7 @@ mod tests {
         assert!(execute_unary_condition(lhs, Operator::IsNotEmpty).unwrap());
 
         // IS_EMPTY/IS_NOT_EMPTY - String
-        
+
         let lhs = ResolveReferenceResult {
             value: json!(""),
             does_not_exist_and_is_single_reference_only: false,
@@ -582,7 +581,7 @@ mod tests {
         assert!(execute_unary_condition(lhs, Operator::IsNotEmpty).unwrap());
 
         // IS_EMPTY/IS_NOT_EMPTY - Other data types
-        
+
         let lhs = ResolveReferenceResult {
             value: json!(true),
             does_not_exist_and_is_single_reference_only: false,
@@ -596,7 +595,7 @@ mod tests {
         assert!(execute_unary_condition(lhs, Operator::IsNotEmpty).is_err());
 
         // EXISTS/DOES_NOT_EXIST
-        
+
         let lhs = ResolveReferenceResult {
             value: json!({}),
             does_not_exist_and_is_single_reference_only: false,

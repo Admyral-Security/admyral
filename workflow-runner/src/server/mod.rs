@@ -5,7 +5,11 @@ use anyhow::Result;
 use async_once::AsyncOnce;
 use auth::authenticate_webhook;
 use axum::{
-    extract::{Json, Path, State}, http::{HeaderMap, StatusCode}, response::IntoResponse, routing::{get, post}, Router
+    extract::{Json, Path, State},
+    http::{HeaderMap, StatusCode},
+    response::IntoResponse,
+    routing::{get, post},
+    Router,
 };
 use lazy_static::lazy_static;
 use serde_json::json;
@@ -13,8 +17,8 @@ use shared_state::SharedState;
 use sqlx::{Pool, Postgres};
 use std::collections::HashMap;
 use std::{borrow::Borrow, sync::Arc};
-use tower_http::{cors::CorsLayer, trace::TraceLayer};
 use tower::ServiceBuilder;
+use tower_http::{cors::CorsLayer, trace::TraceLayer};
 
 use crate::{
     postgres::{
@@ -303,8 +307,8 @@ pub async fn run_server() -> Result<()> {
         )
         .layer(
             ServiceBuilder::new()
-            .layer(TraceLayer::new_for_http())
-            .layer(CorsLayer::permissive())
+                .layer(TraceLayer::new_for_http())
+                .layer(CorsLayer::permissive()),
         )
         .with_state(state);
 

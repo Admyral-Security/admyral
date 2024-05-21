@@ -1,10 +1,16 @@
 import { loadWorkflowRunEvents, loadWorkflowRuns } from "@/lib/api";
-import { WorkflowRun, WorkflowRunEvent } from "@/lib/types";
+import {
+	ActionNode,
+	IntegrationType,
+	WorkflowRun,
+	WorkflowRunEvent,
+} from "@/lib/types";
 import { Badge, Box, Card, Flex, Text } from "@radix-ui/themes";
 import { useEffect, useState } from "react";
 import "@/components/workflow-builder-run-history.css";
 import ActionNodeIcon from "./action-node-icon";
 import Image from "next/image";
+import IntegrationLogoIcon from "./integration-logo-icon";
 
 const MONTHS = [
 	"Jan",
@@ -50,6 +56,21 @@ function computeTrace(
 	return trace.reverse();
 }
 
+function ActionIcon({
+	actionType,
+	actionDefinition,
+}: {
+	actionType: ActionNode;
+	actionDefinition: any;
+}) {
+	if (actionType !== ActionNode.INTEGRATION) {
+		return <ActionNodeIcon actionType={actionType} />;
+	}
+	const integrationType = (actionDefinition as any)
+		.integrationType as IntegrationType;
+	return <IntegrationLogoIcon integration={integrationType} />;
+}
+
 interface RowProps {
 	children: React.ReactNode;
 	selected: boolean;
@@ -93,7 +114,10 @@ function TraceEvent({ event }: { event: WorkflowRunEvent }) {
 			<Card>
 				<Flex justify="between" align="center" width="100%">
 					<Flex gap="4" justify="start" align="center">
-						<ActionNodeIcon actionType={event.actionType} />
+						<ActionIcon
+							actionType={event.actionType}
+							actionDefinition={event.actionDefinition}
+						/>
 						<Text size="3" weight="medium">
 							{event.actionName}
 						</Text>
@@ -302,9 +326,12 @@ export default function WorkflowBuilderRunHistory({
 										justify="start"
 										gap="2"
 									>
-										<ActionNodeIcon
+										<ActionIcon
 											actionType={
 												workflowRunEvent.actionType
+											}
+											actionDefinition={
+												workflowRunEvent.actionDefinition
 											}
 										/>
 										<Text size="2">

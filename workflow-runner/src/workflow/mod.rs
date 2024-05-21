@@ -4,6 +4,7 @@ mod execution_state;
 pub mod executor;
 mod http_request_action;
 mod if_condition_action;
+mod integration_action;
 mod manual_start_action;
 mod reference_resolution;
 mod send_email_action;
@@ -74,6 +75,7 @@ pub enum ActionNode {
     AiAction(ai_action::AiAction),
     SendEmail(send_email_action::SendEmail),
     ManualStart(manual_start_action::ManualStart),
+    Integration(integration_action::Integration),
 }
 
 impl ActionNode {
@@ -95,6 +97,9 @@ impl ActionNode {
             "MANUAL_START" => Ok(Self::ManualStart(
                 manual_start_action::ManualStart::default(),
             )),
+            "INTEGRATION" => Ok(Self::Integration(serde_json::from_value::<
+                integration_action::Integration,
+            >(action_definition)?)),
             _ => Err(anyhow!("Unknown action type: {action_type}")),
         }
     }
@@ -107,6 +112,7 @@ impl ActionNode {
             Self::AiAction(_) => "AI_ACTION",
             Self::SendEmail(_) => "SEND_EMAIL",
             Self::ManualStart(_) => "MANUAL_START",
+            Self::Integration(_) => "INTEGRATION",
         }
     }
 
