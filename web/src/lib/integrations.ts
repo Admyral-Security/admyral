@@ -1,10 +1,20 @@
-import { IntegrationDefinition, IntegrationType } from "./types";
+import {
+	IntegrationCredentialDefinition,
+	IntegrationDefinition,
+	IntegrationType,
+} from "./types";
 
 export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 	// VirusTotal
 	[IntegrationType.VIRUSTOTAL]: {
 		name: "VirusTotal",
 		integrationType: IntegrationType.VIRUSTOTAL,
+		credentials: [
+			{
+				id: "API_KEY",
+				displayName: "API Key",
+			},
+		],
 		apis: [
 			{
 				id: "GET_A_FILE_REPORT",
@@ -20,6 +30,7 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 						required: true,
 					},
 				],
+				requiresAuthentication: true,
 			},
 			// {
 			// 	id: "SCAN_URL",
@@ -66,6 +77,7 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 						required: true,
 					},
 				],
+				requiresAuthentication: true,
 			},
 			{
 				id: "GET_IP_ADDRESS_REPORT",
@@ -82,6 +94,7 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 						required: true,
 					},
 				],
+				requiresAuthentication: true,
 			},
 		],
 	},
@@ -89,6 +102,12 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 	[IntegrationType.ALIENVAULT_OTX]: {
 		name: "AlienVault OTX",
 		integrationType: IntegrationType.ALIENVAULT_OTX,
+		credentials: [
+			{
+				id: "API_KEY",
+				displayName: "API Key",
+			},
+		],
 		apis: [
 			{
 				id: "GET_DOMAIN_INFORMATION",
@@ -105,6 +124,7 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 						required: true,
 					},
 				],
+				requiresAuthentication: true,
 			},
 		],
 	},

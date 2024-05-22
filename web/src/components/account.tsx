@@ -65,7 +65,9 @@ export default function Account() {
 			<Card size="3" variant="classic">
 				<Flex direction="column" gap="5">
 					<Flex justify="start">
-						<Text size="4">Account</Text>
+						<Text size="4" weight="medium">
+							Account
+						</Text>
 					</Flex>
 
 					{error && (

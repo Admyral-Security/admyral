@@ -13,6 +13,7 @@ pub trait IntegrationExecutor {
         &self,
         context: &Context,
         api: &str,
+        credential_name: &str,
         parameters: &HashMap<String, String>,
     ) -> Result<serde_json::Value>;
 }
@@ -29,6 +30,7 @@ pub struct Integration {
     integration_type: IntegrationType,
     api: String,
     params: HashMap<String, String>,
+    credential: String,
 }
 
 impl ActionExecutor for Integration {
@@ -36,12 +38,12 @@ impl ActionExecutor for Integration {
         match self.integration_type {
             IntegrationType::VirusTotal => {
                 virustotal::VirusTotalExecutor
-                    .execute(context, &self.api, &self.params)
+                    .execute(context, &self.api, &self.credential, &self.params)
                     .await
             }
             IntegrationType::AlienvaultOtx => {
                 alienvault_otx::AlienvaultOtxExecutor
-                    .execute(context, &self.api, &self.params)
+                    .execute(context, &self.api, &self.credential, &self.params)
                     .await
             }
         }

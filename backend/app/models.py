@@ -6,12 +6,13 @@ from sqlalchemy.sql.expression import func
 from sqlalchemy import Column, ForeignKey
 
 from app.config import settings
-from app.schema import ActionType, EdgeType
+from app.schema import ActionType, EdgeType, IntegrationType
 
 
 # We must register the ENUM types with the database under the correct schema
 action_type_enum = ENUM(ActionType, schema=settings.DATABASE_SCHEMA, create_type=False, name="actiontype")
 edge_type_enum = ENUM(EdgeType, schema=settings.DATABASE_SCHEMA, create_type=False, name="edgetype")
+integration_type_enum = ENUM(IntegrationType, schema=settings.DATABASE_SCHEMA, create_type=False, name="integrationtype")
 
 
 class Base(SQLModel, table=False):
@@ -45,6 +46,7 @@ class Credential(Base, table=True):
     credential_name: str = Field(primary_key=True, sa_type=TEXT())
     encrypted_secret: str = Field(sa_type=TEXT())
     created_at: datetime = Field(sa_type=TIMESTAMP(), sa_column_kwargs=dict(server_default=func.now()))
+    credential_type: Optional[IntegrationType] = Field(sa_column=Column(integration_type_enum, nullable=True))
 
     user: UserProfile = Relationship(back_populates="credentials")
 

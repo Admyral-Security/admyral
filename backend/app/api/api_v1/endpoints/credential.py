@@ -1,3 +1,4 @@
+from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel.ext.asyncio.session import AsyncSession
 from sqlmodel import select
@@ -5,7 +6,8 @@ from pydantic import BaseModel
 from sqlalchemy.exc import IntegrityError
 
 from app.deps import AuthenticatedUser, get_authenticated_user, get_session
-from app.models import Credential 
+from app.models import Credential
+from app.schema import IntegrationType
 
 
 router = APIRouter()
@@ -17,6 +19,7 @@ router = APIRouter()
 class CredentialCreateRequest(BaseModel):
     credential_name: str
     encrypted_secret: str
+    credential_type: Optional[IntegrationType]
 
 
 @router.post(
@@ -31,7 +34,8 @@ async def create_credential(
     new_credential = Credential(
         user_id=user.user_id,
         credential_name=request.credential_name,
-        encrypted_secret=request.encrypted_secret
+        encrypted_secret=request.encrypted_secret,
+        credential_type=request.credential_type
     )
 
     try:
@@ -73,17 +77,38 @@ async def delete_credential(
     await db.commit()
 
 
+class CredentialListResult(BaseModel):
+    name: str
+    credential_type: Optional[IntegrationType]
+
+
 @router.get(
     "",
     status_code=status.HTTP_200_OK
 )
 async def list_credentials(
     db: AsyncSession = Depends(get_session),
-    user: AuthenticatedUser = Depends(get_authenticated_user)
-) -> list[str]:
-    result = await db.exec(
-        select(Credential)
-        .where(Credential.user_id == user.user_id)
-    )
+    user: AuthenticatedUser = Depends(get_authenticated_user),
+    integration_type: Optional[IntegrationType] = None
+) -> list[CredentialListResult]:
+    if integration_type:
+        result = await db.exec(
+            select(Credential)
+            .where(Credential.user_id == user.user_id)
+            .where(Credential.credential_type == integration_type)
+        )
+    else:
+        result = await db.exec(
+            select(Credential)
+            .where(Credential.user_id == user.user_id)
+        )
     credentials = result.all()
-    return list(map(lambda credential: credential.credential_name, credentials))
+    return list(
+        map(
+            lambda credential: CredentialListResult(
+                name=credential.credential_name,
+                credential_type=credential.credential_type
+            ),
+            credentials
+        )
+    )

@@ -16,6 +16,8 @@ import {
 	WorkflowRun,
 	WorkflowRunEvent,
 	WorkflowTemplate,
+	Credential,
+	IntegrationType,
 } from "./types";
 import { generateWebhook } from "./workflow-node";
 
@@ -209,11 +211,18 @@ export async function deleteAccount() {
 	redirect("/login");
 }
 
-export async function listCredentials() {
+export async function listCredentials(
+	integrationTypeFilter: IntegrationType | null = null,
+): Promise<Credential[]> {
 	const accessToken = await getAccessToken();
 
+	const queryParams =
+		integrationTypeFilter !== null
+			? `?integration_type=${integrationTypeFilter}`
+			: "";
+
 	const result = await fetch(
-		`${process.env.BACKEND_API_URL}/api/v1/credentials`,
+		`${process.env.BACKEND_API_URL}/api/v1/credentials${queryParams}`,
 		{
 			method: "GET",
 			headers: {
@@ -225,10 +234,15 @@ export async function listCredentials() {
 		throw new Error("Failed to list credentials!");
 	}
 
-	return result.json();
+	const credentials = await result.json();
+	return transformObjectKeysToCamelCase(credentials);
 }
 
-export async function createCredential(credentialName: string, value: string) {
+export async function createCredential(
+	credentialName: string,
+	value: string,
+	credentialType: IntegrationType | null = null,
+) {
 	const accessToken = await getAccessToken();
 
 	const encryptedSecret = await encrypt(value);
@@ -244,6 +258,7 @@ export async function createCredential(credentialName: string, value: string) {
 			body: JSON.stringify({
 				credential_name: credentialName,
 				encrypted_secret: encryptedSecret,
+				credential_type: credentialType,
 			}),
 		},
 	);

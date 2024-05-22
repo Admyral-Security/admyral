@@ -112,7 +112,7 @@ impl WorkflowExecutor {
                                 .prev_action_state_id
                                 .as_ref()
                                 .map(|s| s.as_str()),
-                            json!({"error": format!("Failed to execute action {}", action.name)}),
+                            json!({"error": format!("Failed to execute action {}: {e}", action.name)}),
                             true,
                         )
                         .await?;

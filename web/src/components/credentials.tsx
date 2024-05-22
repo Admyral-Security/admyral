@@ -7,6 +7,7 @@ import {
 	Button,
 	Callout,
 	Card,
+	DropdownMenu,
 	Flex,
 	Grid,
 	IconButton,
@@ -15,6 +16,19 @@ import {
 } from "@radix-ui/themes";
 import { useEffect, useState } from "react";
 import TrashIcon from "./icons/trash-icon";
+import { INTEGRATIONS } from "@/lib/integrations";
+import IntegrationLogoIcon from "./integration-logo-icon";
+import {
+	IntegrationType,
+	getIntegrationTypeLabel,
+	Credential,
+	IntegrationCredentialDefinition,
+} from "@/lib/types";
+import ArrowDownIcon from "./icons/arrow-down-icon";
+import FloppyDiskIcon from "./icons/floppy-disk-icon";
+
+const IS_LOADING: boolean = true;
+const IS_NOT_LOADING: boolean = false;
 
 function NoCredentialsInfo() {
 	return (
@@ -48,19 +62,7 @@ function SaveButton({
 			loading={loading}
 			disabled={disabled}
 		>
-			<svg
-				width="18"
-				height="18"
-				viewBox="0 0 18 18"
-				fill="none"
-				xmlns="http://www.w3.org/2000/svg"
-			>
-				<path
-					d="M3 2.25H12.75L15.5303 5.03033C15.6709 5.17098 15.75 5.36175 15.75 5.56066V15C15.75 15.4142 15.4142 15.75 15 15.75H3C2.58579 15.75 2.25 15.4142 2.25 15V3C2.25 2.58579 2.58579 2.25 3 2.25ZM9 13.5C10.2427 13.5 11.25 12.4927 11.25 11.25C11.25 10.0073 10.2427 9 9 9C7.75733 9 6.75 10.0073 6.75 11.25C6.75 12.4927 7.75733 13.5 9 13.5ZM3.75 3.75V6.75H11.25V3.75H3.75Z"
-					fill="#00259E"
-					fill-opacity="0.797"
-				/>
-			</svg>
+			<FloppyDiskIcon />
 		</IconButton>
 	);
 }
@@ -84,28 +86,73 @@ function DeleteButton({
 	);
 }
 
-interface Credential {
+interface OtherCredential {
 	name: string;
 	value: string;
-	isUnsaved: boolean;
+	isPersisted: boolean;
 	loading: boolean;
 	error: string | null;
 }
 
+interface IntegrationCredential {
+	name: string;
+	integrationType: IntegrationType;
+	values: { id: string; value: string }[];
+	isPersisted: boolean;
+	loading: boolean;
+	error: string | null;
+}
+
+function isOtherCredential(credentials: Credential): boolean {
+	return credentials.credentialType === null;
+}
+
+function isIntegrationCredential(credentials: Credential): boolean {
+	return credentials.credentialType !== null;
+}
+
 export default function Credentials() {
-	const [credentials, setCredentials] = useState<Credential[]>([]);
+	const [integrationsCredentials, setIntegrationsCredentials] = useState<
+		IntegrationCredential[]
+	>([]);
+	const [otherCredentials, setOtherCredentials] = useState<OtherCredential[]>(
+		[],
+	);
 	const [error, setError] = useState<string | null>(null);
 
 	useEffect(() => {
 		listCredentials()
-			.then((credentialNames) => {
-				setCredentials(
-					credentialNames.map((name: string) => ({
-						name,
-						value: "",
-						isUnsaved: false,
-						loading: false,
-					})),
+			.then((credentials: Credential[]) => {
+				setOtherCredentials(
+					credentials
+						.filter(isOtherCredential)
+						.map((credential: Credential) => ({
+							name: credential.name,
+							value: "",
+							isPersisted: true,
+							loading: false,
+							error: null,
+						})),
+				);
+
+				setIntegrationsCredentials(
+					credentials
+						.filter(isIntegrationCredential)
+						.map((credential: Credential) => ({
+							name: credential.name,
+							integrationType: credential.credentialType!,
+							values: INTEGRATIONS[
+								credential.credentialType!
+							].credentials.map(
+								(def: IntegrationCredentialDefinition) => ({
+									id: def.id,
+									value: "",
+								}),
+							),
+							isPersisted: true,
+							loading: false,
+							error: null,
+						})),
 				);
 			})
 			.catch((error) => {
@@ -115,56 +162,51 @@ export default function Credentials() {
 			});
 	}, []);
 
-	const setLoading = (credentialName: string) => {
-		setCredentials(
-			[...credentials].map((credential) => {
+	const setLoading = (credentialName: string, isLoading: boolean) => {
+		setOtherCredentials(
+			[...otherCredentials].map((credential: OtherCredential) => {
 				if (credential.name === credentialName) {
-					credential.loading = true;
+					credential.loading = isLoading;
 				}
 				return credential;
 			}),
 		);
-	};
 
-	const create = async (credentialName: string, value: string) => {
-		try {
-			setError(null);
-			setLoading(credentialName);
-			await createCredential(credentialName, value);
-			setCredentials(
-				[...credentials].map((credential) => {
+		setIntegrationsCredentials(
+			[...integrationsCredentials].map(
+				(credential: IntegrationCredential) => {
 					if (credential.name === credentialName) {
-						return {
-							name: credentialName,
-							value: "",
-							isUnsaved: false,
-							loading: false,
-							error: null,
-						};
+						credential.loading = isLoading;
 					}
 					return credential;
-				}),
-			);
-		} catch (error) {
-			setError(
-				`Failed to save credential: ${credentialName}. If the problem persists, please contact us on Discord or via email ${process.env.NEXT_PUBLIC_SUPPORT_EMAIL}`,
-			);
-		}
+				},
+			),
+		);
 	};
 
 	const remove = async (credentialName: string) => {
 		try {
 			setError(null);
-			setLoading(credentialName);
+			setLoading(credentialName, IS_LOADING);
 			await deleteCredential(credentialName);
-			setCredentials(
-				[...credentials].filter(
+
+			setOtherCredentials(
+				[...otherCredentials].filter(
 					(credential) =>
 						credential.name !== credentialName &&
-						!credential.isUnsaved,
+						credential.isPersisted,
+				),
+			);
+
+			setIntegrationsCredentials(
+				[...integrationsCredentials].filter(
+					(credential) =>
+						credential.name !== credentialName &&
+						credential.isPersisted,
 				),
 			);
 		} catch (error) {
+			setLoading(credentialName, IS_NOT_LOADING);
 			setError(
 				`Failed to remove credential: ${credentialName}. If the problem persists, please contact us on Discord or via email ${process.env.NEXT_PUBLIC_SUPPORT_EMAIL}`,
 			);
@@ -172,9 +214,17 @@ export default function Credentials() {
 	};
 
 	const checkForDuplicateCredentialName = (credentialName: string) => {
-		return credentials.find(
-			(credential) =>
-				!credential.isUnsaved && credential.name === credentialName,
+		return (
+			otherCredentials.find(
+				(credential) =>
+					credential.isPersisted &&
+					credential.name === credentialName,
+			) ||
+			integrationsCredentials.find(
+				(credential) =>
+					credential.isPersisted &&
+					credential.name === credentialName,
+			)
 		);
 	};
 
@@ -182,7 +232,10 @@ export default function Credentials() {
 		return credentialName.match(/^[a-zA-Z][a-zA-Z0-9-_]*$/);
 	};
 
-	const handleSaveButtonClick = (credential: Credential, idx: number) => {
+	const handleOtherCredentialSaveButtonClick = async (
+		credential: OtherCredential,
+		idx: number,
+	) => {
 		let errorMessage = null;
 		if (!isValidCredentialPattern(credential.name)) {
 			errorMessage =
@@ -194,13 +247,93 @@ export default function Credentials() {
 		}
 
 		if (errorMessage !== null) {
-			const credentialsCopy = [...credentials];
+			const credentialsCopy = [...otherCredentials];
 			credentialsCopy[idx].error = errorMessage;
-			setCredentials(credentialsCopy);
+			setOtherCredentials(credentialsCopy);
 			return;
 		}
 
-		create(credential.name, credential.value);
+		try {
+			setError(null);
+			setLoading(credential.name, IS_LOADING);
+			await createCredential(credential.name, credential.value);
+
+			setOtherCredentials(
+				[...otherCredentials].map((credential) => {
+					if (credential.name === credential.name) {
+						return {
+							name: credential.name,
+							value: "",
+							isPersisted: true,
+							loading: false,
+							error: null,
+						};
+					}
+					return credential;
+				}),
+			);
+		} catch (error) {
+			setLoading(credential.name, IS_NOT_LOADING);
+			setError(
+				`Failed to save credential: ${credential.name}. If the problem persists, please contact us on Discord or via email ${process.env.NEXT_PUBLIC_SUPPORT_EMAIL}`,
+			);
+		}
+	};
+
+	const handleIntegrationCredentialSaveButtonClick = async (
+		credential: IntegrationCredential,
+		idx: number,
+	) => {
+		if (checkForDuplicateCredentialName(credential.name)) {
+			const credentialsCopy = [...integrationsCredentials];
+			credentialsCopy[idx].error =
+				"Credential name already exists and must be unique.";
+			setIntegrationsCredentials(credentialsCopy);
+			return;
+		}
+
+		try {
+			setError(null);
+			setLoading(credential.name, IS_LOADING);
+
+			await createCredential(
+				credential.name,
+				JSON.stringify(
+					Object.fromEntries(
+						credential.values.map((v) => [v.id, v.value]),
+					),
+				),
+				credential.integrationType,
+			);
+
+			setIntegrationsCredentials(
+				[...integrationsCredentials].map((credential) => {
+					if (credential.name === credential.name) {
+						return {
+							name: credential.name,
+							integrationType: credential.integrationType,
+							values: INTEGRATIONS[
+								credential.integrationType!
+							].credentials.map(
+								(def: IntegrationCredentialDefinition) => ({
+									id: def.id,
+									value: "",
+								}),
+							),
+							isPersisted: true,
+							loading: false,
+							error: null,
+						};
+					}
+					return credential;
+				}),
+			);
+		} catch (error) {
+			setLoading(credential.name, IS_NOT_LOADING);
+			setError(
+				`Failed to save credential: ${credential.name}. If the problem persists, please contact us on Discord or via email ${process.env.NEXT_PUBLIC_SUPPORT_EMAIL}`,
+			);
+		}
 	};
 
 	return (
@@ -208,28 +341,104 @@ export default function Credentials() {
 			<Card size="3" variant="classic">
 				<Flex direction="column" gap="5">
 					<Flex justify="between">
-						<Text size="4">Credentials</Text>
+						<Text size="4" weight="medium">
+							Credentials
+						</Text>
 
-						<Button
-							variant="solid"
-							size="2"
-							style={{ cursor: "pointer" }}
-							onClick={() =>
-								setCredentials([
-									...credentials,
-									{
-										name: "",
-										value: "",
-										isUnsaved: true,
-										loading: false,
-										error: null,
-									},
-								])
-							}
-						>
-							<PlusIcon />
-							New credential
-						</Button>
+						<DropdownMenu.Root>
+							<DropdownMenu.Trigger>
+								<Button
+									variant="solid"
+									size="2"
+									style={{ cursor: "pointer" }}
+								>
+									Create New Credential
+									<ArrowDownIcon />
+								</Button>
+							</DropdownMenu.Trigger>
+
+							<DropdownMenu.Content variant="soft">
+								{Object.keys(INTEGRATIONS).map(
+									(integration: string) => (
+										<DropdownMenu.Item
+											style={{
+												cursor: "pointer",
+											}}
+											onClick={() =>
+												setIntegrationsCredentials([
+													...integrationsCredentials,
+													{
+														name: "",
+														integrationType:
+															integration as IntegrationType,
+														values: INTEGRATIONS[
+															integration as IntegrationType
+														].credentials.map(
+															(
+																def: IntegrationCredentialDefinition,
+															) => ({
+																id: def.id,
+																value: "",
+															}),
+														),
+														isPersisted: false,
+														loading: false,
+														error: null,
+													},
+												])
+											}
+										>
+											<Grid
+												columns="20px 1fr"
+												gap="2"
+												justify="center"
+												align="center"
+											>
+												<IntegrationLogoIcon
+													integration={
+														integration as IntegrationType
+													}
+												/>
+												<Text>
+													{getIntegrationTypeLabel(
+														integration as IntegrationType,
+													)}
+												</Text>
+											</Grid>
+										</DropdownMenu.Item>
+									),
+								)}
+								<DropdownMenu.Item
+									style={{
+										cursor: "pointer",
+									}}
+									onClick={() =>
+										setOtherCredentials([
+											...otherCredentials,
+											{
+												name: "",
+												value: "",
+												isPersisted: false,
+												loading: false,
+												error: null,
+											},
+										])
+									}
+								>
+									<Grid
+										columns="20px 1fr"
+										gap="2"
+										justify="center"
+										align="center"
+									>
+										<Flex justify="center" align="center">
+											<PlusIcon />
+										</Flex>
+										<Text>Other</Text>
+									</Grid>
+								</DropdownMenu.Item>
+							</DropdownMenu.Content>
+						</DropdownMenu.Root>
 					</Flex>
 
 					{error && (
@@ -241,94 +450,237 @@ export default function Credentials() {
 						</Callout.Root>
 					)}
 
-					{credentials.length === 0 && <NoCredentialsInfo />}
+					{otherCredentials.length === 0 &&
+						integrationsCredentials.length === 0 &&
+						error === null && <NoCredentialsInfo />}
 
-					{credentials.map((credential, idx) => (
-						<Flex
-							key={`credentials_${idx}`}
-							direction="column"
-							gap="2"
-						>
-							<Grid
-								columns="1fr 1fr 38px"
-								align="end"
-								justify="start"
-							>
+					{integrationsCredentials.map(
+						(credential, integrationIdx) => (
+							<Flex direction="column" gap="2">
+								<Flex gap="2">
+									<IntegrationLogoIcon
+										integration={credential.integrationType}
+									/>
+									<Text weight="medium">
+										{getIntegrationTypeLabel(
+											credential.integrationType,
+										)}
+									</Text>
+								</Flex>
+
 								<Flex direction="column" gap="2">
-									<Text>Name</Text>
+									<Text>Integration Name</Text>
 									<TextField.Root
 										variant="surface"
 										value={credential.name}
-										disabled={!credential.isUnsaved}
+										disabled={credential.isPersisted}
 										onChange={(event) => {
-											const credentialName =
-												event.target.value;
 											const credentialsCopy = [
-												...credentials,
+												...integrationsCredentials,
 											];
-											credentialsCopy[idx].name =
-												event.target.value;
-											credentialsCopy[idx].error = null;
-											setCredentials(credentialsCopy);
+											credentialsCopy[
+												integrationIdx
+											].name = event.target.value;
+											setIntegrationsCredentials(
+												credentialsCopy,
+											);
 										}}
 									/>
 								</Flex>
 
-								<Flex direction="column" gap="2" px="2">
-									<Text>Value</Text>
-									<TextField.Root
-										type={
-											credential.isUnsaved
-												? undefined
-												: "password"
-										}
-										disabled={!credential.isUnsaved}
-										variant="surface"
-										value={
-											credential.isUnsaved
-												? credential.value
-												: "some-random-stuff"
-										}
-										onChange={(event) => {
-											const credentialsCopy = [
-												...credentials,
-											];
-											credentialsCopy[idx].value =
-												event.target.value;
-											setCredentials(credentialsCopy);
-										}}
-									/>
-								</Flex>
+								{credential.values.map(
+									(credentialParameter, idx) => (
+										<Flex direction="column" gap="2">
+											<Text>
+												{
+													INTEGRATIONS[
+														credential
+															.integrationType
+													].credentials[idx]
+														.displayName
+												}
+											</Text>
+											<TextField.Root
+												variant="surface"
+												disabled={
+													credential.isPersisted
+												}
+												type={
+													credential.isPersisted
+														? "password"
+														: undefined
+												}
+												value={
+													credential.isPersisted
+														? "some-random-stuff"
+														: credentialParameter.value
+												}
+												onChange={(event) => {
+													const credentialsCopy = [
+														...integrationsCredentials,
+													];
+													credentialsCopy[
+														integrationIdx
+													].values[idx].value =
+														event.target.value;
+													setIntegrationsCredentials(
+														credentialsCopy,
+													);
+												}}
+											/>
+										</Flex>
+									),
+								)}
+
+								{credential.error &&
+									!credential.isPersisted && (
+										<Text color="red">
+											{credential.error}
+										</Text>
+									)}
 
 								<Flex justify="end" width="100%">
-									{credential.isUnsaved ? (
-										<SaveButton
-											disabled={credential.error !== null}
-											loading={credential.loading}
-											onClick={() =>
-												handleSaveButtonClick(
-													credential,
-													idx,
-												)
-											}
-										/>
-									) : (
-										<DeleteButton
-											disabled={credential.loading}
+									{credential.isPersisted ? (
+										<Button
+											variant="soft"
+											color="red"
 											loading={credential.loading}
 											onClick={() =>
 												remove(credential.name)
 											}
-										/>
+											style={{ cursor: "pointer" }}
+										>
+											<TrashIcon color="#e5484d" />
+											Delete Credential
+										</Button>
+									) : (
+										<Button
+											variant="soft"
+											loading={credential.loading}
+											onClick={() =>
+												handleIntegrationCredentialSaveButtonClick(
+													credential,
+													integrationIdx,
+												)
+											}
+											style={{ cursor: "pointer" }}
+										>
+											<FloppyDiskIcon />
+											Save Credential
+										</Button>
 									)}
 								</Flex>
-							</Grid>
+							</Flex>
+						),
+					)}
 
-							{credential.error && credential.isUnsaved && (
-								<Text color="red">{credential.error}</Text>
-							)}
+					{otherCredentials.length > 0 && (
+						<Flex gap="2" direction="column">
+							<Text weight="medium">Others</Text>
+
+							{otherCredentials.map((credential, idx) => (
+								<Flex
+									key={`credentials_${idx}`}
+									direction="column"
+									gap="2"
+								>
+									<Grid
+										columns="1fr 1fr 38px"
+										align="end"
+										justify="start"
+									>
+										<Flex direction="column" gap="2">
+											<Text>Name</Text>
+											<TextField.Root
+												variant="surface"
+												value={credential.name}
+												disabled={
+													credential.isPersisted
+												}
+												onChange={(event) => {
+													const credentialsCopy = [
+														...otherCredentials,
+													];
+													credentialsCopy[idx].name =
+														event.target.value;
+													credentialsCopy[idx].error =
+														null;
+													setOtherCredentials(
+														credentialsCopy,
+													);
+												}}
+											/>
+										</Flex>
+
+										<Flex direction="column" gap="2" px="2">
+											<Text>Value</Text>
+											<TextField.Root
+												variant="surface"
+												disabled={
+													credential.isPersisted
+												}
+												type={
+													credential.isPersisted
+														? "password"
+														: undefined
+												}
+												value={
+													credential.isPersisted
+														? "some-random-stuff"
+														: credential.value
+												}
+												onChange={(event) => {
+													const credentialsCopy = [
+														...otherCredentials,
+													];
+													credentialsCopy[idx].value =
+														event.target.value;
+													setOtherCredentials(
+														credentialsCopy,
+													);
+												}}
+											/>
+										</Flex>
+
+										<Flex justify="end" width="100%">
+											{credential.isPersisted ? (
+												<DeleteButton
+													disabled={
+														credential.loading
+													}
+													loading={credential.loading}
+													onClick={() =>
+														remove(credential.name)
+													}
+												/>
+											) : (
+												<SaveButton
+													disabled={
+														credential.error !==
+														null
+													}
+													loading={credential.loading}
+													onClick={() =>
+														handleOtherCredentialSaveButtonClick(
+															credential,
+															idx,
+														)
+													}
+												/>
+											)}
+										</Flex>
+									</Grid>
+
+									{credential.error &&
+										!credential.isPersisted && (
+											<Text color="red">
+												{credential.error}
+											</Text>
+										)}
+								</Flex>
+							))}
 						</Flex>
-					))}
+					)}
 				</Flex>
 			</Card>
 		</Box>

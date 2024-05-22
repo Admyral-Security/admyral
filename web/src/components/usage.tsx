@@ -42,7 +42,9 @@ export default function Usage() {
 			<Card size="3" variant="classic">
 				<Flex direction="column" gap="5">
 					<Flex justify="start">
-						<Text size="4">Usage</Text>
+						<Text size="4" weight="medium">
+							Usage
+						</Text>
 					</Flex>
 
 					{error && (

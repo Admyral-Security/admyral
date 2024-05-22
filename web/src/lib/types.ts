@@ -55,12 +55,19 @@ export type IntegrationApiDefinition = {
 	description: string;
 	documentationUrl?: string;
 	parameters: IntegrationApiParameter[];
+	requiresAuthentication: boolean;
+};
+
+export type IntegrationCredentialDefinition = {
+	id: string;
+	displayName: string;
 };
 
 export type IntegrationDefinition = {
 	name: string;
 	integrationType: IntegrationType;
 	apis: IntegrationApiDefinition[];
+	credentials: IntegrationCredentialDefinition[];
 };
 
 export enum ActionNode {
@@ -310,4 +317,9 @@ export type GenerateWorkflowConnection = {
 export type GenerateWorkflowResult = {
 	actions: GenerateWorkflowAction[];
 	connections: GenerateWorkflowConnection[];
+};
+
+export type Credential = {
+	name: string;
+	credentialType: IntegrationType | null;
 };

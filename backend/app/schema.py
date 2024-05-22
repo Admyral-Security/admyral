@@ -16,3 +16,8 @@ class EdgeType(str, Enum):
     TRUE = "TRUE"
     FALSE = "FALSE"
     DEFAULT = "DEFAULT"
+
+
+class IntegrationType(str, Enum):
+    VIRUS_TOTAL = "VIRUS_TOTAL"
+    ALIENVAULT_OTX = "ALIENVAULT_OTX"

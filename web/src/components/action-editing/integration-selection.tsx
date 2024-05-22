@@ -126,6 +126,7 @@ export default function IntegrationSelection({ id }: IntegrationProps) {
 				integrationType,
 				api: INTEGRATIONS[integrationType].apis[apiIdx].id,
 				params: {},
+				credential: "",
 			},
 		};
 		updateNodeData(id, newData);
