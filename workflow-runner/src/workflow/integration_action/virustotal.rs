@@ -37,7 +37,7 @@ impl IntegrationExecutor for VirusTotalExecutor {
             "GET_IP_ADDRESS_REPORT" => {
                 get_ip_address_report(context, credential_name, parameters).await
             }
-            _ => return Err(anyhow!("API {api} not implemented for VirusTotal.")),
+            _ => return Err(anyhow!("API {api} not implemented for {VIRUS_TOTAL}.")),
         }
     }
 }
@@ -78,15 +78,14 @@ async fn virus_total_get_request(
 
     if response.status().as_u16() != 200 {
         let error = response.text().await?;
-        let error_message = format!("Error: Failed to call {VIRUS_TOTAL} API with the following error - {error}");
+        let error_message =
+            format!("Error: Failed to call {VIRUS_TOTAL} API with the following error - {error}");
         tracing::error!(error_message);
         return Err(anyhow!(error_message));
     }
     let data = response.json::<serde_json::Value>().await?;
 
-    Ok(json!({
-        "result": data,
-    }))
+    Ok(json!(data))
 }
 
 // https://docs.virustotal.com/reference/file-info

@@ -166,7 +166,9 @@ export default function Integration({ id }: IntegrationProps) {
 				/>
 			</Flex>
 
-			<Text weight="medium">API Parameters</Text>
+			{apiDefinition.parameters.length > 0 && (
+				<Text weight="medium">API Parameters</Text>
+			)}
 
 			{requiresAuthentication && (
 				<Flex direction="column" gap="2">

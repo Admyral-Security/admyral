@@ -5,6 +5,7 @@ use std::collections::HashMap;
 use super::{context::Context, ActionExecutor};
 
 mod alienvault_otx;
+mod threatpost;
 mod utils;
 mod virustotal;
 
@@ -23,6 +24,7 @@ pub trait IntegrationExecutor {
 pub enum IntegrationType {
     VirusTotal,
     AlienvaultOtx,
+    Threatpost,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -43,6 +45,11 @@ impl ActionExecutor for Integration {
             }
             IntegrationType::AlienvaultOtx => {
                 alienvault_otx::AlienvaultOtxExecutor
+                    .execute(context, &self.api, &self.credential, &self.params)
+                    .await
+            }
+            IntegrationType::Threatpost => {
+                threatpost::ThreatpostExecutor
                     .execute(context, &self.api, &self.credential, &self.params)
                     .await
             }

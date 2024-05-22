@@ -30,6 +30,16 @@ export default function IntegrationLogoIcon({
 				/>
 			);
 
+		case IntegrationType.THREATPOST:
+			return (
+				<Image
+					src="/threatpost_logo.svg"
+					alt="Threatpost"
+					height="20"
+					width="40"
+				/>
+			);
+
 		default:
 			return <IntegrationIcon />;
 	}

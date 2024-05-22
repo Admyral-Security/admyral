@@ -1,8 +1,4 @@
-import {
-	IntegrationCredentialDefinition,
-	IntegrationDefinition,
-	IntegrationType,
-} from "./types";
+import { IntegrationDefinition, IntegrationType } from "./types";
 
 export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 	// VirusTotal
@@ -125,6 +121,23 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 					},
 				],
 				requiresAuthentication: true,
+			},
+		],
+	},
+	// Threatpost
+	[IntegrationType.THREATPOST]: {
+		name: "Threatpost",
+		integrationType: IntegrationType.THREATPOST,
+		credentials: [],
+		apis: [
+			{
+				id: "FETCH_RSS_FEED",
+				name: "Get Latest Threats",
+				description:
+					"Get the latest threats from Threatpost's RSS feed",
+				documentationUrl: "https://threatpost.com/",
+				parameters: [],
+				requiresAuthentication: false,
 			},
 		],
 	},

@@ -40,8 +40,8 @@ export default function NodeBase({
 	return (
 		<>
 			<Card size="1" style={cardStyle}>
-				<Flex width="237px" align="center" justify="start" gap="2">
-					<Flex width="32px" justify="start" align="center">
+				<Flex width="242px" align="center" justify="start" gap="2">
+					<Flex width="42px" justify="center" align="center">
 						{icon}
 					</Flex>
 

@@ -33,7 +33,7 @@ impl IntegrationExecutor for AlienvaultOtxExecutor {
             "GET_DOMAIN_INFORMATION" => {
                 get_domain_information(context, credential_name, parameters).await
             }
-            _ => return Err(anyhow!("API {api} not implemented for Alienvault OTX.")),
+            _ => return Err(anyhow!("API {api} not implemented for {ALIENVAULT_OTX}.")),
         }
     }
 }
@@ -74,15 +74,15 @@ async fn alienvault_get_request(
 
     if response.status().as_u16() != 200 {
         let error = response.text().await?;
-        let error_message = format!("Error: Failed to call {ALIENVAULT_OTX} API with the following error - {error}");
+        let error_message = format!(
+            "Error: Failed to call {ALIENVAULT_OTX} API with the following error - {error}"
+        );
         tracing::error!(error_message);
         return Err(anyhow!(error_message));
     }
     let data = response.json::<serde_json::Value>().await?;
 
-    Ok(json!({
-        "result": data,
-    }))
+    Ok(json!(data))
 }
 
 // https://otx.alienvault.com/assets/static/external_api.html#api_v1_indicators_domain__domain___section__get

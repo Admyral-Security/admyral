@@ -40,6 +40,7 @@ export function getIntegrationTypeLabel(integrationType: IntegrationType) {
 export const INTEGRATION_TYPES = [
 	IntegrationType.VIRUSTOTAL,
 	IntegrationType.ALIENVAULT_OTX,
+	IntegrationType.THREATPOST,
 ];
 
 export type IntegrationApiParameter = {
