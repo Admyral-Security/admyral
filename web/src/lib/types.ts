@@ -266,7 +266,7 @@ export type WorkflowTemplate = {
 	templateHeadline: string;
 	templateDescription: string;
 	category: string;
-	icon: string;
+	icon: IntegrationType | null;
 };
 
 export type WorkflowRun = {

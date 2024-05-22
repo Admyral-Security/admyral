@@ -223,7 +223,7 @@ class WorkflowTemplateMetadata(Base, table=True):
     template_headline: str = Field(sa_type=TEXT())
     template_description: str = Field(sa_type=TEXT())
     category: str = Field(sa_type=TEXT())
-    icon: str = Field(sa_type=TEXT())
+    icon: Optional[IntegrationType] = Field(sa_column=Column(integration_type_enum, nullable=True))
 
     workflow: Workflow = Relationship(back_populates="workflow_template_metadata")
 

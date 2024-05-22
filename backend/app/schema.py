@@ -21,3 +21,6 @@ class EdgeType(str, Enum):
 class IntegrationType(str, Enum):
     VIRUS_TOTAL = "VIRUS_TOTAL"
     ALIENVAULT_OTX = "ALIENVAULT_OTX"
+    YARAIFY = "YARAIFY"
+    THREATPOST = "THREATPOST"
+    PHISH_REPORT = "PHISH_REPORT"

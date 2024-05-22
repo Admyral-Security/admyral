@@ -2,7 +2,7 @@ import { IntegrationType } from "@/lib/types";
 import { Card, Flex } from "@radix-ui/themes";
 import Image from "next/image";
 
-function getIcon(integration?: IntegrationType) {
+function getIcon(integration?: IntegrationType | null) {
 	switch (integration) {
 		case IntegrationType.YARAIFY:
 			return (
@@ -64,7 +64,7 @@ function getIcon(integration?: IntegrationType) {
 export default function IntegrationLogoIconCard({
 	integration,
 }: {
-	integration?: IntegrationType;
+	integration?: IntegrationType | null;
 }) {
 	return (
 		<Card
