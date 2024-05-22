@@ -361,6 +361,7 @@ export default function Credentials() {
 								{Object.keys(INTEGRATIONS).map(
 									(integration: string) => (
 										<DropdownMenu.Item
+											key={`credentials_integrations_${integration}`}
 											style={{
 												cursor: "pointer",
 											}}
@@ -456,7 +457,11 @@ export default function Credentials() {
 
 					{integrationsCredentials.map(
 						(credential, integrationIdx) => (
-							<Flex direction="column" gap="2">
+							<Flex
+								key={`credentials_${credential.integrationType}_${integrationIdx}`}
+								direction="column"
+								gap="2"
+							>
 								<Flex gap="2">
 									<IntegrationLogoIcon
 										integration={credential.integrationType}
@@ -490,7 +495,11 @@ export default function Credentials() {
 
 								{credential.values.map(
 									(credentialParameter, idx) => (
-										<Flex direction="column" gap="2">
+										<Flex
+											key={`credentials_${credential.integrationType}_${integrationIdx}_${credentialParameter.id}`}
+											direction="column"
+											gap="2"
+										>
 											<Text>
 												{
 													INTEGRATIONS[

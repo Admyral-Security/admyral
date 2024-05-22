@@ -172,6 +172,7 @@ export default function IntegrationSelection({ id }: IntegrationProps) {
 
 					{INTEGRATIONS[selectedIntegration].apis.map((api, idx) => (
 						<IntegrationApiListElement
+							key={`integration_api_selection_${api.id}`}
 							apiName={api.name}
 							description={api.description}
 							onClick={() =>
@@ -213,6 +214,7 @@ export default function IntegrationSelection({ id }: IntegrationProps) {
 
 				{INTEGRATION_TYPES.map((integrationType) => (
 					<IntegrationListElement
+						key={`integration_selection_${integrationType}`}
 						integration={
 							INTEGRATIONS[integrationType].integrationType
 						}
