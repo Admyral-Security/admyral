@@ -112,12 +112,6 @@ impl FromRequestParts<SharedState> for JwtClaims {
     }
 }
 
-#[derive(Debug, Serialize)]
-struct AuthBody {
-    access_token: String,
-    token_type: String,
-}
-
 pub async fn authenticate_webhook(
     pool: &Pool<Postgres>,
     webhook_id: &str,
