@@ -70,7 +70,8 @@ mod tests {
             "integration_type": "VIRUS_TOTAL",
             "params": {
                 "hash": "<<webhook.body.hash>>"
-            }
+            },
+            "credential": "My VirusTotal API Key"
         });
 
         let parsed_integration = serde_json::from_value::<Integration>(action_definition)
@@ -84,6 +85,10 @@ mod tests {
         assert_eq!(
             parsed_integration.params,
             hashmap! { "hash".to_string() => "<<webhook.body.hash>>".to_string() }
+        );
+        assert_eq!(
+            parsed_integration.credential,
+            "My VirusTotal API Key".to_string()
         );
     }
 }
