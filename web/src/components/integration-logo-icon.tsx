@@ -40,6 +40,16 @@ export default function IntegrationLogoIcon({
 				/>
 			);
 
+		case IntegrationType.YARAIFY:
+			return (
+				<Image
+					src="/abusech_yaraify_logo.svg"
+					alt="YARAify"
+					height="20"
+					width="40"
+				/>
+			);
+
 		default:
 			return <IntegrationIcon />;
 	}

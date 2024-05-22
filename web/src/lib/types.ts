@@ -41,6 +41,7 @@ export const INTEGRATION_TYPES = [
 	IntegrationType.VIRUSTOTAL,
 	IntegrationType.ALIENVAULT_OTX,
 	IntegrationType.THREATPOST,
+	IntegrationType.YARAIFY,
 ];
 
 export type IntegrationApiParameter = {

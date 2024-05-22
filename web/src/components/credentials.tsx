@@ -358,8 +358,13 @@ export default function Credentials() {
 							</DropdownMenu.Trigger>
 
 							<DropdownMenu.Content variant="soft">
-								{Object.keys(INTEGRATIONS).map(
-									(integration: string) => (
+								{Object.keys(INTEGRATIONS)
+									.filter(
+										(integration: string) =>
+											INTEGRATIONS[integration]
+												.credentials.length > 0,
+									)
+									.map((integration: string) => (
 										<DropdownMenu.Item
 											key={`credentials_integrations_${integration}`}
 											style={{
@@ -407,8 +412,7 @@ export default function Credentials() {
 												</Text>
 											</Grid>
 										</DropdownMenu.Item>
-									),
-								)}
+									))}
 								<DropdownMenu.Item
 									style={{
 										cursor: "pointer",

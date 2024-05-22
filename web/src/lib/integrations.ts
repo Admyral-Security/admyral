@@ -141,5 +141,151 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 			},
 		],
 	},
+	// YARAify
+	[IntegrationType.YARAIFY]: {
+		name: "YARAify",
+		integrationType: IntegrationType.YARAIFY,
+		credentials: [],
+		apis: [
+			{
+				id: "QUERY_A_FILE_HASH",
+				name: "Query a File Hash",
+				description:
+					"Query YARAify for a file hash (SHA256, MD5, SHA1, SHA3-384)",
+				documentationUrl:
+					"https://yaraify.abuse.ch/api/#query-filehash",
+				parameters: [
+					{
+						id: "hash",
+						displayName: "Hash",
+						description: "The file's hash",
+						required: true,
+					},
+				],
+				requiresAuthentication: false,
+			},
+			{
+				id: "QUERY_YARA_RULE",
+				name: "Query YARA Rule",
+				description:
+					"Get a list of recent files matching a specific YARA rule",
+				documentationUrl: "https://yaraify.abuse.ch/api/#yara",
+				parameters: [
+					{
+						id: "yara",
+						displayName: "YARA",
+						description: "YARA rule to query for",
+						required: true,
+					},
+				],
+				requiresAuthentication: false,
+			},
+			{
+				id: "QUERY_CLAMAV_SIGNATURE",
+				name: "Query ClamAV Signature",
+				description:
+					"Get a list of recent files associated with a specific ClamAV signature",
+				documentationUrl: "https://yaraify.abuse.ch/api/#clamav",
+				parameters: [
+					{
+						id: "clamav",
+						displayName: "ClamAV Signature",
+						description: "ClamAV Signature to query for",
+						required: true,
+					},
+				],
+				requiresAuthentication: false,
+			},
+			{
+				id: "QUERY_IMPHASH",
+				name: "Query imphash",
+				description:
+					"Get a list of recent files associated with a specific imphash",
+				documentationUrl: "https://yaraify.abuse.ch/api/#imphash",
+				parameters: [
+					{
+						id: "imphash",
+						displayName: "imphash",
+						description: "imphash to query for",
+						required: true,
+					},
+				],
+				requiresAuthentication: false,
+			},
+			{
+				id: "QUERY_TLSH",
+				name: "Query tlsh",
+				description:
+					"Get a list of recent files associated with a tlsh",
+				documentationUrl: "https://yaraify.abuse.ch/api/#tlsh",
+				parameters: [
+					{
+						id: "tlsh",
+						displayName: "tlsh",
+						description: "tlsh to query for",
+						required: true,
+					},
+				],
+				requiresAuthentication: false,
+			},
+			{
+				id: "QUERY_TELFHASH",
+				name: "Query telfhash",
+				description:
+					"Get a list of recent files associated with a specific telfhash",
+				documentationUrl: "https://yaraify.abuse.ch/api/#telfhash",
+				parameters: [
+					{
+						id: "telfhash",
+						displayName: "telfhash",
+						description: "telfhash to query for",
+						required: true,
+					},
+				],
+				requiresAuthentication: false,
+			},
+			{
+				id: "QUERY_GIMPHASH",
+				name: "Query gimphash",
+				description:
+					"Get a list of recent files associated with a specific gimphash",
+				documentationUrl: "https://yaraify.abuse.ch/api/#gimphash",
+				parameters: [
+					{
+						id: "gimphash",
+						displayName: "gimphash",
+						description: "gimphash to query for",
+						required: true,
+					},
+				],
+				requiresAuthentication: false,
+			},
+			{
+				id: "QUERY_ICON_DHASH",
+				name: "Query icon dhash",
+				description:
+					"Get a list of recent files associated with a specific icon dhash",
+				documentationUrl: "https://yaraify.abuse.ch/api/#dhash_icon",
+				parameters: [
+					{
+						id: "icon_dhash",
+						displayName: "icon dhash",
+						description: "icon dhash to query for",
+						required: true,
+					},
+				],
+				requiresAuthentication: false,
+			},
+			{
+				id: "LIST_RECENTLY_DEPLOYED_YARA_RULES",
+				name: "List Recently Deployed YARA Rules",
+				description:
+					"Get a list of the most recent deployed YARA rules on YARAify",
+				documentationUrl: "https://yaraify.abuse.ch/api/#yara-recent",
+				parameters: [],
+				requiresAuthentication: false,
+			},
+		],
+	},
 	// ...
 };

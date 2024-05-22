@@ -8,6 +8,7 @@ mod alienvault_otx;
 mod threatpost;
 mod utils;
 mod virustotal;
+mod yaraify;
 
 pub trait IntegrationExecutor {
     async fn execute(
@@ -25,6 +26,7 @@ pub enum IntegrationType {
     VirusTotal,
     AlienvaultOtx,
     Threatpost,
+    Yaraify,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -50,6 +52,11 @@ impl ActionExecutor for Integration {
             }
             IntegrationType::Threatpost => {
                 threatpost::ThreatpostExecutor
+                    .execute(context, &self.api, &self.credential, &self.params)
+                    .await
+            }
+            IntegrationType::Yaraify => {
+                yaraify::YaraifyExecutor
                     .execute(context, &self.api, &self.credential, &self.params)
                     .await
             }
