@@ -26,7 +26,7 @@ Admyral is an open-source Cybersecurity Automation & Investigation Assistant. Ad
 1. A unified console to perform investigations and handle incidents 📺
 2. A seamless workflow automation creation -- even during incident triage, investigation, or response 👷
 3. Automatic alert investigation as well as next step suggestions for analysts 🧑‍✈️
-4. Workflow automation recommendations for individual cases as well as workflow automation creation through natural language 🤖
+4. Recommendations for automating workflows 🤖
 
 Through Admyral's Assistant functionality, Admyral seeks to provide a new, more effective, and scalable approach for tackling alert fatigue and automating security workflows.
 
