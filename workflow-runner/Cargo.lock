@@ -2824,9 +2824,11 @@ version = "0.1.0"
 dependencies = [
  "aes-gcm",
  "anyhow",
+ "async-trait",
  "async_once",
  "axum",
  "axum-extra",
+ "base64 0.22.1",
  "enum_dispatch",
  "futures",
  "hex",

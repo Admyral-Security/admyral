@@ -27,6 +27,9 @@ impl IntegrationExecutor for PhishReportExecutor {
         credential_name: &str,
         parameters: &HashMap<String, String>,
     ) -> Result<serde_json::Value> {
+        // TODO: fetch secret here and then pass down
+        // TODO: clone client here
+
         match api {
             "GET_HOSTING_CONTACT_INFORMATION" => {
                 get_hosting_contact_information(context, credential_name, parameters).await

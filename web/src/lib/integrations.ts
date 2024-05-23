@@ -33,36 +33,6 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 				],
 				requiresAuthentication: true,
 			},
-			// {
-			// 	id: "SCAN_URL",
-			// 	name: "Scan URL",
-			// 	description: "TODO: ...",
-			// 	documentationUrl:
-			// 		"https://docs.virustotal.com/reference/scan-url",
-			// 	parameters: [
-			// 		{
-			// 			id: "url",
-			// 			displayName: "URL",
-			// 			description: "The URL to scan",
-			// 			required: true,
-			// 		},
-			// 	],
-			// },
-			// {
-			// 	id: "GET_A_URL_ANALYSIS_REPORT",
-			// 	name: "Get a URL analysis report",
-			// 	description: "TODO: ...",
-			// 	documentationUrl:
-			// 		"https://docs.virustotal.com/reference/url-info",
-			// 	parameters: [
-			// 		{
-			// 			id: "id",
-			// 			displayName: "ID",
-			// 			description: "The URL's id or base64 encoded URL",
-			// 			required: true,
-			// 		},
-			// 	],
-			// },
 			{
 				id: "GET_A_DOMAIN_REPORT",
 				name: "Get a domain report",
@@ -98,6 +68,216 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 					},
 				],
 				requiresAuthentication: true,
+			},
+			{
+				id: "GET_URL_ANALYSIS_REPORT",
+				name: "Get URL analysis report",
+				description: "Retrieve information about a URL.",
+				documentationUrl:
+					"https://docs.virustotal.com/reference/url-info",
+				parameters: [
+					{
+						id: "url",
+						displayName: "URL",
+						description: "The URL to get a report for",
+						required: true,
+						dataType: ApiParameterDatatype.STRING,
+					},
+				],
+				requiresAuthentication: true,
+			},
+			{
+				id: "GET_FILE_BEHAVIOR_REPORTS_SUMMARY",
+				name: "Get a summary of all behavior reports for a file",
+				description:
+					"Retrieve a summary of all behavior reports for a file consisting in merging together the reports produced by multiple sandboxes.",
+				documentationUrl:
+					"https://docs.virustotal.com/reference/file-all-behaviours-summary",
+				parameters: [
+					{
+						id: "hash",
+						displayName: "Hash",
+						description:
+							"SHA-256, SHA-1 or MD5 identifying the file",
+						required: true,
+						dataType: ApiParameterDatatype.STRING,
+					},
+				],
+				requiresAuthentication: true,
+			},
+			{
+				id: "GET_VOTES_ON_A_DOMAIN",
+				name: "Get votes on a domain",
+				description: "Retrieve the votes for a domain.",
+				documentationUrl:
+					"https://docs.virustotal.com/reference/domains-votes-get",
+				parameters: [
+					{
+						id: "domain",
+						displayName: "Domain",
+						description: "The domain to get votes for.",
+						required: true,
+						dataType: ApiParameterDatatype.STRING,
+					},
+				],
+				requiresAuthentication: true,
+			},
+			{
+				id: "GET_VOTES_ON_A_FILE",
+				name: "Get votes on a file",
+				description: "Retrieve the votes for a domain.",
+				documentationUrl:
+					"https://docs.virustotal.com/reference/files-votes-get",
+				parameters: [
+					{
+						id: "hash",
+						displayName: "Hash",
+						description:
+							"SHA-256, SHA-1 or MD5 identifying the file",
+						required: true,
+						dataType: ApiParameterDatatype.STRING,
+					},
+				],
+				requiresAuthentication: true,
+			},
+			{
+				id: "GET_VOTES_ON_AN_IP_ADDRESS",
+				name: "Get votes on an IP address",
+				description: "Retrieve the votes for an IP address.",
+				documentationUrl:
+					"https://docs.virustotal.com/reference/ip-votes",
+				requiresAuthentication: true,
+				parameters: [
+					{
+						id: "ip",
+						displayName: "IP Address",
+						description: "The IP address to get votes for.",
+						required: true,
+						dataType: ApiParameterDatatype.STRING,
+					},
+				],
+			},
+			{
+				id: "GET_VOTES_ON_A_URL",
+				name: "Get votes on a URL",
+				description: "Retrieve the votes for a URL.",
+				documentationUrl:
+					"https://docs.virustotal.com/reference/urls-votes-get",
+				requiresAuthentication: true,
+				parameters: [
+					{
+						id: "url",
+						displayName: "URL",
+						description: "The URL to get votes for.",
+						required: true,
+						dataType: ApiParameterDatatype.STRING,
+					},
+				],
+			},
+			{
+				id: "SCAN_URL",
+				name: "Scan a URL",
+				description: "Submit a URL for scanning.",
+				documentationUrl:
+					"https://docs.virustotal.com/reference/scan-url",
+				requiresAuthentication: true,
+				parameters: [
+					{
+						id: "url",
+						displayName: "URL",
+						description: "The URL to scan.",
+						required: true,
+						dataType: ApiParameterDatatype.STRING,
+					},
+				],
+			},
+			{
+				id: "GET_COMMENTS_IP_ADDRESS",
+				name: "Get comments on an IP address",
+				description: "Retrieve the comments for an IP address.",
+				documentationUrl:
+					"https://docs.virustotal.com/reference/ip-comments-get",
+				requiresAuthentication: true,
+				parameters: [
+					{
+						id: "ip",
+						displayName: "IP Address",
+						description: "The IP address to get comments for.",
+						required: true,
+						dataType: ApiParameterDatatype.STRING,
+					},
+				],
+			},
+			{
+				id: "GET_COMMENTS_DOMAIN",
+				name: "Get comments on a domain",
+				description: "Retrieve the comments for a domain.",
+				documentationUrl:
+					"https://docs.virustotal.com/reference/domains-comments-get",
+				requiresAuthentication: true,
+				parameters: [
+					{
+						id: "domain",
+						displayName: "Domain",
+						description: "The domain to get comments for.",
+						required: true,
+						dataType: ApiParameterDatatype.STRING,
+					},
+				],
+			},
+			{
+				id: "GET_COMMENTS_FILE",
+				name: "Get comments on a file",
+				description: "Retrieve the comments for a file.",
+				documentationUrl:
+					"https://docs.virustotal.com/reference/files-comments-get",
+				requiresAuthentication: true,
+				parameters: [
+					{
+						id: "hash",
+						displayName: "Hash",
+						description:
+							"SHA-256, SHA-1 or MD5 identifying the file",
+						required: true,
+						dataType: ApiParameterDatatype.STRING,
+					},
+				],
+			},
+			{
+				id: "GET_COMMENTS_URL",
+				name: "Get comments on a URL",
+				description: "Retrieve the comments for a URL.",
+				documentationUrl:
+					"https://docs.virustotal.com/reference/urls-comments-get",
+				requiresAuthentication: true,
+				parameters: [
+					{
+						id: "url",
+						displayName: "URL",
+						description: "The URL to get comments for.",
+						required: true,
+						dataType: ApiParameterDatatype.STRING,
+					},
+				],
+			},
+			{
+				id: "SEARCH",
+				name: "Search for files, URLs, domains, IPs, and comments",
+				description:
+					"This endpoint searches for file hashes, URLs, domains, IPs, and comments by tags",
+				documentationUrl:
+					"https://docs.virustotal.com/reference/api-search",
+				requiresAuthentication: true,
+				parameters: [
+					{
+						id: "query",
+						displayName: "Query",
+						description:
+							"File hash, URL, domain, IP, or comment by tag (e.g. #tag)",
+						required: true,
+						dataType: ApiParameterDatatype.STRING,
+					},
+				],
 			},
 		],
 	},
@@ -303,7 +483,7 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 			},
 		],
 	},
-	// PhishReport
+	// Phish Report
 	[IntegrationType.PHISH_REPORT]: {
 		name: "Phish Report",
 		integrationType: IntegrationType.PHISH_REPORT,

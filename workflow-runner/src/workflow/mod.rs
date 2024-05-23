@@ -9,6 +9,7 @@ mod manual_start_action;
 mod reference_resolution;
 mod send_email_action;
 mod webhook_action;
+mod http_client;
 
 use self::executor::WorkflowExecutor;
 use crate::postgres::fetch_workflow_data;

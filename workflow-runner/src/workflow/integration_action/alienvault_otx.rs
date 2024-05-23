@@ -29,6 +29,9 @@ impl IntegrationExecutor for AlienvaultOtxExecutor {
         credential_name: &str,
         parameters: &HashMap<String, String>,
     ) -> Result<serde_json::Value> {
+        // TODO: fetch secret here and then pass down
+        // TODO: create client here and then pass down
+
         match api {
             "GET_DOMAIN_INFORMATION" => {
                 get_domain_information(context, credential_name, parameters).await
