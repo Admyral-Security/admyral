@@ -44,11 +44,17 @@ export const INTEGRATION_TYPES = [
 	IntegrationType.YARAIFY,
 ];
 
+export enum ApiParameterDatatype {
+	STRING = "STRING",
+	BOOLEAN = "BOOLEAN",
+}
+
 export type IntegrationApiParameter = {
 	id: string;
 	displayName: string;
 	description: string;
 	required: boolean;
+	dataType: ApiParameterDatatype;
 };
 
 export type IntegrationApiDefinition = {

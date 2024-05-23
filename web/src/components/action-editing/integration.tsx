@@ -5,6 +5,7 @@ import CopyText from "../copy-text";
 import { generateReferenceHandle } from "@/lib/workflow-node";
 import { cloneDeep } from "lodash";
 import {
+	ApiParameterDatatype,
 	Credential,
 	IntegrationData,
 	IntegrationType,
@@ -207,21 +208,52 @@ export default function Integration({ id }: IntegrationProps) {
 					</Flex>
 
 					<Flex direction="column" gap="0">
-						<TextField.Root
-							variant="surface"
-							value={
-								(data.actionDefinition as any).params[
-									parameter.id
-								]
-							}
-							onChange={(event) => {
-								const clonedData = cloneDeep(data);
-								(clonedData.actionDefinition as any).params[
-									parameter.id
-								] = event.target.value;
-								updateData(clonedData);
-							}}
-						/>
+						{parameter.dataType === ApiParameterDatatype.STRING && (
+							<TextField.Root
+								variant="surface"
+								value={
+									(data.actionDefinition as any).params[
+										parameter.id
+									]
+								}
+								onChange={(event) => {
+									const clonedData = cloneDeep(data);
+									(clonedData.actionDefinition as any).params[
+										parameter.id
+									] = event.target.value;
+									updateData(clonedData);
+								}}
+							/>
+						)}
+						{parameter.dataType ===
+							ApiParameterDatatype.BOOLEAN && (
+							<Select.Root
+								value={
+									(data.actionDefinition as any).params[
+										parameter.id
+									] === undefined
+										? undefined
+										: (data.actionDefinition as any).params[
+												parameter.id
+											].toString()
+								}
+								onValueChange={(value) => {
+									const clonedData = cloneDeep(data);
+									(clonedData.actionDefinition as any).params[
+										parameter.id
+									] = value === "true";
+									updateData(clonedData);
+								}}
+							>
+								<Select.Trigger placeholder="Select a value" />
+								<Select.Content>
+									<Select.Item value="true">true</Select.Item>
+									<Select.Item value="false">
+										false
+									</Select.Item>
+								</Select.Content>
+							</Select.Root>
+						)}
 						{parameter.required && (
 							<Flex justify="end">
 								<Text size="1">Required</Text>
