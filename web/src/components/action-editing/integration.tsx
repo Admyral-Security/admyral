@@ -199,23 +199,35 @@ export default function Integration({ id }: IntegrationProps) {
 
 			{apiDefinition.parameters.map((parameter) => (
 				<Flex direction="column" gap="2" key={parameter.id}>
-					<Text>
-						{parameter.displayName}
-						{parameter.required ? "" : " (Optional)"}
-					</Text>
-					<TextField.Root
-						variant="surface"
-						value={
-							(data.actionDefinition as any).params[parameter.id]
-						}
-						onChange={(event) => {
-							const clonedData = cloneDeep(data);
-							(clonedData.actionDefinition as any).params[
-								parameter.id
-							] = event.target.value;
-							updateData(clonedData);
-						}}
-					/>
+					<Flex direction="column" gap="0">
+						<Text>{parameter.displayName}</Text>
+						<Text color="gray" weight="light" size="1">
+							{parameter.description}
+						</Text>
+					</Flex>
+
+					<Flex direction="column" gap="0">
+						<TextField.Root
+							variant="surface"
+							value={
+								(data.actionDefinition as any).params[
+									parameter.id
+								]
+							}
+							onChange={(event) => {
+								const clonedData = cloneDeep(data);
+								(clonedData.actionDefinition as any).params[
+									parameter.id
+								] = event.target.value;
+								updateData(clonedData);
+							}}
+						/>
+						{parameter.required && (
+							<Flex justify="end">
+								<Text size="1">Required</Text>
+							</Flex>
+						)}
+					</Flex>
 				</Flex>
 			))}
 		</Flex>
