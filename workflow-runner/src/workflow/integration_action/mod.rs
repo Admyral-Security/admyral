@@ -5,6 +5,7 @@ use std::collections::HashMap;
 use super::{context::Context, ActionExecutor};
 
 mod alienvault_otx;
+mod phish_report;
 mod threatpost;
 mod utils;
 mod virustotal;
@@ -27,6 +28,7 @@ pub enum IntegrationType {
     AlienvaultOtx,
     Threatpost,
     Yaraify,
+    PhishReport,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -57,6 +59,11 @@ impl ActionExecutor for Integration {
             }
             IntegrationType::Yaraify => {
                 yaraify::YaraifyExecutor
+                    .execute(context, &self.api, &self.credential, &self.params)
+                    .await
+            }
+            IntegrationType::PhishReport => {
+                phish_report::PhishReportExecutor
                     .execute(context, &self.api, &self.credential, &self.params)
                     .await
             }

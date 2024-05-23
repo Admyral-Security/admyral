@@ -33,7 +33,7 @@ export function getIntegrationTypeLabel(integrationType: IntegrationType) {
 		case IntegrationType.THREATPOST:
 			return "Threatpost";
 		case IntegrationType.PHISH_REPORT:
-			return "PhishReport";
+			return "Phish Report";
 	}
 }
 
@@ -42,6 +42,7 @@ export const INTEGRATION_TYPES = [
 	IntegrationType.ALIENVAULT_OTX,
 	IntegrationType.THREATPOST,
 	IntegrationType.YARAIFY,
+	IntegrationType.PHISH_REPORT,
 ];
 
 export enum ApiParameterDatatype {
@@ -290,7 +291,7 @@ export type WorkflowRunEvent = {
 	actionType: ActionNode;
 	actionName: string;
 	actionDefinition: Record<string, any>;
-	actionState: Record<string, any>;
+	actionState: any;
 	prevActionStateId: string | null;
 	isError: boolean;
 };

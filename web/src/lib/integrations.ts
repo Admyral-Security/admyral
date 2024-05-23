@@ -26,7 +26,7 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 					{
 						id: "hash",
 						displayName: "Hash",
-						description: "The file's hash",
+						description: "The file's hash.",
 						required: true,
 						dataType: ApiParameterDatatype.STRING,
 					},
@@ -74,7 +74,7 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 					{
 						id: "domain",
 						displayName: "Domain",
-						description: "The domain to get a report for",
+						description: "The domain to get a report for.",
 						required: true,
 						dataType: ApiParameterDatatype.STRING,
 					},
@@ -123,7 +123,7 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 					{
 						id: "domain",
 						displayName: "Domain",
-						description: "The domain to get a report for",
+						description: "The domain to get a report for.",
 						required: true,
 						dataType: ApiParameterDatatype.STRING,
 					},
@@ -166,7 +166,7 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 					{
 						id: "hash",
 						displayName: "Hash",
-						description: "The file's hash",
+						description: "The file's hash.",
 						required: true,
 						dataType: ApiParameterDatatype.STRING,
 					},
@@ -183,7 +183,7 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 					{
 						id: "yara",
 						displayName: "YARA",
-						description: "YARA rule to query for",
+						description: "The YARA rule to query for.",
 						required: true,
 						dataType: ApiParameterDatatype.STRING,
 					},
@@ -200,7 +200,7 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 					{
 						id: "clamav",
 						displayName: "ClamAV Signature",
-						description: "ClamAV Signature to query for",
+						description: "The ClamAV Signature to query for.",
 						required: true,
 						dataType: ApiParameterDatatype.STRING,
 					},
@@ -217,7 +217,7 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 					{
 						id: "imphash",
 						displayName: "imphash",
-						description: "imphash to query for",
+						description: "The imphash to query for.",
 						required: true,
 						dataType: ApiParameterDatatype.STRING,
 					},
@@ -234,7 +234,7 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 					{
 						id: "tlsh",
 						displayName: "tlsh",
-						description: "tlsh to query for",
+						description: "The tlsh to query for.",
 						required: true,
 						dataType: ApiParameterDatatype.STRING,
 					},
@@ -251,7 +251,7 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 					{
 						id: "telfhash",
 						displayName: "telfhash",
-						description: "telfhash to query for",
+						description: "The telfhash to query for.",
 						required: true,
 						dataType: ApiParameterDatatype.STRING,
 					},
@@ -268,7 +268,7 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 					{
 						id: "gimphash",
 						displayName: "gimphash",
-						description: "gimphash to query for",
+						description: "The gimphash to query for.",
 						required: true,
 						dataType: ApiParameterDatatype.STRING,
 					},
@@ -285,7 +285,7 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 					{
 						id: "icon_dhash",
 						displayName: "icon dhash",
-						description: "icon dhash to query for",
+						description: "The icon dhash to query for.",
 						required: true,
 						dataType: ApiParameterDatatype.STRING,
 					},
@@ -300,6 +300,119 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 				documentationUrl: "https://yaraify.abuse.ch/api/#yara-recent",
 				parameters: [],
 				requiresAuthentication: false,
+			},
+		],
+	},
+	// PhishReport
+	[IntegrationType.PHISH_REPORT]: {
+		name: "Phish Report",
+		integrationType: IntegrationType.PHISH_REPORT,
+		credentials: [
+			{
+				id: "API_KEY",
+				displayName: "API Key",
+			},
+		],
+		apis: [
+			{
+				id: "GET_HOSTING_CONTACT_INFORMATION",
+				name: "Get Hosting Providers and Abuse Contact Information for an URL/IP",
+				description:
+					"Finds the best way to report a URL/IP to the relevant hosting providers and domain registrars.",
+				documentationUrl:
+					"https://phish.report/api/v0#tag/Analysis/paths/~1api~1v0~1hosting/get",
+				parameters: [
+					{
+						id: "url",
+						displayName: "URL",
+						description:
+							"The URL, domain, or IP address to find abuse contact information for.",
+						required: true,
+						dataType: ApiParameterDatatype.STRING,
+					},
+				],
+				requiresAuthentication: true,
+			},
+			{
+				id: "LIST_TAKEDOWNS",
+				name: "List Takedowns",
+				description:
+					"Retrieve a list of takedowns you've previously reported",
+				documentationUrl:
+					"https://phish.report/api/v0#tag/Takedown/paths/~1api~1v0~1cases/get",
+				parameters: [],
+				requiresAuthentication: true,
+			},
+			{
+				id: "START_TAKEDOWN",
+				name: "Start a Takedown",
+				description:
+					"Start the takedown of a URL you've identified as malicious. Phish Report will complete all available automatic takedown steps, and return a list of recommended manual actions.",
+				documentationUrl:
+					"https://phish.report/api/v0#tag/Takedown/paths/~1api~1v0~1cases/post",
+				parameters: [
+					{
+						id: "url",
+						displayName: "Phishing URL",
+						description:
+							"The phishing URL to take down. You should have high confidence that this URL is malicious.",
+						required: true,
+						dataType: ApiParameterDatatype.STRING,
+					},
+					{
+						id: "ignore_duplicates",
+						displayName: "Ignore Duplicates",
+						description:
+							"By default, trying to create a duplicate case will fail. Setting this to true will allow duplictes.",
+						required: false,
+						dataType: ApiParameterDatatype.BOOLEAN,
+					},
+				],
+				requiresAuthentication: true,
+			},
+			{
+				id: "GET_TAKEDOWN",
+				name: "Get a Takedown",
+				description:
+					"Retrieve the takedown information for an URL you've previously reported.",
+				documentationUrl:
+					"https://phish.report/api/v0#tag/Takedown/paths/~1api~1v0~1cases~1%7Bid%7D/get",
+				requiresAuthentication: true,
+				parameters: [
+					{
+						id: "id",
+						displayName: "Case ID",
+						description: "The ID of the takedown request.",
+						required: true,
+						dataType: ApiParameterDatatype.STRING,
+					},
+				],
+			},
+			{
+				id: "CLOSE_TAKEDOWN_CASE",
+				name: "Close a Takedown Case",
+				description:
+					"Close a takedown case you've previously reported (e.g. because the site is not longer active).",
+				documentationUrl:
+					"https://phish.report/api/v0#tag/Takedown/paths/~1api~1v0~1cases~1%7Bid%7D~1close/put",
+				requiresAuthentication: true,
+				parameters: [
+					{
+						id: "id",
+						displayName: "Case ID",
+						description: "The ID of the takedown request.",
+						required: true,
+						dataType: ApiParameterDatatype.STRING,
+					},
+					{
+						id: "comment",
+						displayName: "Comment",
+						description:
+							"An optional comment explaining why the case is being closed.",
+						required: false,
+						dataType: ApiParameterDatatype.STRING,
+					},
+				],
 			},
 		],
 	},

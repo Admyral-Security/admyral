@@ -1,4 +1,4 @@
-use super::IntegrationExecutor;
+use super::{utils::ParameterType, IntegrationExecutor};
 use crate::{
     postgres::fetch_secret,
     workflow::{context, integration_action::utils::get_string_parameter},
@@ -7,7 +7,6 @@ use anyhow::{anyhow, Result};
 use lazy_static::lazy_static;
 use reqwest::header::{HeaderMap, HeaderValue};
 use serde::{Deserialize, Serialize};
-use serde_json::json;
 use std::borrow::Borrow;
 use std::collections::HashMap;
 
@@ -83,9 +82,8 @@ async fn virus_total_get_request(
         tracing::error!(error_message);
         return Err(anyhow!(error_message));
     }
-    let data = response.json::<serde_json::Value>().await?;
 
-    Ok(json!(data))
+    Ok(response.json::<serde_json::Value>().await?)
 }
 
 // https://docs.virustotal.com/reference/file-info
@@ -100,8 +98,10 @@ async fn get_a_file_report(
         "GET_A_FILE_REPORT",
         parameters,
         context,
+        ParameterType::Required,
     )
-    .await?;
+    .await?
+    .expect("file_hash is required");
     let api_url = format!("https://www.virustotal.com/api/v3/files/{file_hash}");
     virus_total_get_request(&api_url, credential_name, context).await
 }
@@ -118,8 +118,10 @@ async fn get_a_domain_report(
         "GET_A_DOMAIN_REPORT",
         parameters,
         context,
+        ParameterType::Required,
     )
-    .await?;
+    .await?
+    .expect("domain is required");
     let api_url = format!("https://www.virustotal.com/api/v3/domains/{domain}");
     virus_total_get_request(&api_url, credential_name, context).await
 }
@@ -136,8 +138,10 @@ async fn get_ip_address_report(
         "GET_IP_ADDRESS_REPORT",
         parameters,
         context,
+        ParameterType::Required,
     )
-    .await?;
+    .await?
+    .expect("ip is required");
     let api_url = format!("https://www.virustotal.com/api/v3/ip_addresses/{ip}");
     virus_total_get_request(&api_url, credential_name, context).await
 }

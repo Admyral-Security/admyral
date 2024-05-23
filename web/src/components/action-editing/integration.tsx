@@ -101,9 +101,11 @@ export default function Integration({ id }: IntegrationProps) {
 	return (
 		<Flex direction="column" gap="4" p="4">
 			<Flex gap="4" align="center">
-				<IntegrationLogoIconCard
-					integration={integration.integrationType}
-				/>
+				<Flex>
+					<IntegrationLogoIconCard
+						integration={integration.integrationType}
+					/>
+				</Flex>
 
 				<Flex direction="column">
 					<Text weight="medium">
@@ -174,27 +176,36 @@ export default function Integration({ id }: IntegrationProps) {
 			{requiresAuthentication && (
 				<Flex direction="column" gap="2">
 					<Text>Credential</Text>
-					<Select.Root
-						value={(data.actionDefinition as any).credential}
-						onValueChange={(credential) => {
-							const clonedData = cloneDeep(data);
-							(clonedData.actionDefinition as any).credential =
-								credential;
-							updateData(clonedData);
-						}}
-					>
-						<Select.Trigger placeholder="Select a credential" />
-						<Select.Content>
-							{availableCredentials.map((credential: string) => (
-								<Select.Item
-									key={credential}
-									value={credential}
-								>
-									{credential}
-								</Select.Item>
-							))}
-						</Select.Content>
-					</Select.Root>
+					<Flex direction="column" gap="0">
+						<Select.Root
+							value={(data.actionDefinition as any).credential}
+							onValueChange={(credential) => {
+								const clonedData = cloneDeep(data);
+								(
+									clonedData.actionDefinition as any
+								).credential = credential;
+								updateData(clonedData);
+							}}
+						>
+							<Select.Trigger placeholder="Select a credential" />
+							<Select.Content>
+								{availableCredentials.map(
+									(credential: string) => (
+										<Select.Item
+											key={credential}
+											value={credential}
+										>
+											{credential}
+										</Select.Item>
+									),
+								)}
+							</Select.Content>
+						</Select.Root>
+
+						<Flex justify="end">
+							<Text size="1">Required</Text>
+						</Flex>
+					</Flex>
 				</Flex>
 			)}
 
@@ -254,11 +265,13 @@ export default function Integration({ id }: IntegrationProps) {
 								</Select.Content>
 							</Select.Root>
 						)}
-						{parameter.required && (
-							<Flex justify="end">
+						<Flex justify="end">
+							{parameter.required ? (
 								<Text size="1">Required</Text>
-							</Flex>
-						)}
+							) : (
+								<Text size="1">Optional</Text>
+							)}
+						</Flex>
 					</Flex>
 				</Flex>
 			))}

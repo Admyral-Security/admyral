@@ -6,22 +6,19 @@ use std::collections::HashMap;
 
 pub async fn get_parameter(
     parameter_name: &str,
-    integration_name: &str,
-    api_name: &str,
     parameters: &HashMap<String, String>,
     context: &context::Context,
-) -> Result<serde_json::Value> {
+) -> Result<Option<serde_json::Value>> {
     match parameters.get(parameter_name) {
-        None => {
-            tracing::error!(
-                "Missing parameter \"{parameter_name}\" for {integration_name} {api_name}"
-            );
-            Err(anyhow!(
-                "Missing parameter \"{parameter_name}\" for {integration_name} {api_name}"
-            ))
-        }
-        Some(value) => Ok(resolve_references(value, context).await?.value),
+        None => Ok(None),
+        Some(value) => Ok(Some(resolve_references(value, context).await?.value)),
     }
+}
+
+#[derive(Debug, Clone, Copy, Eq, PartialEq)]
+pub enum ParameterType {
+    Required,
+    Optional,
 }
 
 pub async fn get_string_parameter(
@@ -30,22 +27,61 @@ pub async fn get_string_parameter(
     api_name: &str,
     parameters: &HashMap<String, String>,
     context: &context::Context,
-) -> Result<String> {
-    let result = get_parameter(
-        parameter_name,
-        integration_name,
-        api_name,
-        parameters,
-        context,
-    )
-    .await?;
+    parameter_type: ParameterType,
+) -> Result<Option<String>> {
+    let result = get_parameter(parameter_name, parameters, context).await?;
 
-    match result.clone() {
-        serde_json::Value::String(value) => Ok(value),
-        _ => {
-            tracing::error!("Invalid \"{parameter_name}\" parameter for {integration_name} {api_name} API because not a string: {:?}", result);
-            return Err(anyhow!("Invalid \"{parameter_name}\" parameter for {integration_name} {api_name} API because not a string."));
-        }
+    match result {
+        None => match parameter_type {
+            ParameterType::Optional => Ok(None),
+            ParameterType::Required => {
+                tracing::error!(
+                    "Missing parameter \"{parameter_name}\" for {integration_name} {api_name}"
+                );
+                Err(anyhow!(
+                    "Missing parameter \"{parameter_name}\" for {integration_name} {api_name}"
+                ))
+            }
+        },
+        Some(result) => match result.clone() {
+            serde_json::Value::String(value) => Ok(Some(value)),
+            _ => {
+                tracing::error!("Invalid \"{parameter_name}\" parameter for {integration_name} {api_name} API because not a string: {:?}", result);
+                return Err(anyhow!("Invalid \"{parameter_name}\" parameter for {integration_name} {api_name} API because not a string."));
+            }
+        },
+    }
+}
+
+pub async fn get_bool_parameter(
+    parameter_name: &str,
+    integration_name: &str,
+    api_name: &str,
+    parameters: &HashMap<String, String>,
+    context: &context::Context,
+    parameter_type: ParameterType,
+) -> Result<Option<bool>> {
+    let result = get_parameter(parameter_name, parameters, context).await?;
+
+    match result {
+        None => match parameter_type {
+            ParameterType::Optional => Ok(None),
+            ParameterType::Required => {
+                tracing::error!(
+                    "Missing parameter \"{parameter_name}\" for {integration_name} {api_name}"
+                );
+                Err(anyhow!(
+                    "Missing parameter \"{parameter_name}\" for {integration_name} {api_name}"
+                ))
+            }
+        },
+        Some(result) => match result.clone() {
+            serde_json::Value::Bool(value) => Ok(Some(value)),
+            _ => {
+                tracing::error!("Invalid \"{parameter_name}\" parameter for {integration_name} {api_name} API because not a bool: {:?}", result);
+                return Err(anyhow!("Invalid \"{parameter_name}\" parameter for {integration_name} {api_name} API because not a bool."));
+            }
+        },
     }
 }
 

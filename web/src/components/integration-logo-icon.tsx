@@ -50,6 +50,16 @@ export default function IntegrationLogoIcon({
 				/>
 			);
 
+		case IntegrationType.PHISH_REPORT:
+			return (
+				<Image
+					src="/phish_report.svg"
+					alt="Phish Report"
+					height="20"
+					width="20"
+				/>
+			);
+
 		default:
 			return <IntegrationIcon />;
 	}

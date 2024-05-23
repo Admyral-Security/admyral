@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Any, Optional
 
 from fastapi import APIRouter, Depends, status, HTTPException
 from sqlmodel.ext.asyncio.session import AsyncSession
@@ -666,7 +666,7 @@ class WorkflowRunEvent(BaseModel):
     action_name: str
     action_type: ActionType
     action_definition: dict
-    action_state: dict
+    action_state: Any 
     prev_action_state_id: Optional[str]
     is_error: bool
 

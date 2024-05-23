@@ -1,4 +1,7 @@
-use super::{utils::get_string_parameter, IntegrationExecutor};
+use super::{
+    utils::{get_string_parameter, ParameterType},
+    IntegrationExecutor,
+};
 use crate::workflow::context;
 use anyhow::{anyhow, Result};
 use lazy_static::lazy_static;
@@ -65,9 +68,7 @@ async fn query_yaraify(query: &str, search_term_opt: Option<&str>) -> Result<ser
         tracing::error!(error_message);
         return Err(anyhow!(error_message));
     }
-    let data = response.json::<serde_json::Value>().await?;
-
-    Ok(json!(data))
+    Ok(response.json::<serde_json::Value>().await?)
 }
 
 // https://yaraify.abuse.ch/api/#query-filehash
@@ -75,8 +76,16 @@ async fn query_a_file_hash(
     context: &context::Context,
     parameters: &HashMap<String, String>,
 ) -> Result<serde_json::Value> {
-    let file_hash =
-        get_string_parameter("hash", YARAIFY, "QUERY_A_FILE_HASH", parameters, context).await?;
+    let file_hash = get_string_parameter(
+        "hash",
+        YARAIFY,
+        "QUERY_A_FILE_HASH",
+        parameters,
+        context,
+        ParameterType::Required,
+    )
+    .await?
+    .expect("file_hash is required");
     query_yaraify("lookup_hash", Some(&file_hash)).await
 }
 
@@ -85,8 +94,16 @@ async fn query_yara_rule(
     context: &context::Context,
     parameters: &HashMap<String, String>,
 ) -> Result<serde_json::Value> {
-    let yara_rule =
-        get_string_parameter("yara", YARAIFY, "QUERY_YARA_RULE", parameters, context).await?;
+    let yara_rule = get_string_parameter(
+        "yara",
+        YARAIFY,
+        "QUERY_YARA_RULE",
+        parameters,
+        context,
+        ParameterType::Required,
+    )
+    .await?
+    .expect("yara is required");
     query_yaraify("get_yara", Some(&yara_rule)).await
 }
 
@@ -101,8 +118,10 @@ async fn query_clamav_signature(
         "QUERY_CLAMAV_SIGNATURE",
         parameters,
         context,
+        ParameterType::Required,
     )
-    .await?;
+    .await?
+    .expect("clamav is required");
     query_yaraify("get_clamav", Some(&clamav)).await
 }
 
@@ -111,8 +130,16 @@ async fn query_imphash(
     context: &context::Context,
     parameters: &HashMap<String, String>,
 ) -> Result<serde_json::Value> {
-    let imphash =
-        get_string_parameter("imphash", YARAIFY, "QUERY_IMPHASH", parameters, context).await?;
+    let imphash = get_string_parameter(
+        "imphash",
+        YARAIFY,
+        "QUERY_IMPHASH",
+        parameters,
+        context,
+        ParameterType::Required,
+    )
+    .await?
+    .expect("imphash is required");
     query_yaraify("get_imphash", Some(&imphash)).await
 }
 
@@ -121,7 +148,16 @@ async fn query_tlsh(
     context: &context::Context,
     parameters: &HashMap<String, String>,
 ) -> Result<serde_json::Value> {
-    let tlsh = get_string_parameter("tlsh", YARAIFY, "QUERY_TLSH", parameters, context).await?;
+    let tlsh = get_string_parameter(
+        "tlsh",
+        YARAIFY,
+        "QUERY_TLSH",
+        parameters,
+        context,
+        ParameterType::Required,
+    )
+    .await?
+    .expect("tlsh is required");
     query_yaraify("get_tlsh", Some(&tlsh)).await
 }
 
@@ -130,8 +166,16 @@ async fn query_telfhash(
     context: &context::Context,
     parameters: &HashMap<String, String>,
 ) -> Result<serde_json::Value> {
-    let telfhash =
-        get_string_parameter("telfhash", YARAIFY, "QUERY_TELFHASH", parameters, context).await?;
+    let telfhash = get_string_parameter(
+        "telfhash",
+        YARAIFY,
+        "QUERY_TELFHASH",
+        parameters,
+        context,
+        ParameterType::Required,
+    )
+    .await?
+    .expect("telfhash is required");
     query_yaraify("get_telfhash", Some(&telfhash)).await
 }
 
@@ -140,8 +184,16 @@ async fn query_gimphash(
     context: &context::Context,
     parameters: &HashMap<String, String>,
 ) -> Result<serde_json::Value> {
-    let gimphash =
-        get_string_parameter("gimphash", YARAIFY, "QUERY_GIMPHASH", parameters, context).await?;
+    let gimphash = get_string_parameter(
+        "gimphash",
+        YARAIFY,
+        "QUERY_GIMPHASH",
+        parameters,
+        context,
+        ParameterType::Required,
+    )
+    .await?
+    .expect("gimphash is required");
     query_yaraify("get_gimphash", Some(&gimphash)).await
 }
 
@@ -156,8 +208,10 @@ async fn query_icon_dhash(
         "QUERY_ICON_DHASH",
         parameters,
         context,
+        ParameterType::Required,
     )
-    .await?;
+    .await?
+    .expect("icon_dhash is required");
     query_yaraify("get_dhash_icon", Some(&icon_dhash)).await
 }
 

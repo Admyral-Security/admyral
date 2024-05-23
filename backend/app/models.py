@@ -1,5 +1,5 @@
 from sqlmodel import SQLModel, Field, Relationship
-from typing import Optional
+from typing import Any, Optional
 from sqlalchemy.dialects.postgresql import UUID, TIMESTAMP, TEXT, JSONB, ENUM
 from datetime import datetime
 from sqlalchemy.sql.expression import func
@@ -186,7 +186,7 @@ class WorkflowRunActionState(Base, table=True):
     
     action_state_id: str = Field(primary_key=True, sa_type=UUID(as_uuid=False), sa_column_kwargs=dict(server_default=func.gen_random_uuid()))
     created_at: datetime = Field(sa_type=TIMESTAMP(), sa_column_kwargs=dict(server_default=func.now()))
-    action_state: dict = Field(sa_type=JSONB())
+    action_state: Any = Field(sa_type=JSONB())
     is_error: bool = Field(default=False)
 
     run_id: str = Field(

@@ -4,7 +4,6 @@ use anyhow::{anyhow, Result};
 use lazy_static::lazy_static;
 use reqwest::header::{HeaderMap, HeaderValue};
 use serde::{Deserialize, Serialize};
-use serde_json::json;
 use std::collections::HashMap;
 
 lazy_static! {
@@ -51,7 +50,5 @@ async fn fetch_rss_feed() -> Result<serde_json::Value> {
     }
 
     let xml = response.text().await?;
-    let data = xml_to_json(xml)?;
-
-    Ok(json!(data))
+    Ok(xml_to_json(xml)?)
 }

@@ -1,4 +1,4 @@
-use super::IntegrationExecutor;
+use super::{utils::ParameterType, IntegrationExecutor};
 use crate::{
     postgres::fetch_secret,
     workflow::{context, integration_action::utils::get_string_parameter},
@@ -80,9 +80,8 @@ async fn alienvault_get_request(
         tracing::error!(error_message);
         return Err(anyhow!(error_message));
     }
-    let data = response.json::<serde_json::Value>().await?;
 
-    Ok(json!(data))
+    Ok(response.json::<serde_json::Value>().await?)
 }
 
 // https://otx.alienvault.com/assets/static/external_api.html#api_v1_indicators_domain__domain___section__get
@@ -97,8 +96,10 @@ async fn get_domain_information(
         "GET_DOMAIN_INFORMATION",
         parameters,
         context,
+        ParameterType::Required,
     )
-    .await?;
+    .await?
+    .expect("domain is required");
     let api_url = format!("https://otx.alienvault.com/api/v1/indicators/domain/{domain}/general");
     alienvault_get_request(&api_url, credential_name, context).await
 }
