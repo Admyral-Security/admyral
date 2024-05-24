@@ -13,13 +13,12 @@ mod utils;
 mod webhook_action;
 
 use self::executor::WorkflowExecutor;
-use crate::postgres::fetch_workflow_data;
+use crate::postgres::Database;
 use anyhow::{anyhow, Result};
 use async_once::AsyncOnce;
 use enum_dispatch::enum_dispatch;
 use lazy_static::lazy_static;
 use serde::{Deserialize, Serialize};
-use sqlx::{Pool, Postgres};
 use std::borrow::Borrow;
 use std::collections::HashMap;
 use std::sync::Arc;
@@ -144,8 +143,8 @@ pub struct Workflow {
 }
 
 impl Workflow {
-    pub async fn load_from_db(workflow_id: &str, pool: &Pool<Postgres>) -> Result<Self> {
-        let (workflow, actions, edges) = fetch_workflow_data(pool, workflow_id).await?;
+    pub async fn load_from_db(workflow_id: &str, db: &dyn Database) -> Result<Self> {
+        let (workflow, actions, edges) = db.fetch_workflow_data(workflow_id).await?;
 
         let actions = actions
             .into_iter()
@@ -192,9 +191,9 @@ pub async fn run_workflow(
     workflow_id: String,
     start_node_reference_handle: String,
     trigger_event: Option<serde_json::Value>,
-    pg_pool: Arc<Pool<Postgres>>,
+    db: Arc<dyn Database>,
 ) -> Result<()> {
-    let mut workflow = Workflow::load_from_db(&workflow_id, pg_pool.borrow()).await?;
+    let mut workflow = Workflow::load_from_db(&workflow_id, db.borrow()).await?;
 
     if !workflow.is_live {
         // Workflow is offline
@@ -223,7 +222,7 @@ pub async fn run_workflow(
     let timeout_in_seconds = WORKFLOW_RUN_TIMEOUT_IN_SECONDS.get().await.clone();
 
     let mut executor = WorkflowExecutor::init(
-        pg_pool,
+        db,
         workflow,
         start_node_reference_handle,
         timeout_in_seconds,

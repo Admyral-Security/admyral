@@ -1,15 +1,14 @@
-use crate::postgres::{init_run_state, mark_run_state_as_completed, persist_action_run_state};
+use crate::postgres::Database;
 use anyhow::Result;
-use sqlx::{Pool, Postgres};
-use std::{borrow::Borrow, sync::Arc};
+use std::sync::Arc;
 
 use super::{execution_state::ExecutionState, ReferenceHandle};
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct Context {
     pub workflow_id: String,
     pub execution_state: ExecutionState,
-    pub pg_pool: Arc<Pool<Postgres>>,
+    pub db: Arc<dyn Database>,
     pub run_id: String,
     pub execution_time_limit_in_sec: Option<u64>,
 }
@@ -18,13 +17,13 @@ impl Context {
     pub async fn init(
         workflow_id: String,
         execution_time_limit_in_sec: Option<u64>,
-        pg_pool: Arc<Pool<Postgres>>,
+        db: Arc<dyn Database>,
     ) -> Result<Self> {
-        let run_id = init_run_state(pg_pool.borrow(), &workflow_id).await?;
+        let run_id = db.init_run_state(&workflow_id).await?;
         Ok(Self {
             workflow_id,
             execution_state: ExecutionState::default(),
-            pg_pool,
+            db,
             run_id,
             execution_time_limit_in_sec,
         })
@@ -40,20 +39,21 @@ impl Context {
     ) -> Result<String> {
         self.execution_state
             .store(reference_handle.clone(), output.clone());
-        let action_state_id = persist_action_run_state(
-            self.pg_pool.borrow(),
-            &self.run_id,
-            action_id,
-            prev_action_state_id,
-            output,
-            is_error,
-        )
-        .await?;
+        let action_state_id = self
+            .db
+            .persist_action_run_state(
+                &self.run_id,
+                action_id,
+                prev_action_state_id,
+                output,
+                is_error,
+            )
+            .await?;
         Ok(action_state_id)
     }
 
     pub async fn complete_run(&self) -> Result<()> {
-        mark_run_state_as_completed(self.pg_pool.borrow(), &self.run_id).await?;
+        self.db.mark_run_state_as_completed(&self.run_id).await?;
         Ok(())
     }
 }

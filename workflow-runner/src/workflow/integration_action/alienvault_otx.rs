@@ -1,16 +1,12 @@
 use super::IntegrationExecutor;
-use crate::{
-    postgres::fetch_secret,
-    workflow::{
-        context,
-        http_client::HttpClient,
-        utils::{get_string_parameter, ParameterType},
-    },
+use crate::workflow::{
+    context,
+    http_client::HttpClient,
+    utils::{get_string_parameter, ParameterType},
 };
 use anyhow::{anyhow, Result};
 use maplit::hashmap;
 use serde::{Deserialize, Serialize};
-use std::borrow::Borrow;
 use std::collections::HashMap;
 
 const ALIENVAULT_OTX: &str = "AlienVault OTX";
@@ -22,12 +18,10 @@ struct AlienvaultOtxCredential {
 }
 
 async fn fetch_api_key(credential_name: &str, context: &context::Context) -> Result<String> {
-    let credential_secret = fetch_secret(
-        context.pg_pool.borrow(),
-        &context.workflow_id,
-        credential_name,
-    )
-    .await?;
+    let credential_secret = context
+        .db
+        .fetch_secret(&context.workflow_id, credential_name)
+        .await?;
     let credential = match credential_secret {
         None => {
             let error_message = format!("Missing credentials for {ALIENVAULT_OTX}.");
@@ -103,4 +97,34 @@ async fn get_domain_information(
     .expect("domain is required");
     let api_url = format!("https://otx.alienvault.com/api/v1/indicators/domain/{domain}/general");
     alienvault_get_request(client, api_key, &api_url).await
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use async_trait::async_trait;
+    use serde_json::json;
+
+    #[tokio::test]
+    async fn test_get_domain_information() {
+        struct MockHttpClient;
+
+        #[async_trait]
+        impl HttpClient for MockHttpClient {
+            async fn get(
+                &self,
+                _url: &str,
+                _headers: HashMap<String, String>,
+                _expected_response_status: u16,
+                _error_message: String,
+            ) -> Result<serde_json::Value> {
+                Ok(json!({}))
+            }
+        }
+
+        let client = MockHttpClient;
+        let api_key = "some-api-key";
+
+        // get_domain_information(&client, api_key, context, parameters);
+    }
 }

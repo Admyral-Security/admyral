@@ -1,9 +1,9 @@
+use crate::postgres::Database;
 use crate::workflow::EdgeType;
 
 use super::{context::Context, ActionExecutor, ReferenceHandle, Workflow};
 use anyhow::Result;
 use serde_json::json;
-use sqlx::{Pool, Postgres};
 use std::collections::VecDeque;
 use std::sync::Arc;
 use std::time::Instant;
@@ -14,7 +14,7 @@ struct QueueElement {
     prev_action_state_id: Option<String>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct WorkflowExecutor {
     workflow: Workflow,
     context: Context,
@@ -23,7 +23,7 @@ pub struct WorkflowExecutor {
 
 impl WorkflowExecutor {
     pub async fn init(
-        pg_pool: Arc<Pool<Postgres>>,
+        db: Arc<dyn Database>,
         workflow: Workflow,
         start_node_reference_handle: ReferenceHandle,
         execution_time_limit_in_sec: Option<u64>,
@@ -31,7 +31,7 @@ impl WorkflowExecutor {
         let context = Context::init(
             workflow.workflow_id.clone(),
             execution_time_limit_in_sec,
-            pg_pool,
+            db,
         )
         .await?;
         Ok(Self {

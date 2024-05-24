@@ -23,29 +23,35 @@ pub enum PostRequest {
 pub trait HttpClient: Send + Sync {
     async fn get(
         &self,
-        url: &str,
-        headers: HashMap<String, String>,
-        expected_response_status: u16,
-        error_message: String,
-    ) -> Result<serde_json::Value>;
+        _url: &str,
+        _headers: HashMap<String, String>,
+        _expected_response_status: u16,
+        _error_message: String,
+    ) -> Result<serde_json::Value> {
+        Ok(serde_json::json!({}))
+    }
 
     async fn post(
         &self,
-        url: &str,
-        headers: HashMap<String, String>,
-        body: PostRequest,
-        expected_response_status: u16,
-        error_message: String,
-    ) -> Result<serde_json::Value>;
+        _url: &str,
+        _headers: HashMap<String, String>,
+        _body: PostRequest,
+        _expected_response_status: u16,
+        _error_message: String,
+    ) -> Result<serde_json::Value> {
+        Ok(serde_json::json!({}))
+    }
 
     async fn put(
         &self,
-        url: &str,
-        headers: HashMap<String, String>,
-        body: PostRequest,
-        expected_response_status: u16,
-        error_message: String,
-    ) -> Result<serde_json::Value>;
+        _url: &str,
+        _headers: HashMap<String, String>,
+        _body: PostRequest,
+        _expected_response_status: u16,
+        _error_message: String,
+    ) -> Result<serde_json::Value> {
+        Ok(serde_json::json!({}))
+    }
 }
 
 #[derive(Debug, Clone)]

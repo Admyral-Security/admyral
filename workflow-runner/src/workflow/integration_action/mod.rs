@@ -1,12 +1,11 @@
-use anyhow::Result;
-use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
-
 use super::{
     context::Context,
     http_client::{HttpClient, ReqwestClient},
     ActionExecutor,
 };
+use anyhow::Result;
+use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 
 mod alienvault_otx;
 mod phish_report;

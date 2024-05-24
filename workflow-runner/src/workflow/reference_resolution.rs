@@ -1,5 +1,3 @@
-use crate::postgres::fetch_secret;
-
 use super::context::Context;
 use anyhow::Result;
 use futures::future::join_all;
@@ -102,13 +100,14 @@ pub async fn resolve_references(value: &str, context: &Context) -> Result<Resolv
             // Credential access
             if cleaned_reference.starts_with(CREDENTIAL_PREFIX) {
                 let credential_name = &cleaned_reference[CREDENTIAL_PREFIX.len()..];
-                let secret =
-                    match fetch_secret(&context.pg_pool, &context.workflow_id, credential_name)
-                        .await?
-                    {
-                        Some(secret) => secret,
-                        None => "".to_string(),
-                    };
+                let secret = match context
+                    .db
+                    .fetch_secret(&context.workflow_id, credential_name)
+                    .await?
+                {
+                    Some(secret) => secret,
+                    None => "".to_string(),
+                };
                 return Ok((reference, (secret, false)));
             }
 

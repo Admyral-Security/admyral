@@ -1,11 +1,8 @@
 use super::IntegrationExecutor;
-use crate::{
-    postgres::fetch_secret,
-    workflow::{
-        context,
-        http_client::{HttpClient, PostRequest},
-        utils::{get_string_parameter, ParameterType},
-    },
+use crate::workflow::{
+    context,
+    http_client::{HttpClient, PostRequest},
+    utils::{get_string_parameter, ParameterType},
 };
 use anyhow::{anyhow, Result};
 use base64::{engine::general_purpose::STANDARD_NO_PAD, Engine};
@@ -26,12 +23,10 @@ struct VirusTotalCredential {
 }
 
 async fn get_secret(credential_name: &str, context: &context::Context) -> Result<String> {
-    let credential_secret = fetch_secret(
-        context.pg_pool.borrow(),
-        &context.workflow_id,
-        credential_name,
-    )
-    .await?;
+    let credential_secret = context
+        .db
+        .fetch_secret(&context.workflow_id, credential_name)
+        .await?;
 
     let credentials = match credential_secret {
         None => {

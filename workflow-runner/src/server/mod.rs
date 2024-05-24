@@ -14,20 +14,12 @@ use axum::{
 use lazy_static::lazy_static;
 use serde_json::json;
 use shared_state::SharedState;
-use sqlx::{Pool, Postgres};
 use std::collections::HashMap;
 use std::{borrow::Borrow, sync::Arc};
 use tower::ServiceBuilder;
 use tower_http::{cors::CorsLayer, trace::TraceLayer};
 
-use crate::{
-    postgres::{
-        count_workflow_runs_of_account_last_hour, fetch_action, fetch_webhook, get_workflow_owner,
-        is_workflow_owned_by_user,
-    },
-    server::shared_state::setup_state,
-    workflow::run_workflow,
-};
+use crate::{postgres::Database, server::shared_state::setup_state, workflow::run_workflow};
 
 use self::auth::JwtClaims;
 
@@ -57,7 +49,7 @@ async fn enqueue_workflow_job(
     workflow_id: String,
     start_reference_handle: String,
     trigger_event: Option<serde_json::Value>,
-    db_pool: Arc<Pool<Postgres>>,
+    db: Arc<dyn Database>,
 ) {
     tokio::spawn(async move {
         tracing::info!("Running workflow {workflow_id} starting at {start_reference_handle}");
@@ -65,7 +57,7 @@ async fn enqueue_workflow_job(
             workflow_id.clone(),
             start_reference_handle,
             trigger_event,
-            db_pool,
+            db,
         )
         .await
         {
@@ -78,7 +70,7 @@ async fn is_quota_limit_exceeded(
     user_id: Option<&str>,
     workflow_id: &str,
     quota_limit: Option<i64>,
-    db_pool: &Pool<Postgres>,
+    db: &dyn Database,
 ) -> Result<bool> {
     let quota = match quota_limit {
         None => return Ok(false),
@@ -87,10 +79,12 @@ async fn is_quota_limit_exceeded(
 
     let user_id = match user_id {
         Some(user_id) => user_id.to_string(),
-        None => get_workflow_owner(db_pool, &workflow_id).await?,
+        None => db.get_workflow_owner(&workflow_id).await?,
     };
 
-    let runs = count_workflow_runs_of_account_last_hour(db_pool, &user_id).await?;
+    let runs = db
+        .count_workflow_runs_of_account_last_hour(&user_id)
+        .await?;
     let exceeded_quota = runs >= quota;
     if exceeded_quota {
         tracing::info!("User {user_id} exceeded workflow run quota. Executed {runs} workflows in the last hour. Quota is {quota}.");
@@ -105,12 +99,12 @@ async fn is_quota_limit_exceeded(
 async fn webhook_handler(
     webhook_id: String,
     secret: String,
-    db_pool: Arc<Pool<Postgres>>,
+    db: Arc<dyn Database>,
     trigger_event: serde_json::Value,
 ) -> impl IntoResponse {
     tracing::info!("Webhook {} triggered", webhook_id);
 
-    match authenticate_webhook(db_pool.borrow(), &webhook_id, &secret).await {
+    match authenticate_webhook(db.borrow(), &webhook_id, &secret).await {
         Err(e) => {
             tracing::error!("Error verifying webhook: {e}");
             return (
@@ -126,7 +120,7 @@ async fn webhook_handler(
     }
 
     tracing::info!("Fetching webhook data for webhook {}", webhook_id);
-    let webhook = match fetch_webhook(db_pool.borrow(), &webhook_id).await {
+    let webhook = match db.fetch_webhook(&webhook_id).await {
         Ok(webhook_opt) => match webhook_opt {
             Some(webhook) => webhook,
             None => {
@@ -144,7 +138,7 @@ async fn webhook_handler(
     };
 
     let quota_limit = WORKFLOW_RUN_HOURLY_QUOTA.get().await.clone();
-    match is_quota_limit_exceeded(None, &webhook.workflow_id, quota_limit, db_pool.borrow()).await {
+    match is_quota_limit_exceeded(None, &webhook.workflow_id, quota_limit, db.borrow()).await {
         Err(e) => {
             tracing::error!("Error checking workflow run quota limit exceeded check: {e}");
             return (
@@ -163,7 +157,7 @@ async fn webhook_handler(
         webhook.workflow_id,
         webhook.reference_handle,
         Some(trigger_event),
-        db_pool,
+        db,
     )
     .await;
 
@@ -187,7 +181,7 @@ async fn get_webhook_handler(
         "body": json!(""),
         "headers": headersmap_to_json(headers)
     });
-    webhook_handler(webhook_id, secret, state.db_pool.clone(), trigger_event).await
+    webhook_handler(webhook_id, secret, state.db.clone(), trigger_event).await
 }
 
 async fn post_webhook_handler(
@@ -200,7 +194,7 @@ async fn post_webhook_handler(
         "body": payload,
         "headers": headersmap_to_json(headers)
     });
-    webhook_handler(webhook_id, secret, state.db_pool.clone(), trigger_event).await
+    webhook_handler(webhook_id, secret, state.db.clone(), trigger_event).await
 }
 
 async fn post_trigger_workflow_handler(
@@ -211,7 +205,11 @@ async fn post_trigger_workflow_handler(
 ) -> impl IntoResponse {
     // verify that the workflow is owned by the requesting user
     let user_id = &claim.sub;
-    match is_workflow_owned_by_user(state.db_pool.borrow(), user_id, &workflow_id).await {
+    match state
+        .db
+        .is_workflow_owned_by_user(user_id, &workflow_id)
+        .await
+    {
         Ok(is_valid) => {
             if !is_valid {
                 tracing::error!("Workflow {workflow_id} does not exist.");
@@ -225,7 +223,7 @@ async fn post_trigger_workflow_handler(
     }
 
     let quota_limit = WORKFLOW_RUN_HOURLY_QUOTA.get().await.clone();
-    match is_quota_limit_exceeded(None, &workflow_id, quota_limit, state.db_pool.borrow()).await {
+    match is_quota_limit_exceeded(None, &workflow_id, quota_limit, &*state.db).await {
         Err(e) => {
             tracing::error!("Error checking workflow run quota limit exceeded check: {e}");
             return (
@@ -240,7 +238,7 @@ async fn post_trigger_workflow_handler(
         }
     }
 
-    let action_opt = match fetch_action(state.db_pool.borrow(), &workflow_id, &action_id).await {
+    let action_opt = match state.db.fetch_action(&workflow_id, &action_id).await {
         Ok(action_opt) => action_opt,
         Err(e) => {
             tracing::error!("Error fetching action: {e}");
@@ -271,7 +269,7 @@ async fn post_trigger_workflow_handler(
         workflow_id,
         start_reference_handle,
         trigger_event,
-        state.db_pool.clone(),
+        state.db.clone(),
     )
     .await;
 

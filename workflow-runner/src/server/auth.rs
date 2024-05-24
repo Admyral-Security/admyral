@@ -1,5 +1,5 @@
 use super::shared_state::SharedState;
-use crate::postgres::{fetch_webhook_secret, is_user_valid};
+use crate::postgres::Database;
 use anyhow::Result;
 use axum::{
     async_trait,
@@ -16,8 +16,6 @@ use jsonwebtoken::{decode, Algorithm, DecodingKey, Validation};
 use lazy_static::lazy_static;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
-use sqlx::{Pool, Postgres};
-use std::borrow::Borrow;
 use std::fmt::Display;
 
 lazy_static! {
@@ -100,7 +98,9 @@ impl FromRequestParts<SharedState> for JwtClaims {
             })?;
 
         // we additionally check whether the user id exists
-        if !is_user_valid(state.db_pool.borrow(), &token_data.claims.sub)
+        if !state
+            .db
+            .is_user_valid(&token_data.claims.sub)
             .await
             .map_err(|_| AuthError::InternalServerError)?
         {
@@ -113,11 +113,11 @@ impl FromRequestParts<SharedState> for JwtClaims {
 }
 
 pub async fn authenticate_webhook(
-    pool: &Pool<Postgres>,
+    db: &dyn Database,
     webhook_id: &str,
     secret: &str,
 ) -> Result<bool> {
-    match fetch_webhook_secret(pool, webhook_id).await? {
+    match db.fetch_webhook_secret(webhook_id).await? {
         None => Ok(false),
         Some(fetched_secret) => Ok(fetched_secret == secret),
     }

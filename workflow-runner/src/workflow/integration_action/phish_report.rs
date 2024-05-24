@@ -1,14 +1,13 @@
 use super::IntegrationExecutor;
+use crate::workflow::context;
 use crate::workflow::{
     http_client::{HttpClient, PostRequest},
     utils::{get_bool_parameter, get_string_parameter, ParameterType},
 };
-use crate::{postgres::fetch_secret, workflow::context};
 use anyhow::{anyhow, Result};
 use maplit::hashmap;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
-use std::borrow::Borrow;
 use std::collections::HashMap;
 
 const PHISH_REPORT: &str = "PhishReport";
@@ -20,12 +19,10 @@ struct PhishReportCredential {
 }
 
 async fn fetch_api_key(credential_name: &str, context: &context::Context) -> Result<String> {
-    let credential_secret = fetch_secret(
-        context.pg_pool.borrow(),
-        &context.workflow_id,
-        credential_name,
-    )
-    .await?;
+    let credential_secret = context
+        .db
+        .fetch_secret(&context.workflow_id, credential_name)
+        .await?;
     let credential = match credential_secret {
         None => {
             let error_message = format!("Missing credentials for {PHISH_REPORT}.");
