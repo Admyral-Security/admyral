@@ -107,42 +107,72 @@ mod tests {
     use serde_json::json;
     use std::sync::Arc;
 
-    #[tokio::test]
-    async fn test_get_domain_information() {
-        struct MockHttpClient;
-        #[async_trait]
-        impl HttpClient for MockHttpClient {
-            async fn get(
-                &self,
-                _url: &str,
-                _headers: HashMap<String, String>,
-                _expected_response_status: u16,
-                _error_message: String,
-            ) -> Result<serde_json::Value> {
-                Ok(json!({
-                    "domain": "admyral.dev"
-                }))
-            }
+    struct MockHttpClient;
+    #[async_trait]
+    impl HttpClient for MockHttpClient {
+        async fn get(
+            &self,
+            _url: &str,
+            _headers: HashMap<String, String>,
+            _expected_response_status: u16,
+            _error_message: String,
+        ) -> Result<serde_json::Value> {
+            Ok(json!({
+                "domain": "admyral.dev"
+            }))
         }
+    }
 
-        struct MockDb;
-        #[async_trait]
-        impl Database for MockDb {}
+    struct MockDb;
+    #[async_trait]
+    impl Database for MockDb {
+        async fn fetch_secret(
+            &self,
+            _workflow_id: &str,
+            _credential_name: &str,
+        ) -> Result<Option<String>> {
+            Ok(Some("{\"API_KEY\": \"some-api-key\"}".to_string()))
+        }
+    }
 
-        let mock_db = Arc::new(MockDb);
-        let mock_client = MockHttpClient;
+    struct MockDbUnknownSecret;
+    #[async_trait]
+    impl Database for MockDbUnknownSecret {
+        async fn fetch_secret(
+            &self,
+            _workflow_id: &str,
+            _credential_name: &str,
+        ) -> Result<Option<String>> {
+            Ok(None)
+        }
+    }
+
+    async fn setup(db: Arc<dyn Database>) -> (Arc<MockHttpClient>, context::Context) {
         let context = context::Context::init(
             "ddd54f25-0537-4e40-ab96-c93beee543de".to_string(),
             None,
-            mock_db,
+            db,
         )
         .await
         .unwrap();
-        let api_key = "some-api-key";
+        (Arc::new(MockHttpClient), context)
+    }
+
+    #[tokio::test]
+    async fn test_get_domain_information() {
+        let (client, context) = setup(Arc::new(MockDb)).await;
 
         let parameters = hashmap! { "domain".to_string() => "admyral.dev".to_string() };
 
-        let result = get_domain_information(&mock_client, api_key, &context, &parameters).await;
+        let result = AlienvaultOtxExecutor
+            .execute(
+                &*client,
+                &context,
+                "GET_DOMAIN_INFORMATION",
+                "credentials",
+                &parameters,
+            )
+            .await;
         assert!(result.is_ok());
 
         let value = result.unwrap();
@@ -150,5 +180,24 @@ mod tests {
             value.as_object().unwrap().get("domain").unwrap(),
             "admyral.dev"
         );
+    }
+
+    #[tokio::test]
+    async fn test_unknown_credential() {
+        let (client, context) = setup(Arc::new(MockDbUnknownSecret)).await;
+
+        let parameters = hashmap! { "domain".to_string() => "admyral.dev".to_string() };
+
+        let result = AlienvaultOtxExecutor
+            .execute(
+                &*client,
+                &context,
+                "GET_DOMAIN_INFORMATION",
+                "credentials",
+                &parameters,
+            )
+            .await;
+        assert!(result.is_err());
+        assert_eq!(result.err().unwrap().to_string(), "Missing credentials for AlienVault OTX.");
     }
 }
