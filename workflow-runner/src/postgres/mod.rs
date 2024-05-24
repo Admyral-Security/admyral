@@ -107,7 +107,7 @@ pub trait Database: Send + Sync {
     }
 
     async fn init_run_state(&self, _workflow_id: &str) -> Result<String> {
-        Ok(String::new())
+        Ok("93d08575-2bbe-4811-ac3e-75305fcd5fd5".to_string())
     }
 
     async fn persist_action_run_state(

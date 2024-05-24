@@ -102,13 +102,14 @@ async fn get_domain_information(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::postgres::Database;
     use async_trait::async_trait;
     use serde_json::json;
+    use std::sync::Arc;
 
     #[tokio::test]
     async fn test_get_domain_information() {
         struct MockHttpClient;
-
         #[async_trait]
         impl HttpClient for MockHttpClient {
             async fn get(
@@ -118,13 +119,36 @@ mod tests {
                 _expected_response_status: u16,
                 _error_message: String,
             ) -> Result<serde_json::Value> {
-                Ok(json!({}))
+                Ok(json!({
+                    "domain": "admyral.dev"
+                }))
             }
         }
 
-        let client = MockHttpClient;
+        struct MockDb;
+        #[async_trait]
+        impl Database for MockDb {}
+
+        let mock_db = Arc::new(MockDb);
+        let mock_client = MockHttpClient;
+        let context = context::Context::init(
+            "ddd54f25-0537-4e40-ab96-c93beee543de".to_string(),
+            None,
+            mock_db,
+        )
+        .await
+        .unwrap();
         let api_key = "some-api-key";
 
-        // get_domain_information(&client, api_key, context, parameters);
+        let parameters = hashmap! { "domain".to_string() => "admyral.dev".to_string() };
+
+        let result = get_domain_information(&mock_client, api_key, &context, &parameters).await;
+        assert!(result.is_ok());
+
+        let value = result.unwrap();
+        assert_eq!(
+            value.as_object().unwrap().get("domain").unwrap(),
+            "admyral.dev"
+        );
     }
 }
