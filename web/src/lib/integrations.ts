@@ -540,7 +540,7 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 						dataType: ApiParameterDatatype.STRING,
 					},
 					{
-						id: "ignore_duplicates",
+						id: "ignoreDuplicates",
 						displayName: "Ignore Duplicates",
 						description:
 							"By default, trying to create a duplicate case will fail. Setting this to true will allow duplictes.",
