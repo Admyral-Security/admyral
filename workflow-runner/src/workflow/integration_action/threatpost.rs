@@ -40,3 +40,66 @@ async fn fetch_rss_feed(client: &dyn HttpClient) -> Result<serde_json::Value> {
 
     Ok(response)
 }
+
+
+mod tests {
+    use super::*;
+    use crate::postgres::Database;
+    use async_trait::async_trait;
+    use serde_json::json;
+    use std::sync::Arc;
+    use std::collections::HashMap;
+
+    struct MockHttpClient;
+    #[async_trait]
+    impl HttpClient for MockHttpClient {
+        async fn get(
+            &self,
+            _url: &str,
+            _headers: HashMap<String, String>,
+            _expected_response_status: u16,
+            _error_message: String,
+        ) -> Result<serde_json::Value> {
+            Ok(json!({
+                "rss": "some feed"
+            }))
+        }
+    }
+
+    struct MockDb;
+    #[async_trait]
+    impl Database for MockDb {}
+
+    async fn setup() -> (Arc<MockHttpClient>, context::Context) {
+        let context = context::Context::init(
+            "ddd54f25-0537-4e40-ab96-c93beee543de".to_string(),
+            None,
+            Arc::new(MockDb),
+        )
+        .await
+        .unwrap();
+        (Arc::new(MockHttpClient), context)
+    }
+
+    #[tokio::test]
+    async fn test_fetch_rss_feed() {
+        let (client, context) = setup().await;
+
+        let result = ThreatpostExecutor
+            .execute(
+                &*client,
+                &context,
+                "FETCH_RSS_FEED",
+                "credentials",
+                &HashMap::new(),
+            )
+            .await;
+        assert!(result.is_ok());
+
+        let value = result.unwrap();
+        assert_eq!(
+            value.as_object().unwrap().get("rss").unwrap(),
+            "some feed"
+        );
+    }
+}
