@@ -1,21 +1,18 @@
-use super::{utils::ParameterType, IntegrationExecutor};
+use super::IntegrationExecutor;
 use crate::{
     postgres::fetch_secret,
-    workflow::{context, integration_action::utils::get_string_parameter},
+    workflow::{
+        context,
+        http_client::{HttpClient, PostRequest},
+        utils::{get_string_parameter, ParameterType},
+    },
 };
 use anyhow::{anyhow, Result};
 use base64::{engine::general_purpose::STANDARD_NO_PAD, Engine};
-use lazy_static::lazy_static;
 use maplit::hashmap;
-use reqwest::header::{HeaderMap, HeaderValue};
 use serde::{Deserialize, Serialize};
 use std::borrow::Borrow;
 use std::collections::HashMap;
-
-lazy_static! {
-    // make reqwest client singleton to leverage connection pooling
-    static ref REQ_CLIENT: reqwest::Client = reqwest::Client::new();
-}
 
 const VIRUS_TOTAL: &str = "VirusTotal";
 
@@ -27,7 +24,6 @@ pub struct VirusTotalExecutor;
 struct VirusTotalCredential {
     api_key: String,
 }
-
 
 async fn get_secret(credential_name: &str, context: &context::Context) -> Result<String> {
     let credential_secret = fetch_secret(
@@ -52,15 +48,14 @@ async fn get_secret(credential_name: &str, context: &context::Context) -> Result
 impl IntegrationExecutor for VirusTotalExecutor {
     async fn execute(
         &self,
+        client: &dyn HttpClient,
         context: &context::Context,
         api: &str,
         credential_name: &str,
         parameters: &HashMap<String, String>,
     ) -> Result<serde_json::Value> {
         let api_key = get_secret(credential_name, context).await?;
-        let client = REQ_CLIENT.clone();
 
-        // TODO: create client here
         match api {
             "GET_A_FILE_REPORT" => get_a_file_report(client, context, &api_key, parameters).await,
             "GET_A_DOMAIN_REPORT" => {
@@ -102,75 +97,55 @@ impl IntegrationExecutor for VirusTotalExecutor {
 
 // TODO: add retry mechanism, timeout
 async fn virus_total_get_request(
-    client: reqwest::Client,
+    client: &dyn HttpClient,
     api_url: &str,
     api_key: &str,
 ) -> Result<serde_json::Value> {
-    let mut headers = HeaderMap::new();
-    headers.insert("x-apikey", HeaderValue::from_str(&api_key)?);
-    headers.insert("Content-Type", HeaderValue::from_str("application/json")?);
+    let headers = hashmap! {
+        "x-apikey".to_string() => api_key.to_string(),
+        "Content-Type".to_string() => "application/json".to_string()
+    };
 
-    let response = client.get(api_url).headers(headers).send().await?;
-
-    if response.status().as_u16() != 200 {
-        let error = response.text().await?;
-        let error_message =
-            format!("Error: Failed to call {VIRUS_TOTAL} API with the following error - {error}");
-        tracing::error!(error_message);
-        return Err(anyhow!(error_message));
-    }
-
-    Ok(response.json::<serde_json::Value>().await?)
-}
-
-enum PostRequestType {
-    Form { params: HashMap<String, String> },
-    Json { body: serde_json::Value },
+    client
+        .get(
+            api_url,
+            headers,
+            200,
+            format!("Error: Failed to call {VIRUS_TOTAL} API"),
+        )
+        .await
 }
 
 async fn virus_total_post_request(
-    client: reqwest::Client,
+    client: &dyn HttpClient,
     api_url: &str,
     api_key: &str,
-    request_type: PostRequestType,
+    request_type: PostRequest,
 ) -> Result<serde_json::Value> {
-    let mut headers = HeaderMap::new();
-    headers.insert("x-apikey", HeaderValue::from_str(&api_key)?);
-    headers.insert("accept", HeaderValue::from_str("application/json")?);
+    let mut headers = hashmap! {
+        "x-apikey".to_string() => api_key.to_string(),
+        "accept".to_string() => "application/json".to_string()
+    };
 
-    let response = match request_type {
-        PostRequestType::Form { params } => {
-            headers.insert(
-                "content-type",
-                HeaderValue::from_str("application/x-www-form-urlencoded")?,
-            );
-            client
-                .post(api_url)
-                .headers(headers)
-                .form(&params)
-                .send()
-                .await?
-        }
-        PostRequestType::Json { body } => {
-            headers.insert("content-type", HeaderValue::from_str("application/json")?);
-            client
-                .post(api_url)
-                .headers(headers)
-                .json(&body)
-                .send()
-                .await?
+    match &request_type {
+        PostRequest::Form { .. } => headers.insert(
+            "content-type".to_string(),
+            "application/x-www-form-urlencoded".to_string(),
+        ),
+        PostRequest::Json { .. } => {
+            headers.insert("content-type".to_string(), "application/json".to_string())
         }
     };
 
-    if response.status().as_u16() != 200 {
-        let error = response.text().await?;
-        let error_message =
-            format!("Error: Failed to call {VIRUS_TOTAL} API with the following error - {error}");
-        tracing::error!(error_message);
-        return Err(anyhow!(error_message));
-    }
-
-    Ok(response.json::<serde_json::Value>().await?)
+    client
+        .post(
+            api_url,
+            headers,
+            request_type,
+            200,
+            format!("Error: Failed to call {VIRUS_TOTAL} API"),
+        )
+        .await
 }
 
 /// URL Identifier Generation: https://docs.virustotal.com/reference/url#url-identifiers
@@ -180,7 +155,7 @@ fn generate_virus_total_url_identifier(url: String) -> String {
 
 // https://docs.virustotal.com/reference/file-info
 async fn get_a_file_report(
-    client: reqwest::Client,
+    client: &dyn HttpClient,
     context: &context::Context,
     api_key: &str,
     parameters: &HashMap<String, String>,
@@ -201,7 +176,7 @@ async fn get_a_file_report(
 
 // https://docs.virustotal.com/reference/domain-info
 async fn get_a_domain_report(
-    client: reqwest::Client,
+    client: &dyn HttpClient,
     context: &context::Context,
     api_key: &str,
     parameters: &HashMap<String, String>,
@@ -222,7 +197,7 @@ async fn get_a_domain_report(
 
 // https://docs.virustotal.com/reference/ip-info
 async fn get_ip_address_report(
-    client: reqwest::Client,
+    client: &dyn HttpClient,
     context: &context::Context,
     api_key: &str,
     parameters: &HashMap<String, String>,
@@ -243,7 +218,7 @@ async fn get_ip_address_report(
 
 // https://docs.virustotal.com/reference/url-info
 async fn get_url_analysis_report(
-    client: reqwest::Client,
+    client: &dyn HttpClient,
     context: &context::Context,
     api_key: &str,
     parameters: &HashMap<String, String>,
@@ -265,7 +240,7 @@ async fn get_url_analysis_report(
 
 // https://docs.virustotal.com/reference/file-all-behaviours-summary
 async fn get_file_behavior_reports_summary(
-    client: reqwest::Client,
+    client: &dyn HttpClient,
     context: &context::Context,
     api_key: &str,
     parameters: &HashMap<String, String>,
@@ -286,7 +261,7 @@ async fn get_file_behavior_reports_summary(
 
 // https://docs.virustotal.com/reference/domains-votes-get
 async fn get_votes_on_a_domain(
-    client: reqwest::Client,
+    client: &dyn HttpClient,
     context: &context::Context,
     api_key: &str,
     parameters: &HashMap<String, String>,
@@ -308,7 +283,7 @@ async fn get_votes_on_a_domain(
 // TODO: pagination
 // https://docs.virustotal.com/reference/files-votes-get
 async fn get_votes_on_a_file(
-    client: reqwest::Client,
+    client: &dyn HttpClient,
     context: &context::Context,
     api_key: &str,
     parameters: &HashMap<String, String>,
@@ -329,7 +304,7 @@ async fn get_votes_on_a_file(
 
 // https://docs.virustotal.com/reference/ip-votes
 async fn get_votes_on_an_ip_address(
-    client: reqwest::Client,
+    client: &dyn HttpClient,
     context: &context::Context,
     api_key: &str,
     parameters: &HashMap<String, String>,
@@ -351,7 +326,7 @@ async fn get_votes_on_an_ip_address(
 // TODO: pagination
 // https://docs.virustotal.com/reference/urls-votes-get
 async fn get_votes_on_a_url(
-    client: reqwest::Client,
+    client: &dyn HttpClient,
     context: &context::Context,
     api_key: &str,
     parameters: &HashMap<String, String>,
@@ -373,7 +348,7 @@ async fn get_votes_on_a_url(
 
 // https://docs.virustotal.com/reference/scan-url
 async fn scan_url(
-    client: reqwest::Client,
+    client: &dyn HttpClient,
     context: &context::Context,
     api_key: &str,
     parameters: &HashMap<String, String>,
@@ -393,7 +368,7 @@ async fn scan_url(
         client,
         &api_url,
         api_key,
-        PostRequestType::Form {
+        PostRequest::Form {
             params: hashmap! {
                 "url".to_string() => url
             },
@@ -405,7 +380,7 @@ async fn scan_url(
 // TODO: pagination
 // https://docs.virustotal.com/reference/ip-comments-get
 async fn get_comments_ip_address(
-    client: reqwest::Client,
+    client: &dyn HttpClient,
     context: &context::Context,
     api_key: &str,
     parameters: &HashMap<String, String>,
@@ -427,7 +402,7 @@ async fn get_comments_ip_address(
 // TODO: pagination
 // https://docs.virustotal.com/reference/domains-comments-get
 async fn get_comments_domain(
-    client: reqwest::Client,
+    client: &dyn HttpClient,
     context: &context::Context,
     api_key: &str,
     parameters: &HashMap<String, String>,
@@ -449,7 +424,7 @@ async fn get_comments_domain(
 // TODO: pagination
 // https://docs.virustotal.com/reference/files-comments-get
 async fn get_comments_file(
-    client: reqwest::Client,
+    client: &dyn HttpClient,
     context: &context::Context,
     api_key: &str,
     parameters: &HashMap<String, String>,
@@ -471,7 +446,7 @@ async fn get_comments_file(
 // TODO: pagination
 // https://docs.virustotal.com/reference/urls-comments-get
 async fn get_comments_url(
-    client: reqwest::Client,
+    client: &dyn HttpClient,
     context: &context::Context,
     api_key: &str,
     parameters: &HashMap<String, String>,
@@ -494,7 +469,7 @@ async fn get_comments_url(
 // Note: ignoring pagination here because I am not sure whether there is a max. amount of search results
 // https://docs.virustotal.com/reference/api-search
 async fn search(
-    client: reqwest::Client,
+    client: &dyn HttpClient,
     context: &context::Context,
     api_key: &str,
     parameters: &HashMap<String, String>,
@@ -502,9 +477,13 @@ async fn search(
     let query = get_string_parameter(
         "query",
         VIRUS_TOTAL,
-        "SEARCH", parameters, context, ParameterType::Required)
-        .await?
-        .expect("query is a required parameter");
+        "SEARCH",
+        parameters,
+        context,
+        ParameterType::Required,
+    )
+    .await?
+    .expect("query is a required parameter");
     let api_url = format!("https://www.virustotal.com/api/v3/search?query={query}");
     virus_total_get_request(client, &api_url, api_key).await
 }

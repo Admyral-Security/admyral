@@ -2,18 +2,22 @@ use anyhow::Result;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
-use super::{context::Context, ActionExecutor};
+use super::{
+    context::Context,
+    http_client::{HttpClient, ReqwestClient},
+    ActionExecutor,
+};
 
 mod alienvault_otx;
 mod phish_report;
 mod threatpost;
-mod utils;
 mod virustotal;
 mod yaraify;
 
 pub trait IntegrationExecutor {
     async fn execute(
         &self,
+        client: &dyn HttpClient,
         context: &Context,
         api: &str,
         credential_name: &str,
@@ -41,30 +45,32 @@ pub struct Integration {
 
 impl ActionExecutor for Integration {
     async fn execute(&self, context: &Context) -> Result<serde_json::Value> {
+        let client = ReqwestClient::new();
+
         match self.integration_type {
             IntegrationType::VirusTotal => {
                 virustotal::VirusTotalExecutor
-                    .execute(context, &self.api, &self.credential, &self.params)
+                    .execute(&client, context, &self.api, &self.credential, &self.params)
                     .await
             }
             IntegrationType::AlienvaultOtx => {
                 alienvault_otx::AlienvaultOtxExecutor
-                    .execute(context, &self.api, &self.credential, &self.params)
+                    .execute(&client, context, &self.api, &self.credential, &self.params)
                     .await
             }
             IntegrationType::Threatpost => {
                 threatpost::ThreatpostExecutor
-                    .execute(context, &self.api, &self.credential, &self.params)
+                    .execute(&client, context, &self.api, &self.credential, &self.params)
                     .await
             }
             IntegrationType::Yaraify => {
                 yaraify::YaraifyExecutor
-                    .execute(context, &self.api, &self.credential, &self.params)
+                    .execute(&client, context, &self.api, &self.credential, &self.params)
                     .await
             }
             IntegrationType::PhishReport => {
                 phish_report::PhishReportExecutor
-                    .execute(context, &self.api, &self.credential, &self.params)
+                    .execute(&client, context, &self.api, &self.credential, &self.params)
                     .await
             }
         }
