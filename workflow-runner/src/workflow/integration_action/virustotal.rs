@@ -500,13 +500,36 @@ mod tests {
             _expected_response_status: u16,
             _error_message: String,
         ) -> Result<serde_json::Value> {
-            Ok(json!({}))
+            Ok(json!({
+                "result": "ok"
+            }))
+        }
+
+        async fn post(
+            &self,
+            url: &str,
+            headers: HashMap<String, String>,
+            body: PostRequest,
+            expected_response_status: u16,
+            error_message: String,
+        ) -> Result<serde_json::Value> {
+            Ok(serde_json::json!({
+                "result": "ok"
+            }))
         }
     }
 
     struct MockDb;
     #[async_trait]
-    impl Database for MockDb {}
+    impl Database for MockDb {
+        async fn fetch_secret(
+            &self,
+            _workflow_id: &str,
+            _credential_name: &str,
+        ) -> Result<Option<String>> {
+            Ok(Some("{\"API_KEY\": \"some-api-key\"}".to_string()))
+        }
+    }
 
     struct MockDbUnknownSecret;
     #[async_trait]
@@ -545,5 +568,275 @@ mod tests {
             result.err().unwrap().to_string(),
             "Missing credentials for VirusTotal."
         );
+    }
+
+    #[tokio::test]
+    async fn test_get_a_file_report() {
+        let (client, context) = setup(Arc::new(MockDb)).await;
+        let result = VirusTotalExecutor
+            .execute(
+                &*client,
+                &context,
+                "GET_A_FILE_REPORT",
+                "credentials",
+                &hashmap! {
+                    "hash".to_string() => json!("c0202cf6aeab8437c638533d14563d35")
+                },
+            )
+            .await;
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap(), json!({ "result": "ok" }));
+    }
+
+    #[tokio::test]
+    async fn test_get_a_domain_report() {
+        let (client, context) = setup(Arc::new(MockDb)).await;
+        let result = VirusTotalExecutor
+            .execute(
+                &*client,
+                &context,
+                "GET_A_DOMAIN_REPORT",
+                "credentials",
+                &hashmap! {
+                    "domain".to_string() => json!("admyral.dev")
+                },
+            )
+            .await;
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap(), json!({ "result": "ok" }));
+    }
+
+    #[tokio::test]
+    async fn test_get_ip_address_report() {
+        let (client, context) = setup(Arc::new(MockDb)).await;
+        let result = VirusTotalExecutor
+            .execute(
+                &*client,
+                &context,
+                "GET_IP_ADDRESS_REPORT",
+                "credentials",
+                &hashmap! {
+                    "ip".to_string() => json!("8.8.8.8")
+                },
+            )
+            .await;
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap(), json!({ "result": "ok" }));
+    }
+
+    #[tokio::test]
+    async fn test_get_url_analysis_report() {
+        let (client, context) = setup(Arc::new(MockDb)).await;
+        let result = VirusTotalExecutor
+            .execute(
+                &*client,
+                &context,
+                "GET_URL_ANALYSIS_REPORT",
+                "credentials",
+                &hashmap! {
+                    "url".to_string() => json!("https://www.google.com")
+                },
+            )
+            .await;
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap(), json!({ "result": "ok" }));
+    }
+
+    #[tokio::test]
+    async fn test_get_file_behavior_reports_summary() {
+        let (client, context) = setup(Arc::new(MockDb)).await;
+        let result = VirusTotalExecutor
+            .execute(
+                &*client,
+                &context,
+                "GET_FILE_BEHAVIOR_REPORTS_SUMMARY",
+                "credentials",
+                &hashmap! {
+                    "hash".to_string() => json!("c0202cf6aeab8437c638533d14563d35")
+                },
+            )
+            .await;
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap(), json!({ "result": "ok" }));
+    }
+
+    #[tokio::test]
+    async fn test_get_votes_on_a_domain() {
+        let (client, context) = setup(Arc::new(MockDb)).await;
+        let result = VirusTotalExecutor
+            .execute(
+                &*client,
+                &context,
+                "GET_VOTES_ON_A_DOMAIN",
+                "credentials",
+                &hashmap! {
+                    "domain".to_string() => json!("admyral.dev")
+                },
+            )
+            .await;
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap(), json!({ "result": "ok" }));
+    }
+
+    #[tokio::test]
+    async fn test_get_votes_on_a_file() {
+        let (client, context) = setup(Arc::new(MockDb)).await;
+        let result = VirusTotalExecutor
+            .execute(
+                &*client,
+                &context,
+                "GET_VOTES_ON_A_FILE",
+                "credentials",
+                &hashmap! {
+                    "hash".to_string() => json!("c0202cf6aeab8437c638533d14563d35")
+                },
+            )
+            .await;
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap(), json!({ "result": "ok" }));
+    }
+
+    #[tokio::test]
+    async fn test_get_votes_on_an_ip_address() {
+        let (client, context) = setup(Arc::new(MockDb)).await;
+        let result = VirusTotalExecutor
+            .execute(
+                &*client,
+                &context,
+                "GET_VOTES_ON_AN_IP_ADDRESS",
+                "credentials",
+                &hashmap! {
+                    "ip".to_string() => json!("8.8.8.8")
+                },
+            )
+            .await;
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap(), json!({ "result": "ok" }));
+    }
+
+    #[tokio::test]
+    async fn test_get_votes_on_a_url() {
+        let (client, context) = setup(Arc::new(MockDb)).await;
+        let result = VirusTotalExecutor
+            .execute(
+                &*client,
+                &context,
+                "GET_VOTES_ON_A_URL",
+                "credentials",
+                &hashmap! {
+                    "url".to_string() => json!("https://www.google.com")
+                },
+            )
+            .await;
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap(), json!({ "result": "ok" }));
+    }
+
+    #[tokio::test]
+    async fn test_scan_url() {
+        let (client, context) = setup(Arc::new(MockDb)).await;
+        let result = VirusTotalExecutor
+            .execute(
+                &*client,
+                &context,
+                "SCAN_URL",
+                "credentials",
+                &hashmap! {
+                    "url".to_string() => json!("https://www.google.com")
+                },
+            )
+            .await;
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap(), json!({ "result": "ok" }));
+    }
+
+    #[tokio::test]
+    async fn test_get_comments_ip_address() {
+        let (client, context) = setup(Arc::new(MockDb)).await;
+        let result = VirusTotalExecutor
+            .execute(
+                &*client,
+                &context,
+                "GET_COMMENTS_IP_ADDRESS",
+                "credentials",
+                &hashmap! {
+                    "ip".to_string() => json!("8.8.8.8")
+                },
+            )
+            .await;
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap(), json!({ "result": "ok" }));
+    }
+
+    #[tokio::test]
+    async fn test_get_comments_domain() {
+        let (client, context) = setup(Arc::new(MockDb)).await;
+        let result = VirusTotalExecutor
+            .execute(
+                &*client,
+                &context,
+                "GET_COMMENTS_DOMAIN",
+                "credentials",
+                &hashmap! {
+                    "domain".to_string() => json!("admyral.dev")
+                },
+            )
+            .await;
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap(), json!({ "result": "ok" }));
+    }
+
+    #[tokio::test]
+    async fn test_get_comments_file() {
+        let (client, context) = setup(Arc::new(MockDb)).await;
+        let result = VirusTotalExecutor
+            .execute(
+                &*client,
+                &context,
+                "GET_COMMENTS_FILE",
+                "credentials",
+                &hashmap! {
+                    "hash".to_string() => json!("c0202cf6aeab8437c638533d14563d35")
+                },
+            )
+            .await;
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap(), json!({ "result": "ok" }));
+    }
+
+    #[tokio::test]
+    async fn test_get_comments_url() {
+        let (client, context) = setup(Arc::new(MockDb)).await;
+        let result = VirusTotalExecutor
+            .execute(
+                &*client,
+                &context,
+                "GET_COMMENTS_URL",
+                "credentials",
+                &hashmap! {
+                    "url".to_string() => json!("https://www.google.com")
+                },
+            )
+            .await;
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap(), json!({ "result": "ok" }));
+    }
+
+    #[tokio::test]
+    async fn test_search() {
+        let (client, context) = setup(Arc::new(MockDb)).await;
+        let result = VirusTotalExecutor
+            .execute(
+                &*client,
+                &context,
+                "SEARCH",
+                "credentials",
+                &hashmap! {
+                    "query".to_string() => json!("https://www.google.com")
+                },
+            )
+            .await;
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap(), json!({ "result": "ok" }));
     }
 }
