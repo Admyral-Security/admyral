@@ -481,3 +481,69 @@ async fn search(
     let api_url = format!("https://www.virustotal.com/api/v3/search?query={query}");
     virus_total_get_request(client, &api_url, api_key).await
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::postgres::Database;
+    use async_trait::async_trait;
+    use serde_json::json;
+    use std::sync::Arc;
+
+    struct MockHttpClient;
+    #[async_trait]
+    impl HttpClient for MockHttpClient {
+        async fn get(
+            &self,
+            _url: &str,
+            _headers: HashMap<String, String>,
+            _expected_response_status: u16,
+            _error_message: String,
+        ) -> Result<serde_json::Value> {
+            Ok(json!({}))
+        }
+    }
+
+    struct MockDb;
+    #[async_trait]
+    impl Database for MockDb {}
+
+    struct MockDbUnknownSecret;
+    #[async_trait]
+    impl Database for MockDbUnknownSecret {
+        async fn fetch_secret(
+            &self,
+            _workflow_id: &str,
+            _credential_name: &str,
+        ) -> Result<Option<String>> {
+            Ok(None)
+        }
+    }
+
+    async fn setup(db: Arc<dyn Database>) -> (Arc<MockHttpClient>, context::Context) {
+        let context =
+            context::Context::init("ddd54f25-0537-4e40-ab96-c93beee543de".to_string(), None, db)
+                .await
+                .unwrap();
+        (Arc::new(MockHttpClient), context)
+    }
+
+    #[tokio::test]
+    async fn test_missing_credential() {
+        let (client, context) = setup(Arc::new(MockDbUnknownSecret)).await;
+        let result = VirusTotalExecutor
+            .execute(
+                &*client,
+                &context,
+                "GET_A_FILE_REPORT",
+                "credentials",
+                &HashMap::new(),
+            )
+            .await;
+        assert!(result.is_err());
+        assert_eq!(
+            result.err().unwrap().to_string(),
+            "Missing credentials for VirusTotal."
+        );
+    }
+}

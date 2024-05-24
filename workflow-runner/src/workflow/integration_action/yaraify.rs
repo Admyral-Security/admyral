@@ -219,3 +219,200 @@ async fn query_icon_dhash(
 async fn list_recently_deployed_yara_rules(client: &dyn HttpClient) -> Result<serde_json::Value> {
     query_yaraify(client, "recent_yararules", None).await
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::postgres::Database;
+    use async_trait::async_trait;
+    use serde_json::json;
+    use std::sync::Arc;
+
+    struct MockHttpClient;
+    #[async_trait]
+    impl HttpClient for MockHttpClient {
+        async fn post(
+            &self,
+            _url: &str,
+            _headers: HashMap<String, String>,
+            _body: PostRequest,
+            _expected_response_status: u16,
+            _error_message: String,
+        ) -> Result<serde_json::Value> {
+            Ok(serde_json::json!({"result": "ok"}))
+        }
+    }
+
+    struct MockDb;
+    #[async_trait]
+    impl Database for MockDb {}
+
+    async fn setup() -> (Arc<MockHttpClient>, context::Context) {
+        let db = Arc::new(MockDb);
+        let context =
+            context::Context::init("ddd54f25-0537-4e40-ab96-c93beee543de".to_string(), None, db)
+                .await
+                .unwrap();
+        (Arc::new(MockHttpClient), context)
+    }
+
+    #[tokio::test]
+    async fn test_query_a_file_hash() {
+        let (client, context) = setup().await;
+        let result = YaraifyExecutor
+            .execute(
+                &*client,
+                &context,
+                "QUERY_A_FILE_HASH",
+                "credentials",
+                &hashmap! {
+                    "hash".to_string() => json!("c0202cf6aeab8437c638533d14563d35")
+                },
+            )
+            .await;
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap(), json!({ "result": "ok" }));
+    }
+
+    #[tokio::test]
+    async fn test_query_yara_rule() {
+        let (client, context) = setup().await;
+        let result = YaraifyExecutor
+            .execute(
+                &*client,
+                &context,
+                "QUERY_YARA_RULE",
+                "credentials",
+                &hashmap! {
+                    "yara".to_string() => json!("MALWARE_Win_Neshta")
+                },
+            )
+            .await;
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap(), json!({ "result": "ok" }));
+    }
+
+    #[tokio::test]
+    async fn test_query_clamav_signature() {
+        let (client, context) = setup().await;
+        let result = YaraifyExecutor
+            .execute(
+                &*client,
+                &context,
+                "QUERY_CLAMAV_SIGNATURE",
+                "credentials",
+                &hashmap! {
+                    "clamav".to_string() => json!("Win.Dropper.Gh0stRAT-9789290-0")
+                },
+            )
+            .await;
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap(), json!({ "result": "ok" }));
+    }
+
+    #[tokio::test]
+    async fn test_query_imphash() {
+        let (client, context) = setup().await;
+        let result = YaraifyExecutor
+            .execute(
+                &*client,
+                &context,
+                "QUERY_IMPHASH",
+                "credentials",
+                &hashmap! {
+                    "imphash".to_string() => json!("680b9682922177224183342c299d809f")
+                },
+            )
+            .await;
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap(), json!({ "result": "ok" }));
+    }
+
+    #[tokio::test]
+    async fn test_query_tlsh() {
+        let (client, context) = setup().await;
+        let result = YaraifyExecutor
+            .execute(
+                &*client,
+                &context,
+                "QUERY_TLSH",
+                "credentials",
+                &hashmap! {
+                    "tlsh".to_string() => json!("T140551236C8E05951CAEFD73315186AF983182477CCC9E5BB0E6B36D62CB6431A36B06D")
+                }
+            )
+            .await;
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap(), json!({ "result": "ok" }));
+    }
+
+    #[tokio::test]
+    async fn test_query_telfhash() {
+        let (client, context) = setup().await;
+        let result = YaraifyExecutor
+            .execute(
+                &*client,
+                &context,
+                "QUERY_TELFHASH",
+                "credentials",
+                &hashmap! {
+                    "telfhash".to_string() => json!("t1dd211d716b2195266ea0cd9088eca7b2512c97072349df33cf31849c24140aeea3ac4f")
+                }
+            )
+            .await;
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap(), json!({ "result": "ok" }));
+    }
+
+    #[tokio::test]
+    async fn test_query_gimphash() {
+        let (client, context) = setup().await;
+        let result = YaraifyExecutor
+            .execute(
+                &*client,
+                &context,
+                "QUERY_GIMPHASH",
+                "credentials",
+                &hashmap! {
+                    "gimphash".to_string() => json!("a081e2fab5999d99ed6be718af55e93df171d14bc83c7ca5fdc0907edba0d338c")
+                }
+            )
+            .await;
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap(), json!({ "result": "ok" }));
+    }
+
+    #[tokio::test]
+    async fn test_query_icon_dhash() {
+        let (client, context) = setup().await;
+        let result = YaraifyExecutor
+            .execute(
+                &*client,
+                &context,
+                "QUERY_ICON_DHASH",
+                "credentials",
+                &hashmap! {
+                    "icon_dhash".to_string() => json!("d8d0d4d8ececece4")
+                },
+            )
+            .await;
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap(), json!({ "result": "ok" }));
+    }
+
+    #[tokio::test]
+    async fn test_list_recently_deployed_yara_rules() {
+        let (client, context) = setup().await;
+        let result = YaraifyExecutor
+            .execute(
+                &*client,
+                &context,
+                "LIST_RECENTLY_DEPLOYED_YARA_RULES",
+                "credentials",
+                &HashMap::new(),
+            )
+            .await;
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap(), json!({ "result": "ok" }));
+    }
+}

@@ -244,6 +244,7 @@ async fn close_takedown(
     phish_report_request(client, api_key, &api_url, HttpRequest::Put { body }).await
 }
 
+#[cfg(test)]
 mod tests {
     use super::*;
     use crate::postgres::Database;

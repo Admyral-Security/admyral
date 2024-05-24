@@ -41,6 +41,7 @@ async fn fetch_rss_feed(client: &dyn HttpClient) -> Result<serde_json::Value> {
     Ok(response)
 }
 
+#[cfg(test)]
 mod tests {
     use super::*;
     use crate::postgres::Database;
