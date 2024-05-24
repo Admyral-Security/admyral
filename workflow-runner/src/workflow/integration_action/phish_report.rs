@@ -278,7 +278,6 @@ mod tests {
                 "domain": "admyral.ai"
             }))
         }
-    
     }
 
     struct MockDb;
