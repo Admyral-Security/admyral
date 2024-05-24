@@ -20,7 +20,7 @@ pub trait IntegrationExecutor {
         context: &Context,
         api: &str,
         credential_name: &str,
-        parameters: &HashMap<String, String>,
+        parameters: &HashMap<String, serde_json::Value>,
     ) -> Result<serde_json::Value>;
 }
 
@@ -38,7 +38,7 @@ pub enum IntegrationType {
 pub struct Integration {
     integration_type: IntegrationType,
     api: String,
-    params: HashMap<String, String>,
+    params: HashMap<String, serde_json::Value>,
     credential: String,
 }
 
@@ -103,7 +103,7 @@ mod tests {
         assert_eq!(parsed_integration.api, "GET_A_FILE_REPORT".to_string());
         assert_eq!(
             parsed_integration.params,
-            hashmap! { "hash".to_string() => "<<webhook.body.hash>>".to_string() }
+            hashmap! { "hash".to_string() => json!("<<webhook.body.hash>>") }
         );
         assert_eq!(
             parsed_integration.credential,

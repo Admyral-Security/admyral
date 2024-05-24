@@ -23,7 +23,7 @@ impl IntegrationExecutor for YaraifyExecutor {
         context: &context::Context,
         api: &str,
         _credential_name: &str,
-        parameters: &HashMap<String, String>,
+        parameters: &HashMap<String, serde_json::Value>,
     ) -> Result<serde_json::Value> {
         match api {
             "QUERY_A_FILE_HASH" => query_a_file_hash(client, context, parameters).await,
@@ -67,7 +67,7 @@ async fn query_yaraify(
 async fn query_a_file_hash(
     client: &dyn HttpClient,
     context: &context::Context,
-    parameters: &HashMap<String, String>,
+    parameters: &HashMap<String, serde_json::Value>,
 ) -> Result<serde_json::Value> {
     let file_hash = get_string_parameter(
         "hash",
@@ -86,7 +86,7 @@ async fn query_a_file_hash(
 async fn query_yara_rule(
     client: &dyn HttpClient,
     context: &context::Context,
-    parameters: &HashMap<String, String>,
+    parameters: &HashMap<String, serde_json::Value>,
 ) -> Result<serde_json::Value> {
     let yara_rule = get_string_parameter(
         "yara",
@@ -105,7 +105,7 @@ async fn query_yara_rule(
 async fn query_clamav_signature(
     client: &dyn HttpClient,
     context: &context::Context,
-    parameters: &HashMap<String, String>,
+    parameters: &HashMap<String, serde_json::Value>,
 ) -> Result<serde_json::Value> {
     let clamav = get_string_parameter(
         "clamav",
@@ -124,7 +124,7 @@ async fn query_clamav_signature(
 async fn query_imphash(
     client: &dyn HttpClient,
     context: &context::Context,
-    parameters: &HashMap<String, String>,
+    parameters: &HashMap<String, serde_json::Value>,
 ) -> Result<serde_json::Value> {
     let imphash = get_string_parameter(
         "imphash",
@@ -143,7 +143,7 @@ async fn query_imphash(
 async fn query_tlsh(
     client: &dyn HttpClient,
     context: &context::Context,
-    parameters: &HashMap<String, String>,
+    parameters: &HashMap<String, serde_json::Value>,
 ) -> Result<serde_json::Value> {
     let tlsh = get_string_parameter(
         "tlsh",
@@ -162,7 +162,7 @@ async fn query_tlsh(
 async fn query_telfhash(
     client: &dyn HttpClient,
     context: &context::Context,
-    parameters: &HashMap<String, String>,
+    parameters: &HashMap<String, serde_json::Value>,
 ) -> Result<serde_json::Value> {
     let telfhash = get_string_parameter(
         "telfhash",
@@ -181,7 +181,7 @@ async fn query_telfhash(
 async fn query_gimphash(
     client: &dyn HttpClient,
     context: &context::Context,
-    parameters: &HashMap<String, String>,
+    parameters: &HashMap<String, serde_json::Value>,
 ) -> Result<serde_json::Value> {
     let gimphash = get_string_parameter(
         "gimphash",
@@ -200,7 +200,7 @@ async fn query_gimphash(
 async fn query_icon_dhash(
     client: &dyn HttpClient,
     context: &context::Context,
-    parameters: &HashMap<String, String>,
+    parameters: &HashMap<String, serde_json::Value>,
 ) -> Result<serde_json::Value> {
     let icon_dhash = get_string_parameter(
         "icon_dhash",

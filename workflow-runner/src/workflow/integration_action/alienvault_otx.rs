@@ -43,7 +43,7 @@ impl IntegrationExecutor for AlienvaultOtxExecutor {
         context: &context::Context,
         api: &str,
         credential_name: &str,
-        parameters: &HashMap<String, String>,
+        parameters: &HashMap<String, serde_json::Value>,
     ) -> Result<serde_json::Value> {
         let api_key = fetch_api_key(credential_name, context).await?;
 
@@ -83,7 +83,7 @@ async fn get_domain_information(
     client: &dyn HttpClient,
     api_key: &str,
     context: &context::Context,
-    parameters: &HashMap<String, String>,
+    parameters: &HashMap<String, serde_json::Value>,
 ) -> Result<serde_json::Value> {
     let domain = get_string_parameter(
         "domain",
@@ -148,13 +148,10 @@ mod tests {
     }
 
     async fn setup(db: Arc<dyn Database>) -> (Arc<MockHttpClient>, context::Context) {
-        let context = context::Context::init(
-            "ddd54f25-0537-4e40-ab96-c93beee543de".to_string(),
-            None,
-            db,
-        )
-        .await
-        .unwrap();
+        let context =
+            context::Context::init("ddd54f25-0537-4e40-ab96-c93beee543de".to_string(), None, db)
+                .await
+                .unwrap();
         (Arc::new(MockHttpClient), context)
     }
 
@@ -162,7 +159,7 @@ mod tests {
     async fn test_get_domain_information() {
         let (client, context) = setup(Arc::new(MockDb)).await;
 
-        let parameters = hashmap! { "domain".to_string() => "admyral.dev".to_string() };
+        let parameters = hashmap! { "domain".to_string() => json!("admyral.dev") };
 
         let result = AlienvaultOtxExecutor
             .execute(
@@ -183,21 +180,21 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_unknown_credential() {
+    async fn test_missing_credential() {
         let (client, context) = setup(Arc::new(MockDbUnknownSecret)).await;
-
-        let parameters = hashmap! { "domain".to_string() => "admyral.dev".to_string() };
-
         let result = AlienvaultOtxExecutor
             .execute(
                 &*client,
                 &context,
                 "GET_DOMAIN_INFORMATION",
                 "credentials",
-                &parameters,
+                &HashMap::new(),
             )
             .await;
         assert!(result.is_err());
-        assert_eq!(result.err().unwrap().to_string(), "Missing credentials for AlienVault OTX.");
+        assert_eq!(
+            result.err().unwrap().to_string(),
+            "Missing credentials for AlienVault OTX."
+        );
     }
 }

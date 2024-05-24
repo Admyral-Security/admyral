@@ -8,7 +8,6 @@ use anyhow::{anyhow, Result};
 use base64::{engine::general_purpose::STANDARD_NO_PAD, Engine};
 use maplit::hashmap;
 use serde::{Deserialize, Serialize};
-use std::borrow::Borrow;
 use std::collections::HashMap;
 
 const VIRUS_TOTAL: &str = "VirusTotal";
@@ -47,7 +46,7 @@ impl IntegrationExecutor for VirusTotalExecutor {
         context: &context::Context,
         api: &str,
         credential_name: &str,
-        parameters: &HashMap<String, String>,
+        parameters: &HashMap<String, serde_json::Value>,
     ) -> Result<serde_json::Value> {
         let api_key = get_secret(credential_name, context).await?;
 
@@ -153,7 +152,7 @@ async fn get_a_file_report(
     client: &dyn HttpClient,
     context: &context::Context,
     api_key: &str,
-    parameters: &HashMap<String, String>,
+    parameters: &HashMap<String, serde_json::Value>,
 ) -> Result<serde_json::Value> {
     let file_hash = get_string_parameter(
         "hash",
@@ -174,7 +173,7 @@ async fn get_a_domain_report(
     client: &dyn HttpClient,
     context: &context::Context,
     api_key: &str,
-    parameters: &HashMap<String, String>,
+    parameters: &HashMap<String, serde_json::Value>,
 ) -> Result<serde_json::Value> {
     let domain = get_string_parameter(
         "domain",
@@ -195,7 +194,7 @@ async fn get_ip_address_report(
     client: &dyn HttpClient,
     context: &context::Context,
     api_key: &str,
-    parameters: &HashMap<String, String>,
+    parameters: &HashMap<String, serde_json::Value>,
 ) -> Result<serde_json::Value> {
     let ip = get_string_parameter(
         "ip",
@@ -216,7 +215,7 @@ async fn get_url_analysis_report(
     client: &dyn HttpClient,
     context: &context::Context,
     api_key: &str,
-    parameters: &HashMap<String, String>,
+    parameters: &HashMap<String, serde_json::Value>,
 ) -> Result<serde_json::Value> {
     let url = get_string_parameter(
         "url",
@@ -238,7 +237,7 @@ async fn get_file_behavior_reports_summary(
     client: &dyn HttpClient,
     context: &context::Context,
     api_key: &str,
-    parameters: &HashMap<String, String>,
+    parameters: &HashMap<String, serde_json::Value>,
 ) -> Result<serde_json::Value> {
     let hash = get_string_parameter(
         "hash",
@@ -259,7 +258,7 @@ async fn get_votes_on_a_domain(
     client: &dyn HttpClient,
     context: &context::Context,
     api_key: &str,
-    parameters: &HashMap<String, String>,
+    parameters: &HashMap<String, serde_json::Value>,
 ) -> Result<serde_json::Value> {
     let domain = get_string_parameter(
         "domain",
@@ -281,7 +280,7 @@ async fn get_votes_on_a_file(
     client: &dyn HttpClient,
     context: &context::Context,
     api_key: &str,
-    parameters: &HashMap<String, String>,
+    parameters: &HashMap<String, serde_json::Value>,
 ) -> Result<serde_json::Value> {
     let hash = get_string_parameter(
         "hash",
@@ -302,7 +301,7 @@ async fn get_votes_on_an_ip_address(
     client: &dyn HttpClient,
     context: &context::Context,
     api_key: &str,
-    parameters: &HashMap<String, String>,
+    parameters: &HashMap<String, serde_json::Value>,
 ) -> Result<serde_json::Value> {
     let ip = get_string_parameter(
         "ip",
@@ -324,7 +323,7 @@ async fn get_votes_on_a_url(
     client: &dyn HttpClient,
     context: &context::Context,
     api_key: &str,
-    parameters: &HashMap<String, String>,
+    parameters: &HashMap<String, serde_json::Value>,
 ) -> Result<serde_json::Value> {
     let url = get_string_parameter(
         "url",
@@ -346,7 +345,7 @@ async fn scan_url(
     client: &dyn HttpClient,
     context: &context::Context,
     api_key: &str,
-    parameters: &HashMap<String, String>,
+    parameters: &HashMap<String, serde_json::Value>,
 ) -> Result<serde_json::Value> {
     let url = get_string_parameter(
         "url",
@@ -378,7 +377,7 @@ async fn get_comments_ip_address(
     client: &dyn HttpClient,
     context: &context::Context,
     api_key: &str,
-    parameters: &HashMap<String, String>,
+    parameters: &HashMap<String, serde_json::Value>,
 ) -> Result<serde_json::Value> {
     let ip = get_string_parameter(
         "ip",
@@ -400,7 +399,7 @@ async fn get_comments_domain(
     client: &dyn HttpClient,
     context: &context::Context,
     api_key: &str,
-    parameters: &HashMap<String, String>,
+    parameters: &HashMap<String, serde_json::Value>,
 ) -> Result<serde_json::Value> {
     let domain = get_string_parameter(
         "domain",
@@ -422,7 +421,7 @@ async fn get_comments_file(
     client: &dyn HttpClient,
     context: &context::Context,
     api_key: &str,
-    parameters: &HashMap<String, String>,
+    parameters: &HashMap<String, serde_json::Value>,
 ) -> Result<serde_json::Value> {
     let hash = get_string_parameter(
         "hash",
@@ -444,7 +443,7 @@ async fn get_comments_url(
     client: &dyn HttpClient,
     context: &context::Context,
     api_key: &str,
-    parameters: &HashMap<String, String>,
+    parameters: &HashMap<String, serde_json::Value>,
 ) -> Result<serde_json::Value> {
     let url = get_string_parameter(
         "url",
@@ -467,7 +466,7 @@ async fn search(
     client: &dyn HttpClient,
     context: &context::Context,
     api_key: &str,
-    parameters: &HashMap<String, String>,
+    parameters: &HashMap<String, serde_json::Value>,
 ) -> Result<serde_json::Value> {
     let query = get_string_parameter(
         "query",

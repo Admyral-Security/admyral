@@ -6,12 +6,14 @@ use std::collections::HashMap;
 
 pub async fn get_parameter(
     parameter_name: &str,
-    parameters: &HashMap<String, String>,
+    parameters: &HashMap<String, serde_json::Value>,
     context: &context::Context,
 ) -> Result<Option<serde_json::Value>> {
     match parameters.get(parameter_name) {
         None => Ok(None),
-        Some(value) => Ok(Some(resolve_references(value, context).await?.value)),
+        Some(value) => Ok(Some(
+            resolve_references(&value.to_string(), context).await?.value,
+        )),
     }
 }
 
@@ -25,7 +27,7 @@ pub async fn get_string_parameter(
     parameter_name: &str,
     integration_name: &str,
     api_name: &str,
-    parameters: &HashMap<String, String>,
+    parameters: &HashMap<String, serde_json::Value>,
     context: &context::Context,
     parameter_type: ParameterType,
 ) -> Result<Option<String>> {
@@ -57,7 +59,7 @@ pub async fn get_bool_parameter(
     parameter_name: &str,
     integration_name: &str,
     api_name: &str,
-    parameters: &HashMap<String, String>,
+    parameters: &HashMap<String, serde_json::Value>,
     context: &context::Context,
     parameter_type: ParameterType,
 ) -> Result<Option<bool>> {

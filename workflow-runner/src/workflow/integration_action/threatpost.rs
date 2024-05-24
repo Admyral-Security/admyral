@@ -16,7 +16,7 @@ impl IntegrationExecutor for ThreatpostExecutor {
         _context: &context::Context,
         api: &str,
         _credential_name: &str,
-        _parameters: &HashMap<String, String>,
+        _parameters: &HashMap<String, serde_json::Value>,
     ) -> Result<serde_json::Value> {
         match api {
             "FETCH_RSS_FEED" => fetch_rss_feed(client).await,
@@ -41,14 +41,13 @@ async fn fetch_rss_feed(client: &dyn HttpClient) -> Result<serde_json::Value> {
     Ok(response)
 }
 
-
 mod tests {
     use super::*;
     use crate::postgres::Database;
     use async_trait::async_trait;
     use serde_json::json;
-    use std::sync::Arc;
     use std::collections::HashMap;
+    use std::sync::Arc;
 
     struct MockHttpClient;
     #[async_trait]
@@ -97,9 +96,6 @@ mod tests {
         assert!(result.is_ok());
 
         let value = result.unwrap();
-        assert_eq!(
-            value.as_object().unwrap().get("rss").unwrap(),
-            "some feed"
-        );
+        assert_eq!(value.as_object().unwrap().get("rss").unwrap(), "some feed");
     }
 }

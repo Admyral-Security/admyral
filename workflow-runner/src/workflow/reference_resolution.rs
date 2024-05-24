@@ -81,7 +81,7 @@ pub async fn resolve_references(value: &str, context: &Context) -> Result<Resolv
     if references.is_empty() {
         // Nothing to do here.
         return Ok(ResolveReferenceResult {
-            value: json!(value),
+            value: string_to_json_value(value)?,
             does_not_exist_and_is_single_reference_only: false,
         });
     }
