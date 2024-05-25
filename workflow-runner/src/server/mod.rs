@@ -7,7 +7,7 @@ use auth::authenticate_webhook;
 use axum::{
     extract::{Json, Path, State},
     http::{HeaderMap, StatusCode},
-    response::IntoResponse,
+    response::{IntoResponse, Response},
     routing::{get, post},
     Router,
 };
@@ -96,12 +96,39 @@ async fn is_quota_limit_exceeded(
     Ok(exceeded_quota)
 }
 
+// Documentation: https://api.slack.com/apis/events-api#handshake
+fn handle_slack_url_verification_handshake(
+    headers: HeaderMap,
+    body: &serde_json::Value,
+) -> Result<Option<serde_json::Value>> {
+    if let Some(user_agent) = headers.get("user-agent") {
+        if user_agent.to_str()? == "Slackbot 1.0 (+https://api.slack.com/robots)" {
+            if let Some(body_ref) = body.as_object() {
+                if let Some(request_type) = body_ref.get("type") {
+                    if request_type.is_string()
+                        && request_type.as_str().unwrap() == "url_verification"
+                    {
+                        let challenge = body_ref
+                            .get("challenge")
+                            .expect("challenge must exist")
+                            .as_str()
+                            .expect("challenge must be a string");
+                        return Ok(Some(json!({"challenge": challenge})));
+                    }
+                }
+            }
+        }
+    }
+    Ok(None)
+}
+
 async fn webhook_handler(
+    headers: HeaderMap,
     webhook_id: String,
     secret: String,
     db: Arc<dyn Database>,
     trigger_event: serde_json::Value,
-) -> impl IntoResponse {
+) -> Response {
     tracing::info!("Webhook {} triggered", webhook_id);
 
     match authenticate_webhook(db.borrow(), &webhook_id, &secret).await {
@@ -109,12 +136,36 @@ async fn webhook_handler(
             tracing::error!("Error verifying webhook: {e}");
             return (
                 StatusCode::INTERNAL_SERVER_ERROR,
-                "Error: Internal server error. Try again later.",
-            );
+                Json(json!({"error": "Error: Internal server error. Try again later."})),
+            )
+                .into_response();
         }
         Ok(is_authorized) => {
             if !is_authorized {
-                return (StatusCode::UNAUTHORIZED, "Error: Unauthorized");
+                return (
+                    StatusCode::UNAUTHORIZED,
+                    Json(json!({"error": "Error: Unauthorized"})),
+                )
+                    .into_response();
+            }
+        }
+    }
+
+    // Check whether this is a Slack Events url verification
+    match handle_slack_url_verification_handshake(headers, &trigger_event) {
+        Err(e) => {
+            let error_message =
+                format!("Error verifying whether it is a Slack URL Verification challenge: {e}");
+            tracing::error!(error_message);
+            return (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(json!({"error": error_message})),
+            )
+                .into_response();
+        }
+        Ok(challenge_opt) => {
+            if let Some(challenge) = challenge_opt {
+                return (StatusCode::OK, Json(challenge)).into_response();
             }
         }
     }
@@ -125,15 +176,20 @@ async fn webhook_handler(
             Some(webhook) => webhook,
             None => {
                 tracing::error!("The webhook {webhook_id} does not exist.");
-                return (StatusCode::NOT_FOUND, "Webhook does not exis.");
+                return (
+                    StatusCode::NOT_FOUND,
+                    Json(json!({"error": "Webhook does not exis."})),
+                )
+                    .into_response();
             }
         },
         Err(e) => {
             tracing::error!("Error fetching webhook {webhook_id}: {e}");
             return (
                 StatusCode::INTERNAL_SERVER_ERROR,
-                "Error: Internal server error. Try again later.",
-            );
+                Json(json!({"error": "Error: Internal server error. Try again later."})),
+            )
+                .into_response();
         }
     };
 
@@ -143,12 +199,17 @@ async fn webhook_handler(
             tracing::error!("Error checking workflow run quota limit exceeded check: {e}");
             return (
                 StatusCode::INTERNAL_SERVER_ERROR,
-                "Error: Internal server error. Try again later.",
-            );
+                Json(json!({"error": "Error: Internal server error. Try again later."})),
+            )
+                .into_response();
         }
         Ok(is_quota_exceeded) => {
             if is_quota_exceeded {
-                return (StatusCode::FORBIDDEN, "Workflow run quota limit exceeded");
+                return (
+                    StatusCode::FORBIDDEN,
+                    Json(json!({"error": "Workflow run quota limit exceeded"})),
+                )
+                    .into_response();
             }
         }
     }
@@ -161,7 +222,7 @@ async fn webhook_handler(
     )
     .await;
 
-    (StatusCode::CREATED, "Ok")
+    (StatusCode::OK, Json(json!({"ok": true}))).into_response()
 }
 
 fn headersmap_to_json(headers: HeaderMap) -> serde_json::Value {
@@ -179,9 +240,9 @@ async fn get_webhook_handler(
 ) -> impl IntoResponse {
     let trigger_event = json!({
         "body": json!(""),
-        "headers": headersmap_to_json(headers)
+        "headers": headersmap_to_json(headers.clone())
     });
-    webhook_handler(webhook_id, secret, state.db.clone(), trigger_event).await
+    webhook_handler(headers, webhook_id, secret, state.db.clone(), trigger_event).await
 }
 
 async fn post_webhook_handler(
@@ -192,9 +253,9 @@ async fn post_webhook_handler(
 ) -> impl IntoResponse {
     let trigger_event = json!({
         "body": payload,
-        "headers": headersmap_to_json(headers)
+        "headers": headersmap_to_json(headers.clone())
     });
-    webhook_handler(webhook_id, secret, state.db.clone(), trigger_event).await
+    webhook_handler(headers, webhook_id, secret, state.db.clone(), trigger_event).await
 }
 
 async fn post_trigger_workflow_handler(

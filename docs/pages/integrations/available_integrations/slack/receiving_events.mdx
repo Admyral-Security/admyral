@@ -1,0 +1,23 @@
+# Receiving Slack Events
+
+In order to receive events from Slack, you need to set up an event subscription in your Slack app. This allows Slack to send events that you specify which triggers a workflow in Admyral. Follow the steps below to set up event subscriptions:
+
+1. Go to the [Your Apps](https://api.slack.com/apps) page and continue to the app you created for Admyral.
+
+2. Go to **Event Subscriptions**
+
+<img src="/slack_events1.png" />
+
+3. Click the toggle to enable events.
+
+<img src="/slack_events2.png" />
+
+4. Go to your workflow in Admyral which should process the incoming Slack events. Add a **Start Workflow** action, click on the action node, and select **Event-based Workflow Execution** as **Start Workflow Type**.
+
+<img src="/slack_events3.png" />
+
+5. Copy the API URL from the **Start Workflow** action and paste it in the **Request URL** field in the **Event Subscriptions** page in Slack. Admyral automatically handles the Slack [URL verification challenge](https://api.slack.com/apis/events-api#handshake).
+
+TODO: screenshot
+
+6. After the URL verification, you need to choose the events you want to subscribe to. Click on **Add Workspace Event** and select the events you want to subscribe to.

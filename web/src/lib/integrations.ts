@@ -609,7 +609,7 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 		apis: [
 			{
 				id: "SEND_MESSAGE",
-				name: "Send a message to a channel",
+				name: "Send a message",
 				description:
 					"This method posts a message to a public channel, private channel, or direct message (DM, or IM) conversation. Required scopes: chat:write",
 				documentationUrl:

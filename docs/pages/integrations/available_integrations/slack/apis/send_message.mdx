@@ -1,70 +1,15 @@
-# Slack
+import { Callout } from "nextra/components";
 
-## Create a Slack bot and connect to Admyral
+# Send a message
 
-1. Go to the [Your Apps](https://api.slack.com/apps) page and click **Create an App** button.
+Send a message to a channel, user, or group.
 
-2. Click on **From Scratch**.
+<Callout type="info">
+	For Slack's documentation, see
+	[chat.postMessage](https://api.slack.com/methods/chat.postMessage).
+</Callout>
 
-<img src="/slack1.png" />
-
-3. Enter your App Name. For example, enter **Admyral**.
-
-4. Select your workspace.
-
-5. Click **Create App**.
-
-<img src="/slack2.png" />
-
-6. Go to **OAuth & Permissions**
-
-<img src="/slack3.png" />
-
-7. scroll down to **Scopes** and add the following scopes:
-
-**Bot Token Scopes**
-
-```
-- chat:write
-```
-
-**User Token Scopes**
-
-```
-...
-```
-
-8. In the sidepanel, go to **Install App** and click **Install to Workspace**.
-
-<img src="/slack4.png" />
-
-9. Click **Allow**.
-
-10. Copy the **Bot User OAuth Access Token**.
-
-<img src="/slack5.png" />
-
-11. Go to the **Settings** page in **Admyral** and click **Create New Credential**. Select **Slack**.
-
-<img src="/slack6.png" />
-
-12. Paste the **Bot User OAuth Access Token** in the **API Key** field and hit **Save Credential**.
-
-<img src="/slack7.png" />
-
-13. To communicate with existing Slack channels, you need to invite the bot to the channel. Go to the channel and type `/invite @<your app name>` (e.g. `/invite @Admyral`). Alternatively, you can add the scope `chat:write.public` to the **Bot Token Scopes**.
-
-14. You can now use the Slack APIs in Admyral.
-
-## Slack APIs
-
-The following APIs are available for Slack. If you need any additional Slack API, please reach out to us on [Discord](https://discord.com/invite/GqbJZT9Hbf).
-
-### Send a message
-
-Send a message to a channel, user, or group. For the Slack's documentation, see [chat.postMessage](https://api.slack.com/methods/chat.postMessage).
-
-**Parameters:**
+## Parameters:
 
 | Field                      | Description                                                                                                                                                                                                                                                                           | Required |
 | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------: |
@@ -74,3 +19,50 @@ Send a message to a channel, user, or group. For the Slack's documentation, see 
 | **Thread Timestamp**       | To reply to another message, provide the "ts" value of the message to reply to. Avoid using a reply\'s "ts" value. Instead, use the "ts" value of the parent message.                                                                                                                 |    -     |
 
 Tip: Slack offers an online [Block Kit Builder](https://app.slack.com/block-kit-builder) to help you create blocks for your messages more easily.
+
+## Example Output:
+
+```json
+{
+	"ok": true,
+	"ts": "1716658341.471459",
+	"channel": "C06QP0KV1L2",
+	"message": {
+		"ts": "1716658341.471459",
+		"team": "T06DB7NEYJG",
+		"text": "test reply",
+		"type": "message",
+		"user": "U074PMEF89M",
+		"app_id": "A0751AEHE13",
+		"blocks": [
+			{
+				"text": {
+					"text": "New Paid Time Off request from <example.com|Fred Enriquez>\n\n<https://example.com|View request>",
+					"type": "mrkdwn",
+					"verbatim": false
+				},
+				"type": "section",
+				"block_id": "BHeQA"
+			}
+		],
+		"bot_id": "B075T2B0BUY",
+		"bot_profile": {
+			"id": "B075T2B0BUY",
+			"name": "Admyral",
+			"icons": {
+				"image_36": "https://a.slack-edge.com/80588/img/plugins/app/bot_36.png",
+				"image_48": "https://a.slack-edge.com/80588/img/plugins/app/bot_48.png",
+				"image_72": "https://a.slack-edge.com/80588/img/plugins/app/service_72.png"
+			},
+			"app_id": "A0751AEHE13",
+			"deleted": false,
+			"team_id": "T06DB7NEYJG",
+			"updated": 1716648265
+		}
+	},
+	"warning": "missing_charset",
+	"response_metadata": {
+		"warnings": ["missing_charset"]
+	}
+}
+```
