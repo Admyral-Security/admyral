@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n        INSERT INTO admyral.workflow_run_action_state ( action_state, run_id, action_id, is_error, prev_action_state_id)\n        VALUES ( $1, $2, $3, $4, $5 )\n        RETURNING action_state_id\n        ",
+  "query": "\n            INSERT INTO admyral.workflow_run_action_state ( action_state, run_id, action_id, is_error, prev_action_state_id)\n            VALUES ( $1, $2, $3, $4, $5 )\n            RETURNING action_state_id\n            ",
   "describe": {
     "columns": [
       {
@@ -22,5 +22,5 @@
       false
     ]
   },
-  "hash": "162141872b6d3e2e77347ca731b36b4718e6f0b2f70a8b5294c9ffbdf47f6e9d"
+  "hash": "cec79110b618df8e406239aa95550d4cf45bb02630596c656c5f5649923e4b50"
 }

@@ -1,0 +1,34 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            SELECT parent.reference_handle as parent_reference_handle, child.reference_handle as child_reference_handle, we.edge_type::TEXT as \"edge_type!: String\"\n            FROM admyral.workflow_edge we\n            JOIN admyral.action_node parent ON parent.action_id = we.parent_action_id\n            JOIN admyral.action_node child ON child.action_id = we.child_action_id\n            JOIN admyral.workflow w ON w.workflow_id = parent.workflow_id AND w.workflow_id = child.workflow_id\n            WHERE w.workflow_id = $1\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "parent_reference_handle",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 1,
+        "name": "child_reference_handle",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "edge_type!: String",
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      null
+    ]
+  },
+  "hash": "d2b36c23e25f98fd760187e7e5de5334083ed0327bc935657cef4f8d8a302730"
+}

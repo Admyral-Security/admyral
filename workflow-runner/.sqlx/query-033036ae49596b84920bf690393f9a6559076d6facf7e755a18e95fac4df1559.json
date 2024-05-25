@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            UPDATE admyral.workflow_run\n            SET completed_timestamp = CURRENT_TIMESTAMP\n            WHERE run_id = $1\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "033036ae49596b84920bf690393f9a6559076d6facf7e755a18e95fac4df1559"
+}

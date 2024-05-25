@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n        SELECT w.webhook_id, a.reference_handle, workflow_id\n        FROM admyral.webhook w\n        JOIN admyral.action_node a ON w.action_id = a.action_id\n        WHERE w.webhook_id = $1\n        LIMIT 1\n        ",
+  "query": "\n            SELECT w.webhook_id, a.reference_handle, workflow_id\n            FROM admyral.webhook w\n            JOIN admyral.action_node a ON w.action_id = a.action_id\n            WHERE w.webhook_id = $1\n            LIMIT 1\n            ",
   "describe": {
     "columns": [
       {
@@ -30,5 +30,5 @@
       false
     ]
   },
-  "hash": "16242b5baeba2fd6b5c1ff4359b66a0dbea737b7933eb6ee26d7fb41c9d11126"
+  "hash": "69774eb2027439a86150d0a79fb611da28740c2824bebcd85a0e0ae079e35258"
 }

@@ -1,0 +1,22 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            SELECT COUNT(*) AS \"count!: i64\"\n            FROM admyral.workflow_run run\n            JOIN admyral.workflow w on run.workflow_id = w.workflow_id\n            WHERE\n                w.user_id = $1\n                AND run.started_timestamp >= (NOW()::TIMESTAMP - INTERVAL '1 hour')\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "count!: i64",
+        "type_info": "Int8"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "fc758948e6e337e855627bec0bb7ae46715e90e65df5974bc21c32c7ebc7a958"
+}

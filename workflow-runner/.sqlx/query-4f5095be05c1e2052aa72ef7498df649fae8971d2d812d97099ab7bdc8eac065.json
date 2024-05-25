@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n        INSERT INTO admyral.workflow_run ( workflow_id )\n        VALUES ( $1 )\n        RETURNING run_id\n        ",
+  "query": "\n            INSERT INTO admyral.workflow_run ( workflow_id )\n            VALUES ( $1 )\n            RETURNING run_id\n            ",
   "describe": {
     "columns": [
       {
@@ -18,5 +18,5 @@
       false
     ]
   },
-  "hash": "35362ed84f7b932a4fac6c0178452d5c3bc5f3f76fa50f592e554493a56ea183"
+  "hash": "4f5095be05c1e2052aa72ef7498df649fae8971d2d812d97099ab7bdc8eac065"
 }
