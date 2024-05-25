@@ -8,6 +8,7 @@
 	},
 	"workflows": "Workflows",
 	"actions": "Actions",
+	"integrations": "Integrations",
 	"credentials": "Credential Management",
 	"account_settings": "Account Settings",
 	"-- More": {

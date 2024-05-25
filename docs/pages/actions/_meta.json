@@ -1,5 +1,4 @@
 {
-    "configuration": "Configuration",
-    "action_types": "Action Types",
-    "integrations": "Integrations"
+	"configuration": "Configuration",
+	"action_types": "Action Types"
 }

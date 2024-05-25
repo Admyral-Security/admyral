@@ -13,6 +13,7 @@ lazy_static! {
     static ref REQ_CLIENT: reqwest::Client = reqwest::Client::new();
 }
 
+// TODO: rename to Request Body Type
 #[derive(Debug, Clone)]
 pub enum PostRequest {
     Form { params: HashMap<String, String> },
@@ -85,22 +86,28 @@ async fn decode_response(
     }
 
     let response_headers = response.headers();
-    if let Some(content_type) = response_headers.get("content-type") {
-        if content_type.to_str()?.starts_with("application/rss+xml") {
-            // XML to JSON
-            let xml_content = response.text().await?;
-            return Ok(xml_to_json(xml_content.to_string())?);
-        }
+
+    let content_type = if let Some(content_type) = response_headers.get("content-type") {
+        content_type.to_str()?.to_string()
+    } else if let Some(content_type) = response_headers.get("Content-Type") {
+        content_type.to_str()?.to_string()
+    } else {
+        String::new()
+    };
+
+    if content_type.starts_with("application/rss+xml") {
+        // XML to JSON
+        let xml_content = response.text().await?;
+        return Ok(xml_to_json(xml_content.to_string())?);
     }
-    if let Some(content_type) = response_headers.get("Content-Type") {
-        if content_type.to_str()?.starts_with("application/rss+xml") {
-            // XML to JSON
-            let xml_content = response.text().await?;
-            return Ok(xml_to_json(xml_content.to_string())?);
-        }
+    if content_type.starts_with("text/html") {
+        return Ok(json!(response.text().await?));
     }
 
-    Ok(response.json::<serde_json::Value>().await?)
+    response
+        .json::<serde_json::Value>()
+        .await
+        .map_err(|e| anyhow!(e))
 }
 
 #[async_trait]
@@ -137,6 +144,7 @@ impl HttpClient for ReqwestClient {
 
         let response = match body {
             PostRequest::Form { params } => {
+                // TODO: Remove content type
                 headers.insert(
                     "content-type",
                     HeaderValue::from_str("application/x-www-form-urlencoded")?,
@@ -149,6 +157,7 @@ impl HttpClient for ReqwestClient {
                     .await?
             }
             PostRequest::Json { body } => {
+                // TODO: Remove content type
                 headers.insert("content-type", HeaderValue::from_str("application/json")?);
                 self.client
                     .post(url)
@@ -177,6 +186,7 @@ impl HttpClient for ReqwestClient {
 
         let response = match body {
             PostRequest::Form { params } => {
+                // TODO: Remove content type
                 headers.insert(
                     "content-type",
                     HeaderValue::from_str("application/x-www-form-urlencoded")?,
@@ -189,6 +199,7 @@ impl HttpClient for ReqwestClient {
                     .await?
             }
             PostRequest::Json { body } => {
+                // TODO: Remove content type
                 headers.insert("content-type", HeaderValue::from_str("application/json")?);
                 self.client
                     .put(url)

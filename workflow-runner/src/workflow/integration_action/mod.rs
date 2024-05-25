@@ -9,6 +9,7 @@ use std::collections::HashMap;
 
 mod alienvault_otx;
 mod phish_report;
+mod slack;
 mod threatpost;
 mod virustotal;
 mod yaraify;
@@ -32,6 +33,7 @@ pub enum IntegrationType {
     Threatpost,
     Yaraify,
     PhishReport,
+    Slack,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -69,6 +71,11 @@ impl ActionExecutor for Integration {
             }
             IntegrationType::PhishReport => {
                 phish_report::PhishReportExecutor
+                    .execute(&client, context, &self.api, &self.credential, &self.params)
+                    .await
+            }
+            IntegrationType::Slack => {
+                slack::SlackExecutor
                     .execute(&client, context, &self.api, &self.credential, &self.params)
                     .await
             }

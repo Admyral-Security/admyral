@@ -210,7 +210,12 @@ export default function Integration({ id }: IntegrationProps) {
 			)}
 
 			{apiDefinition.parameters.map((parameter) => (
-				<Flex direction="column" gap="2" key={parameter.id}>
+				<Flex
+					direction="column"
+					gap="2"
+					key={parameter.id}
+					width="100%"
+				>
 					<Flex direction="column" gap="0">
 						<Text>{parameter.displayName}</Text>
 						<Text color="gray" weight="light" size="1">
@@ -218,8 +223,8 @@ export default function Integration({ id }: IntegrationProps) {
 						</Text>
 					</Flex>
 
-					<Flex direction="column" gap="0">
-						{parameter.dataType === ApiParameterDatatype.STRING && (
+					<Flex direction="column" gap="0" width="100%">
+						{parameter.dataType === ApiParameterDatatype.TEXT && (
 							<TextField.Root
 								variant="surface"
 								value={
@@ -235,6 +240,28 @@ export default function Integration({ id }: IntegrationProps) {
 									updateData(clonedData);
 								}}
 							/>
+						)}
+						{parameter.dataType ===
+							ApiParameterDatatype.TEXTAREA && (
+							<Flex height="300px">
+								<TextArea
+									variant="surface"
+									value={
+										(data.actionDefinition as any).params[
+											parameter.id
+										]
+									}
+									onChange={(event) => {
+										const clonedData = cloneDeep(data);
+										(
+											clonedData.actionDefinition as any
+										).params[parameter.id] =
+											event.target.value;
+										updateData(clonedData);
+									}}
+									style={{ width: "100%" }}
+								/>
+							</Flex>
 						)}
 						{parameter.dataType ===
 							ApiParameterDatatype.BOOLEAN && (

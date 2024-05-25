@@ -60,6 +60,16 @@ export default function IntegrationLogoIcon({
 				/>
 			);
 
+		case IntegrationType.SLACK:
+			return (
+				<Image
+					src="/slack_logo_color.svg"
+					alt="Slack"
+					height="20"
+					width="20"
+				/>
+			);
+
 		default:
 			return <IntegrationIcon />;
 	}

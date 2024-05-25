@@ -54,6 +54,16 @@ function getIcon(integration?: IntegrationType | null) {
 				/>
 			);
 
+		case IntegrationType.SLACK:
+			return (
+				<Image
+					src="/slack_logo_color.svg"
+					alt="Slack"
+					height="32"
+					width="32"
+				/>
+			);
+
 		default:
 			return (
 				<Image src="/logo.svg" alt="Admyral" height="32" width="32" />
