@@ -1,6 +1,8 @@
 mod auth;
 mod shared_state;
+mod slack_url_verification_handshake;
 
+use crate::{postgres::Database, server::shared_state::setup_state, workflow::run_workflow};
 use anyhow::Result;
 use async_once::AsyncOnce;
 use auth::authenticate_webhook;
@@ -14,12 +16,11 @@ use axum::{
 use lazy_static::lazy_static;
 use serde_json::json;
 use shared_state::SharedState;
+use slack_url_verification_handshake::handle_slack_url_verification_handshake;
 use std::collections::HashMap;
 use std::{borrow::Borrow, sync::Arc};
 use tower::ServiceBuilder;
 use tower_http::{cors::CorsLayer, trace::TraceLayer};
-
-use crate::{postgres::Database, server::shared_state::setup_state, workflow::run_workflow};
 
 use self::auth::JwtClaims;
 
@@ -94,32 +95,6 @@ async fn is_quota_limit_exceeded(
         )
     }
     Ok(exceeded_quota)
-}
-
-// Documentation: https://api.slack.com/apis/events-api#handshake
-fn handle_slack_url_verification_handshake(
-    headers: HeaderMap,
-    body: &serde_json::Value,
-) -> Result<Option<serde_json::Value>> {
-    if let Some(user_agent) = headers.get("user-agent") {
-        if user_agent.to_str()? == "Slackbot 1.0 (+https://api.slack.com/robots)" {
-            if let Some(body_ref) = body.as_object() {
-                if let Some(request_type) = body_ref.get("type") {
-                    if request_type.is_string()
-                        && request_type.as_str().unwrap() == "url_verification"
-                    {
-                        let challenge = body_ref
-                            .get("challenge")
-                            .expect("challenge must exist")
-                            .as_str()
-                            .expect("challenge must be a string");
-                        return Ok(Some(json!({"challenge": challenge})));
-                    }
-                }
-            }
-        }
-    }
-    Ok(None)
 }
 
 async fn webhook_handler(

@@ -5,8 +5,6 @@ use crate::workflow::{
     utils::{get_string_parameter, ParameterType},
 };
 use anyhow::{anyhow, Result};
-use maplit::hashmap;
-use reqwest::header::{HeaderMap, HeaderValue};
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use std::collections::HashMap;
@@ -225,6 +223,7 @@ mod tests {
     use super::*;
     use crate::postgres::Database;
     use async_trait::async_trait;
+    use maplit::hashmap;
     use serde_json::json;
     use std::sync::Arc;
 
