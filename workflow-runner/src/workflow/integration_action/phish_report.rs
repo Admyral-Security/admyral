@@ -1,7 +1,7 @@
 use super::IntegrationExecutor;
 use crate::workflow::context;
 use crate::workflow::{
-    http_client::{HttpClient, PostRequest},
+    http_client::{HttpClient, RequestBodyType},
     utils::{get_bool_parameter, get_string_parameter, ParameterType},
 };
 use anyhow::{anyhow, Result};
@@ -94,7 +94,7 @@ async fn phish_report_request(
                 .post(
                     api_url,
                     headers,
-                    PostRequest::Json { body: body },
+                    RequestBodyType::Json { body: body },
                     200,
                     format!("Error: Failed to call {PHISH_REPORT} API"),
                 )
@@ -105,7 +105,7 @@ async fn phish_report_request(
                 .put(
                     api_url,
                     headers,
-                    PostRequest::Json { body: body },
+                    RequestBodyType::Json { body: body },
                     200,
                     format!("Error: Failed to call {PHISH_REPORT} API"),
                 )
@@ -271,7 +271,7 @@ mod tests {
             &self,
             _url: &str,
             _headers: HashMap<String, String>,
-            _body: PostRequest,
+            _body: RequestBodyType,
             _expected_response_status: u16,
             _error_message: String,
         ) -> Result<serde_json::Value> {

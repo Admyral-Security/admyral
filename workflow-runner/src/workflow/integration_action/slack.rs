@@ -1,7 +1,7 @@
 use super::IntegrationExecutor;
 use crate::workflow::{
     context,
-    http_client::{HttpClient, PostRequest},
+    http_client::{HttpClient, RequestBodyType},
     utils::{get_string_parameter, ParameterType},
 };
 use anyhow::{anyhow, Result};
@@ -70,7 +70,7 @@ async fn slack_post_request(
         .post(
             api_url,
             headers,
-            PostRequest::Json { body },
+            RequestBodyType::Json { body },
             200,
             format!("Error: Failed to call {SLACK} API"),
         )
@@ -180,7 +180,7 @@ mod tests {
             &self,
             _url: &str,
             _headers: HashMap<String, String>,
-            _body: PostRequest,
+            _body: RequestBodyType,
             _expected_response_status: u16,
             _error_message: String,
         ) -> Result<serde_json::Value> {

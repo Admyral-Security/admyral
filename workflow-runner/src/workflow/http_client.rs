@@ -13,9 +13,8 @@ lazy_static! {
     static ref REQ_CLIENT: reqwest::Client = reqwest::Client::new();
 }
 
-// TODO: rename to Request Body Type
 #[derive(Debug, Clone)]
-pub enum PostRequest {
+pub enum RequestBodyType {
     Form { params: HashMap<String, String> },
     Json { body: serde_json::Value },
 }
@@ -36,7 +35,7 @@ pub trait HttpClient: Send + Sync {
         &self,
         url: &str,
         headers: HashMap<String, String>,
-        body: PostRequest,
+        body: RequestBodyType,
         expected_response_status: u16,
         error_message: String,
     ) -> Result<serde_json::Value> {
@@ -47,7 +46,7 @@ pub trait HttpClient: Send + Sync {
         &self,
         url: &str,
         headers: HashMap<String, String>,
-        body: PostRequest,
+        body: RequestBodyType,
         expected_response_status: u16,
         error_message: String,
     ) -> Result<serde_json::Value> {
@@ -133,7 +132,7 @@ impl HttpClient for ReqwestClient {
         &self,
         url: &str,
         header_parameters: HashMap<String, String>,
-        body: PostRequest,
+        body: RequestBodyType,
         expected_response_status: u16,
         error_message: String,
     ) -> Result<serde_json::Value> {
@@ -143,7 +142,7 @@ impl HttpClient for ReqwestClient {
         }
 
         let response = match body {
-            PostRequest::Form { params } => {
+            RequestBodyType::Form { params } => {
                 // TODO: Remove content type
                 headers.insert(
                     "content-type",
@@ -156,7 +155,7 @@ impl HttpClient for ReqwestClient {
                     .send()
                     .await?
             }
-            PostRequest::Json { body } => {
+            RequestBodyType::Json { body } => {
                 // TODO: Remove content type
                 headers.insert("content-type", HeaderValue::from_str("application/json")?);
                 self.client
@@ -175,7 +174,7 @@ impl HttpClient for ReqwestClient {
         &self,
         url: &str,
         header_parameters: HashMap<String, String>,
-        body: PostRequest,
+        body: RequestBodyType,
         expected_response_status: u16,
         error_message: String,
     ) -> Result<serde_json::Value, Error> {
@@ -185,7 +184,7 @@ impl HttpClient for ReqwestClient {
         }
 
         let response = match body {
-            PostRequest::Form { params } => {
+            RequestBodyType::Form { params } => {
                 // TODO: Remove content type
                 headers.insert(
                     "content-type",
@@ -198,7 +197,7 @@ impl HttpClient for ReqwestClient {
                     .send()
                     .await?
             }
-            PostRequest::Json { body } => {
+            RequestBodyType::Json { body } => {
                 // TODO: Remove content type
                 headers.insert("content-type", HeaderValue::from_str("application/json")?);
                 self.client

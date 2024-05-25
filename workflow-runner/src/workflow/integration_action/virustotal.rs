@@ -1,7 +1,7 @@
 use super::IntegrationExecutor;
 use crate::workflow::{
     context,
-    http_client::{HttpClient, PostRequest},
+    http_client::{HttpClient, RequestBodyType},
     utils::{get_string_parameter, ParameterType},
 };
 use anyhow::{anyhow, Result};
@@ -114,7 +114,7 @@ async fn virus_total_post_request(
     client: &dyn HttpClient,
     api_url: &str,
     api_key: &str,
-    request_type: PostRequest,
+    request_type: RequestBodyType,
 ) -> Result<serde_json::Value> {
     let mut headers = hashmap! {
         "x-apikey".to_string() => api_key.to_string(),
@@ -122,11 +122,11 @@ async fn virus_total_post_request(
     };
 
     match &request_type {
-        PostRequest::Form { .. } => headers.insert(
+        RequestBodyType::Form { .. } => headers.insert(
             "content-type".to_string(),
             "application/x-www-form-urlencoded".to_string(),
         ),
-        PostRequest::Json { .. } => {
+        RequestBodyType::Json { .. } => {
             headers.insert("content-type".to_string(), "application/json".to_string())
         }
     };
@@ -362,7 +362,7 @@ async fn scan_url(
         client,
         &api_url,
         api_key,
-        PostRequest::Form {
+        RequestBodyType::Form {
             params: hashmap! {
                 "url".to_string() => url
             },
@@ -509,7 +509,7 @@ mod tests {
             &self,
             url: &str,
             headers: HashMap<String, String>,
-            body: PostRequest,
+            body: RequestBodyType,
             expected_response_status: u16,
             error_message: String,
         ) -> Result<serde_json::Value> {
