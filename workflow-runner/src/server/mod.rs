@@ -98,7 +98,6 @@ async fn is_quota_limit_exceeded(
 }
 
 async fn webhook_handler(
-    headers: HeaderMap,
     webhook_id: String,
     secret: String,
     db: Arc<dyn Database>,
@@ -127,7 +126,7 @@ async fn webhook_handler(
     }
 
     // Check whether this is a Slack Events url verification
-    match handle_slack_url_verification_handshake(headers, &trigger_event) {
+    match handle_slack_url_verification_handshake(&trigger_event) {
         Err(e) => {
             let error_message =
                 format!("Error verifying whether it is a Slack URL Verification challenge: {e}");
@@ -215,9 +214,9 @@ async fn get_webhook_handler(
 ) -> impl IntoResponse {
     let trigger_event = json!({
         "body": json!(""),
-        "headers": headersmap_to_json(headers.clone())
+        "headers": headersmap_to_json(headers)
     });
-    webhook_handler(headers, webhook_id, secret, state.db.clone(), trigger_event).await
+    webhook_handler(webhook_id, secret, state.db.clone(), trigger_event).await
 }
 
 async fn post_webhook_handler(
@@ -228,9 +227,9 @@ async fn post_webhook_handler(
 ) -> impl IntoResponse {
     let trigger_event = json!({
         "body": payload,
-        "headers": headersmap_to_json(headers.clone())
+        "headers": headersmap_to_json(headers)
     });
-    webhook_handler(headers, webhook_id, secret, state.db.clone(), trigger_event).await
+    webhook_handler(webhook_id, secret, state.db.clone(), trigger_event).await
 }
 
 async fn post_trigger_workflow_handler(
