@@ -1,3 +1,5 @@
+import { Callout } from "nextra/components";
+
 # Receiving Slack Events
 
 In order to receive events from Slack, you need to set up an event subscription in your Slack app. This allows Slack to send events that you specify which triggers a workflow in Admyral. Follow the steps below to set up event subscriptions:
@@ -21,3 +23,35 @@ In order to receive events from Slack, you need to set up an event subscription 
 <img src="/slack_events4.png" />
 
 6. After the URL verification, you need to choose the events you want to subscribe to. Click on **Add Workspace Event** and select the events you want to subscribe to.
+
+## Example: React to messages posted in a Slack channel
+
+This is what we are going to build:
+
+<img src="/slack_events_example2.png" />
+
+7. In the **Event Subscriptions** page in Slack, add the `message.channels` event in the **Subscribe to Bot Events** section. Click on **Save Changes** at the bottom of the page.
+
+<Callout type="info">
+  Admyral can only receive events from channels that the app is a member of. Make sure to invite the app to the channel you want to receive events from. You can invite the app to a channel by typing `/invite @<app-name>` in the channel (e.g., `/invite @Admyral`).
+</Callout>
+
+<br />
+
+<img src="/slack_events_example1.png" />
+
+8. First, we add an **If-Condition** action below the **Start Workflow** action. We need to check whether the received message is from user. We configure the If-Condition with the following parameters:
+
+-   **Condition**: `<<slack_events_input.body.event.bot_id>>` does not exist
+
+9. Next, we use the **Send Message** API from the Slack integration to comment on the message. In the **Credential** dropdown, we select our Slack credentials. We configure the **Send Message** action with the following parameters:
+
+-   **Channel**: `<<slack_events_input.body.event.channel>>`
+-   **Text**: `Yo! Admyral here. What's up?`
+-   **Thread Timestamp**: `<<slack_events_input.body.event.ts>>`
+
+10. Finally, we also use the **Add Reaction** API from the Slack integration to add a reaction to the message. First, we need to select our Slack credentials. Then, we configure the **Add Reaction** action with the following parameters:
+
+-   **Channel**: `<<slack_events_input.body.event.channel>>`
+-   **Name**: `thumbsup`
+-   **Timestamp**: `<<slack_events_input.body.event.ts>>`
