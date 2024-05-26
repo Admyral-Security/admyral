@@ -87,6 +87,38 @@ pub async fn get_bool_parameter(
     }
 }
 
+pub async fn get_number_parameter(
+    parameter_name: &str,
+    integration_name: &str,
+    api_name: &str,
+    parameters: &HashMap<String, serde_json::Value>,
+    context: &context::Context,
+    parameter_type: ParameterType,
+) -> Result<Option<serde_json::Number>> {
+    let result = get_parameter(parameter_name, parameters, context).await?;
+
+    match result {
+        None => match parameter_type {
+            ParameterType::Optional => Ok(None),
+            ParameterType::Required => {
+                tracing::error!(
+                    "Missing parameter \"{parameter_name}\" for {integration_name} {api_name}"
+                );
+                Err(anyhow!(
+                    "Missing parameter \"{parameter_name}\" for {integration_name} {api_name}"
+                ))
+            }
+        },
+        Some(result) => match result.clone() {
+            serde_json::Value::Number(value) => Ok(Some(value)),
+            _ => {
+                tracing::error!("Invalid \"{parameter_name}\" parameter for {integration_name} {api_name} API because not a number: {:?}", result);
+                return Err(anyhow!("Invalid \"{parameter_name}\" parameter for {integration_name} {api_name} API because not a number."));
+            }
+        },
+    }
+}
+
 pub fn xml_to_json(xml_content: String) -> Result<serde_json::Value> {
     let mut config = Config::new_with_defaults().add_json_type_override(
         Regex::new(r".*").unwrap(),

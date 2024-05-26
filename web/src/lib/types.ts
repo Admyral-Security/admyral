@@ -53,6 +53,7 @@ export enum ApiParameterDatatype {
 	TEXT = "TEXT",
 	BOOLEAN = "BOOLEAN",
 	TEXTAREA = "TEXTAREA",
+	NUMBER = "NUMBER",
 }
 
 export type IntegrationApiParameter = {

@@ -224,6 +224,25 @@ export default function Integration({ id }: IntegrationProps) {
 					</Flex>
 
 					<Flex direction="column" gap="0" width="100%">
+						{parameter.dataType === ApiParameterDatatype.NUMBER && (
+							<TextField.Root
+								variant="surface"
+								value={
+									(data.actionDefinition as any).params[
+										parameter.id
+									]
+								}
+								onChange={(event) => {
+									const value = parseInt(event.target.value);
+									const clonedData = cloneDeep(data);
+									(clonedData.actionDefinition as any).params[
+										parameter.id
+									] = Number.isNaN(value) ? undefined : value;
+
+									updateData(clonedData);
+								}}
+							/>
+						)}
 						{parameter.dataType === ApiParameterDatatype.TEXT && (
 							<TextField.Root
 								variant="surface"

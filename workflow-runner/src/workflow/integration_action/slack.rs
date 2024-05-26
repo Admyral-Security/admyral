@@ -2,7 +2,7 @@ use super::IntegrationExecutor;
 use crate::workflow::{
     context,
     http_client::{HttpClient, RequestBodyType},
-    utils::{get_string_parameter, ParameterType},
+    utils::{get_bool_parameter, get_number_parameter, get_string_parameter, ParameterType},
 };
 use anyhow::{anyhow, Result};
 use maplit::hashmap;
@@ -50,6 +50,7 @@ impl IntegrationExecutor for SlackExecutor {
 
         match api {
             "SEND_MESSAGE" => send_message(client, context, &api_key, parameters).await,
+            "LIST_USERS" => list_users(client, context, &api_key, parameters).await,
             _ => return Err(anyhow!("API {api} not implemented for {SLACK}.")),
         }
     }
@@ -71,6 +72,26 @@ async fn slack_post_request(
             api_url,
             headers,
             RequestBodyType::Json { body },
+            200,
+            format!("Error: Failed to call {SLACK} API"),
+        )
+        .await
+}
+
+async fn slack_get_request(
+    client: &dyn HttpClient,
+    api_url: &str,
+    api_key: &str,
+) -> Result<serde_json::Value> {
+    let headers = hashmap! {
+        "Authorization".to_string() => format!("Bearer {api_key}"),
+        "Content-type".to_string() => "application/json".to_string(),
+    };
+
+    client
+        .get(
+            api_url,
+            headers,
             200,
             format!("Error: Failed to call {SLACK} API"),
         )
@@ -153,13 +174,133 @@ async fn send_message(
     slack_post_request(client, api_url, api_key, body).await
 }
 
+// Documentation: https://api.slack.com/methods/users.list
+async fn list_users(
+    client: &dyn HttpClient,
+    context: &context::Context,
+    api_key: &str,
+    parameters: &HashMap<String, serde_json::Value>,
+) -> Result<serde_json::Value> {
+    let mut params = Vec::new();
+
+    if let Some(include_local) = get_bool_parameter(
+        "include_locale",
+        SLACK,
+        "LIST_USERS",
+        parameters,
+        context,
+        ParameterType::Optional,
+    )
+    .await?
+    {
+        params.push(format!("include_locale={include_local}"));
+    }
+
+    match get_number_parameter(
+        "limit",
+        SLACK,
+        "LIST_USERS",
+        parameters,
+        context,
+        ParameterType::Optional,
+    )
+    .await?
+    {
+        Some(limit) => {
+            if limit.is_f64() {
+                return Err(anyhow!("Error: Limit must not be float."));
+            }
+
+            if let Some(limit_i64) = limit.as_i64() {
+                if limit_i64 < 0 {
+                    return Err(anyhow!("Error: Limit must not be negative."));
+                }
+
+                params.push(format!("limit={limit_i64}"));
+            } else if let Some(limit_u64) = limit.as_u64() {
+                params.push(format!("limit={limit_u64}"));
+            } else {
+                return Err(anyhow!("Error: Unknown type for limit: {:?}", limit));
+            }
+        }
+        None => params.push(format!("limit=200")),
+    };
+
+    let handle_pagination = match get_bool_parameter(
+        "return_all_pages",
+        SLACK,
+        "LIST_USERS",
+        parameters,
+        context,
+        ParameterType::Optional,
+    )
+    .await?
+    {
+        Some(return_all_pages) => return_all_pages,
+        None => false,
+    };
+
+    let mut api_url = "https://slack.com/api/users.list".to_string();
+    if !params.is_empty() {
+        let params_string = params.join("&");
+        api_url = format!("{api_url}?{params_string}");
+    }
+
+    tracing::info!("Calling Slack users.list API: {api_url}");
+    let result = slack_get_request(client, &api_url, api_key).await?;
+
+    if handle_pagination {
+        let mut out = vec![result];
+        loop {
+            let next_cursor_opt = out
+                .last()
+                .unwrap()
+                .get("response_metadata")
+                .expect("Missing response_metadata for Slack users.list API response. API changed?")
+                .get("next_cursor")
+                .expect("Missing next_cursor for Slack users.list API response. API changed?")
+                .as_str();
+
+            // Check whether we have a next cursor. Otherwise we stop.
+            let next_cursor = match next_cursor_opt {
+                Some(next_cursor) => {
+                    if next_cursor.is_empty() {
+                        break;
+                    }
+
+                    let mut next_cursor = next_cursor.to_string();
+                    // Cursors typically end with = and must be encoded with %3D
+                    // See: https://api.slack.com/apis/pagination
+                    next_cursor = next_cursor.replace("=", "%3D");
+                    next_cursor
+                }
+                None => break,
+            };
+
+            let next_api_url = if params.is_empty() {
+                format!("{api_url}?cursor={next_cursor}")
+            } else {
+                format!("{api_url}&cursor={next_cursor}")
+            };
+
+            tracing::info!("Calling Slack users.list API with pagination: {next_api_url}");
+            let result = slack_get_request(client, &next_api_url, api_key).await?;
+            out.push(result);
+        }
+
+        return Ok(json!(out));
+    }
+
+    Ok(result)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::postgres::Database;
     use async_trait::async_trait;
     use serde_json::json;
-    use std::sync::Arc;
+    use std::sync::{Arc, RwLock};
 
     struct MockHttpClient;
     #[async_trait]
@@ -172,7 +313,10 @@ mod tests {
             _error_message: String,
         ) -> Result<serde_json::Value> {
             Ok(json!({
-                "ok": true
+                "ok": true,
+                "response_metadata": {
+                    "next_cursor": ""
+                }
             }))
         }
 
@@ -281,6 +425,141 @@ mod tests {
             assert!(result.is_ok());
             let value = result.unwrap();
             assert_eq!(value, json!({"ok": true}));
+        }
+    }
+
+    #[tokio::test]
+    async fn test_list_users() {
+        {
+            let (client, context) = setup(Arc::new(MockDb)).await;
+            let parameters = hashmap! {
+                "include_locale".to_string() => json!(false),
+                "limit".to_string() => json!(1),
+            };
+            let result = SlackExecutor
+                .execute(&*client, &context, "LIST_USERS", "credentials", &parameters)
+                .await;
+            assert!(result.is_ok());
+            let value = result.unwrap();
+            assert_eq!(
+                value,
+                json!({"ok": true, "response_metadata": {"next_cursor": ""}})
+            );
+        }
+
+        {
+            let (client, context) = setup(Arc::new(MockDb)).await;
+            let parameters = hashmap! {
+                "include_locale".to_string() => json!(false),
+                "limit".to_string() => json!(-1),
+            };
+            let result = SlackExecutor
+                .execute(&*client, &context, "LIST_USERS", "credentials", &parameters)
+                .await;
+            assert!(result.is_err());
+            assert_eq!(
+                result.err().unwrap().to_string(),
+                "Error: Limit must not be negative."
+            );
+        }
+
+        {
+            let (client, context) = setup(Arc::new(MockDb)).await;
+            let parameters = hashmap! {
+                "include_locale".to_string() => json!(false),
+                "limit".to_string() => json!(1.0),
+            };
+            let result = SlackExecutor
+                .execute(&*client, &context, "LIST_USERS", "credentials", &parameters)
+                .await;
+            assert!(result.is_err());
+            assert_eq!(
+                result.err().unwrap().to_string(),
+                "Error: Limit must not be float."
+            );
+        }
+
+        {
+            #[derive(Default)]
+            struct State {
+                state: usize,
+            }
+
+            #[derive(Default)]
+            struct MockHttpClientWithPagination {
+                state: RwLock<State>,
+            }
+            #[async_trait]
+            impl HttpClient for MockHttpClientWithPagination {
+                async fn get(
+                    &self,
+                    _url: &str,
+                    _headers: HashMap<String, String>,
+                    _expected_response_status: u16,
+                    _error_message: String,
+                ) -> Result<serde_json::Value> {
+                    let mut state_locked = self.state.write().unwrap();
+
+                    if state_locked.state == 0 {
+                        state_locked.state += 1;
+                        return Ok(json!({
+                            "ok": true,
+                            "page": 0,
+                            "response_metadata": {
+                                "next_cursor": "abcedfgef"
+                            }
+                        }));
+                    }
+
+                    Ok(json!({
+                        "ok": true,
+                        "page": 1,
+                        "response_metadata": {
+                            "next_cursor": ""
+                        }
+                    }))
+                }
+            }
+
+            let client = MockHttpClientWithPagination::default();
+
+            let context = context::Context::init(
+                "ddd54f25-0537-4e40-ab96-c93beee543de".to_string(),
+                None,
+                Arc::new(MockDb),
+            )
+            .await
+            .unwrap();
+
+            let parameters = hashmap! {
+                "include_locale".to_string() => json!(false),
+                "limit".to_string() => json!(1),
+                "return_all_pages".to_string() => json!(true)
+            };
+            let result = SlackExecutor
+                .execute(&client, &context, "LIST_USERS", "credentials", &parameters)
+                .await;
+            assert!(result.is_ok());
+            let value = result.unwrap();
+            assert_eq!(
+                value,
+                json!([
+                    {
+                        "ok": true,
+                        "page": 0,
+                        "response_metadata": {
+                            "next_cursor": "abcedfgef"
+                        }
+                    },
+                    {
+                        "ok": true,
+                        "page": 1,
+                        "response_metadata": {
+                            "next_cursor": ""
+                        }
+                    }
+                ])
+            );
         }
     }
 }

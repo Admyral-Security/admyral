@@ -611,7 +611,7 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 				id: "SEND_MESSAGE",
 				name: "Send a message",
 				description:
-					"This method posts a message to a public channel, private channel, or direct message (DM, or IM) conversation. Required scopes: chat:write",
+					"This method posts a message to a public channel, private channel, or direct message (DM, or IM) conversation. Required scope: chat:write",
 				documentationUrl:
 					"https://api.slack.com/methods/chat.postMessage",
 				requiresAuthentication: true,
@@ -646,6 +646,40 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 							'To reply to another message, provide the "ts" value of the message to reply to. Avoid using a reply\'s "ts" value. Instead, use the "ts" value of the parent message.',
 						required: false,
 						dataType: ApiParameterDatatype.TEXT,
+					},
+				],
+			},
+			{
+				id: "LIST_USERS",
+				name: "List Users",
+				description:
+					"Lists all users in a Slack team. This includes deleted/deactivated users. Requred scopes: users:read, users:read.email",
+				documentationUrl: "https://api.slack.com/methods/users.list",
+				requiresAuthentication: true,
+				parameters: [
+					{
+						id: "includeLocale",
+						displayName: "Include Locale for Users?",
+						description:
+							"Set this to true to receive the locale for users. Defaults to false.",
+						required: false,
+						dataType: ApiParameterDatatype.BOOLEAN,
+					},
+					{
+						id: "limit",
+						displayName: "Limit",
+						description:
+							"Number of users to return per page. Maximum of 1000. Defaults to 200.",
+						required: false,
+						dataType: ApiParameterDatatype.NUMBER,
+					},
+					{
+						id: "returnAllPages",
+						displayName: "Return All Pages",
+						description:
+							"Set this to true to handle pagination automatically and return all users. Defaults to false.",
+						required: false,
+						dataType: ApiParameterDatatype.BOOLEAN,
 					},
 				],
 			},
