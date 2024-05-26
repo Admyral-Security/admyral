@@ -53,6 +53,7 @@ impl IntegrationExecutor for SlackExecutor {
             "LIST_USERS" => list_users(client, context, &api_key, parameters).await,
             "LOOKUP_BY_EMAIL" => lookup_by_email(client, context, &api_key, parameters).await,
             "CONVERSATIONS_OPEN" => conversations_open(client, context, &api_key, parameters).await,
+            "REACTIONS_ADD" => reactions_add(client, context, &api_key, parameters).await,
             _ => return Err(anyhow!("API {api} not implemented for {SLACK}.")),
         }
     }
@@ -368,6 +369,52 @@ async fn conversations_open(
     let api_url = "https://slack.com/api/conversations.open";
 
     slack_post_request(client, api_url, api_key, json!(body)).await
+}
+
+// Documentation: https://api.slack.com/methods/reactions.add
+async fn reactions_add(
+    client: &dyn HttpClient,
+    context: &context::Context,
+    api_key: &str,
+    parameters: &HashMap<String, serde_json::Value>,
+) -> Result<serde_json::Value> {
+    let channel = get_string_parameter(
+        "channel",
+        SLACK,
+        "REACTIONS_ADD",
+        parameters,
+        context,
+        ParameterType::Required,
+    )
+    .await?
+    .expect("channel is a required parameter");
+    let name = get_string_parameter(
+        "name",
+        SLACK,
+        "REACTIONS_ADD",
+        parameters,
+        context,
+        ParameterType::Required,
+    )
+    .await?
+    .expect("name is a required parameter");
+    let timestamp = get_string_parameter(
+        "timestamp",
+        SLACK,
+        "REACTIONS_ADD",
+        parameters,
+        context,
+        ParameterType::Required,
+    )
+    .await?
+    .expect("timestamp is a required parameter");
+    let body = json!({
+        "channel": channel,
+        "name": name,
+        "timestamp": timestamp
+    });
+    let api_url = "https://slack.com/api/reactions.add";
+    slack_post_request(client, api_url, api_key, body).await
 }
 
 #[cfg(test)]
@@ -695,6 +742,28 @@ mod tests {
                 &*client,
                 &context,
                 "CONVERSATIONS_OPEN",
+                "credentials",
+                &parameters,
+            )
+            .await;
+        assert!(result.is_ok());
+        let value = result.unwrap();
+        assert_eq!(value, json!({"ok": true}));
+    }
+
+    #[tokio::test]
+    async fn test_reactions_add() {
+        let (client, context) = setup(Arc::new(MockDb)).await;
+        let parameters = hashmap! {
+            "channel".to_string() => json!("C1234567890"),
+            "name".to_string() => json!("thumbsup"),
+            "timestamp".to_string() => json!("1234567890.123456")
+        };
+        let result = SlackExecutor
+            .execute(
+                &*client,
+                &context,
+                "REACTIONS_ADD",
                 "credentials",
                 &parameters,
             )

@@ -1,0 +1,41 @@
+import { Callout } from "nextra/components";
+
+# Add a Reaction
+
+Adds a reaction to an item.
+
+Required scopes:
+
+-   `reactions:write`
+
+<Callout type="info">
+	For Slack's documentation, see
+	[reactions.add](https://api.slack.com/methods/reactions.add).
+</Callout>
+
+## Parameters:
+
+| Field         | Description                                              | Required |
+| ------------- | -------------------------------------------------------- | :------: |
+| **Channel**   | Channel where the message to add reaction to was posted. |   Yes    |
+| **Name**      | Reaction (emoji) name (e.g., `thumbsup`).                |   Yes    |
+| **Timestamp** | Timestamp of the message to add reaction to.             |   Yes    |
+
+## Example Output:
+
+Typical successful response:
+
+```json
+{
+	"ok": true
+}
+```
+
+Typical error response:
+
+```json
+{
+	"ok": false,
+	"error": "already_reacted"
+}
+```

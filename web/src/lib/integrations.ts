@@ -736,6 +736,39 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 					},
 				],
 			},
+			{
+				id: "REACTIONS_ADD",
+				name: "Add a Reaction",
+				description: "Adds a reaction to a message.",
+				documentationUrl: "https://api.slack.com/methods/reactions.add",
+				requiresAuthentication: true,
+				parameters: [
+					{
+						id: "channel",
+						displayName: "Channel",
+						description:
+							'Channel where the message to add reaction to was posted (e.g., "C1234567890").',
+						required: true,
+						dataType: ApiParameterDatatype.TEXT,
+					},
+					{
+						id: "name",
+						displayName: "Name",
+						description:
+							'Reaction (emoji) name (e.g., "thumbsup").',
+						required: true,
+						dataType: ApiParameterDatatype.TEXT,
+					},
+					{
+						id: "timestamp",
+						displayName: "Timestamp",
+						description:
+							'Timestamp of the message to add reaction to (e.g., "1234567890.123456").',
+						required: true,
+						dataType: ApiParameterDatatype.TEXT,
+					},
+				],
+			},
 		],
 	},
 	// ...
