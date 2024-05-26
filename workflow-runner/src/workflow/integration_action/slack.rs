@@ -52,6 +52,7 @@ impl IntegrationExecutor for SlackExecutor {
             "SEND_MESSAGE" => send_message(client, context, &api_key, parameters).await,
             "LIST_USERS" => list_users(client, context, &api_key, parameters).await,
             "LOOKUP_BY_EMAIL" => lookup_by_email(client, context, &api_key, parameters).await,
+            "CONVERSATIONS_OPEN" => conversations_open(client, context, &api_key, parameters).await,
             _ => return Err(anyhow!("API {api} not implemented for {SLACK}.")),
         }
     }
@@ -314,6 +315,59 @@ async fn lookup_by_email(
     .expect("email is a required parameter");
     let api_url = format!("https://slack.com/api/users.lookupByEmail?email={email}");
     slack_get_request(client, &api_url, api_key).await
+}
+
+// Documentation: https://api.slack.com/methods/conversations.open
+async fn conversations_open(
+    client: &dyn HttpClient,
+    context: &context::Context,
+    api_key: &str,
+    parameters: &HashMap<String, serde_json::Value>,
+) -> Result<serde_json::Value> {
+    let mut body = HashMap::new();
+
+    if let Some(users) = get_string_parameter(
+        "users",
+        SLACK,
+        "CONVERSATIONS_OPEN",
+        parameters,
+        context,
+        ParameterType::Optional,
+    )
+    .await?
+    {
+        body.insert("users".to_string(), json!(users));
+    }
+
+    if let Some(channel) = get_string_parameter(
+        "channel",
+        SLACK,
+        "CONVERSATIONS_OPEN",
+        parameters,
+        context,
+        ParameterType::Optional,
+    )
+    .await?
+    {
+        body.insert("channel".to_string(), json!(channel));
+    }
+
+    if let Some(return_im) = get_bool_parameter(
+        "return_im",
+        SLACK,
+        "CONVERSATIONS_OPEN",
+        parameters,
+        context,
+        ParameterType::Optional,
+    )
+    .await?
+    {
+        body.insert("return_im".to_string(), json!(return_im));
+    }
+
+    let api_url = "https://slack.com/api/conversations.open";
+
+    slack_post_request(client, api_url, api_key, json!(body)).await
 }
 
 #[cfg(test)]
@@ -627,5 +681,26 @@ mod tests {
                 "Missing parameter \"email\" for Slack LOOKUP_BY_EMAIL"
             );
         }
+    }
+
+    #[tokio::test]
+    async fn test_conversations_open() {
+        let (client, context) = setup(Arc::new(MockDb)).await;
+        let parameters = hashmap! {
+            "users".to_string() => json!("ABCDEF,DSASDD"),
+            "return_im".to_string() => json!(true)
+        };
+        let result = SlackExecutor
+            .execute(
+                &*client,
+                &context,
+                "CONVERSATIONS_OPEN",
+                "credentials",
+                &parameters,
+            )
+            .await;
+        assert!(result.is_ok());
+        let value = result.unwrap();
+        assert_eq!(value, json!({"ok": true}));
     }
 }

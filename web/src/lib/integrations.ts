@@ -701,6 +701,41 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 					},
 				],
 			},
+			{
+				id: "CONVERSATIONS_OPEN",
+				name: "Open a Conversation",
+				description:
+					"Opens or resumes a direct message or multi-person direct message. Requred scopes: im:write, mpim:write, groups:write, channels:manage",
+				documentationUrl:
+					"https://api.slack.com/methods/conversations.open",
+				requiresAuthentication: true,
+				parameters: [
+					{
+						id: "users",
+						displayName: "User IDs",
+						description:
+							'Comma-separated list of 1 to 8 user IDs (e.g. "W1234567890,U2345678901,U3456789012"). If only one user is included, this creates a 1:1 DM. If no users are included, then a channel must be provided.',
+						required: false,
+						dataType: ApiParameterDatatype.TEXT,
+					},
+					{
+						id: "channel",
+						displayName: "Channel",
+						description:
+							'Resume a conversation by supplying an "im" or "mpim"\'s ID. Alternatively, provide a list of user IDs.',
+						required: false,
+						dataType: ApiParameterDatatype.TEXT,
+					},
+					{
+						id: "returnIm",
+						displayName: "Return IM?",
+						description:
+							'Boolean, indicates you want the full IM channel definition in the response. Defaults to "false".',
+						required: false,
+						dataType: ApiParameterDatatype.BOOLEAN,
+					},
+				],
+			},
 		],
 	},
 	// ...
