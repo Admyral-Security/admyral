@@ -683,6 +683,24 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 					},
 				],
 			},
+			{
+				id: "LOOKUP_BY_EMAIL",
+				name: "Lookup User by Email",
+				description:
+					"Find a user with an email address. Requred scopes: users:read.email",
+				documentationUrl:
+					"https://api.slack.com/methods/users.lookupByEmail",
+				requiresAuthentication: true,
+				parameters: [
+					{
+						id: "email",
+						displayName: "Email",
+						description: "An email address to look up.",
+						required: true,
+						dataType: ApiParameterDatatype.TEXT,
+					},
+				],
+			},
 		],
 	},
 	// ...

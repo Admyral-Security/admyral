@@ -51,6 +51,7 @@ impl IntegrationExecutor for SlackExecutor {
         match api {
             "SEND_MESSAGE" => send_message(client, context, &api_key, parameters).await,
             "LIST_USERS" => list_users(client, context, &api_key, parameters).await,
+            "LOOKUP_BY_EMAIL" => lookup_by_email(client, context, &api_key, parameters).await,
             _ => return Err(anyhow!("API {api} not implemented for {SLACK}.")),
         }
     }
@@ -292,6 +293,27 @@ async fn list_users(
     }
 
     Ok(result)
+}
+
+// Documentation: https://api.slack.com/methods/users.lookupByEmail
+async fn lookup_by_email(
+    client: &dyn HttpClient,
+    context: &context::Context,
+    api_key: &str,
+    parameters: &HashMap<String, serde_json::Value>,
+) -> Result<serde_json::Value> {
+    let email = get_string_parameter(
+        "email",
+        SLACK,
+        "LOOKUP_BY_EMAIL",
+        parameters,
+        context,
+        ParameterType::Required,
+    )
+    .await?
+    .expect("email is a required parameter");
+    let api_url = format!("https://slack.com/api/users.lookupByEmail?email={email}");
+    slack_get_request(client, &api_url, api_key).await
 }
 
 #[cfg(test)]
@@ -559,6 +581,50 @@ mod tests {
                         }
                     }
                 ])
+            );
+        }
+    }
+
+    #[tokio::test]
+    async fn test_lookup_by_email() {
+        {
+            let (client, context) = setup(Arc::new(MockDb)).await;
+            let parameters = hashmap! {
+                "email".to_string() => json!("hello@admyral.dev"),
+            };
+            let result = SlackExecutor
+                .execute(
+                    &*client,
+                    &context,
+                    "LOOKUP_BY_EMAIL",
+                    "credentials",
+                    &parameters,
+                )
+                .await;
+            assert!(result.is_ok());
+            let value = result.unwrap();
+            assert_eq!(
+                value,
+                json!({"ok": true, "response_metadata": { "next_cursor": "" }})
+            );
+        }
+
+        {
+            let (client, context) = setup(Arc::new(MockDb)).await;
+            let parameters = HashMap::new();
+            let result = SlackExecutor
+                .execute(
+                    &*client,
+                    &context,
+                    "LOOKUP_BY_EMAIL",
+                    "credentials",
+                    &parameters,
+                )
+                .await;
+            assert!(result.is_err());
+            assert_eq!(
+                result.err().unwrap().to_string(),
+                "Missing parameter \"email\" for Slack LOOKUP_BY_EMAIL"
             );
         }
     }

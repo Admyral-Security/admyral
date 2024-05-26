@@ -1,3 +1,5 @@
 {
-	"send_message": "Send a message"
+	"send_message": "Send a message",
+	"list_users": "List users",
+	"lookup_by_email": "Lookup user by email"
 }
