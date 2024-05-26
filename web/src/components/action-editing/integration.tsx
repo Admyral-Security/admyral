@@ -213,7 +213,7 @@ export default function Integration({ id }: IntegrationProps) {
 				<Flex
 					direction="column"
 					gap="2"
-					key={parameter.id}
+					key={`${data.actionId}_${parameter.id}`}
 					width="100%"
 				>
 					<Flex direction="column" gap="0">
