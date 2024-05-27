@@ -237,7 +237,13 @@ async fn close_takedown(
 
     let body = match comment {
         None => json!({}),
-        Some(comment) => json!({"comment": comment}),
+        Some(comment) => {
+            if comment.is_empty() {
+                json!({})
+            } else {
+                json!({"comment": comment})
+            }
+        }
     };
 
     let api_url = format!("https://phish.report/api/v0/cases/{case_id}/close");

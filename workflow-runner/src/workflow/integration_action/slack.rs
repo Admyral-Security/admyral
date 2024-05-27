@@ -130,7 +130,7 @@ async fn send_message(
     .await?
     .expect("text is a required parameter");
 
-    let blocks = get_string_parameter(
+    let mut blocks = get_string_parameter(
         "blocks",
         SLACK,
         "SEND_MESSAGE",
@@ -139,8 +139,12 @@ async fn send_message(
         ParameterType::Optional,
     )
     .await?;
+    // If thread_ts is a valid string, it must not be empty!
+    if blocks.is_some() && blocks.as_ref().unwrap().is_empty() {
+        blocks = None;
+    }
 
-    let thread_ts = get_string_parameter(
+    let mut thread_ts = get_string_parameter(
         "thread_ts",
         SLACK,
         "SEND_MESSAGE",
@@ -149,6 +153,10 @@ async fn send_message(
         ParameterType::Optional,
     )
     .await?;
+    // If thread_ts is a valid string, it must not be empty!
+    if thread_ts.is_some() && thread_ts.as_ref().unwrap().is_empty() {
+        thread_ts = None;
+    }
 
     let body = match (blocks, thread_ts) {
         (None, None) => json!({
@@ -337,7 +345,9 @@ async fn conversations_open(
     )
     .await?
     {
-        body.insert("users".to_string(), json!(users));
+        if !users.is_empty() {
+            body.insert("users".to_string(), json!(users));
+        }
     }
 
     if let Some(channel) = get_string_parameter(
@@ -350,7 +360,9 @@ async fn conversations_open(
     )
     .await?
     {
-        body.insert("channel".to_string(), json!(channel));
+        if !channel.is_empty() {
+            body.insert("channel".to_string(), json!(channel));
+        }
     }
 
     if let Some(return_im) = get_bool_parameter(
