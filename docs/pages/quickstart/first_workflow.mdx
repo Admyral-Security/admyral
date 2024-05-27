@@ -17,7 +17,27 @@ Done. You created your first workflow! 🥳
 
 ### Self-hosted
 
-The self-hosted version is coming in the beginning of May 2024.
+Follow these steps to start Admyral using Docker:
+
+```bash
+# Clone the repository
+git clone https://github.com/Admyral-Security/admyral.git
+
+# Change directory to docker self-hosting
+cd admyral/deploy/selfhosting
+
+# Copy the env vars
+cp .env.example .env
+
+# Start the services in detached mode
+docker compose up -d
+```
+
+Check out [Setup](https://docs.admyral.dev/setup/docker) for more details on self-hosting.
+
+Now, you can follow the same steps as listed above in the cloud version.
+
+Note: When you create an account on your self-hosted instance, email verification is deactivated. Hence, after you created an account, you can immediately proceed to login.
 
 
 
