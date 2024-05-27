@@ -21,6 +21,7 @@ export enum IntegrationType {
 	THREATPOST = "THREATPOST",
 	PHISH_REPORT = "PHISH_REPORT",
 	SLACK = "SLACK",
+	JIRA = "JIRA",
 }
 
 export function getIntegrationTypeLabel(integrationType: IntegrationType) {
@@ -37,6 +38,8 @@ export function getIntegrationTypeLabel(integrationType: IntegrationType) {
 			return "Phish Report";
 		case IntegrationType.SLACK:
 			return "Slack";
+		case IntegrationType.JIRA:
+			return "Jira";
 	}
 }
 
@@ -47,6 +50,7 @@ export const INTEGRATION_TYPES = [
 	IntegrationType.YARAIFY,
 	IntegrationType.PHISH_REPORT,
 	IntegrationType.SLACK,
+	IntegrationType.JIRA,
 ];
 
 export enum ApiParameterDatatype {

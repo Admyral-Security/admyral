@@ -8,6 +8,7 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
 mod alienvault_otx;
+mod jira;
 mod phish_report;
 mod slack;
 mod threatpost;
@@ -34,6 +35,7 @@ pub enum IntegrationType {
     Yaraify,
     PhishReport,
     Slack,
+    Jira,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -76,6 +78,11 @@ impl ActionExecutor for Integration {
             }
             IntegrationType::Slack => {
                 slack::SlackExecutor
+                    .execute(&client, context, &self.api, &self.credential, &self.params)
+                    .await
+            }
+            IntegrationType::Jira => {
+                jira::JiraExecutor
                     .execute(&client, context, &self.api, &self.credential, &self.params)
                     .await
             }

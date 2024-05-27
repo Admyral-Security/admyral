@@ -4,5 +4,6 @@
 	"slack": "Slack",
 	"threatpost": "Threatpost",
 	"virus_total": "VirusTotal",
-	"yaraify": "YARAify"
+	"yaraify": "YARAify",
+	"jira": "Jira"
 }

@@ -64,6 +64,11 @@ function getIcon(integration?: IntegrationType | null) {
 				/>
 			);
 
+		case IntegrationType.JIRA:
+			return (
+				<Image src="/jira_logo.svg" alt="Jira" height="32" width="32" />
+			);
+
 		default:
 			return (
 				<Image src="/logo.svg" alt="Admyral" height="32" width="32" />

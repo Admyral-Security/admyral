@@ -25,3 +25,4 @@ class IntegrationType(str, Enum):
     THREATPOST = "THREATPOST"
     PHISH_REPORT = "PHISH_REPORT"
     SLACK = "SLACK"
+    JIRA= "JIRA"

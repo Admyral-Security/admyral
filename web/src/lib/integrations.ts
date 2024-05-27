@@ -771,5 +771,126 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 			},
 		],
 	},
+	// Jira
+	[IntegrationType.JIRA]: {
+		name: "Jira",
+		integrationType: IntegrationType.JIRA,
+		credentials: [
+			{
+				id: "DOMAIN",
+				displayName:
+					"Domain (e.g., the your-domain part of https://your-domain.atlassian.net)",
+			},
+			{
+				id: "EMAIL",
+				displayName:
+					"Email of the account who provisioned the API token",
+			},
+			{
+				id: "API_TOKEN",
+				displayName: "API Token",
+			},
+		],
+		apis: [
+			{
+				id: "CREATE_ISSUE",
+				name: "Create Issue",
+				description: "Create a new issue",
+				documentationUrl:
+					"https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issues/#api-rest-api-3-issue-post",
+				requiresAuthentication: true,
+				parameters: [
+					{
+						id: "summary",
+						displayName: "Summary",
+						description: "Summary of the issue",
+						required: true,
+						dataType: ApiParameterDatatype.TEXT,
+					},
+					{
+						id: "projectId",
+						displayName: "Project ID",
+						description:
+							"The ID of the project to create the issue in",
+						required: true,
+						dataType: ApiParameterDatatype.TEXT,
+					},
+					{
+						id: "issueType",
+						displayName: "Issue Type",
+						description:
+							'The name of the issue type to create (e.g. "Story", "Bug")',
+						required: true,
+						dataType: ApiParameterDatatype.TEXT,
+					},
+					{
+						id: "description",
+						displayName: "Description",
+						description:
+							"Description of the issue in Atlassian Document Format",
+						required: false,
+						dataType: ApiParameterDatatype.TEXTAREA,
+					},
+					{
+						id: "assignee",
+						displayName: "Assignee",
+						description: "The account ID of the assignee",
+						required: false,
+						dataType: ApiParameterDatatype.TEXT,
+					},
+					{
+						id: "labels",
+						displayName: "Labels",
+						description:
+							'Comma-separated list of labels (e.g., "label1, label2"). Note that a label must not contain spaces.',
+						required: false,
+						dataType: ApiParameterDatatype.TEXT,
+					},
+					{
+						id: "priority",
+						displayName: "Priority",
+						description:
+							'The priority of the issue (e.g., "High", "Medium")',
+						required: false,
+						dataType: ApiParameterDatatype.TEXT,
+					},
+					{
+						id: "customFields",
+						displayName: "Custom Fields",
+						description:
+							'Custom fields for the issue (e.g., { "customfield_10000": "value" } ) defined as a JSON object.',
+						required: false,
+						dataType: ApiParameterDatatype.TEXTAREA,
+					},
+					{
+						id: "components",
+						displayName: "Components",
+						description:
+							'JSON array of components for the issue (e.g., [ { "name": "component1" }, { "name": "component2" } ]). Note that you must use the IDs of the custom fields.',
+						required: false,
+						dataType: ApiParameterDatatype.TEXTAREA,
+					},
+				],
+			},
+			// {
+			// 	id: "CREATE_CUSTOMER_REQUEST",
+			// 	name: "Create Customer Request",
+			// 	description: "Create a new customer request in a service desk",
+			// 	documentationUrl:
+			// 		"https://developer.atlassian.com/cloud/jira/service-desk/rest/api-group-request/#api-rest-servicedeskapi-request-post",
+			// 	requiresAuthentication: true,
+			// 	parameters: [
+			// 		// TODO:
+			// 		{
+			// 			id: "form",
+			// 			displayName: "Form",
+			// 			description: "The form for the request",
+			// 			required: true,
+			// 			dataType: ApiParameterDatatype.TEXTAREA,
+			// 		},
+			// 	],
+			// },
+		],
+	},
 	// ...
 };

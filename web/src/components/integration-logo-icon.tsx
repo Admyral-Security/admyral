@@ -70,6 +70,16 @@ export default function IntegrationLogoIcon({
 				/>
 			);
 
+		case IntegrationType.JIRA:
+			return (
+				<Image
+					src="/jira_logo.svg"
+					alt="Jira Software"
+					height="20"
+					width="20"
+				/>
+			);
+
 		default:
 			return <IntegrationIcon />;
 	}
