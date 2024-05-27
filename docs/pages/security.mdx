@@ -27,13 +27,14 @@ contributions of responsible reporters in our Hall of Fame, unless anonymity is 
 
 ## Data Encryption
 
--   **In Transit**: All data exchanged with our services is encrypted using TLS.
--   **At Rest**: We encrypt sensitive data stored on our servers with strong encryption algorithms.
+-   **In Transit**: All data exchanged with our services is encrypted using TLS 1.2 or above.
+-   **At Rest**: We encrypt sensitive data stored on our servers using AES-256 ([See Supabase Security](https://supabase.com/security)).
 
-## User Authentication
+## Authentication and Credentials
 
--   **User Authentication**: We enforce strong password policies and offer multi-factor authentication (MFA) for enhanced security.
--   **APIs & Webhooks**:
--   **Credentials**:
+-   **User Authentication**: We implement user authentication using Supabase Auth (SOC2 Compliant) which uses Json Web Tokens (JWT) and stores the data securely in a PostgreSQL database. Currently, we provide Email with Password as well as OAuth 2.0 with Google, Microsoft, and GitHub authentication. SSO via SAML 2.0 as well as MFA are available on request.
+-   **APIs**: API requests require the inclusion of a JWT in the Authorization header. The backend validates the JWT and verifies that the user ID exists in the database, ensuring secure access control for API endpoints.
+-   **Webhooks**: For webhook security, each workflow has a unique secret generated using HS256. To trigger a workflow via a webhook, the user must include this secret. This signature verification ensures that only authorized users can trigger workflows.
+-   **Credentials**: Additionalliy to encryption at test, credentials are encrypted using AES-256 GCM on application-level.
 
 We're dedicated to maintaining the highest level of security. For further details or immediate concerns, reach out to us directly.
