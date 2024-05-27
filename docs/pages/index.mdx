@@ -16,23 +16,41 @@
 
 ### Case Management
 
-_Coming in May 2024_
+_Coming soon_
 
 ### Admyral Assistant
 
-_First features are coming in May/June 2024_
+- **Natural Language to Workflow**: Quickly build workflows by describing them in a few words
+
+_more assistant features are going to be released soon_
 
 ## Getting Started
 
-import { Callout } from "nextra/components";
+### Admyral Cloud (free)
+Create an account or simply sign-in via Github, Google, or Microsoft [here](https://admyral.dev/login).
 
-<Callout type="info">
-	Self-hosting of Admyral will be available in May 2024. Until
-	then, we recommend to use the [cloud version](www.google.com) (free).
-</Callout>
+
+### Self-Hosting with Docker 
+Follow these steps to start Admyral using Docker:
+
+```bash
+# Clone the repository
+git clone https://github.com/Admyral-Security/admyral.git
+
+# Change directory to docker self-hosting
+cd admyral/deploy/selfhosting
+
+# Copy the env vars
+cp .env.example .env
+
+# Start the services in detached mode
+docker compose up -d
+```
+
+Check out [Setup](https://docs.admyral.dev/setup/docker) for more details.
 
 ## Getting in Touch & Updates
 
-Admyral evolves quickly, check out the announcements in [Discord](https://discord.gg/GqbJZT9Hbf)/[Slack](https://join.slack.com/t/admyralcommunity/shared_invite/zt-2hqxj1xrr-YoWXYq7t8l3i5GyTCzEwPg) for the latest updates.
+Admyral evolves quickly, check out the announcements in [Discord](https://discord.gg/GqbJZT9Hbf) / [Slack](https://join.slack.com/t/admyralcommunity/shared_invite/zt-2hqxj1xrr-YoWXYq7t8l3i5GyTCzEwPg) for the latest updates.
 
-Reach out to us in [Discord](https://discord.gg/GqbJZT9Hbf)/[Slack](https://join.slack.com/t/admyralcommunity/shared_invite/zt-2hqxj1xrr-YoWXYq7t8l3i5GyTCzEwPg) or via email at [chris@admyral.dev](mailto:chris@admyral.dev) for feedback, feature requests, bugs, partnerships, etc.
+Reach out to us in [Discord](https://discord.gg/GqbJZT9Hbf) / [Slack](https://join.slack.com/t/admyralcommunity/shared_invite/zt-2hqxj1xrr-YoWXYq7t8l3i5GyTCzEwPg) or via email at [chris@admyral.dev](mailto:chris@admyral.dev) for feedback, feature requests, bugs, partnerships, etc.
