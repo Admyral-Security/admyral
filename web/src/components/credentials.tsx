@@ -87,6 +87,7 @@ function DeleteButton({
 }
 
 interface OtherCredential {
+	key: string;
 	name: string;
 	value: string;
 	isPersisted: boolean;
@@ -95,6 +96,7 @@ interface OtherCredential {
 }
 
 interface IntegrationCredential {
+	key: string;
 	name: string;
 	integrationType: IntegrationType;
 	values: { id: string; value: string }[];
@@ -127,6 +129,7 @@ export default function Credentials() {
 					credentials
 						.filter(isOtherCredential)
 						.map((credential: Credential) => ({
+							key: `other_credentials_${Math.random()}`,
 							name: credential.name,
 							value: "",
 							isPersisted: true,
@@ -139,6 +142,7 @@ export default function Credentials() {
 					credentials
 						.filter(isIntegrationCredential)
 						.map((credential: Credential) => ({
+							key: `integration_credentials_${Math.random()}`,
 							name: credential.name,
 							integrationType: credential.credentialType!,
 							values: INTEGRATIONS[
@@ -184,22 +188,47 @@ export default function Credentials() {
 		);
 	};
 
-	const remove = async (credentialName: string) => {
+	const removeIntegrationsCredentials = async (integrationIdx: number) => {
+		setError(null);
+		if (!integrationsCredentials[integrationIdx].isPersisted) {
+			return;
+		}
+
+		const credentialName = integrationsCredentials[integrationIdx].name;
+
 		try {
-			setError(null);
 			setLoading(credentialName, IS_LOADING);
 			await deleteCredential(credentialName);
 
-			setOtherCredentials(
-				[...otherCredentials].filter(
+			setIntegrationsCredentials(
+				[...integrationsCredentials].filter(
 					(credential) =>
 						credential.name !== credentialName &&
 						credential.isPersisted,
 				),
 			);
+		} catch (error) {
+			setLoading(credentialName, IS_NOT_LOADING);
+			setError(
+				`Failed to remove credential: ${credentialName}. If the problem persists, please contact us on Discord or via email ${process.env.NEXT_PUBLIC_SUPPORT_EMAIL}`,
+			);
+		}
+	};
 
-			setIntegrationsCredentials(
-				[...integrationsCredentials].filter(
+	const removeOtherCredentials = async (integrationIdx: number) => {
+		setError(null);
+		if (!otherCredentials[integrationIdx].isPersisted) {
+			return;
+		}
+
+		const credentialName = otherCredentials[integrationIdx].name;
+
+		try {
+			setLoading(credentialName, IS_LOADING);
+			await deleteCredential(credentialName);
+
+			setOtherCredentials(
+				[...otherCredentials].filter(
 					(credential) =>
 						credential.name !== credentialName &&
 						credential.isPersisted,
@@ -262,6 +291,7 @@ export default function Credentials() {
 				[...otherCredentials].map((credential) => {
 					if (credential.name === credential.name) {
 						return {
+							key: credential.key,
 							name: credential.name,
 							value: "",
 							isPersisted: true,
@@ -310,6 +340,7 @@ export default function Credentials() {
 				[...integrationsCredentials].map((credential) => {
 					if (credential.name === credential.name) {
 						return {
+							key: credential.key,
 							name: credential.name,
 							integrationType: credential.integrationType,
 							values: INTEGRATIONS[
@@ -374,6 +405,7 @@ export default function Credentials() {
 												setIntegrationsCredentials([
 													...integrationsCredentials,
 													{
+														key: `integration_credentials_${Math.random()}`,
 														name: "",
 														integrationType:
 															integration as IntegrationType,
@@ -421,6 +453,7 @@ export default function Credentials() {
 										setOtherCredentials([
 											...otherCredentials,
 											{
+												key: `other_credentials_${Math.random()}`,
 												name: "",
 												value: "",
 												isPersisted: false,
@@ -462,7 +495,7 @@ export default function Credentials() {
 					{integrationsCredentials.map(
 						(credential, integrationIdx) => (
 							<Flex
-								key={`credentials_${credential.integrationType}_${integrationIdx}`}
+								key={credential.key}
 								direction="column"
 								gap="2"
 							>
@@ -559,7 +592,9 @@ export default function Credentials() {
 											color="red"
 											loading={credential.loading}
 											onClick={() =>
-												remove(credential.name)
+												removeIntegrationsCredentials(
+													integrationIdx,
+												)
 											}
 											style={{ cursor: "pointer" }}
 										>
@@ -593,7 +628,7 @@ export default function Credentials() {
 
 							{otherCredentials.map((credential, idx) => (
 								<Flex
-									key={`credentials_${idx}`}
+									key={credential.key}
 									direction="column"
 									gap="2"
 								>
@@ -663,7 +698,9 @@ export default function Credentials() {
 													}
 													loading={credential.loading}
 													onClick={() =>
-														remove(credential.name)
+														removeOtherCredentials(
+															idx,
+														)
 													}
 												/>
 											) : (
