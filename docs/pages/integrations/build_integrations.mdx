@@ -23,7 +23,7 @@ The only file you need to modify in the UI is `web/src/lib/integrations.ts`. Her
 
 0. If you have a logo icon, please add it to the `web/public` directory. We prefer SVG files. The naming convention should be `<integration_name>_logo.svg` (e.g., `jira_logo.svg`).
 
-1. In the `web/src/lib/integrations.ts` file, Define the integration type in the enum `IntegrationType`.
+1. In the `web/src/lib/integrations.ts` file, define the integration type in the enum `IntegrationType`.
 
     Example for the Jira integration:
 
@@ -148,7 +148,7 @@ In order to add an integration to the workflow runner, we'll need to adapt the f
     const INTEGRATION_NAME: &str = "Jira"; // TODO: Adjust the integration name here
 
     #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
-    pub struct JiraExecutor; // TODO: Rename this struct according to the integratoin. Naming Convention: <IntegrationName>Executor
+    pub struct JiraExecutor; // TODO: Rename this struct according to the integration. Naming Convention: <IntegrationName>Executor
 
     impl IntegrationExecutor for JiraExecutor {
         async fn execute(
@@ -247,7 +247,7 @@ In order to add an integration to the workflow runner, we'll need to adapt the f
     - `description`: The description of the API
     - `documentationUrl`: The link to the API documentation of the vendor
     - `requiresAuthentication`: Does the API require authentication?
-    - `parameters`: The parameters of the API call
+    - `parameters`: The parameters of the API call (see below)
 
     Parameters are defined as follows:
 
@@ -388,7 +388,7 @@ In order to add an integration to the workflow runner, we'll need to adapt the f
         .expect("required parameter!");
         ```
 
-    -   Extract an Optional parameter:
+    -   Extract an optional parameter:
 
         ```rust
         let your_parameter_name = get_string_parameter(
@@ -585,6 +585,6 @@ In order to add an integration to the workflow runner, we'll need to adapt the f
 
 <Callout type="info">
 	If you require any help while building or setting up the project or have any
-	questions, feel free to reach out to us on our
+	questions, feel free to reach out to us on
 	[Discord](https://discord.com/invite/GqbJZT9Hbf).
 </Callout>
