@@ -44,7 +44,7 @@ export type Icon = {
 
 export type IntegrationDefinition = {
 	name: string;
-	icon: Icon;
+	icon?: Icon;
 	apis: IntegrationApiDefinition[];
 	credentials: IntegrationCredentialDefinition[];
 };

@@ -3,12 +3,16 @@ import { Card, Flex } from "@radix-ui/themes";
 import Image from "next/image";
 
 function getIcon(integration?: IntegrationType | null) {
-	if (integration === null || integration === undefined) {
+	if (
+		integration === null ||
+		integration === undefined ||
+		!INTEGRATIONS[integration].icon === undefined
+	) {
 		return <Image src="/logo.svg" alt="Admyral" height="32" width="32" />;
 	}
 
 	const name = INTEGRATIONS[integration].name;
-	const { src, isSquareIcon } = INTEGRATIONS[integration].icon;
+	const { src, isSquareIcon } = INTEGRATIONS[integration].icon!;
 	const [height, width] = isSquareIcon ? [32, 32] : [32, 64];
 
 	return <Image src={src} alt={name} height={height} width={width} />;
