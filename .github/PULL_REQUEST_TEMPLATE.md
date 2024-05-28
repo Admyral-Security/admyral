@@ -29,13 +29,13 @@ Fixes # (issue)
 <!-- Remove bullet points below that don't apply to you -->
 
 - I haven't read the [contributing guide](https://github.com/Admyral-Security/admyral/blob/main/CONTRIBUTING.md)
-- My code doesn't follow the style guidelines of this project (`npm run prettier`)
+- My code doesn't follow the style guidelines of this project
+    - Inside web: `npm run prettier`
+    - Inside workflow-runner: `cargo fmt`
 - I haven't commented my code, particularly in hard-to-understand areas
 - I haven't checked if my PR needs changes to the documentation
 - I haven't checked if my changes generate no new warnings (`npm run lint`)
 - I haven't added tests that prove my fix is effective or that my feature works
 - I haven't checked if new and existing unit tests pass locally with my changes
-- I didn't test and lint my code: 
-    - Inside workflow-runner: `cargo fmt`  and `cargo test`
     - Inside backend: `poetry run pytest`
-    - Inside web: `npm run lint` and `npm run prettier`
+    - Inside workflow-runner: `cargo test`
