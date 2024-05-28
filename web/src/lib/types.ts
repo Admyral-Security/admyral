@@ -16,6 +16,86 @@ export function getLLMLabel(model: LLM) {
 
 export const LLM_MODELS = [LLM.GPT4_TURBO, LLM.GPT3_5_TURBO];
 
+<<<<<<< HEAD
+=======
+export enum IntegrationType {
+	VIRUSTOTAL = "VIRUS_TOTAL",
+	ALIENVAULT_OTX = "ALIENVAULT_OTX",
+	YARAIFY = "YARAIFY",
+	THREATPOST = "THREATPOST",
+	PHISH_REPORT = "PHISH_REPORT",
+	SLACK = "SLACK",
+	JIRA = "JIRA",
+}
+
+export function getIntegrationTypeLabel(
+	integrationType: IntegrationType,
+): string {
+	switch (integrationType) {
+		case IntegrationType.VIRUSTOTAL:
+			return "VirusTotal";
+		case IntegrationType.ALIENVAULT_OTX:
+			return "AlienVault OTX";
+		case IntegrationType.YARAIFY:
+			return "YARAify";
+		case IntegrationType.THREATPOST:
+			return "Threatpost";
+		case IntegrationType.PHISH_REPORT:
+			return "Phish Report";
+		case IntegrationType.SLACK:
+			return "Slack";
+		case IntegrationType.JIRA:
+			return "Jira";
+	}
+}
+
+export const INTEGRATION_TYPES = [
+	IntegrationType.VIRUSTOTAL,
+	IntegrationType.ALIENVAULT_OTX,
+	IntegrationType.THREATPOST,
+	IntegrationType.YARAIFY,
+	IntegrationType.PHISH_REPORT,
+	IntegrationType.SLACK,
+	IntegrationType.JIRA,
+];
+
+export enum ApiParameterDatatype {
+	TEXT = "TEXT",
+	BOOLEAN = "BOOLEAN",
+	TEXTAREA = "TEXTAREA",
+	NUMBER = "NUMBER",
+}
+
+export type IntegrationApiParameter = {
+	id: string;
+	displayName: string;
+	description: string;
+	required: boolean;
+	dataType: ApiParameterDatatype;
+};
+
+export type IntegrationApiDefinition = {
+	id: string;
+	name: string;
+	description: string;
+	documentationUrl?: string;
+	parameters: IntegrationApiParameter[];
+	requiresAuthentication: boolean;
+};
+
+export type IntegrationCredentialDefinition = {
+	id: string;
+	displayName: string;
+};
+
+export type IntegrationDefinition = {
+	name: string;
+	integrationType: IntegrationType;
+	apis: IntegrationApiDefinition[];
+	credentials: IntegrationCredentialDefinition[];
+};
+
+>>>>>>> origin/draft-custom-integrations
 export enum ActionNode {
 	MANUAL_START = "MANUAL_START",
 	WEBHOOK = "WEBHOOK",

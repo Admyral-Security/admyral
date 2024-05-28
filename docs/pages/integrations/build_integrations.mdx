@@ -1,3 +1,524 @@
-# Build Integrations
+import { Callout } from "nextra/components";
 
-Instructions coming soon...
+# Build New Integrations
+
+In this guide, we'll show you how to add new integrations to Admyral.
+
+<Callout type="warning">
+	We are currently working on simplifying the process of building new
+	integrations. Users will be able to add new integrations using Python and
+	YAML. Stay tuned!
+</Callout>
+
+## Prerequisites
+
+-   You should have cloned the [Admyral Repository](https://github.com/admyral-Security/admyral) and be able to run the application locally. See the READMEs of the different services for more information.
+-   You should have a basic understanding of Typescript, Python, and Rust.
+
+## Step-by-Step Guide: Adding a New Integration
+
+### UI (Typescript)
+
+-   `web/src/lib/types.ts`: add a new integration type to the enum `IntegrationType` and add a label:
+
+Example with `JIRA`
+
+```typescript
+// File: web/src/lib/types.ts
+
+export enum IntegrationType {
+  ...,
+  JIRA = "JIRA", // New integration type
+}
+```
+
+```typescript
+// File: web/src/lib/integrations.ts
+
+export function getIntegrationTypeLabel(
+	integrationType: IntegrationType
+): string {
+	switch (integrationType) {
+		// ...
+		case JIRA:
+			return "Jira"; // New integration UI label
+	}
+}
+```
+
+-   `web/src/lib/integrations.ts`: Define the integration here
+
+```typescript
+// File: web/src/lib/integrations.ts
+
+export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
+	// ...
+	[IntegrationType.SLACK]: {
+		name: "Jira", // TODO: Can we use this and remove getIntegrationTypeLabel?
+		icon: "/jira_logo.svg", // Add the icon here
+		credentials: [
+			// Define the necessary fields here which are needed to authenticate with the integration
+			{
+				name: "API_TOKEN",
+				displayName: "API Token",
+			},
+			{
+				name: "EMAIL",
+				displayName: "Email",
+			},
+			{
+				name: "DOMAIN",
+				displayName: "Domain",
+			},
+		],
+		apis: [], // We leave the APIs empty for now
+	},
+};
+```
+
+TODO: Icon!!!
+
+-   You should now be able to see the following in the workflow builder UI when dragging & dropping an `Integration` action to the workflow:
+
+### Workflow Runner (Rust)
+
+-   `workflow-runner/src/workflow/integration_action/mod.rs`:
+
+Add new integration type `IntegrationType` here
+
+```rust
+// File: workflow-runner/src/workflow/integration_action/mod.rs
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+pub enum IntegrationType {
+    // ...
+    Jira,
+}
+```
+
+Create a new module for the integration (file naming should be snake_case): `workflow-runner/src/workflow/integration_action/<integration-name>.rs`
+Example: `workflow-runner/src/workflow/integration_action/jira.rs`
+
+Go to `workflow-runner/src/workflow/integration_action/mod.rs` and add the following at the top of the file:
+
+```rust
+// File: workflow-runner/src/workflow/integration_action/mod.rs
+
+use super::{
+    context::Context,
+    http_client::{HttpClient, ReqwestClient},
+    ActionExecutor,
+};
+use anyhow::Result;
+use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
+
+// other integration modules
+mod jira; // NEW INTEGRATION MODULE
+```
+
+Now, go back to the `jira.rs` file and implement the `IntegrationExecutor` add the following:
+
+```rust
+// File: workflow-runner/src/workflow/integration_action/jira.rs
+
+use super::IntegrationExecutor;
+use crate::workflow::{
+    context,
+    http_client::{HttpClient, RequestBodyType},
+    utils::{get_string_parameter, ParameterType},
+};
+use anyhow::{anyhow, Result};
+use maplit::hashmap;
+use serde::{Deserialize, Serialize};
+use serde_json::json;
+use std::collections::HashMap;
+// TODO: add import for fetch_secret!!!
+
+const INTEGRATION_NAME: &str = "Jira"; // Adjust the integration name here
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct JiraExecutor; // ADD A NEW STRUCT. Naming Convention: <IntegrationName>Executor
+
+// Implement the IntegrationExecutor trait for the new struct. <IntegrationName>Executor
+impl IntegrationExecutor for JiraExecutor {
+    async fn execute(
+        &self,
+        client: &dyn HttpClient,
+        context: &context::Context,
+        api: &str,
+        credential_name: &str,
+        parameters: &HashMap<String, serde_json::Value>,
+    ) -> Result<serde_json::Value> {
+        match api {
+            // APIs will be added here later
+            _ => return Err(anyhow!("API {api} not implemented for {INTEGRATION_NAME}.")),
+        }
+    }
+}
+```
+
+In case, the APIs of the integration require authentication, we must also fetch the secret. Hence, we add another struct to the `jira.rs` file. The members of the struct
+are simply the name fields in snake_case of the `credentials` array in `web/src/lib/integrations.ts`.
+
+```rust
+// File: workflow-runner/src/workflow/integration_action/jira.rs
+
+// NEW: Struct for credentials
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+struct JiraCredential { // Naming Convention: <IntegrationName>Credential
+    domain: String,
+    email: String,
+    api_token: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct JiraExecutor; // ADD A NEW STRUCT. Naming Convention: <IntegrationName>Executor
+
+// ...
+```
+
+We adapt the `execute` function of the `IntegrationExecutor` trait to fetch the secret by adding the line `let credential = fetch_secret::<T>(context, credential_name).await?;` where `T` is the name of the struct we just implemented.
+
+```rust
+// File: workflow-runner/src/workflow/integration_action/jira.rs
+
+impl IntegrationExecutor for JiraExecutor {
+    async fn execute(
+        &self,
+        client: &dyn HttpClient,
+        context: &context::Context,
+        api: &str,
+        credential_name: &str,
+        parameters: &HashMap<String, serde_json::Value>,
+    ) -> Result<serde_json::Value> {
+         // NEW: Fetch the secret from the DB, decrypt and parse it
+        let credential = fetch_secret::<JiraCredential>(context, credential_name).await?;
+
+        match api {
+            // APIs will be added here later
+            _ => return Err(anyhow!("API {api} not implemented for {INTEGRATION_NAME}.")),
+        }
+    }
+}
+```
+
+Go back to `workflow-runner/src/workflow/integration_action/mod.rs` and adapt the `execute` function of the `Integration` struct:
+
+```rust
+// workflow-runner/src/workflow/integration_action/mod.rs
+
+impl ActionExecutor for Integration {
+    async fn execute(&self, context: &Context) -> Result<serde_json::Value> {
+        let client = ReqwestClient::new();
+
+        match self.integration_type {
+            // ...
+            IntegrationType::Jira => {
+                jira::JiraExecutor // module_name::<IntegrationName>Executor => this calls the execute function of the struct we implemented above
+                    .execute(&client, context, &self.api, &self.credential, &self.params)
+                    .await
+            }
+        }
+    }
+}
+```
+
+Now, we check everything compiles and builds by running the following command from inside the `workflow-runner` directory: `cargo fmt && cargo build`
+
+## Step-by-Step Guide: Adding an API
+
+### Defining the API for the UI (Typescript)
+
+-   `web/src/lib/integrations.ts`: Define the API in the corresponding integration object
+
+```typescript
+// web/src/lib/integrations.ts
+
+export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
+	// ...
+	[IntegrationType.JIRA]: {
+		// ...
+		apis: [
+			// Define the API here
+			{
+				id: "ASSIGN_ISSUE", // Give the API an ID (Naming Convention: SCREAMING_SNAKE_CASE of the API name)
+				name: "Assign Issue", // Display name of the API
+				description: "Assign an issue to a user.", // Description of the API
+				documentationUrl:
+					"https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issues/#api-rest-api-3-issue-issueidorkey-assignee-put", // Link to the API documentation
+				requiresAuthentication: true, // Does the API require authentication?
+				parameters: [
+					// Define API parameters here
+					{
+						id: "ISSUE_ID_OR_KEY", // Parameter ID (Naming Convention: SCREAMING_SNAKE_CASE of the parameter name) which must be unique for the API
+						displayName: "Issue ID or Key", // Display name of the parameter
+						description:
+							"The ID or key of the issue to be assigned.", // Description of the parameter
+						required: true, // Is the parameter required?
+						dataType: ApiParameterDatatype.TEXT, // Define the parameter type here: TEXT, TEXTAREA, NUMBER, BOOLEAN
+					},
+					{
+						id: "ACCOUNT_ID",
+						displayName: "Account ID",
+						description: "The account ID of the assignee",
+						required: true,
+						dataType: ApiParameterDatatype.TEXT,
+					},
+				],
+			},
+		],
+	},
+};
+```
+
+-   Now, you should be able to see the API in the workflow builder UI: TODO: Add screenshot
+
+### Implementing the API for the Workflow Runner (Rust)
+
+-   Go to the module you previously created for the integration (e.g., `workflow-runner/src/workflow/integration_action/jira.rs`)
+
+-   At the bottom of the file, we add a function for implementing the API call. The naming convention is the API name in snake_case (e.g., `assign_issue`).
+
+-   The function usually takes the following parameters:
+
+    -   `client`: The HTTP client to make the request
+    -   `context`: The context of the workflow
+    -   `credential`: The credential struct we implemented earlier
+    -   `parameters`: The parameters of the API call
+
+```rust
+// workflow-runner/src/workflow/integration_action/jira.rs
+
+async fn assign_issue(
+    client: &dyn HttpClient,
+    context: &context::Context,
+    credential: &JiraCredential, // Adjust the credential struct here
+    parameters: &HashMap<String, serde_json::Value>,
+) -> Result<serde_json::Value> {
+    // We will implement the API call here
+}
+```
+
+-   Extract the parameters from the `parameters` hashmap:
+
+    -   We provide the following functions to access parameters safely:
+
+        -   For `String` parameters: `get_string_parameter`
+        -   For `Number` parameters: `get_number_parameter`
+        -   For `Boolean` parameters: `get_boolean_parameter`
+
+    -   Extract a required parameter:
+
+        ```rust
+        let your_parameter_name = get_string_parameter(
+            "YOUR_PARAMETER_ID", // The ID of the parameter which you defined in the API definition in web/src/lib/integrations.ts
+            INTEGRATION_NAME,
+            "API_NAME", // Naming Convention: SCREAMING_SNAKE_CASE of the API name
+            parameters,
+            context,
+            ParameterType::Required,
+        )
+        .await?
+        .expect("required parameter!");
+        ```
+
+    -   Extract an Optional parameter:
+
+        ```rust
+        let your_parameter_name = get_string_parameter(
+            "YOUR_PARAMETER_ID", // The ID of the parameter which you defined in the API definition in web/src/lib/integrations.ts
+            INTEGRATION_NAME,
+            "API_NAME", // Naming Convention: SCREAMING_SNAKE_CASE of the API name
+            parameters,
+            context,
+            ParameterType::Optional,
+        )
+        .await?;
+        ```
+
+-   API URL Construction:
+
+    -   If the API is static, simply hard-code the API URL: `let api_url = "https://your-api-path";`
+    -   If you require dynamic API URL construction, you can use the `format!` macro: `let api_url = format!("https://{}.your-api-path", your_parameter_name);`
+    -   In case, you want to append query parameters, either use the `format!` macro or collect the query parameters in a `Vec` and concatenate them with the `join` function:
+
+        ```rust
+        let mut query_params = vec![];
+        query_params.push(format!("param1={}", param1));
+        query_params.push(format!("param2={}", param2));
+
+        let api_url = format!("https://your-api-path?{}", query_params.join("&"));
+        ```
+
+-   Header and Body Construction:
+
+    -   Construct the headers and body of the API call. The headers are usually a `HashMap<String, String>` with the header name as key and the header value as value. You can either use the hashmap macro `hashmap!` or create a new hashmap and insert the headers manually.
+    -   In case, the body has `Content-Type` `application/json`. Then body of the API call is expected to be of type `serde_json::Value`. You can use the `serde_json::json!` macro to create the JSON object:
+
+        ```rust
+        let body_json_example = json!({
+            "key1": "value1",
+            "key2": {
+                "key3": 1234,
+            },
+        });
+        ```
+
+        To dynamically create the body, you can use a hashmap of type `HashMap<String, serde_json::Value>` and then wrap the hashmap using `json!`.
+
+    -   In case, the body has `Content-Type` `application/x-www-form-urlencoded`, then the body of the API call is expected to be of type `HashMap<String, String>`. Similarly to the headers, you can use the hashmap macro `hashmap!` to create the hashmap.
+
+        ```rust
+        let body_form_example = hashmap! {
+            "key1".to_string() => "value1".to_string(),
+            "key2".to_string() => "value2".to_string(),
+        };
+        ```
+
+-   Performing the HTTP request
+
+    -   We recommen using `client: &dyn HttpClient` to make the request since it already abstracts away a lot of the boilerplate code. The code for the HTTP client can be found in `workflow-runner/src/workflow/http_client.rs`.
+    -   `client` supports `get`, `post`, and `put` requests at the moment. If you require another method, please reach out to us.
+    -   Example for `get`:
+
+    ```rust
+    client.get(
+        api_url,
+        headers,
+        200, // Expected status code
+        format!("Error: Failed to call {INTEGRATION_NAME} API <todo-add-the-api-name-here>"), // Error message
+    )
+    .await
+    ```
+
+    -   Example for `post`/`put`:
+
+    ```rust
+    client.post( // or client.put
+        api_url,
+        headers,
+        RequestBodyType::Json { body }, // RequestBodyType::Json { body } for JSON body
+        201, // Expected status code
+        format!("Error: Failed to call {INTEGRATION_NAME} API <todo-add-the-api-name-here>"), // Error message
+    )
+    .await
+    ```
+
+    To pass form data, use `RequestBodyType::Form { params: body }` instead of `RequestBodyType::Json { body }`.
+
+Full Example:
+
+```rust
+// workflow-runner/src/workflow/integration_action/jira.rs
+
+async fn assign_issue(
+    client: &dyn HttpClient,
+    context: &context::Context,
+    credential: &JiraCredential, // Adjust the credential struct here
+    parameters: &HashMap<String, serde_json::Value>,
+) -> Result<serde_json::Value> {
+    // Extract parameters
+
+    let issue_id_or_key = get_string_parameter(
+        "issue_id_or_key",
+        JIRA,
+        "ASSIGN_ISSUE",
+        parameters,
+        context,
+        ParameterType::Required,
+    )
+    .await?
+    .expect("issue_id_or_key is a required parameter!");
+
+    let account_id = get_string_parameter(
+        "account_id",
+        JIRA,
+        "ASSIGN_ISSUE",
+        parameters,
+        context,
+        ParameterType::Required,
+    )
+    .await?
+    .expect("account_id is a required parameter");
+
+    // Construct API URL
+    let api_url = format!(
+        "https://{}.atlassian.net/rest/api/3/issue/{}/assignee",
+        credential.domain, issue_id_or_key
+    );
+
+    // Construct headers
+    let api_key = format!("{}:{}", credential.email, credential.api_token);
+
+    let headers = hashmap! {
+        "Authorization".to_string() => format!("Basic {api_key}"),
+        "Content-type".to_string() => "application/json".to_string(),
+    };
+
+    // Construct body
+    let body = json!({
+        "accountId": account_id,
+    });
+
+    // Perform the HTTP request
+    client
+        .put(
+            api_url,
+            headers,
+            RequestBodyType::Json { body },
+            204,
+            format!("Error: Failed to call {INTEGRATION_NAME} API Assign Issue"),
+        )
+        .await
+}
+```
+
+## Adding Documentation
+
+-   Create a new directory in `docs/pages/integrations/available_integrations` with the name of the integration (e.g., `jira`)
+-   Adapt the `_meta.json` file (responsible for defining the links in the navigation bar) in `docs/pages/integrations/available_integrations` to add a link to the new directory by adding a new key-value pair with the name of the new directory as key and as value the display name of the integration:
+
+```json
+// File: docs/pages/integrations/available_integrations/_meta.json
+
+{
+	// ...
+	"jira": "Jira" // NEW INTEGRATION
+}
+```
+
+-   Add a new file called `<integration_name>.mdx` (e.g., `jira.mdx`) in the newly created directory. In this file, there should be information about how to create credentials for the integration.
+
+-   Create another directory in `docs/pages/integrations/available_integrations/<integration_name>` called `apis` (e.g., `docs/pages/integrations/available_integrations/jira/apis`)
+
+-   Create a `_meta.json` file in the new directory `docs/pages/integrations/available_integrations/<integration_name>` with two key-value pairs:
+    -   The name of the `.mdx` file you previously created as key (without the suffix `.mdx`) and `Connect <Integration Display Name>` as value
+    -   "apis" as key and "APIs" as value
+
+```json
+// File: docs/pages/integrations/available_integrations/<integration_name>/_meta.json
+
+{
+	"jira": "Connect Jira",
+	"apis": "APIs"
+}
+```
+
+-   In order to document the API, create a new file in the `apis` directory with the name of the API using snake_case (e.g., `assign_issue.mdx`)
+-   Again, we need to add a key-value pair with the file name as key and display name of the API as value to the `_meta.json` file in the `apis` directory, so that the API is displayed in the navigation bar:
+
+```json
+{
+	// previous apis, ...
+	"assign_issue": "Assign Issue" // NEW
+}
+```
+
+<Callout type="info">
+	If you require any help while building or setting up the project or have any
+	questions, feel free to reach out to us on our
+	[Discord](https://discord.com/invite/GqbJZT9Hbf).
+</Callout>
