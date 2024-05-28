@@ -46,7 +46,7 @@ export default function LoginPage() {
 					redirectTo: `${window.location.origin}/auth/callback`,
 					// Offline access is required to refresh access tokens
 					// https://supabase.com/docs/guides/auth/social-login/auth-azure#obtain-the-provider-refresh-token
-					scopes: "email offline_access",
+					// scopes: "email offline_access",
 				},
 			});
 			if (error) throw error;
