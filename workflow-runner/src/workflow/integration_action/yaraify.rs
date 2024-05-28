@@ -68,7 +68,7 @@ async fn query_a_file_hash(
     parameters: &HashMap<String, serde_json::Value>,
 ) -> Result<serde_json::Value> {
     let file_hash = get_string_parameter(
-        "hash",
+        "HASH",
         YARAIFY,
         "QUERY_A_FILE_HASH",
         parameters,
@@ -77,6 +77,7 @@ async fn query_a_file_hash(
     )
     .await?
     .expect("file_hash is required");
+
     query_yaraify(client, "lookup_hash", Some(&file_hash)).await
 }
 
@@ -87,7 +88,7 @@ async fn query_yara_rule(
     parameters: &HashMap<String, serde_json::Value>,
 ) -> Result<serde_json::Value> {
     let yara_rule = get_string_parameter(
-        "yara",
+        "YARA",
         YARAIFY,
         "QUERY_YARA_RULE",
         parameters,
@@ -106,7 +107,7 @@ async fn query_clamav_signature(
     parameters: &HashMap<String, serde_json::Value>,
 ) -> Result<serde_json::Value> {
     let clamav = get_string_parameter(
-        "clamav",
+        "CLAMAV",
         YARAIFY,
         "QUERY_CLAMAV_SIGNATURE",
         parameters,
@@ -125,7 +126,7 @@ async fn query_imphash(
     parameters: &HashMap<String, serde_json::Value>,
 ) -> Result<serde_json::Value> {
     let imphash = get_string_parameter(
-        "imphash",
+        "IMPHASH",
         YARAIFY,
         "QUERY_IMPHASH",
         parameters,
@@ -144,7 +145,7 @@ async fn query_tlsh(
     parameters: &HashMap<String, serde_json::Value>,
 ) -> Result<serde_json::Value> {
     let tlsh = get_string_parameter(
-        "tlsh",
+        "TLSH",
         YARAIFY,
         "QUERY_TLSH",
         parameters,
@@ -163,7 +164,7 @@ async fn query_telfhash(
     parameters: &HashMap<String, serde_json::Value>,
 ) -> Result<serde_json::Value> {
     let telfhash = get_string_parameter(
-        "telfhash",
+        "TELFHASH",
         YARAIFY,
         "QUERY_TELFHASH",
         parameters,
@@ -182,7 +183,7 @@ async fn query_gimphash(
     parameters: &HashMap<String, serde_json::Value>,
 ) -> Result<serde_json::Value> {
     let gimphash = get_string_parameter(
-        "gimphash",
+        "GIMPHASH",
         YARAIFY,
         "QUERY_GIMPHASH",
         parameters,
@@ -201,7 +202,7 @@ async fn query_icon_dhash(
     parameters: &HashMap<String, serde_json::Value>,
 ) -> Result<serde_json::Value> {
     let icon_dhash = get_string_parameter(
-        "icon_dhash",
+        "ICON_DHASH",
         YARAIFY,
         "QUERY_ICON_DHASH",
         parameters,
@@ -265,7 +266,7 @@ mod tests {
                 "QUERY_A_FILE_HASH",
                 "credentials",
                 &hashmap! {
-                    "hash".to_string() => json!("c0202cf6aeab8437c638533d14563d35")
+                    "HASH".to_string() => json!("c0202cf6aeab8437c638533d14563d35")
                 },
             )
             .await;
@@ -283,7 +284,7 @@ mod tests {
                 "QUERY_YARA_RULE",
                 "credentials",
                 &hashmap! {
-                    "yara".to_string() => json!("MALWARE_Win_Neshta")
+                    "YARA".to_string() => json!("MALWARE_Win_Neshta")
                 },
             )
             .await;
@@ -301,7 +302,7 @@ mod tests {
                 "QUERY_CLAMAV_SIGNATURE",
                 "credentials",
                 &hashmap! {
-                    "clamav".to_string() => json!("Win.Dropper.Gh0stRAT-9789290-0")
+                    "CLAMAV".to_string() => json!("Win.Dropper.Gh0stRAT-9789290-0")
                 },
             )
             .await;
@@ -319,7 +320,7 @@ mod tests {
                 "QUERY_IMPHASH",
                 "credentials",
                 &hashmap! {
-                    "imphash".to_string() => json!("680b9682922177224183342c299d809f")
+                    "IMPHASH".to_string() => json!("680b9682922177224183342c299d809f")
                 },
             )
             .await;
@@ -337,7 +338,7 @@ mod tests {
                 "QUERY_TLSH",
                 "credentials",
                 &hashmap! {
-                    "tlsh".to_string() => json!("T140551236C8E05951CAEFD73315186AF983182477CCC9E5BB0E6B36D62CB6431A36B06D")
+                    "TLSH".to_string() => json!("T140551236C8E05951CAEFD73315186AF983182477CCC9E5BB0E6B36D62CB6431A36B06D")
                 }
             )
             .await;
@@ -355,7 +356,7 @@ mod tests {
                 "QUERY_TELFHASH",
                 "credentials",
                 &hashmap! {
-                    "telfhash".to_string() => json!("t1dd211d716b2195266ea0cd9088eca7b2512c97072349df33cf31849c24140aeea3ac4f")
+                    "TELFHASH".to_string() => json!("t1dd211d716b2195266ea0cd9088eca7b2512c97072349df33cf31849c24140aeea3ac4f")
                 }
             )
             .await;
@@ -373,7 +374,7 @@ mod tests {
                 "QUERY_GIMPHASH",
                 "credentials",
                 &hashmap! {
-                    "gimphash".to_string() => json!("a081e2fab5999d99ed6be718af55e93df171d14bc83c7ca5fdc0907edba0d338c")
+                    "GIMPHASH".to_string() => json!("a081e2fab5999d99ed6be718af55e93df171d14bc83c7ca5fdc0907edba0d338c")
                 }
             )
             .await;
@@ -391,7 +392,7 @@ mod tests {
                 "QUERY_ICON_DHASH",
                 "credentials",
                 &hashmap! {
-                    "icon_dhash".to_string() => json!("d8d0d4d8ececece4")
+                    "ICON_DHASH".to_string() => json!("d8d0d4d8ececece4")
                 },
             )
             .await;

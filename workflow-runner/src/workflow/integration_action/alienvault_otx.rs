@@ -2,6 +2,7 @@ use super::IntegrationExecutor;
 use crate::workflow::{
     context,
     http_client::HttpClient,
+    secrets::fetch_credential,
     utils::{get_string_parameter, ParameterType},
 };
 use anyhow::{anyhow, Result};
@@ -17,22 +18,6 @@ struct AlienvaultOtxCredential {
     api_key: String,
 }
 
-async fn fetch_api_key(credential_name: &str, context: &context::Context) -> Result<String> {
-    let credential_secret = context
-        .db
-        .fetch_secret(&context.workflow_id, credential_name)
-        .await?;
-    let credential = match credential_secret {
-        None => {
-            let error_message = format!("Missing credentials for {ALIENVAULT_OTX}.");
-            tracing::error!(error_message);
-            return Err(anyhow!(error_message));
-        }
-        Some(secret) => serde_json::from_str::<AlienvaultOtxCredential>(&secret)?,
-    };
-    Ok(credential.api_key)
-}
-
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct AlienvaultOtxExecutor;
 
@@ -45,8 +30,9 @@ impl IntegrationExecutor for AlienvaultOtxExecutor {
         credential_name: &str,
         parameters: &HashMap<String, serde_json::Value>,
     ) -> Result<serde_json::Value> {
-        let api_key = fetch_api_key(credential_name, context).await?;
-
+        let api_key = fetch_credential::<AlienvaultOtxCredential>(credential_name, context)
+            .await?
+            .api_key;
         match api {
             "GET_DOMAIN_INFORMATION" => {
                 get_domain_information(client, &api_key, context, parameters).await
@@ -86,7 +72,7 @@ async fn get_domain_information(
     parameters: &HashMap<String, serde_json::Value>,
 ) -> Result<serde_json::Value> {
     let domain = get_string_parameter(
-        "domain",
+        "DOMAIN",
         ALIENVAULT_OTX,
         "GET_DOMAIN_INFORMATION",
         parameters,
@@ -159,7 +145,7 @@ mod tests {
     async fn test_get_domain_information() {
         let (client, context) = setup(Arc::new(MockDb)).await;
 
-        let parameters = hashmap! { "domain".to_string() => json!("admyral.dev") };
+        let parameters = hashmap! { "DOMAIN".to_string() => json!("admyral.dev") };
 
         let result = AlienvaultOtxExecutor
             .execute(
@@ -194,7 +180,7 @@ mod tests {
         assert!(result.is_err());
         assert_eq!(
             result.err().unwrap().to_string(),
-            "Missing credentials for AlienVault OTX."
+            "Missing credentials: \"credentials\""
         );
     }
 }

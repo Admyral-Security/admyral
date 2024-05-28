@@ -2,7 +2,8 @@ import { memo } from "react";
 import { NodeProps, Handle, Position } from "reactflow";
 import NodeBase from "./node-base";
 import { Flex } from "@radix-ui/themes";
-import { IntegrationData, IntegrationType } from "@/lib/types";
+import { IntegrationData } from "@/lib/types";
+import { IntegrationType } from "@/lib/integrations";
 import _ from "lodash";
 import IntegrationLogoIcon from "../integration-logo-icon";
 

@@ -16,14 +16,13 @@ import {
 } from "@radix-ui/themes";
 import { useEffect, useState } from "react";
 import TrashIcon from "./icons/trash-icon";
-import { INTEGRATIONS } from "@/lib/integrations";
-import IntegrationLogoIcon from "./integration-logo-icon";
 import {
+	INTEGRATIONS,
 	IntegrationType,
-	getIntegrationTypeLabel,
-	Credential,
 	IntegrationCredentialDefinition,
-} from "@/lib/types";
+} from "@/lib/integrations";
+import IntegrationLogoIcon from "./integration-logo-icon";
+import { Credential } from "@/lib/types";
 import ArrowDownIcon from "./icons/arrow-down-icon";
 import FloppyDiskIcon from "./icons/floppy-disk-icon";
 
@@ -438,9 +437,11 @@ export default function Credentials() {
 													}
 												/>
 												<Text>
-													{getIntegrationTypeLabel(
-														integration as IntegrationType,
-													)}
+													{
+														INTEGRATIONS[
+															integration as IntegrationType
+														].name
+													}
 												</Text>
 											</Grid>
 										</DropdownMenu.Item>
@@ -504,9 +505,11 @@ export default function Credentials() {
 										integration={credential.integrationType}
 									/>
 									<Text weight="medium">
-										{getIntegrationTypeLabel(
-											credential.integrationType,
-										)}
+										{
+											INTEGRATIONS[
+												credential.integrationType
+											].name
+										}
 									</Text>
 								</Flex>
 

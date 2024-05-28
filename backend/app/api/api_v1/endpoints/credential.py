@@ -7,7 +7,6 @@ from sqlalchemy.exc import IntegrityError
 
 from app.deps import AuthenticatedUser, get_authenticated_user, get_session
 from app.models import Credential
-from app.schema import IntegrationType
 
 
 router = APIRouter()
@@ -19,7 +18,7 @@ router = APIRouter()
 class CredentialCreateRequest(BaseModel):
     credential_name: str
     encrypted_secret: str
-    credential_type: Optional[IntegrationType]
+    credential_type: Optional[str]
 
 
 @router.post(
@@ -79,7 +78,7 @@ async def delete_credential(
 
 class CredentialListResult(BaseModel):
     name: str
-    credential_type: Optional[IntegrationType]
+    credential_type: Optional[str]
 
 
 @router.get(
@@ -89,7 +88,7 @@ class CredentialListResult(BaseModel):
 async def list_credentials(
     db: AsyncSession = Depends(get_session),
     user: AuthenticatedUser = Depends(get_authenticated_user),
-    integration_type: Optional[IntegrationType] = None
+    integration_type: Optional[str] = None
 ) -> list[CredentialListResult]:
     if integration_type:
         result = await db.exec(

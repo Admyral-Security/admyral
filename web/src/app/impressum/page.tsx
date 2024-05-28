@@ -163,20 +163,24 @@ export default function ImpressumPage() {
 				<Text>Posthog</Text>
 				<br />
 				<Text>
-					Wir verwenden auf unserer Plattform außerdem den Service von 
-					PostHog, der von der PostHog, Inc., 965 Mission Street, San Francisco, 
-					CA 94103, USA („Posthog“) bereitgestellt wird. PostHog hilft uns dabei, 
-					die Nutzung unserer Plattform besser zu verstehen und verbessern zu können.
-					Für die Analyse können die folgenden Daten verarbeitet werden: Name und 
-					Nutzername, E-Mail-Adresse, IP- und MAC-Adresse, Browser Footprint, 
-					geografische Informationen (Land, gebiet, Stadt) und Informationen über die 
-					Nutzung der Plattform, wie Seitenaufrufe, Klicks oder Browsing-Verhalten. 
-					Wir haben mit PostHog einen Auftragsverarbeitungsvertrag gemäß Art. 28 (3) 
-					DSGVO geschlossen sowie die EU-Standardvertragsklauseln für die Übermittlung 
-					personenbezogener Daten an Auftragsverarbeiter in Drittländern vom 04. Juni 
-					2021 vereinbart. Die Datenschutzhinweise von PostHog können Sie hier 
-					abrufen: https://posthog.com/privacy. 
-					Die von PostHog genutzten Cookies haben eine Lebensdauer von höchstens zwei Jahren.
+					Wir verwenden auf unserer Plattform außerdem den Service von
+					PostHog, der von der PostHog, Inc., 965 Mission Street, San
+					Francisco, CA 94103, USA („Posthog“) bereitgestellt wird.
+					PostHog hilft uns dabei, die Nutzung unserer Plattform
+					besser zu verstehen und verbessern zu können. Für die
+					Analyse können die folgenden Daten verarbeitet werden: Name
+					und Nutzername, E-Mail-Adresse, IP- und MAC-Adresse, Browser
+					Footprint, geografische Informationen (Land, gebiet, Stadt)
+					und Informationen über die Nutzung der Plattform, wie
+					Seitenaufrufe, Klicks oder Browsing-Verhalten. Wir haben mit
+					PostHog einen Auftragsverarbeitungsvertrag gemäß Art. 28 (3)
+					DSGVO geschlossen sowie die EU-Standardvertragsklauseln für
+					die Übermittlung personenbezogener Daten an
+					Auftragsverarbeiter in Drittländern vom 04. Juni 2021
+					vereinbart. Die Datenschutzhinweise von PostHog können Sie
+					hier abrufen: https://posthog.com/privacy. Die von PostHog
+					genutzten Cookies haben eine Lebensdauer von höchstens zwei
+					Jahren.
 				</Text>
 			</Flex>
 		</Flex>

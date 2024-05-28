@@ -2,6 +2,7 @@ use super::IntegrationExecutor;
 use crate::workflow::{
     context,
     http_client::{HttpClient, RequestBodyType},
+    secrets::fetch_credential,
     utils::{get_string_parameter, ParameterType},
 };
 use anyhow::{anyhow, Result};
@@ -21,31 +22,6 @@ struct JiraCredential {
     api_token: String,
 }
 
-async fn fetch_credential(
-    credential_name: &str,
-    context: &context::Context,
-) -> Result<JiraCredential> {
-    let credential_secret = context
-        .db
-        .fetch_secret(&context.workflow_id, credential_name)
-        .await?;
-    let credential = match credential_secret {
-        None => {
-            let error_message = format!("Missing credentials for {JIRA}.");
-            tracing::error!(error_message);
-            return Err(anyhow!(error_message));
-        }
-        Some(secret) => match serde_json::from_str::<JiraCredential>(&secret) {
-            Err(e) => {
-                tracing::error!("Error parsing Jira credential: {e}");
-                return Err(anyhow!("Received malformed Jira credential. Expecting the following structure: \"{{\"DOMAIN\": <string>, \"EMAIL\": <string>, \"API_TOKEN\": <string>}}\""));
-            }
-            Ok(credential) => credential,
-        },
-    };
-    Ok(credential)
-}
-
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct JiraExecutor;
 
@@ -58,7 +34,7 @@ impl IntegrationExecutor for JiraExecutor {
         credential_name: &str,
         parameters: &HashMap<String, serde_json::Value>,
     ) -> Result<serde_json::Value> {
-        let credential = fetch_credential(credential_name, context).await?;
+        let credential = fetch_credential::<JiraCredential>(credential_name, context).await?;
         match api {
             "CREATE_ISSUE" => create_issue(client, context, &credential, parameters).await,
             "ASSIGN_ISSUE" => assign_issue(client, context, &credential, parameters).await,
@@ -132,7 +108,7 @@ async fn create_issue(
     );
 
     let summary = get_string_parameter(
-        "summary",
+        "SUMMARY",
         JIRA,
         "CREATE_ISSUE",
         parameters,
@@ -143,7 +119,7 @@ async fn create_issue(
     .expect("summary is a required parameter");
 
     let project_id = get_string_parameter(
-        "project_id",
+        "PROJECT_ID",
         JIRA,
         "CREATE_ISSUE",
         parameters,
@@ -154,7 +130,7 @@ async fn create_issue(
     .expect("project_id is a required parameter");
 
     let issue_type = get_string_parameter(
-        "issue_type",
+        "ISSUE_TYPE",
         JIRA,
         "CREATE_ISSUE",
         parameters,
@@ -171,7 +147,7 @@ async fn create_issue(
     };
 
     if let Some(description) = get_string_parameter(
-        "description",
+        "DESCRIPTION",
         JIRA,
         "CREATE_ISSUE",
         parameters,
@@ -203,7 +179,7 @@ async fn create_issue(
     }
 
     if let Some(assignee) = get_string_parameter(
-        "assignee",
+        "ASSIGNEE",
         JIRA,
         "CREATE_ISSUE",
         parameters,
@@ -218,7 +194,7 @@ async fn create_issue(
     }
 
     if let Some(labels) = get_string_parameter(
-        "labels",
+        "LABELS",
         JIRA,
         "CREATE_ISSUE",
         parameters,
@@ -237,7 +213,7 @@ async fn create_issue(
     }
 
     if let Some(priority) = get_string_parameter(
-        "priority",
+        "PRIORITY",
         JIRA,
         "CREATE_ISSUE",
         parameters,
@@ -252,7 +228,7 @@ async fn create_issue(
     }
 
     if let Some(custom_fields) = get_string_parameter(
-        "custom_fields",
+        "CUSTOM_FIELDS",
         JIRA,
         "CREATE_ISSUE",
         parameters,
@@ -278,7 +254,7 @@ async fn create_issue(
     }
 
     if let Some(components) = get_string_parameter(
-        "components",
+        "COMPONENTS",
         JIRA,
         "CREATE_ISSUE",
         parameters,
@@ -304,7 +280,7 @@ async fn assign_issue(
     parameters: &HashMap<String, serde_json::Value>,
 ) -> Result<serde_json::Value> {
     let issue_id_or_key = get_string_parameter(
-        "issue_id_or_key",
+        "ISSUE_ID_OR_KEY",
         JIRA,
         "ASSIGN_ISSUE",
         parameters,
@@ -313,8 +289,9 @@ async fn assign_issue(
     )
     .await?
     .expect("issue_id_or_key is a required parameter!");
+
     let account_id = get_string_parameter(
-        "account_id",
+        "ACCOUNT_ID",
         JIRA,
         "ASSIGN_ISSUE",
         parameters,
@@ -323,10 +300,12 @@ async fn assign_issue(
     )
     .await?
     .expect("account_id is a required parameter");
+
     let api_url = format!(
         "https://{}.atlassian.net/rest/api/3/issue/{}/assignee",
         credential.domain, issue_id_or_key
     );
+
     jira_put_request(
         client,
         &api_url,
@@ -442,7 +421,7 @@ mod tests {
             assert!(result.is_err());
             assert_eq!(
                 result.err().unwrap().to_string(),
-                "Missing credentials for Jira."
+                "Missing credentials: \"credentials\""
             );
         }
 
@@ -460,7 +439,7 @@ mod tests {
             assert!(result.is_err());
             assert_eq!(
                 result.err().unwrap().to_string(),
-                "Received malformed Jira credential. Expecting the following structure: \"{\"DOMAIN\": <string>, \"EMAIL\": <string>, \"API_TOKEN\": <string>}\""
+                "Received malformed credential."
             );
         }
     }
@@ -469,15 +448,15 @@ mod tests {
     async fn test_create_issue() {
         let (client, context) = setup(Arc::new(MockDb)).await;
         let parameters = hashmap! {
-            "summary".to_string() => json!("This is the ticket summary"),
-            "project_id".to_string() => json!("10000"),
-            "issue_type".to_string() => json!("Bug"),
-            "description".to_string() => json!("{\"content\": [{\"content\": [{\"text\": \"Order entry fails when selecting supplier.\", \"type\": \"text\"}], \"type\": \"paragraph\"}], \"type\": \"doc\", \"version\": 1}"),
-            "assignee".to_string() => json!("712020:8f417ffa-dc11-42b9-8464-b9e8b7a31559"),
-            "labels".to_string() => json!("label1, label2"),
-            "priority".to_string() => json!("High"),
-            "custom_fields".to_string() => json!("{\"customfield_10042\": \"this is my custom field\"}"),
-            "components".to_string() => json!("[{\"name\": \"Component1\"}, {\"name\": \"Component2\"}]")
+            "SUMMARY".to_string() => json!("This is the ticket summary"),
+            "PROJECT_ID".to_string() => json!("10000"),
+            "ISSUE_TYPE".to_string() => json!("Bug"),
+            "DESCRIPTION".to_string() => json!("{\"content\": [{\"content\": [{\"text\": \"Order entry fails when selecting supplier.\", \"type\": \"text\"}], \"type\": \"paragraph\"}], \"type\": \"doc\", \"version\": 1}"),
+            "ASSIGNEE".to_string() => json!("712020:8f417ffa-dc11-42b9-8464-b9e8b7a31559"),
+            "LABELS".to_string() => json!("label1, label2"),
+            "PRIORITY".to_string() => json!("High"),
+            "CUSTOM_FIELDS".to_string() => json!("{\"customfield_10042\": \"this is my custom field\"}"),
+            "COMPONENTS".to_string() => json!("[{\"name\": \"Component1\"}, {\"name\": \"Component2\"}]")
         };
         let result = JiraExecutor
             .execute(
@@ -497,8 +476,8 @@ mod tests {
     async fn test_assign_issue() {
         let (client, context) = setup(Arc::new(MockDb)).await;
         let parameters = hashmap! {
-            "issue_id_or_key".to_string() => json!("ADM-123"),
-            "account_id".to_string() => json!("712020:8f417ffa-dc11-42b9-8464-b9e8b7a31559")
+            "ISSUE_ID_OR_KEY".to_string() => json!("ADM-123"),
+            "ACCOUNT_ID".to_string() => json!("712020:8f417ffa-dc11-42b9-8464-b9e8b7a31559")
         };
         let result = JiraExecutor
             .execute(

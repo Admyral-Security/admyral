@@ -1,14 +1,62 @@
-import {
-	ApiParameterDatatype,
-	IntegrationDefinition,
-	IntegrationType,
-} from "./types";
+export enum IntegrationType {
+	VIRUSTOTAL = "VIRUS_TOTAL",
+	ALIENVAULT_OTX = "ALIENVAULT_OTX",
+	YARAIFY = "YARAIFY",
+	THREATPOST = "THREATPOST",
+	PHISH_REPORT = "PHISH_REPORT",
+	SLACK = "SLACK",
+	JIRA = "JIRA",
+}
+
+export enum ApiParameterDatatype {
+	TEXT = "TEXT",
+	BOOLEAN = "BOOLEAN",
+	TEXTAREA = "TEXTAREA",
+	NUMBER = "NUMBER",
+}
+
+export type IntegrationApiParameter = {
+	id: string;
+	displayName: string;
+	description: string;
+	required: boolean;
+	dataType: ApiParameterDatatype;
+};
+
+export type IntegrationApiDefinition = {
+	id: string;
+	name: string;
+	description: string;
+	documentationUrl?: string;
+	parameters: IntegrationApiParameter[];
+	requiresAuthentication: boolean;
+};
+
+export type IntegrationCredentialDefinition = {
+	id: string;
+	displayName: string;
+};
+
+export type Icon = {
+	src: string;
+	isSquareIcon: boolean;
+};
+
+export type IntegrationDefinition = {
+	name: string;
+	icon: Icon;
+	apis: IntegrationApiDefinition[];
+	credentials: IntegrationCredentialDefinition[];
+};
 
 export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 	// VirusTotal
 	[IntegrationType.VIRUSTOTAL]: {
 		name: "VirusTotal",
-		integrationType: IntegrationType.VIRUSTOTAL,
+		icon: {
+			src: "/virustotal-icon.svg",
+			isSquareIcon: true,
+		},
 		credentials: [
 			{
 				id: "API_KEY",
@@ -24,7 +72,7 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 					"https://docs.virustotal.com/reference/file-info",
 				parameters: [
 					{
-						id: "hash",
+						id: "HASH",
 						displayName: "Hash",
 						description: "The file's hash.",
 						required: true,
@@ -42,7 +90,7 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 					"https://docs.virustotal.com/reference/domain-info",
 				parameters: [
 					{
-						id: "domain",
+						id: "DOMAIN",
 						displayName: "Domain",
 						description: "The domain to get a report for.",
 						required: true,
@@ -60,7 +108,7 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 					"https://docs.virustotal.com/reference/ip-info",
 				parameters: [
 					{
-						id: "ip",
+						id: "IP",
 						displayName: "IP Address",
 						description: "The IP address to get a report for",
 						required: true,
@@ -77,7 +125,7 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 					"https://docs.virustotal.com/reference/url-info",
 				parameters: [
 					{
-						id: "url",
+						id: "URL",
 						displayName: "URL",
 						description: "The URL to get a report for",
 						required: true,
@@ -95,7 +143,7 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 					"https://docs.virustotal.com/reference/file-all-behaviours-summary",
 				parameters: [
 					{
-						id: "hash",
+						id: "HASH",
 						displayName: "Hash",
 						description:
 							"SHA-256, SHA-1 or MD5 identifying the file",
@@ -113,7 +161,7 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 					"https://docs.virustotal.com/reference/domains-votes-get",
 				parameters: [
 					{
-						id: "domain",
+						id: "DOMAIN",
 						displayName: "Domain",
 						description: "The domain to get votes for.",
 						required: true,
@@ -130,7 +178,7 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 					"https://docs.virustotal.com/reference/files-votes-get",
 				parameters: [
 					{
-						id: "hash",
+						id: "HASH",
 						displayName: "Hash",
 						description:
 							"SHA-256, SHA-1 or MD5 identifying the file",
@@ -149,7 +197,7 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 				requiresAuthentication: true,
 				parameters: [
 					{
-						id: "ip",
+						id: "IP",
 						displayName: "IP Address",
 						description: "The IP address to get votes for.",
 						required: true,
@@ -166,7 +214,7 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 				requiresAuthentication: true,
 				parameters: [
 					{
-						id: "url",
+						id: "URL",
 						displayName: "URL",
 						description: "The URL to get votes for.",
 						required: true,
@@ -183,7 +231,7 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 				requiresAuthentication: true,
 				parameters: [
 					{
-						id: "url",
+						id: "URL",
 						displayName: "URL",
 						description: "The URL to scan.",
 						required: true,
@@ -200,7 +248,7 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 				requiresAuthentication: true,
 				parameters: [
 					{
-						id: "ip",
+						id: "IP",
 						displayName: "IP Address",
 						description: "The IP address to get comments for.",
 						required: true,
@@ -217,7 +265,7 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 				requiresAuthentication: true,
 				parameters: [
 					{
-						id: "domain",
+						id: "DOMAIN",
 						displayName: "Domain",
 						description: "The domain to get comments for.",
 						required: true,
@@ -234,7 +282,7 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 				requiresAuthentication: true,
 				parameters: [
 					{
-						id: "hash",
+						id: "HASH",
 						displayName: "Hash",
 						description:
 							"SHA-256, SHA-1 or MD5 identifying the file",
@@ -252,7 +300,7 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 				requiresAuthentication: true,
 				parameters: [
 					{
-						id: "url",
+						id: "URL",
 						displayName: "URL",
 						description: "The URL to get comments for.",
 						required: true,
@@ -270,7 +318,7 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 				requiresAuthentication: true,
 				parameters: [
 					{
-						id: "query",
+						id: "QUERY",
 						displayName: "Query",
 						description:
 							"File hash, URL, domain, IP, or comment by tag (e.g. #tag)",
@@ -284,7 +332,10 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 	// AlienVault OTX
 	[IntegrationType.ALIENVAULT_OTX]: {
 		name: "AlienVault OTX",
-		integrationType: IntegrationType.ALIENVAULT_OTX,
+		icon: {
+			src: "/alienvault_otx_icon.png",
+			isSquareIcon: true,
+		},
 		credentials: [
 			{
 				id: "API_KEY",
@@ -301,7 +352,7 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 					"https://otx.alienvault.com/assets/static/external_api.html#api_v1_indicators_domain__domain___section__get",
 				parameters: [
 					{
-						id: "domain",
+						id: "DOMAIN",
 						displayName: "Domain",
 						description: "The domain to get a report for.",
 						required: true,
@@ -315,7 +366,10 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 	// Threatpost
 	[IntegrationType.THREATPOST]: {
 		name: "Threatpost",
-		integrationType: IntegrationType.THREATPOST,
+		icon: {
+			src: "/threatpost_logo.svg",
+			isSquareIcon: false,
+		},
 		credentials: [],
 		apis: [
 			{
@@ -332,7 +386,10 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 	// YARAify
 	[IntegrationType.YARAIFY]: {
 		name: "YARAify",
-		integrationType: IntegrationType.YARAIFY,
+		icon: {
+			src: "/abusech_yaraify_logo.svg",
+			isSquareIcon: false,
+		},
 		credentials: [],
 		apis: [
 			{
@@ -344,7 +401,7 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 					"https://yaraify.abuse.ch/api/#query-filehash",
 				parameters: [
 					{
-						id: "hash",
+						id: "HASH",
 						displayName: "Hash",
 						description: "The file's hash.",
 						required: true,
@@ -361,7 +418,7 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 				documentationUrl: "https://yaraify.abuse.ch/api/#yara",
 				parameters: [
 					{
-						id: "yara",
+						id: "YARA",
 						displayName: "YARA",
 						description: "The YARA rule to query for.",
 						required: true,
@@ -378,7 +435,7 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 				documentationUrl: "https://yaraify.abuse.ch/api/#clamav",
 				parameters: [
 					{
-						id: "clamav",
+						id: "CLAMAV",
 						displayName: "ClamAV Signature",
 						description: "The ClamAV Signature to query for.",
 						required: true,
@@ -395,7 +452,7 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 				documentationUrl: "https://yaraify.abuse.ch/api/#imphash",
 				parameters: [
 					{
-						id: "imphash",
+						id: "IMPHASH",
 						displayName: "imphash",
 						description: "The imphash to query for.",
 						required: true,
@@ -412,7 +469,7 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 				documentationUrl: "https://yaraify.abuse.ch/api/#tlsh",
 				parameters: [
 					{
-						id: "tlsh",
+						id: "TLSH",
 						displayName: "tlsh",
 						description: "The tlsh to query for.",
 						required: true,
@@ -429,7 +486,7 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 				documentationUrl: "https://yaraify.abuse.ch/api/#telfhash",
 				parameters: [
 					{
-						id: "telfhash",
+						id: "TELFHASH",
 						displayName: "telfhash",
 						description: "The telfhash to query for.",
 						required: true,
@@ -446,7 +503,7 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 				documentationUrl: "https://yaraify.abuse.ch/api/#gimphash",
 				parameters: [
 					{
-						id: "gimphash",
+						id: "GIMPHASH",
 						displayName: "gimphash",
 						description: "The gimphash to query for.",
 						required: true,
@@ -463,7 +520,7 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 				documentationUrl: "https://yaraify.abuse.ch/api/#dhash_icon",
 				parameters: [
 					{
-						id: "icon_dhash",
+						id: "ICON_DHASH",
 						displayName: "icon dhash",
 						description: "The icon dhash to query for.",
 						required: true,
@@ -486,7 +543,10 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 	// Phish Report
 	[IntegrationType.PHISH_REPORT]: {
 		name: "Phish Report",
-		integrationType: IntegrationType.PHISH_REPORT,
+		icon: {
+			src: "/phish_report.svg",
+			isSquareIcon: true,
+		},
 		credentials: [
 			{
 				id: "API_KEY",
@@ -503,7 +563,7 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 					"https://phish.report/api/v0#tag/Analysis/paths/~1api~1v0~1hosting/get",
 				parameters: [
 					{
-						id: "url",
+						id: "URL",
 						displayName: "URL",
 						description:
 							"The URL, domain, or IP address to find abuse contact information for.",
@@ -532,7 +592,7 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 					"https://phish.report/api/v0#tag/Takedown/paths/~1api~1v0~1cases/post",
 				parameters: [
 					{
-						id: "url",
+						id: "URL",
 						displayName: "Phishing URL",
 						description:
 							"The phishing URL to take down. You should have high confidence that this URL is malicious.",
@@ -540,7 +600,7 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 						dataType: ApiParameterDatatype.TEXT,
 					},
 					{
-						id: "ignoreDuplicates",
+						id: "IGNORE_DUPLICATES",
 						displayName: "Ignore Duplicates",
 						description:
 							"By default, trying to create a duplicate case will fail. Setting this to true will allow duplictes.",
@@ -560,7 +620,7 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 				requiresAuthentication: true,
 				parameters: [
 					{
-						id: "id",
+						id: "ID",
 						displayName: "Case ID",
 						description: "The ID of the takedown request.",
 						required: true,
@@ -578,14 +638,14 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 				requiresAuthentication: true,
 				parameters: [
 					{
-						id: "id",
+						id: "ID",
 						displayName: "Case ID",
 						description: "The ID of the takedown request.",
 						required: true,
 						dataType: ApiParameterDatatype.TEXT,
 					},
 					{
-						id: "comment",
+						id: "COMMENT",
 						displayName: "Comment",
 						description:
 							"An optional comment explaining why the case is being closed.",
@@ -599,7 +659,10 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 	// Slack
 	[IntegrationType.SLACK]: {
 		name: "Slack",
-		integrationType: IntegrationType.SLACK,
+		icon: {
+			src: "/slack_logo_color.svg",
+			isSquareIcon: true,
+		},
 		credentials: [
 			{
 				id: "API_KEY",
@@ -617,7 +680,7 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 				requiresAuthentication: true,
 				parameters: [
 					{
-						id: "channel",
+						id: "CHANNEL",
 						displayName: "Channel / Group / User",
 						description:
 							"Channel, private group, or user to send a message to. For channels, you can use the name (e.g. #my-channel) or the ID. For private channels and groups, use the ID. For DMs to users, use the user ID.",
@@ -625,7 +688,7 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 						dataType: ApiParameterDatatype.TEXT,
 					},
 					{
-						id: "text",
+						id: "TEXT",
 						displayName: "Text",
 						description:
 							"The purpose of this field changes depends on whether the blocks field is used. If blocks is used, this is used as a fallback string to display in notifications. If blocks is not used, this is the main body text of the message. It can be formatted as plain text, or with mrkdwn.",
@@ -633,14 +696,14 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 						dataType: ApiParameterDatatype.TEXTAREA,
 					},
 					{
-						id: "blocks",
+						id: "BLOCKS",
 						displayName: "Blocks",
 						description: "An array of layout blocks.",
 						required: false,
 						dataType: ApiParameterDatatype.TEXTAREA,
 					},
 					{
-						id: "threadTs",
+						id: "THREAD_TS",
 						displayName: "Thread Timestamp",
 						description:
 							'To reply to another message, provide the "ts" value of the message to reply to. Avoid using a reply\'s "ts" value. Instead, use the "ts" value of the parent message.',
@@ -658,7 +721,7 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 				requiresAuthentication: true,
 				parameters: [
 					{
-						id: "includeLocale",
+						id: "INCLUDE_LOCALE",
 						displayName: "Include Locale for Users?",
 						description:
 							"Set this to true to receive the locale for users. Defaults to false.",
@@ -666,7 +729,7 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 						dataType: ApiParameterDatatype.BOOLEAN,
 					},
 					{
-						id: "limit",
+						id: "LIMIT",
 						displayName: "Limit",
 						description:
 							"Number of users to return per page. Maximum of 1000. Defaults to 200.",
@@ -674,7 +737,7 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 						dataType: ApiParameterDatatype.NUMBER,
 					},
 					{
-						id: "returnAllPages",
+						id: "RETURN_ALL_PAGES",
 						displayName: "Return All Pages",
 						description:
 							"Set this to true to handle pagination automatically and return all users. Defaults to false.",
@@ -693,7 +756,7 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 				requiresAuthentication: true,
 				parameters: [
 					{
-						id: "email",
+						id: "EMAIL",
 						displayName: "Email",
 						description: "An email address to look up.",
 						required: true,
@@ -711,7 +774,7 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 				requiresAuthentication: true,
 				parameters: [
 					{
-						id: "users",
+						id: "USERS",
 						displayName: "User IDs",
 						description:
 							'Comma-separated list of 1 to 8 user IDs (e.g. "W1234567890,U2345678901,U3456789012"). If only one user is included, this creates a 1:1 DM. If no users are included, then a channel must be provided.',
@@ -719,7 +782,7 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 						dataType: ApiParameterDatatype.TEXT,
 					},
 					{
-						id: "channel",
+						id: "CHANNEL",
 						displayName: "Channel",
 						description:
 							'Resume a conversation by supplying an "im" or "mpim"\'s ID. Alternatively, provide a list of user IDs.',
@@ -727,7 +790,7 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 						dataType: ApiParameterDatatype.TEXT,
 					},
 					{
-						id: "returnIm",
+						id: "RETURN_IM",
 						displayName: "Return IM?",
 						description:
 							'Boolean, indicates you want the full IM channel definition in the response. Defaults to "false".',
@@ -744,7 +807,7 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 				requiresAuthentication: true,
 				parameters: [
 					{
-						id: "channel",
+						id: "CHANNEL",
 						displayName: "Channel",
 						description:
 							'Channel where the message to add reaction to was posted (e.g., "C1234567890").',
@@ -752,7 +815,7 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 						dataType: ApiParameterDatatype.TEXT,
 					},
 					{
-						id: "name",
+						id: "NAME",
 						displayName: "Name",
 						description:
 							'Reaction (emoji) name (e.g., "thumbsup").',
@@ -760,7 +823,7 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 						dataType: ApiParameterDatatype.TEXT,
 					},
 					{
-						id: "timestamp",
+						id: "TIMESTAMP",
 						displayName: "Timestamp",
 						description:
 							'Timestamp of the message to add reaction to (e.g., "1234567890.123456").',
@@ -774,7 +837,10 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 	// Jira
 	[IntegrationType.JIRA]: {
 		name: "Jira",
-		integrationType: IntegrationType.JIRA,
+		icon: {
+			src: "/jira_logo.svg",
+			isSquareIcon: true,
+		},
 		credentials: [
 			{
 				id: "DOMAIN",
@@ -801,14 +867,14 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 				requiresAuthentication: true,
 				parameters: [
 					{
-						id: "summary",
+						id: "SUMMARY",
 						displayName: "Summary",
 						description: "Summary of the issue",
 						required: true,
 						dataType: ApiParameterDatatype.TEXT,
 					},
 					{
-						id: "projectId",
+						id: "PROJECT_ID",
 						displayName: "Project ID",
 						description:
 							"The ID of the project to create the issue in",
@@ -816,7 +882,7 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 						dataType: ApiParameterDatatype.TEXT,
 					},
 					{
-						id: "issueType",
+						id: "ISSUE_TYPE",
 						displayName: "Issue Type",
 						description:
 							'The name of the issue type to create (e.g. "Story", "Bug")',
@@ -824,7 +890,7 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 						dataType: ApiParameterDatatype.TEXT,
 					},
 					{
-						id: "description",
+						id: "DESCRIPTION",
 						displayName: "Description",
 						description:
 							"Description of the issue in Atlassian Document Format",
@@ -832,14 +898,14 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 						dataType: ApiParameterDatatype.TEXTAREA,
 					},
 					{
-						id: "assignee",
+						id: "ASSIGNEE",
 						displayName: "Assignee",
 						description: "The account ID of the assignee",
 						required: false,
 						dataType: ApiParameterDatatype.TEXT,
 					},
 					{
-						id: "labels",
+						id: "LABELS",
 						displayName: "Labels",
 						description:
 							'Comma-separated list of labels (e.g., "label1, label2"). Note that a label must not contain spaces.',
@@ -847,7 +913,7 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 						dataType: ApiParameterDatatype.TEXT,
 					},
 					{
-						id: "priority",
+						id: "PRIORITY",
 						displayName: "Priority",
 						description:
 							'The priority of the issue (e.g., "High", "Medium")',
@@ -855,7 +921,7 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 						dataType: ApiParameterDatatype.TEXT,
 					},
 					{
-						id: "customFields",
+						id: "CUSTOM_FIELDS",
 						displayName: "Custom Fields",
 						description:
 							'Custom fields for the issue (e.g., { "customfield_10000": "value" } ) defined as a JSON object.',
@@ -863,7 +929,7 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 						dataType: ApiParameterDatatype.TEXTAREA,
 					},
 					{
-						id: "components",
+						id: "COMPONENTS",
 						displayName: "Components",
 						description:
 							'JSON array of components for the issue (e.g., [ { "name": "component1" }, { "name": "component2" } ]). Note that you must use the IDs of the custom fields.',
@@ -881,7 +947,7 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 				requiresAuthentication: true,
 				parameters: [
 					{
-						id: "issueIdOrKey",
+						id: "ISSUE_ID_OR_KEY",
 						displayName: "Issue ID or Key",
 						description:
 							"The ID or key of the issue to be assigned.",
@@ -889,7 +955,7 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 						dataType: ApiParameterDatatype.TEXT,
 					},
 					{
-						id: "accountId",
+						id: "ACCOUNT_ID",
 						displayName: "Account ID",
 						description: "The account ID of the assignee",
 						required: true,

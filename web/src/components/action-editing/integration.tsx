@@ -4,13 +4,8 @@ import { Flex, Select, Text, TextArea, TextField } from "@radix-ui/themes";
 import CopyText from "../copy-text";
 import { generateReferenceHandle } from "@/lib/workflow-node";
 import { cloneDeep } from "lodash";
-import {
-	ApiParameterDatatype,
-	Credential,
-	IntegrationData,
-	IntegrationType,
-	getIntegrationTypeLabel,
-} from "@/lib/types";
+import { Credential, IntegrationData } from "@/lib/types";
+import { ApiParameterDatatype, IntegrationType } from "@/lib/integrations";
 import useWorkflowStore from "@/lib/workflow-store";
 import IntegrationLogoIconCard from "../integration-logo-icon-card";
 import { INTEGRATIONS } from "@/lib/integrations";
@@ -102,14 +97,12 @@ export default function Integration({ id }: IntegrationProps) {
 		<Flex direction="column" gap="4" p="4">
 			<Flex gap="4" align="center">
 				<Flex>
-					<IntegrationLogoIconCard
-						integration={integration.integrationType}
-					/>
+					<IntegrationLogoIconCard integration={integrationType} />
 				</Flex>
 
 				<Flex direction="column">
 					<Text weight="medium">
-						{getIntegrationTypeLabel(integration.integrationType)}
+						{INTEGRATIONS[integrationType].name}
 					</Text>
 					<Text color="gray" weight="light">
 						{apiDefinition.name}

@@ -1,7 +1,7 @@
 import { importWorkflowFromTemplate } from "@/lib/api";
 import { Badge, Box, Card, Flex, Grid, Text } from "@radix-ui/themes";
 import IntegrationLogoIconCard from "./integration-logo-icon-card";
-import { IntegrationType } from "@/lib/types";
+import { IntegrationType } from "@/lib/integrations";
 
 interface WorkflowTemplateCardProps {
 	workflowId: string;

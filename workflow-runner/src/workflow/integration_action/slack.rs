@@ -2,6 +2,7 @@ use super::IntegrationExecutor;
 use crate::workflow::{
     context,
     http_client::{HttpClient, RequestBodyType},
+    secrets::fetch_credential,
     utils::{get_bool_parameter, get_number_parameter, get_string_parameter, ParameterType},
 };
 use anyhow::{anyhow, Result};
@@ -18,22 +19,6 @@ struct SlackCredential {
     api_key: String,
 }
 
-async fn fetch_api_key(credential_name: &str, context: &context::Context) -> Result<String> {
-    let credential_secret = context
-        .db
-        .fetch_secret(&context.workflow_id, credential_name)
-        .await?;
-    let credential = match credential_secret {
-        None => {
-            let error_message = format!("Missing credentials for {SLACK}.");
-            tracing::error!(error_message);
-            return Err(anyhow!(error_message));
-        }
-        Some(secret) => serde_json::from_str::<SlackCredential>(&secret)?,
-    };
-    Ok(credential.api_key)
-}
-
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct SlackExecutor;
 
@@ -46,7 +31,9 @@ impl IntegrationExecutor for SlackExecutor {
         credential_name: &str,
         parameters: &HashMap<String, serde_json::Value>,
     ) -> Result<serde_json::Value> {
-        let api_key = fetch_api_key(credential_name, context).await?;
+        let api_key = fetch_credential::<SlackCredential>(credential_name, context)
+            .await?
+            .api_key;
 
         match api {
             "SEND_MESSAGE" => send_message(client, context, &api_key, parameters).await,
@@ -109,7 +96,7 @@ async fn send_message(
     parameters: &HashMap<String, serde_json::Value>,
 ) -> Result<serde_json::Value> {
     let channel = get_string_parameter(
-        "channel",
+        "CHANNEL",
         SLACK,
         "SEND_MESSAGE",
         parameters,
@@ -120,7 +107,7 @@ async fn send_message(
     .expect("channel is a required parameter");
 
     let text = get_string_parameter(
-        "text",
+        "TEXT",
         SLACK,
         "SEND_MESSAGE",
         parameters,
@@ -131,7 +118,7 @@ async fn send_message(
     .expect("text is a required parameter");
 
     let mut blocks = get_string_parameter(
-        "blocks",
+        "BLOCKS",
         SLACK,
         "SEND_MESSAGE",
         parameters,
@@ -145,7 +132,7 @@ async fn send_message(
     }
 
     let mut thread_ts = get_string_parameter(
-        "thread_ts",
+        "THREAD_TS",
         SLACK,
         "SEND_MESSAGE",
         parameters,
@@ -195,7 +182,7 @@ async fn list_users(
     let mut params = Vec::new();
 
     if let Some(include_local) = get_bool_parameter(
-        "include_locale",
+        "INCLUDE_LOCALE",
         SLACK,
         "LIST_USERS",
         parameters,
@@ -208,7 +195,7 @@ async fn list_users(
     }
 
     match get_number_parameter(
-        "limit",
+        "LIMIT",
         SLACK,
         "LIST_USERS",
         parameters,
@@ -238,7 +225,7 @@ async fn list_users(
     };
 
     let handle_pagination = match get_bool_parameter(
-        "return_all_pages",
+        "RETURN_ALL_PAGES",
         SLACK,
         "LIST_USERS",
         parameters,
@@ -313,7 +300,7 @@ async fn lookup_by_email(
     parameters: &HashMap<String, serde_json::Value>,
 ) -> Result<serde_json::Value> {
     let email = get_string_parameter(
-        "email",
+        "EMAIL",
         SLACK,
         "LOOKUP_BY_EMAIL",
         parameters,
@@ -322,7 +309,9 @@ async fn lookup_by_email(
     )
     .await?
     .expect("email is a required parameter");
+
     let api_url = format!("https://slack.com/api/users.lookupByEmail?email={email}");
+
     slack_get_request(client, &api_url, api_key).await
 }
 
@@ -336,7 +325,7 @@ async fn conversations_open(
     let mut body = HashMap::new();
 
     if let Some(users) = get_string_parameter(
-        "users",
+        "USERS",
         SLACK,
         "CONVERSATIONS_OPEN",
         parameters,
@@ -351,7 +340,7 @@ async fn conversations_open(
     }
 
     if let Some(channel) = get_string_parameter(
-        "channel",
+        "CHANNEL",
         SLACK,
         "CONVERSATIONS_OPEN",
         parameters,
@@ -366,7 +355,7 @@ async fn conversations_open(
     }
 
     if let Some(return_im) = get_bool_parameter(
-        "return_im",
+        "RETURN_IM",
         SLACK,
         "CONVERSATIONS_OPEN",
         parameters,
@@ -391,7 +380,7 @@ async fn reactions_add(
     parameters: &HashMap<String, serde_json::Value>,
 ) -> Result<serde_json::Value> {
     let channel = get_string_parameter(
-        "channel",
+        "CHANNEL",
         SLACK,
         "REACTIONS_ADD",
         parameters,
@@ -400,8 +389,9 @@ async fn reactions_add(
     )
     .await?
     .expect("channel is a required parameter");
+
     let name = get_string_parameter(
-        "name",
+        "NAME",
         SLACK,
         "REACTIONS_ADD",
         parameters,
@@ -410,8 +400,9 @@ async fn reactions_add(
     )
     .await?
     .expect("name is a required parameter");
+
     let timestamp = get_string_parameter(
-        "timestamp",
+        "TIMESTAMP",
         SLACK,
         "REACTIONS_ADD",
         parameters,
@@ -420,12 +411,15 @@ async fn reactions_add(
     )
     .await?
     .expect("timestamp is a required parameter");
+
     let body = json!({
         "channel": channel,
         "name": name,
         "timestamp": timestamp
     });
+
     let api_url = "https://slack.com/api/reactions.add";
+
     slack_post_request(client, api_url, api_key, body).await
 }
 
@@ -514,7 +508,7 @@ mod tests {
         assert!(result.is_err());
         assert_eq!(
             result.err().unwrap().to_string(),
-            "Missing credentials for Slack."
+            "Missing credentials: \"credentials\""
         );
     }
 
@@ -523,8 +517,8 @@ mod tests {
         {
             let (client, context) = setup(Arc::new(MockDb)).await;
             let parameters = hashmap! {
-                "channel".to_string() => json!("CABCDEF"),
-                "text".to_string() => json!("Hello, Admyral here")
+                "CHANNEL".to_string() => json!("CABCDEF"),
+                "TEXT".to_string() => json!("Hello, Admyral here")
             };
             let result = SlackExecutor
                 .execute(
@@ -543,10 +537,10 @@ mod tests {
         {
             let (client, context) = setup(Arc::new(MockDb)).await;
             let parameters = hashmap! {
-                "channel".to_string() => json!("CABCDEF"),
-                "text".to_string() => json!("Hello, Admyral here"),
-                "blocks".to_string() => json!("[{\"type\": \"section\", \"text\": {\"type\": \"mrkdwn\", \"text\": \"New Paid Time Off request from <example.com|Fred Enriquez>\n\n<https://example.com|View request>\"}}]"),
-                "thread_ts".to_string() => json!("1716658341.471459")
+                "CHANNEL".to_string() => json!("CABCDEF"),
+                "TEXT".to_string() => json!("Hello, Admyral here"),
+                "BLOCKS".to_string() => json!("[{\"type\": \"section\", \"text\": {\"type\": \"mrkdwn\", \"text\": \"New Paid Time Off request from <example.com|Fred Enriquez>\n\n<https://example.com|View request>\"}}]"),
+                "THREAD_TS".to_string() => json!("1716658341.471459")
             };
             let result = SlackExecutor
                 .execute(
@@ -568,8 +562,8 @@ mod tests {
         {
             let (client, context) = setup(Arc::new(MockDb)).await;
             let parameters = hashmap! {
-                "include_locale".to_string() => json!(false),
-                "limit".to_string() => json!(1),
+                "INCLUDE_LOCALE".to_string() => json!(false),
+                "LIMIT".to_string() => json!(1),
             };
             let result = SlackExecutor
                 .execute(&*client, &context, "LIST_USERS", "credentials", &parameters)
@@ -585,8 +579,8 @@ mod tests {
         {
             let (client, context) = setup(Arc::new(MockDb)).await;
             let parameters = hashmap! {
-                "include_locale".to_string() => json!(false),
-                "limit".to_string() => json!(-1),
+                "INCLUDE_LOCALE".to_string() => json!(false),
+                "LIMIT".to_string() => json!(-1),
             };
             let result = SlackExecutor
                 .execute(&*client, &context, "LIST_USERS", "credentials", &parameters)
@@ -601,8 +595,8 @@ mod tests {
         {
             let (client, context) = setup(Arc::new(MockDb)).await;
             let parameters = hashmap! {
-                "include_locale".to_string() => json!(false),
-                "limit".to_string() => json!(1.0),
+                "INCLUDE_LOCALE".to_string() => json!(false),
+                "LIMIT".to_string() => json!(1.0),
             };
             let result = SlackExecutor
                 .execute(&*client, &context, "LIST_USERS", "credentials", &parameters)
@@ -667,9 +661,9 @@ mod tests {
             .unwrap();
 
             let parameters = hashmap! {
-                "include_locale".to_string() => json!(false),
-                "limit".to_string() => json!(1),
-                "return_all_pages".to_string() => json!(true)
+                "INCLUDE_LOCALE".to_string() => json!(false),
+                "LIMIT".to_string() => json!(1),
+                "RETURN_ALL_PAGES".to_string() => json!(true)
             };
             let result = SlackExecutor
                 .execute(&client, &context, "LIST_USERS", "credentials", &parameters)
@@ -703,7 +697,7 @@ mod tests {
         {
             let (client, context) = setup(Arc::new(MockDb)).await;
             let parameters = hashmap! {
-                "email".to_string() => json!("hello@admyral.dev"),
+                "EMAIL".to_string() => json!("hello@admyral.dev"),
             };
             let result = SlackExecutor
                 .execute(
@@ -737,7 +731,7 @@ mod tests {
             assert!(result.is_err());
             assert_eq!(
                 result.err().unwrap().to_string(),
-                "Missing parameter \"email\" for Slack LOOKUP_BY_EMAIL"
+                "Missing parameter \"EMAIL\" for Slack LOOKUP_BY_EMAIL"
             );
         }
     }
@@ -746,8 +740,8 @@ mod tests {
     async fn test_conversations_open() {
         let (client, context) = setup(Arc::new(MockDb)).await;
         let parameters = hashmap! {
-            "users".to_string() => json!("ABCDEF,DSASDD"),
-            "return_im".to_string() => json!(true)
+            "USERS".to_string() => json!("ABCDEF,DSASDD"),
+            "RETURN_IM".to_string() => json!(true)
         };
         let result = SlackExecutor
             .execute(
@@ -767,9 +761,9 @@ mod tests {
     async fn test_reactions_add() {
         let (client, context) = setup(Arc::new(MockDb)).await;
         let parameters = hashmap! {
-            "channel".to_string() => json!("C1234567890"),
-            "name".to_string() => json!("thumbsup"),
-            "timestamp".to_string() => json!("1234567890.123456")
+            "CHANNEL".to_string() => json!("C1234567890"),
+            "NAME".to_string() => json!("thumbsup"),
+            "TIMESTAMP".to_string() => json!("1234567890.123456")
         };
         let result = SlackExecutor
             .execute(

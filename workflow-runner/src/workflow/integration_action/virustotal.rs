@@ -2,6 +2,7 @@ use super::IntegrationExecutor;
 use crate::workflow::{
     context,
     http_client::{HttpClient, RequestBodyType},
+    secrets::fetch_credential,
     utils::{get_string_parameter, ParameterType},
 };
 use anyhow::{anyhow, Result};
@@ -21,24 +22,6 @@ struct VirusTotalCredential {
     api_key: String,
 }
 
-async fn get_secret(credential_name: &str, context: &context::Context) -> Result<String> {
-    let credential_secret = context
-        .db
-        .fetch_secret(&context.workflow_id, credential_name)
-        .await?;
-
-    let credentials = match credential_secret {
-        None => {
-            let error_message = format!("Missing credentials for {VIRUS_TOTAL}.");
-            tracing::error!(error_message);
-            return Err(anyhow!(error_message));
-        }
-        Some(secret) => serde_json::from_str::<VirusTotalCredential>(&secret)?,
-    };
-
-    Ok(credentials.api_key)
-}
-
 impl IntegrationExecutor for VirusTotalExecutor {
     async fn execute(
         &self,
@@ -48,7 +31,9 @@ impl IntegrationExecutor for VirusTotalExecutor {
         credential_name: &str,
         parameters: &HashMap<String, serde_json::Value>,
     ) -> Result<serde_json::Value> {
-        let api_key = get_secret(credential_name, context).await?;
+        let api_key = fetch_credential::<VirusTotalCredential>(credential_name, context)
+            .await?
+            .api_key;
 
         match api {
             "GET_A_FILE_REPORT" => get_a_file_report(client, context, &api_key, parameters).await,
@@ -155,7 +140,7 @@ async fn get_a_file_report(
     parameters: &HashMap<String, serde_json::Value>,
 ) -> Result<serde_json::Value> {
     let file_hash = get_string_parameter(
-        "hash",
+        "HASH",
         VIRUS_TOTAL,
         "GET_A_FILE_REPORT",
         parameters,
@@ -176,7 +161,7 @@ async fn get_a_domain_report(
     parameters: &HashMap<String, serde_json::Value>,
 ) -> Result<serde_json::Value> {
     let domain = get_string_parameter(
-        "domain",
+        "DOMAIN",
         VIRUS_TOTAL,
         "GET_A_DOMAIN_REPORT",
         parameters,
@@ -185,7 +170,9 @@ async fn get_a_domain_report(
     )
     .await?
     .expect("domain is required");
+
     let api_url = format!("https://www.virustotal.com/api/v3/domains/{domain}");
+
     virus_total_get_request(client, &api_url, api_key).await
 }
 
@@ -197,7 +184,7 @@ async fn get_ip_address_report(
     parameters: &HashMap<String, serde_json::Value>,
 ) -> Result<serde_json::Value> {
     let ip = get_string_parameter(
-        "ip",
+        "IP",
         VIRUS_TOTAL,
         "GET_IP_ADDRESS_REPORT",
         parameters,
@@ -206,7 +193,9 @@ async fn get_ip_address_report(
     )
     .await?
     .expect("ip is required");
+
     let api_url = format!("https://www.virustotal.com/api/v3/ip_addresses/{ip}");
+
     virus_total_get_request(client, &api_url, api_key).await
 }
 
@@ -218,7 +207,7 @@ async fn get_url_analysis_report(
     parameters: &HashMap<String, serde_json::Value>,
 ) -> Result<serde_json::Value> {
     let url = get_string_parameter(
-        "url",
+        "URL",
         VIRUS_TOTAL,
         "GET_URL_ANALYSIS_REPORT",
         parameters,
@@ -227,8 +216,10 @@ async fn get_url_analysis_report(
     )
     .await?
     .expect("url is a required parameter");
+
     let url_base64 = generate_virus_total_url_identifier(url);
     let api_url = format!("https://www.virustotal.com/api/v3/urls/{url_base64}");
+
     virus_total_get_request(client, &api_url, api_key).await
 }
 
@@ -240,7 +231,7 @@ async fn get_file_behavior_reports_summary(
     parameters: &HashMap<String, serde_json::Value>,
 ) -> Result<serde_json::Value> {
     let hash = get_string_parameter(
-        "hash",
+        "HASH",
         VIRUS_TOTAL,
         "GET_FILE_BEHAVIOR_REPORTS_SUMMARY",
         parameters,
@@ -249,7 +240,9 @@ async fn get_file_behavior_reports_summary(
     )
     .await?
     .expect("hash is a required parameter");
+
     let api_url = format!("https://www.virustotal.com/api/v3/files/{hash}/behaviour_summary");
+
     virus_total_get_request(client, &api_url, api_key).await
 }
 
@@ -261,7 +254,7 @@ async fn get_votes_on_a_domain(
     parameters: &HashMap<String, serde_json::Value>,
 ) -> Result<serde_json::Value> {
     let domain = get_string_parameter(
-        "domain",
+        "DOMAIN",
         VIRUS_TOTAL,
         "GET_VOTES_ON_A_DOMAIN",
         parameters,
@@ -270,7 +263,9 @@ async fn get_votes_on_a_domain(
     )
     .await?
     .expect("domain is a required parameter");
+
     let api_url = format!("https://www.virustotal.com/api/v3/domains/{domain}/votes");
+
     virus_total_get_request(client, &api_url, api_key).await
 }
 
@@ -283,7 +278,7 @@ async fn get_votes_on_a_file(
     parameters: &HashMap<String, serde_json::Value>,
 ) -> Result<serde_json::Value> {
     let hash = get_string_parameter(
-        "hash",
+        "HASH",
         VIRUS_TOTAL,
         "GET_VOTES_ON_A_FILE",
         parameters,
@@ -292,7 +287,9 @@ async fn get_votes_on_a_file(
     )
     .await?
     .expect("hash is a required parameter");
+
     let api_url = format!("https://www.virustotal.com/api/v3/files/{hash}/votes");
+
     virus_total_get_request(client, &api_url, api_key).await
 }
 
@@ -304,7 +301,7 @@ async fn get_votes_on_an_ip_address(
     parameters: &HashMap<String, serde_json::Value>,
 ) -> Result<serde_json::Value> {
     let ip = get_string_parameter(
-        "ip",
+        "IP",
         VIRUS_TOTAL,
         "GET_VOTES_ON_AN_IP_ADDRESS",
         parameters,
@@ -313,7 +310,9 @@ async fn get_votes_on_an_ip_address(
     )
     .await?
     .expect("ip is a required parameter");
+
     let api_url = format!("https://www.virustotal.com/api/v3/ip_addresses/{ip}/votes");
+
     virus_total_get_request(client, &api_url, api_key).await
 }
 
@@ -326,7 +325,7 @@ async fn get_votes_on_a_url(
     parameters: &HashMap<String, serde_json::Value>,
 ) -> Result<serde_json::Value> {
     let url = get_string_parameter(
-        "url",
+        "URL",
         VIRUS_TOTAL,
         "GET_VOTES_ON_A_URL",
         parameters,
@@ -335,8 +334,10 @@ async fn get_votes_on_a_url(
     )
     .await?
     .expect("url is a required parameter");
+
     let url_base64 = generate_virus_total_url_identifier(url);
     let api_url = format!("https://www.virustotal.com/api/v3/urls/{url_base64}/votes");
+
     virus_total_get_request(client, &api_url, api_key).await
 }
 
@@ -348,7 +349,7 @@ async fn scan_url(
     parameters: &HashMap<String, serde_json::Value>,
 ) -> Result<serde_json::Value> {
     let url = get_string_parameter(
-        "url",
+        "URL",
         VIRUS_TOTAL,
         "SCAN_URL",
         parameters,
@@ -357,7 +358,9 @@ async fn scan_url(
     )
     .await?
     .expect("url is a required parameter");
+
     let api_url = "https://www.virustotal.com/api/v3/urls";
+
     virus_total_post_request(
         client,
         &api_url,
@@ -380,7 +383,7 @@ async fn get_comments_ip_address(
     parameters: &HashMap<String, serde_json::Value>,
 ) -> Result<serde_json::Value> {
     let ip = get_string_parameter(
-        "ip",
+        "IP",
         VIRUS_TOTAL,
         "GET_COMMENTS_IP_ADDRESS",
         parameters,
@@ -389,7 +392,9 @@ async fn get_comments_ip_address(
     )
     .await?
     .expect("ip is a required parameter");
+
     let api_url = format!("https://www.virustotal.com/api/v3/ip_addresses/{ip}/comments");
+
     virus_total_get_request(client, &api_url, api_key).await
 }
 
@@ -402,7 +407,7 @@ async fn get_comments_domain(
     parameters: &HashMap<String, serde_json::Value>,
 ) -> Result<serde_json::Value> {
     let domain = get_string_parameter(
-        "domain",
+        "DOMAIN",
         VIRUS_TOTAL,
         "GET_COMMENTS_DOMAIN",
         parameters,
@@ -411,7 +416,9 @@ async fn get_comments_domain(
     )
     .await?
     .expect("domain is a required parameter");
+
     let api_url = format!("https://www.virustotal.com/api/v3/domains/{domain}/comments");
+
     virus_total_get_request(client, &api_url, api_key).await
 }
 
@@ -424,7 +431,7 @@ async fn get_comments_file(
     parameters: &HashMap<String, serde_json::Value>,
 ) -> Result<serde_json::Value> {
     let hash = get_string_parameter(
-        "hash",
+        "HASH",
         VIRUS_TOTAL,
         "GET_COMMENTS_FILE",
         parameters,
@@ -446,7 +453,7 @@ async fn get_comments_url(
     parameters: &HashMap<String, serde_json::Value>,
 ) -> Result<serde_json::Value> {
     let url = get_string_parameter(
-        "url",
+        "URL",
         VIRUS_TOTAL,
         "GET_COMMENTS_URL",
         parameters,
@@ -469,7 +476,7 @@ async fn search(
     parameters: &HashMap<String, serde_json::Value>,
 ) -> Result<serde_json::Value> {
     let query = get_string_parameter(
-        "query",
+        "QUERY",
         VIRUS_TOTAL,
         "SEARCH",
         parameters,
@@ -566,7 +573,7 @@ mod tests {
         assert!(result.is_err());
         assert_eq!(
             result.err().unwrap().to_string(),
-            "Missing credentials for VirusTotal."
+            "Missing credentials: \"credentials\""
         );
     }
 
@@ -580,7 +587,7 @@ mod tests {
                 "GET_A_FILE_REPORT",
                 "credentials",
                 &hashmap! {
-                    "hash".to_string() => json!("c0202cf6aeab8437c638533d14563d35")
+                    "HASH".to_string() => json!("c0202cf6aeab8437c638533d14563d35")
                 },
             )
             .await;
@@ -598,7 +605,7 @@ mod tests {
                 "GET_A_DOMAIN_REPORT",
                 "credentials",
                 &hashmap! {
-                    "domain".to_string() => json!("admyral.dev")
+                    "DOMAIN".to_string() => json!("admyral.dev")
                 },
             )
             .await;
@@ -616,7 +623,7 @@ mod tests {
                 "GET_IP_ADDRESS_REPORT",
                 "credentials",
                 &hashmap! {
-                    "ip".to_string() => json!("8.8.8.8")
+                    "IP".to_string() => json!("8.8.8.8")
                 },
             )
             .await;
@@ -634,7 +641,7 @@ mod tests {
                 "GET_URL_ANALYSIS_REPORT",
                 "credentials",
                 &hashmap! {
-                    "url".to_string() => json!("https://www.google.com")
+                    "URL".to_string() => json!("https://www.google.com")
                 },
             )
             .await;
@@ -652,7 +659,7 @@ mod tests {
                 "GET_FILE_BEHAVIOR_REPORTS_SUMMARY",
                 "credentials",
                 &hashmap! {
-                    "hash".to_string() => json!("c0202cf6aeab8437c638533d14563d35")
+                    "HASH".to_string() => json!("c0202cf6aeab8437c638533d14563d35")
                 },
             )
             .await;
@@ -670,7 +677,7 @@ mod tests {
                 "GET_VOTES_ON_A_DOMAIN",
                 "credentials",
                 &hashmap! {
-                    "domain".to_string() => json!("admyral.dev")
+                    "DOMAIN".to_string() => json!("admyral.dev")
                 },
             )
             .await;
@@ -688,7 +695,7 @@ mod tests {
                 "GET_VOTES_ON_A_FILE",
                 "credentials",
                 &hashmap! {
-                    "hash".to_string() => json!("c0202cf6aeab8437c638533d14563d35")
+                    "HASH".to_string() => json!("c0202cf6aeab8437c638533d14563d35")
                 },
             )
             .await;
@@ -706,7 +713,7 @@ mod tests {
                 "GET_VOTES_ON_AN_IP_ADDRESS",
                 "credentials",
                 &hashmap! {
-                    "ip".to_string() => json!("8.8.8.8")
+                    "IP".to_string() => json!("8.8.8.8")
                 },
             )
             .await;
@@ -724,7 +731,7 @@ mod tests {
                 "GET_VOTES_ON_A_URL",
                 "credentials",
                 &hashmap! {
-                    "url".to_string() => json!("https://www.google.com")
+                    "URL".to_string() => json!("https://www.google.com")
                 },
             )
             .await;
@@ -742,7 +749,7 @@ mod tests {
                 "SCAN_URL",
                 "credentials",
                 &hashmap! {
-                    "url".to_string() => json!("https://www.google.com")
+                    "URL".to_string() => json!("https://www.google.com")
                 },
             )
             .await;
@@ -760,7 +767,7 @@ mod tests {
                 "GET_COMMENTS_IP_ADDRESS",
                 "credentials",
                 &hashmap! {
-                    "ip".to_string() => json!("8.8.8.8")
+                    "IP".to_string() => json!("8.8.8.8")
                 },
             )
             .await;
@@ -778,7 +785,7 @@ mod tests {
                 "GET_COMMENTS_DOMAIN",
                 "credentials",
                 &hashmap! {
-                    "domain".to_string() => json!("admyral.dev")
+                    "DOMAIN".to_string() => json!("admyral.dev")
                 },
             )
             .await;
@@ -796,7 +803,7 @@ mod tests {
                 "GET_COMMENTS_FILE",
                 "credentials",
                 &hashmap! {
-                    "hash".to_string() => json!("c0202cf6aeab8437c638533d14563d35")
+                    "HASH".to_string() => json!("c0202cf6aeab8437c638533d14563d35")
                 },
             )
             .await;
@@ -814,7 +821,7 @@ mod tests {
                 "GET_COMMENTS_URL",
                 "credentials",
                 &hashmap! {
-                    "url".to_string() => json!("https://www.google.com")
+                    "URL".to_string() => json!("https://www.google.com")
                 },
             )
             .await;
@@ -832,7 +839,7 @@ mod tests {
                 "SEARCH",
                 "credentials",
                 &hashmap! {
-                    "query".to_string() => json!("https://www.google.com")
+                    "QUERY".to_string() => json!("https://www.google.com")
                 },
             )
             .await;

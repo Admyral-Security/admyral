@@ -1,4 +1,4 @@
-import { IntegrationType } from "@/lib/types";
+import { INTEGRATIONS, IntegrationType } from "@/lib/integrations";
 import Image from "next/image";
 import IntegrationIcon from "./icons/integration-icon";
 
@@ -9,78 +9,13 @@ export interface IntegrationLogoIconProps {
 export default function IntegrationLogoIcon({
 	integration,
 }: IntegrationLogoIconProps) {
-	switch (integration) {
-		case IntegrationType.VIRUSTOTAL:
-			return (
-				<Image
-					src="/virustotal-icon.svg"
-					alt="VirusTotal"
-					height="20"
-					width="20"
-				/>
-			);
-
-		case IntegrationType.ALIENVAULT_OTX:
-			return (
-				<Image
-					src="/alienvault_otx_icon.png"
-					alt="AlienVault OTX"
-					height="20"
-					width="20"
-				/>
-			);
-
-		case IntegrationType.THREATPOST:
-			return (
-				<Image
-					src="/threatpost_logo.svg"
-					alt="Threatpost"
-					height="20"
-					width="40"
-				/>
-			);
-
-		case IntegrationType.YARAIFY:
-			return (
-				<Image
-					src="/abusech_yaraify_logo.svg"
-					alt="YARAify"
-					height="20"
-					width="40"
-				/>
-			);
-
-		case IntegrationType.PHISH_REPORT:
-			return (
-				<Image
-					src="/phish_report.svg"
-					alt="Phish Report"
-					height="20"
-					width="20"
-				/>
-			);
-
-		case IntegrationType.SLACK:
-			return (
-				<Image
-					src="/slack_logo_color.svg"
-					alt="Slack"
-					height="20"
-					width="20"
-				/>
-			);
-
-		case IntegrationType.JIRA:
-			return (
-				<Image
-					src="/jira_logo.svg"
-					alt="Jira Software"
-					height="20"
-					width="20"
-				/>
-			);
-
-		default:
-			return <IntegrationIcon />;
+	if (integration === null) {
+		return <IntegrationIcon />;
 	}
+
+	const name = INTEGRATIONS[integration].name;
+	const { src, isSquareIcon } = INTEGRATIONS[integration].icon;
+	const [height, width] = isSquareIcon ? [20, 20] : [20, 40];
+
+	return <Image src={src} alt={name} height={height} width={width} />;
 }
