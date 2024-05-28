@@ -872,24 +872,31 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 					},
 				],
 			},
-			// {
-			// 	id: "CREATE_CUSTOMER_REQUEST",
-			// 	name: "Create Customer Request",
-			// 	description: "Create a new customer request in a service desk",
-			// 	documentationUrl:
-			// 		"https://developer.atlassian.com/cloud/jira/service-desk/rest/api-group-request/#api-rest-servicedeskapi-request-post",
-			// 	requiresAuthentication: true,
-			// 	parameters: [
-			// 		// TODO:
-			// 		{
-			// 			id: "form",
-			// 			displayName: "Form",
-			// 			description: "The form for the request",
-			// 			required: true,
-			// 			dataType: ApiParameterDatatype.TEXTAREA,
-			// 		},
-			// 	],
-			// },
+			{
+				id: "ASSIGN_ISSUE",
+				name: "Assign Issue",
+				description: "Assign an issue to a user.",
+				documentationUrl:
+					"https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issues/#api-rest-api-3-issue-issueidorkey-assignee-put",
+				requiresAuthentication: true,
+				parameters: [
+					{
+						id: "issueIdOrKey",
+						displayName: "Issue ID or Key",
+						description:
+							"The ID or key of the issue to be assigned.",
+						required: true,
+						dataType: ApiParameterDatatype.TEXT,
+					},
+					{
+						id: "accountId",
+						displayName: "Account ID",
+						description: "The account ID of the assignee",
+						required: true,
+						dataType: ApiParameterDatatype.TEXT,
+					},
+				],
+			},
 		],
 	},
 	// ...

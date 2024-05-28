@@ -55,6 +55,7 @@ impl IntegrationExecutor for JiraExecutor {
         let credential = fetch_credential(credential_name, context).await?;
         match api {
             "CREATE_ISSUE" => create_issue(client, context, &credential, parameters).await,
+            "ASSIGN_ISSUE" => assign_issue(client, context, &credential, parameters).await,
             _ => return Err(anyhow!("API {api} not implemented for {JIRA}.")),
         }
     }
@@ -81,6 +82,32 @@ async fn jira_post_request(
             headers,
             RequestBodyType::Json { body },
             201,
+            format!("Error: Failed to call {JIRA} API"),
+        )
+        .await
+}
+
+async fn jira_put_request(
+    client: &dyn HttpClient,
+    api_url: &str,
+    credential: &JiraCredential,
+    body: serde_json::Value,
+) -> Result<serde_json::Value> {
+    // API Key Construction: https://developer.atlassian.com/cloud/jira/platform/basic-auth-for-rest-apis/
+    let api_key = format!("{}:{}", credential.email, credential.api_token);
+    let api_key_base64 = STANDARD.encode(api_key);
+
+    let headers = hashmap! {
+        "Authorization".to_string() => format!("Basic {api_key_base64}"),
+        "Content-type".to_string() => "application/json".to_string(),
+    };
+
+    client
+        .put(
+            api_url,
+            headers,
+            RequestBodyType::Json { body },
+            204,
             format!("Error: Failed to call {JIRA} API"),
         )
         .await
@@ -151,13 +178,17 @@ async fn create_issue(
             // Description must be in Atlassian Document Format
             // https://developer.atlassian.com/cloud/jira/platform/apis/document/structure/
             let value = match serde_json::from_str::<serde_json::Value>(&description) {
-                Ok(description_as_json) => {
-                    match description_as_json {
-                        serde_json::Value::Object(obj) => json!(obj),
-                        _ => return Err(anyhow!("Invalid input for \"Description\". Expected Atlassian Document Format."))
-                    }
+                Ok(description_as_json) => match description_as_json {
+                    serde_json::Value::Object(obj) => json!(obj),
+                    _ => return Err(anyhow!(
+                        "Invalid input for \"Description\". Expected Atlassian Document Format."
+                    )),
                 },
-                Err(_) => return Err(anyhow!("Invalid input for \"Description\". Expected Atlassian Document Format."))
+                Err(_) => {
+                    return Err(anyhow!(
+                        "Invalid input for \"Description\". Expected Atlassian Document Format."
+                    ))
+                }
             };
             fields.insert("description".to_string(), value);
         }
@@ -257,4 +288,42 @@ async fn create_issue(
     jira_post_request(client, &api_url, credential, json!({"fields": fields})).await
 }
 
-// TODO: add unit test
+// https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issues/#api-rest-api-3-issue-issueidorkey-assignee-put
+async fn assign_issue(
+    client: &dyn HttpClient,
+    context: &context::Context,
+    credential: &JiraCredential,
+    parameters: &HashMap<String, serde_json::Value>,
+) -> Result<serde_json::Value> {
+    let issue_id_or_key = get_string_parameter(
+        "issue_id_or_key",
+        JIRA,
+        "ASSIGN_ISSUE",
+        parameters,
+        context,
+        ParameterType::Required,
+    )
+    .await?
+    .expect("issue_id_or_key is a required parameter!");
+    let account_id = get_string_parameter(
+        "account_id",
+        JIRA,
+        "ASSIGN_ISSUE",
+        parameters,
+        context,
+        ParameterType::Required,
+    )
+    .await?
+    .expect("account_id is a required parameter");
+    let api_url = format!(
+        "https://{}.atlassian.net/rest/api/3/issue/{}/assignee",
+        credential.domain, issue_id_or_key
+    );
+    jira_put_request(
+        client,
+        &api_url,
+        credential,
+        json!({"accountId": account_id}),
+    )
+    .await
+}
