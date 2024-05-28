@@ -1,0 +1,85 @@
+name: "\U0001F41B Bug Report"
+description: Report a bug in Admyral. To report a security issue, please instead use the security option below. For questions, please use Discord.
+labels: ["02 Bug Report"]
+body:
+  - type: markdown
+    attributes:
+      value: >
+        Thank you for taking the time to file a bug report. 
+        
+        Use this to report bugs in Admyral. 
+        
+        If you're not certain that your issue is due to a bug in Admyral, please use [Discord](https://discord.gg/GqbJZT9Hbf) to ask for help with your issue.
+        
+        
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checked other resources
+      description: Please confirm and check all the following options.
+      options:
+        - label: I added a very descriptive title to this issue.
+          required: true
+        - label: I used the GitHub search to find a similar question and didn't find it.
+          required: true
+        - label: I am sure that this is a bug in Admyral rather than my code.
+          required: true
+  - type: textarea
+    id: reproduction
+    validations:
+      required: true
+    attributes:
+      label: Example Code
+      description: |
+        Please add a self-contained, [minimal, reproducible, example](https://stackoverflow.com/help/minimal-reproducible-example) with your use case.
+        
+        If a maintainer can copy it, run it, and see it right away, there's a much higher chance that you'll be able to get help.
+        
+        **Important!** 
+        
+        * Use code tags (e.g., ```python ... ```) to correctly [format your code](https://help.github.com/en/github/writing-on-github/creating-and-highlighting-code-blocks#syntax-highlighting).
+        * INCLUDE the language label (e.g. `python`) after the first three backticks to enable syntax highlighting. (e.g., ```python rather than ```).
+        * Reduce your code to the minimum required to reproduce the issue if possible. This makes it much easier for others to help you.
+        * Avoid screenshots when possible, as they are hard to read and (more importantly) don't allow others to copy-and-paste your code.
+
+      placeholder: |
+        The following code: 
+        
+        ```python
+        print("enter your code here)
+        ```
+  - type: textarea
+    id: error
+    validations:
+      required: false
+    attributes:
+      label: Error Message and Stack Trace (if applicable)
+      description: |
+        If you are reporting an error, please include the full error message and stack trace.
+      placeholder: |
+        Exception + full stack trace
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: |
+        What is the problem, question, or error?
+
+        Write a short description telling what you are doing, what you expect to happen, and what is currently happening.
+      placeholder: |
+        * I'm trying to use Admyral to do X.
+        * I expect to see Y.
+        * Instead, it does Z.
+    validations:
+      required: true
+  - type: textarea
+    id: system-info
+    attributes:
+      label: System Info
+      description: |
+        Please share your system info with us, e.g. browser, browser version, OS, CPU architecture
+      placeholder: |
+        Your browser, browser version, OS, CPU architecture, etc.
+    validations:
+      required: true
+
