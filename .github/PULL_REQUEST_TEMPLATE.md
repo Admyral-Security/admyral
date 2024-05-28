@@ -1,28 +1,41 @@
-Thank you for contributing to Admyral!
+## What does this PR do?
 
-- [ ] **PR title**: "package: description"
-  - Where "package" is either of "app" or "docs" is being modified. E.g. use "docs: ..." for purely docs changes.
-  - Example: "app: change button color"
+<!-- Please include a summary of the change and which issue is fixed. Please also include relevant motivation and context. List any dependencies that are required for this change. -->
+
+Fixes # (issue)
+
+<!-- Please provide a loom video for visual changes to speed up reviews
+ Loom Video: https://www.loom.com/
+-->
+
+## Type of change
+
+<!-- Please delete bullets that are not relevant. -->
+
+- [ ] Bug fix (non-breaking change which fixes an issue)
+- [ ] Chore (refactoring code, technical debt, workflow improvements)
+- [ ] New feature (non-breaking change which adds functionality)
+- [ ] Breaking change (fix or feature that would cause existing functionality to not work as expected)
+- [ ] Refactor (does not change functionality, e.g. code style improvements, linting)
+- [ ] This change requires a documentation update
+
+## Mandatory Tasks
+
+- [ ] Make sure you have self-reviewed the code. A decent size PR without self-review might be rejected.
 
 
-- [ ] **PR message**: ***Delete this entire checklist*** and replace with
-    - **Description:** a description of the change
-    - **Issue:** the issue # it fixes, if applicable
-    - **Dependencies:** any dependencies required for this change
+## Checklist
 
+<!-- Remove bullet points below that don't apply to you -->
 
-- [ ] **Add tests and docs**: If you're adding a new integration, a new behavior, or feature, please include
-  1. a test for the integration, preferably unit tests,
-  2. add it to the documentation if applicable
-
-
-- [ ] **Lint and test**: Please run the following lint and test commands before opening a PR:
-Inside workflow-runner: `cargo fmt`  and `cargo test`
-Inside backend: `poetry run pytest`
-Inside web: `npm run lint`
-
-Additional guidelines:
-- Make sure optional dependencies are imported within a function.
-- Changes should be backwards compatible.
-
-If no one reviews your PR within a few days, please @-mention danielgrittner.
+- I haven't read the [contributing guide](https://github.com/Admyral-Security/admyral/blob/main/CONTRIBUTING.md)
+- My code doesn't follow the style guidelines of this project (`npm run prettier`)
+- I haven't commented my code, particularly in hard-to-understand areas
+- I haven't checked if my PR needs changes to the documentation
+- I haven't checked if my changes generate no new warnings (`npm run lint`)
+- I haven't added tests that prove my fix is effective or that my feature works
+- I haven't checked if new and existing unit tests pass locally with my changes
+- I didn't test and lint my code: 
+    - Inside workflow-runner: `cargo fmt`  and `cargo test`
+    - Inside backend: `poetry run pytest`
+    - Inside web: `npm run lint` and `npm run prettier`
