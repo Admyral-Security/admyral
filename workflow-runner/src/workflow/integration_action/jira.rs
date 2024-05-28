@@ -313,6 +313,7 @@ async fn assign_issue(
     )
     .await?
     .expect("issue_id_or_key is a required parameter!");
+
     let account_id = get_string_parameter(
         "account_id",
         JIRA,
@@ -323,10 +324,12 @@ async fn assign_issue(
     )
     .await?
     .expect("account_id is a required parameter");
+
     let api_url = format!(
         "https://{}.atlassian.net/rest/api/3/issue/{}/assignee",
         credential.domain, issue_id_or_key
     );
+
     jira_put_request(
         client,
         &api_url,

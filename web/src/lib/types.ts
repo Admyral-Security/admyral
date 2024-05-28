@@ -24,7 +24,9 @@ export enum IntegrationType {
 	JIRA = "JIRA",
 }
 
-export function getIntegrationTypeLabel(integrationType: IntegrationType) {
+export function getIntegrationTypeLabel(
+	integrationType: IntegrationType,
+): string {
 	switch (integrationType) {
 		case IntegrationType.VIRUSTOTAL:
 			return "VirusTotal";
