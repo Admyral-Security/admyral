@@ -17,8 +17,8 @@ import {
 	WorkflowRunEvent,
 	WorkflowTemplate,
 	Credential,
-	IntegrationType,
 } from "./types";
+import { IntegrationType } from "./integrations";
 import { generateWebhook } from "./workflow-node";
 
 async function getAccessToken() {

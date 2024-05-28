@@ -1,13 +1,8 @@
 "use client";
 
 import { Box, Card, Flex, Text } from "@radix-ui/themes";
-import {
-	ActionData,
-	ActionNode,
-	INTEGRATION_TYPES,
-	IntegrationType,
-	getIntegrationTypeLabel,
-} from "@/lib/types";
+import { ActionData, ActionNode } from "@/lib/types";
+import { IntegrationType } from "@/lib/integrations";
 import useWorkflowStore from "@/lib/workflow-store";
 import RightArrowIcon from "../icons/right-arrow-icon";
 import IntegrationLogoIconCard from "../integration-logo-icon-card";
@@ -46,7 +41,7 @@ function IntegrationListElement({
 						<Text weight="medium">
 							{integration === undefined
 								? "HTTP Request"
-								: getIntegrationTypeLabel(integration)}
+								: INTEGRATIONS[integration].name}
 						</Text>
 						<Text color="gray" weight="light">
 							{description}
@@ -115,7 +110,7 @@ export default function IntegrationSelection({ id }: IntegrationProps) {
 		integrationType: IntegrationType,
 		apiIdx: number,
 	) => {
-		const actionName = `${getIntegrationTypeLabel(integrationType)} - ${INTEGRATIONS[integrationType].apis[apiIdx].name}`;
+		const actionName = `${INTEGRATIONS[integrationType].name} - ${INTEGRATIONS[integrationType].apis[apiIdx].name}`;
 		const newData = {
 			...data,
 			actionName,
@@ -150,10 +145,7 @@ export default function IntegrationSelection({ id }: IntegrationProps) {
 								</Box>
 
 								<IntegrationLogoIconCard
-									integration={
-										INTEGRATIONS[selectedIntegration]
-											.integrationType
-									}
+									integration={selectedIntegration}
 								/>
 
 								<Flex direction="column">
@@ -212,14 +204,16 @@ export default function IntegrationSelection({ id }: IntegrationProps) {
 
 				{/* TODO: search bar */}
 
-				{INTEGRATION_TYPES.map((integrationType) => (
+				{Object.keys(INTEGRATIONS).map((integrationType) => (
 					<IntegrationListElement
 						key={`integration_selection_${integrationType}`}
-						integration={
-							INTEGRATIONS[integrationType].integrationType
-						}
+						integration={integrationType as IntegrationType}
 						description={`${INTEGRATIONS[integrationType].apis.length} available APIs`}
-						onClick={() => setSelectedIntegration(integrationType)}
+						onClick={() =>
+							setSelectedIntegration(
+								integrationType as IntegrationType,
+							)
+						}
 					/>
 				))}
 			</Flex>

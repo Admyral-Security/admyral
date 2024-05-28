@@ -1,5 +1,6 @@
 use super::IntegrationExecutor;
 use crate::workflow::context;
+use crate::workflow::secrets::fetch_credential;
 use crate::workflow::{
     http_client::{HttpClient, RequestBodyType},
     utils::{get_bool_parameter, get_string_parameter, ParameterType},
@@ -18,22 +19,6 @@ struct PhishReportCredential {
     api_key: String,
 }
 
-async fn fetch_api_key(credential_name: &str, context: &context::Context) -> Result<String> {
-    let credential_secret = context
-        .db
-        .fetch_secret(&context.workflow_id, credential_name)
-        .await?;
-    let credential = match credential_secret {
-        None => {
-            let error_message = format!("Missing credentials for {PHISH_REPORT}.");
-            tracing::error!(error_message);
-            return Err(anyhow!(error_message));
-        }
-        Some(secret) => serde_json::from_str::<PhishReportCredential>(&secret)?,
-    };
-    Ok(credential.api_key)
-}
-
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct PhishReportExecutor;
 
@@ -46,7 +31,9 @@ impl IntegrationExecutor for PhishReportExecutor {
         credential_name: &str,
         parameters: &HashMap<String, serde_json::Value>,
     ) -> Result<serde_json::Value> {
-        let api_key = fetch_api_key(credential_name, context).await?;
+        let api_key = fetch_credential::<PhishReportCredential>(credential_name, context)
+            .await?
+            .api_key;
 
         match api {
             "GET_HOSTING_CONTACT_INFORMATION" => {
@@ -124,7 +111,7 @@ async fn get_hosting_contact_information(
     parameters: &HashMap<String, serde_json::Value>,
 ) -> Result<serde_json::Value> {
     let url = get_string_parameter(
-        "url",
+        "URL",
         PHISH_REPORT,
         "GET_HOSTING_CONTACT_INFORMATION",
         parameters,
@@ -133,7 +120,9 @@ async fn get_hosting_contact_information(
     )
     .await?
     .expect("url is required");
+
     let api_url = format!("https://phish.report/api/v0/hosting?url={url}");
+
     phish_report_request(client, api_key, &api_url, HttpRequest::Get).await
 }
 
@@ -151,7 +140,7 @@ async fn start_takedown(
     parameters: &HashMap<String, serde_json::Value>,
 ) -> Result<serde_json::Value> {
     let url = get_string_parameter(
-        "url",
+        "URL",
         PHISH_REPORT,
         "START_TAKEDOWN",
         parameters,
@@ -162,7 +151,7 @@ async fn start_takedown(
     .expect("url is a required parameter");
 
     let ignore_duplicates = get_bool_parameter(
-        "ignore_duplicates",
+        "IGNORE_DUPLICATES",
         PHISH_REPORT,
         "START_TAKEDOWN",
         parameters,
@@ -194,7 +183,7 @@ async fn get_takedown(
     parameters: &HashMap<String, serde_json::Value>,
 ) -> Result<serde_json::Value> {
     let case_id = get_string_parameter(
-        "id",
+        "ID",
         PHISH_REPORT,
         "GET_TAKEDOWN",
         parameters,
@@ -205,6 +194,7 @@ async fn get_takedown(
     .expect("id is a required parameter");
 
     let api_url = format!("https://phish.report/api/v0/cases/{case_id}");
+
     phish_report_request(client, api_key, &api_url, HttpRequest::Get).await
 }
 
@@ -216,7 +206,7 @@ async fn close_takedown(
     parameters: &HashMap<String, serde_json::Value>,
 ) -> Result<serde_json::Value> {
     let case_id = get_string_parameter(
-        "id",
+        "ID",
         PHISH_REPORT,
         "GET_TAKEDOWN",
         parameters,
@@ -225,8 +215,9 @@ async fn close_takedown(
     )
     .await?
     .expect("id is a required parameter");
+
     let comment = get_string_parameter(
-        "comment",
+        "COMMENT",
         PHISH_REPORT,
         "GET_TAKEDOWN",
         parameters,
@@ -334,7 +325,7 @@ mod tests {
         assert!(result.is_err());
         assert_eq!(
             result.err().unwrap().to_string(),
-            "Missing credentials for Phish Report."
+            "Missing credentials: \"credentials\""
         );
     }
 
@@ -348,7 +339,7 @@ mod tests {
                 "GET_HOSTING_CONTACT_INFORMATION",
                 "credentials",
                 &hashmap! {
-                    "url".to_string() => json!("admyral.dev")
+                    "URL".to_string() => json!("admyral.dev")
                 },
             )
             .await;
@@ -382,7 +373,7 @@ mod tests {
                 "START_TAKEDOWN",
                 "credentials",
                 &hashmap! {
-                    "url".to_string() => json!("admyral.dev")
+                    "URL".to_string() => json!("admyral.dev")
                 },
             )
             .await;
@@ -397,8 +388,8 @@ mod tests {
                 "START_TAKEDOWN",
                 "credentials",
                 &hashmap! {
-                    "url".to_string() => json!("admyral.dev"),
-                    "ignore_duplicates".to_string() => json!(true)
+                    "URL".to_string() => json!("admyral.dev"),
+                    "IGNORE_DUPLICATES".to_string() => json!(true)
                 },
             )
             .await;
@@ -416,7 +407,7 @@ mod tests {
                 "GET_TAKEDOWN",
                 "credentials",
                 &hashmap! {
-                    "id".to_string() => json!("abcdef")
+                    "ID".to_string() => json!("abcdef")
                 },
             )
             .await;
@@ -434,7 +425,7 @@ mod tests {
                 "GET_TAKEDOWN",
                 "credentials",
                 &hashmap! {
-                    "id".to_string() => json!("abcdef")
+                    "ID".to_string() => json!("abcdef")
                 },
             )
             .await;
@@ -449,8 +440,8 @@ mod tests {
                 "GET_TAKEDOWN",
                 "credentials",
                 &hashmap! {
-                    "id".to_string() => json!("abcdef"),
-                    "comment".to_string() => json!("this is a comment")
+                    "ID".to_string() => json!("abcdef"),
+                    "COMMENT".to_string() => json!("this is a comment")
                 },
             )
             .await;

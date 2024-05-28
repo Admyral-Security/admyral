@@ -1,10 +1,6 @@
 import { loadWorkflowRunEvents, loadWorkflowRuns } from "@/lib/api";
-import {
-	ActionNode,
-	IntegrationType,
-	WorkflowRun,
-	WorkflowRunEvent,
-} from "@/lib/types";
+import { ActionNode, WorkflowRun, WorkflowRunEvent } from "@/lib/types";
+import { IntegrationType } from "@/lib/integrations";
 import { Badge, Box, Card, Flex, Text } from "@radix-ui/themes";
 import { useEffect, useState } from "react";
 import "@/components/workflow-builder-run-history.css";
