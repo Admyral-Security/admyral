@@ -161,7 +161,7 @@ We are open-source for the following reasons:
 
 #### Does Admyral stay open-source?
 
-We love open-source. Therfore, Admyral stays committed to keep all open-sourced features freely available under the same open-source terms and maintain them. However, future premium features may only be part of our enterprise version. For specific requirements, please reach out to us via [chris@admyral.dev](mailto:chris@admyral.dev).
+We love open-source. Therefore, Admyral stays committed to keep all open-sourced features freely available under the same open-source terms and maintain them. However, future premium features may only be part of our enterprise version. For specific requirements, please reach out to us via [chris@admyral.dev](mailto:chris@admyral.dev).
 
 ## 🏙️ Enterprise Version
 
