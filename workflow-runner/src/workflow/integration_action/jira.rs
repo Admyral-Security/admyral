@@ -35,7 +35,13 @@ async fn fetch_credential(
             tracing::error!(error_message);
             return Err(anyhow!(error_message));
         }
-        Some(secret) => serde_json::from_str::<JiraCredential>(&secret)?,
+        Some(secret) => match serde_json::from_str::<JiraCredential>(&secret) {
+            Err(e) => {
+                tracing::error!("Error parsing Jira credential: {e}");
+                return Err(anyhow!("Received malformed Jira credential. Expecting the following structure: \"{{\"DOMAIN\": <string>, \"EMAIL\": <string>, \"API_TOKEN\": <string>}}\""));
+            }
+            Ok(credential) => credential,
+        },
     };
     Ok(credential)
 }
@@ -180,9 +186,11 @@ async fn create_issue(
             let value = match serde_json::from_str::<serde_json::Value>(&description) {
                 Ok(description_as_json) => match description_as_json {
                     serde_json::Value::Object(obj) => json!(obj),
-                    _ => return Err(anyhow!(
+                    _ => {
+                        return Err(anyhow!(
                         "Invalid input for \"Description\". Expected Atlassian Document Format."
-                    )),
+                    ))
+                    }
                 },
                 Err(_) => {
                     return Err(anyhow!(
@@ -326,4 +334,183 @@ async fn assign_issue(
         json!({"accountId": account_id}),
     )
     .await
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::postgres::Database;
+    use async_trait::async_trait;
+    use serde_json::json;
+    use std::sync::Arc;
+
+    struct MockHttpClient;
+    #[async_trait]
+    impl HttpClient for MockHttpClient {
+        async fn get(
+            &self,
+            _url: &str,
+            _headers: HashMap<String, String>,
+            _expected_response_status: u16,
+            _error_message: String,
+        ) -> Result<serde_json::Value> {
+            Ok(json!({
+                "ok": true,
+            }))
+        }
+
+        async fn post(
+            &self,
+            _url: &str,
+            _headers: HashMap<String, String>,
+            _body: RequestBodyType,
+            _expected_response_status: u16,
+            _error_message: String,
+        ) -> Result<serde_json::Value> {
+            Ok(serde_json::json!({"ok": true}))
+        }
+
+        async fn put(
+            &self,
+            _url: &str,
+            _headers: HashMap<String, String>,
+            _body: RequestBodyType,
+            _expected_response_status: u16,
+            _error_message: String,
+        ) -> Result<serde_json::Value> {
+            Ok(serde_json::json!({"ok": true}))
+        }
+    }
+
+    struct MockDb;
+    #[async_trait]
+    impl Database for MockDb {
+        async fn fetch_secret(
+            &self,
+            _workflow_id: &str,
+            _credential_name: &str,
+        ) -> Result<Option<String>> {
+            Ok(Some("{\"API_TOKEN\": \"some-api-key\", \"DOMAIN\": \"test\", \"EMAIL\": \"chris@admyral.dev\"}".to_string()))
+        }
+    }
+
+    struct MockDbUnknownSecret;
+    #[async_trait]
+    impl Database for MockDbUnknownSecret {
+        async fn fetch_secret(
+            &self,
+            _workflow_id: &str,
+            _credential_name: &str,
+        ) -> Result<Option<String>> {
+            Ok(None)
+        }
+    }
+
+    struct MockDbMalformedSecret;
+    #[async_trait]
+    impl Database for MockDbMalformedSecret {
+        async fn fetch_secret(
+            &self,
+            _workflow_id: &str,
+            _credential_name: &str,
+        ) -> Result<Option<String>> {
+            Ok(Some("{\"API_TOKEN\": \"some-api-key\"}".to_string()))
+        }
+    }
+
+    async fn setup(db: Arc<dyn Database>) -> (Arc<MockHttpClient>, context::Context) {
+        let context =
+            context::Context::init("ddd54f25-0537-4e40-ab96-c93beee543de".to_string(), None, db)
+                .await
+                .unwrap();
+        (Arc::new(MockHttpClient), context)
+    }
+
+    #[tokio::test]
+    async fn test_missing_credential() {
+        {
+            let (client, context) = setup(Arc::new(MockDbUnknownSecret)).await;
+            let result = JiraExecutor
+                .execute(
+                    &*client,
+                    &context,
+                    "CREATE_ISSUE",
+                    "credentials",
+                    &HashMap::new(),
+                )
+                .await;
+            assert!(result.is_err());
+            assert_eq!(
+                result.err().unwrap().to_string(),
+                "Missing credentials for Jira."
+            );
+        }
+
+        {
+            let (client, context) = setup(Arc::new(MockDbMalformedSecret)).await;
+            let result = JiraExecutor
+                .execute(
+                    &*client,
+                    &context,
+                    "CREATE_ISSUE",
+                    "credentials",
+                    &HashMap::new(),
+                )
+                .await;
+            assert!(result.is_err());
+            assert_eq!(
+                result.err().unwrap().to_string(),
+                "Received malformed Jira credential. Expecting the following structure: \"{\"DOMAIN\": <string>, \"EMAIL\": <string>, \"API_TOKEN\": <string>}\""
+            );
+        }
+    }
+
+    #[tokio::test]
+    async fn test_create_issue() {
+        let (client, context) = setup(Arc::new(MockDb)).await;
+        let parameters = hashmap! {
+            "summary".to_string() => json!("This is the ticket summary"),
+            "project_id".to_string() => json!("10000"),
+            "issue_type".to_string() => json!("Bug"),
+            "description".to_string() => json!("{\"content\": [{\"content\": [{\"text\": \"Order entry fails when selecting supplier.\", \"type\": \"text\"}], \"type\": \"paragraph\"}], \"type\": \"doc\", \"version\": 1}"),
+            "assignee".to_string() => json!("712020:8f417ffa-dc11-42b9-8464-b9e8b7a31559"),
+            "labels".to_string() => json!("label1, label2"),
+            "priority".to_string() => json!("High"),
+            "custom_fields".to_string() => json!("{\"customfield_10042\": \"this is my custom field\"}"),
+            "components".to_string() => json!("[{\"name\": \"Component1\"}, {\"name\": \"Component2\"}]")
+        };
+        let result = JiraExecutor
+            .execute(
+                &*client,
+                &context,
+                "CREATE_ISSUE",
+                "credentials",
+                &parameters,
+            )
+            .await;
+        assert!(result.is_ok());
+        let value = result.unwrap();
+        assert_eq!(value, json!({"ok": true}));
+    }
+
+    #[tokio::test]
+    async fn test_assign_issue() {
+        let (client, context) = setup(Arc::new(MockDb)).await;
+        let parameters = hashmap! {
+            "issue_id_or_key".to_string() => json!("ADM-123"),
+            "account_id".to_string() => json!("712020:8f417ffa-dc11-42b9-8464-b9e8b7a31559")
+        };
+        let result = JiraExecutor
+            .execute(
+                &*client,
+                &context,
+                "ASSIGN_ISSUE",
+                "credentials",
+                &parameters,
+            )
+            .await;
+        assert!(result.is_ok());
+        let value = result.unwrap();
+        assert_eq!(value, json!({"ok": true}));
+    }
 }
