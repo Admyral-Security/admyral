@@ -1,5 +1,4 @@
 name: admyral
-version: "3.8"
 
 services:
     backend:
@@ -31,7 +30,8 @@ services:
                 condition: service_healthy
 
     workflow-runner:
-        build: ../../workflow-runner
+        container_name: workflow-runner
+        image: admyralai/workflow-runner:latest
         env_file:
             - ./.env
         ports:
