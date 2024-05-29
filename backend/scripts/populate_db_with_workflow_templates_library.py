@@ -4,7 +4,9 @@ from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy.sql import text
 import json
 from datetime import datetime
+from dotenv import load_dotenv
 
+load_dotenv()
 
 async def async_main() -> None:
     engine = create_async_engine(os.environ["DATABASE_URL_ASYNCPG"], echo=True, future=True, pool_pre_ping=True)

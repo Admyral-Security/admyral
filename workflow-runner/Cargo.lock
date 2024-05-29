@@ -2829,6 +2829,7 @@ dependencies = [
  "axum",
  "axum-extra",
  "base64 0.22.1",
+ "dotenvy",
  "enum_dispatch",
  "futures",
  "hex",

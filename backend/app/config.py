@@ -15,7 +15,7 @@ class Settings(BaseSettings):
     JWT_ALGORITHM: str = "HS256"
     WEBHOOK_SIGNING_SECRET: str
 
-    OPENAI_API_KEY: str
+    OPENAI_API_KEY: Optional[str] = None
 
     WORKFLOW_RUN_HOURLY_QUOTA: Optional[int] = None
     WORKFLOW_RUN_TIMEOUT_IN_MINUTES: Optional[int] = None

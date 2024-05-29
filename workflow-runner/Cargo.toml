@@ -13,6 +13,7 @@ async_once = "0.2.6"
 axum = "0.7.5"
 axum-extra = { version = "0.9.3", features = ["typed-header"] }
 base64 = "0.22.1"
+dotenvy = "0.15.7"
 enum_dispatch = "0.3.13"
 futures = "0.3.30"
 hex = "0.4.3"

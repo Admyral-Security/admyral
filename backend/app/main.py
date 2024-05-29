@@ -1,9 +1,13 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
+from dotenv import load_dotenv
 
 from app.config import settings
 from app.api.api_v1.api import api_router
+
+
+load_dotenv()
 
 
 @asynccontextmanager
