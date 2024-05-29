@@ -10,7 +10,7 @@ export async function resetPassowrd(formData: FormData) {
 		formData.get("email") as string,
 	);
 	if (error) {
-		redirect("/error");
+		redirect(`/password/forgot?error=${error.message}`);
 	}
 	revalidatePath("/", "layout");
 	redirect("/password/forgot/success");

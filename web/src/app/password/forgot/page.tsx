@@ -3,8 +3,29 @@
 import Link from "next/link";
 import { resetPassowrd } from "./actions";
 import LogoWithName from "@/components/icons/logo-with-name";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import { Callout, Flex } from "@radix-ui/themes";
+import { InfoCircledIcon } from "@radix-ui/react-icons";
 
 export default function ForgotPasswordPage() {
+	const router = useRouter();
+	const searchParams = useSearchParams();
+
+	const [error, setError] = useState<string | null>(null);
+
+	useEffect(() => {
+		const errorMessage = searchParams.get("error");
+		if (errorMessage !== null) {
+			setError(errorMessage);
+
+			// Remove the error parameter from the URL
+			const params = new URLSearchParams(window.location.search);
+			params.delete("error");
+			router.replace(`?${params.toString()}`);
+		}
+	}, [searchParams, router]);
+
 	return (
 		<div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8 gap-4">
 			<div className="flex items-center justify-center flex-row gap-4">
@@ -25,6 +46,17 @@ export default function ForgotPasswordPage() {
 							/>
 						</div>
 					</div>
+
+					{error !== null && (
+						<Callout.Root color="red">
+							<Flex align="center" gap="5">
+								<Callout.Icon>
+									<InfoCircledIcon width="20" height="20" />
+								</Callout.Icon>
+								<Callout.Text size="2">{error}</Callout.Text>
+							</Flex>
+						</Callout.Root>
+					)}
 
 					<div>
 						<button

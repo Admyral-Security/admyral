@@ -1,10 +1,11 @@
 "use client";
 
 import { login, signup } from "./actions";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
 	Button,
+	Callout,
 	Flex,
 	Grid,
 	Separator,
@@ -16,40 +17,66 @@ import GithubIcon from "@/components/icons/github-icon";
 import LogoWithName from "@/components/icons/logo-with-name";
 import { createClient } from "@/utils/supabase/client";
 import Image from "next/image";
+import { InfoCircledIcon } from "@radix-ui/react-icons";
+import { useSearchParams, useRouter } from "next/navigation";
 
 type OAuthProvider = "google" | "github" | "azure";
 
 export default function LoginPage() {
 	const supabase = createClient();
 
+	const router = useRouter();
+	const searchParams = useSearchParams();
+
 	const [isSignIn, setIsSignIn] = useState<boolean>(true);
 	const [isLoading, setIsLoading] = useState<boolean>(false);
+	const [error, setError] = useState<string | null>(null);
+
+	useEffect(() => {
+		const errorMessage = searchParams.get("error");
+		if (errorMessage !== null) {
+			setError(errorMessage);
+
+			// Remove the error parameter from the URL
+			const params = new URLSearchParams(window.location.search);
+			params.delete("error");
+			router.replace(`?${params.toString()}`);
+		}
+	}, [searchParams, router]);
 
 	const handleSubmit = async (event: any) => {
 		event.preventDefault();
 
+		setError(null);
 		setIsLoading(true);
 
-		const formData = new FormData(event.currentTarget);
-		if (isSignIn) {
-			await login(formData);
-		} else {
-			await signup(formData);
+		try {
+			const formData = new FormData(event.currentTarget);
+			if (isSignIn) {
+				await login(formData);
+			} else {
+				await signup(formData);
+			}
+		} catch (error) {
+			console.error("Error during login: ", error);
+		} finally {
+			setIsLoading(false);
 		}
 	};
 
 	const handleOAuthLogin = async (provider: OAuthProvider) => {
+		setError(null);
+
 		try {
 			const { error } = await supabase.auth.signInWithOAuth({
 				provider,
 				options: {
 					redirectTo: `${window.location.origin}/auth/callback`,
-					// Offline access is required to refresh access tokens
-					// https://supabase.com/docs/guides/auth/social-login/auth-azure#obtain-the-provider-refresh-token
-					// scopes: "email offline_access",
 				},
 			});
-			if (error) throw error;
+			if (error) {
+				setError(error.message);
+			}
 		} catch (error) {
 			alert(error);
 		}
@@ -80,7 +107,10 @@ export default function LoginPage() {
 						<li className="me-2">
 							<button
 								type="button"
-								onClick={() => setIsSignIn(true)}
+								onClick={() => {
+									setError(null);
+									setIsSignIn(true);
+								}}
 								disabled={isSignIn || isLoading}
 								className={
 									isSignIn
@@ -95,7 +125,10 @@ export default function LoginPage() {
 						<li className="me-2">
 							<button
 								type="button"
-								onClick={() => setIsSignIn(false)}
+								onClick={() => {
+									setError(null);
+									setIsSignIn(false);
+								}}
 								disabled={!isSignIn || isLoading}
 								className={
 									!isSignIn
@@ -139,6 +172,22 @@ export default function LoginPage() {
 								/>
 							</div>
 						</div>
+
+						{error !== null && (
+							<Callout.Root color="red">
+								<Flex align="center" gap="5">
+									<Callout.Icon>
+										<InfoCircledIcon
+											width="20"
+											height="20"
+										/>
+									</Callout.Icon>
+									<Callout.Text size="2">
+										{error}
+									</Callout.Text>
+								</Flex>
+							</Callout.Root>
+						)}
 
 						<div>
 							<Button

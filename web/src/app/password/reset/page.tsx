@@ -1,27 +1,51 @@
 "use client";
 
 import { updatePassword } from "./actions";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import LogoWithName from "@/components/icons/logo-with-name";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Button, Callout, Flex } from "@radix-ui/themes";
+import { InfoCircledIcon } from "@radix-ui/react-icons";
 
 export default function ResetPasswordPage() {
+	const router = useRouter();
+	const searchParams = useSearchParams();
+
+	const [error, setError] = useState<string | null>(null);
 	const [isUpdating, setIsUpdating] = useState<boolean>(false);
 	const [isPasswordMismatch, setIsPasswordMismatch] =
 		useState<boolean>(false);
+
+	useEffect(() => {
+		const errorMessage = searchParams.get("error");
+		if (errorMessage !== null) {
+			setError(errorMessage);
+
+			// Remove the error parameter from the URL
+			const params = new URLSearchParams(window.location.search);
+			params.delete("error");
+			router.replace(`?${params.toString()}`);
+		}
+	}, [searchParams, router]);
 
 	const handleSubmit = async (event: any) => {
 		event.preventDefault();
 
 		setIsUpdating(true);
+		setError(null);
 
-		const formData = new FormData(event.currentTarget);
-		if (formData.get("password") !== formData.get("password2")) {
-			setIsPasswordMismatch(true);
+		try {
+			const formData = new FormData(event.currentTarget);
+			if (formData.get("password") !== formData.get("password2")) {
+				setError("Passwords do not match.");
+				return;
+			}
+			await updatePassword(formData);
+		} catch (error) {
+			setError("Failed to update password.");
+		} finally {
 			setIsUpdating(false);
-			return;
 		}
-
-		await updatePassword(formData);
 	};
 
 	return (
@@ -62,31 +86,25 @@ export default function ResetPasswordPage() {
 						</div>
 					</div>
 
-					<div>
-						<button
+					<Flex width="100%">
+						<Button
+							style={{ width: "100%" }}
 							type="submit"
-							className={`flex w-full items-center justify-center rounded-md bg-blue-800 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm ${isUpdating ? "" : "hover:bg-blue-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-800"}`}
-							disabled={isUpdating}
+							loading={isUpdating}
 						>
-							{isUpdating ? (
-								<div className="flex flex-row items-center space-x-2">
-									<span
-										className="animate-spin inline-block w-4 h-4 border-[3px] border-current border-t-transparent text-white rounded-full"
-										role="status"
-										aria-label="loading"
-									></span>
-									<span>Updating password...</span>
-								</div>
-							) : (
-								"Update password"
-							)}
-						</button>
-					</div>
+							Update password
+						</Button>
+					</Flex>
 
-					{isPasswordMismatch && (
-						<div className="text-red-500">
-							Passswords do not match.
-						</div>
+					{error !== null && (
+						<Callout.Root color="red">
+							<Flex align="center" gap="5">
+								<Callout.Icon>
+									<InfoCircledIcon width="20" height="20" />
+								</Callout.Icon>
+								<Callout.Text size="2">{error}</Callout.Text>
+							</Flex>
+						</Callout.Root>
 					)}
 				</form>
 			</div>

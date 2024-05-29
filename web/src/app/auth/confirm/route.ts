@@ -25,9 +25,20 @@ export async function GET(request: NextRequest) {
 			redirectTo.searchParams.delete("next");
 			return NextResponse.redirect(redirectTo);
 		}
+		console.log(
+			`Error verifying OTP for URL \"${request.url}\": ${error.message}`,
+		);
+		redirectTo.searchParams.append("error", error.message);
+	} else {
+		console.log(
+			`Error verifying OTP: Received an invalid confirmation link: ${redirectTo.toString()}`,
+		);
+		redirectTo.searchParams.append(
+			"error",
+			"Received an invalid confirmation link.",
+		);
 	}
 
-	// return the user to an error page with some instructions
-	redirectTo.pathname = "/error";
+	redirectTo.pathname = "/login";
 	return NextResponse.redirect(redirectTo);
 }
