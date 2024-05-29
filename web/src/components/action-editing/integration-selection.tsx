@@ -32,6 +32,7 @@ function IntegrationListElement({
 				cursor: "pointer",
 			}}
 			onClick={onClick}
+			className="hover:bg-[#F8FAFF]"
 		>
 			<Flex justify="between" align="center">
 				<Flex gap="4" align="center">
@@ -67,7 +68,12 @@ function IntegrationApiListElement({
 	onClick,
 }: IntegrationApiListElementProps) {
 	return (
-		<Card variant="ghost" onClick={onClick} style={{ cursor: "pointer" }}>
+		<Card
+			variant="ghost"
+			onClick={onClick}
+			style={{ cursor: "pointer" }}
+			className="hover:bg-[#F8FAFF]"
+		>
 			<Flex justify="between" align="center">
 				<Flex gap="4" align="center">
 					<Flex direction="column">
@@ -219,12 +225,13 @@ export default function IntegrationSelection({ id }: IntegrationProps) {
 			</Flex>
 
 			<a
-				href="mailto:chris@admyral.dev"
+				href="https://discord.com/invite/GqbJZT9Hbf"
 				style={{
 					position: "fixed",
 					right: 16,
 					bottom: 16,
 				}}
+				target="_blank"
 			>
 				<Flex gap="2" align="center">
 					<QuestionAnswerIcon />

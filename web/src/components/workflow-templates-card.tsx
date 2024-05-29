@@ -58,7 +58,9 @@ export default function WorkflowTemplateCard({
 
 				<Flex direction="column" gap="1" justify="start" align="start">
 					<Flex gap="4" justify="start" align="center">
-						<Text weight="bold">{templateHeadline}</Text>
+						<Text weight="bold" size="2">
+							{templateHeadline}
+						</Text>
 						<Box width="auto">
 							<Badge color="blue">{category}</Badge>
 						</Box>

@@ -24,18 +24,18 @@ export default function IntegrationLogoIconCard({
 	integration?: IntegrationType | null;
 }) {
 	return (
-		<Card
+		<Flex
 			style={{
-				padding: 0,
 				borderRadius: "var(--Radius-2, 4px)",
-				height: "80px",
-				width: "80px",
+				border: "1px",
+				height: "64px",
+				width: "64px",
+				backgroundColor:
+					"var(--Semantic-colors-Warning-Alpha-2, rgba(255, 170, 1, 0.07))",
 			}}
 		>
 			<Flex
 				style={{
-					backgroundColor:
-						"var(--Semantic-colors-Warning-Alpha-2, rgba(255, 170, 1, 0.07))",
 					width: "100%",
 					height: "100%",
 				}}
@@ -44,6 +44,6 @@ export default function IntegrationLogoIconCard({
 			>
 				{getIcon(integration)}
 			</Flex>
-		</Card>
+		</Flex>
 	);
 }
