@@ -1,48 +1,29 @@
 "use client";
 
 import { updatePassword } from "./actions";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import LogoWithName from "@/components/icons/logo-with-name";
-import { useRouter, useSearchParams } from "next/navigation";
 import { Button, Callout, Flex } from "@radix-ui/themes";
 import { InfoCircledIcon } from "@radix-ui/react-icons";
+import useSearchParameterError, {
+	SearchParameterErrorProvider,
+} from "@/providers/search-paramater-error-provider";
 
-export default function ResetPasswordPage() {
-	const router = useRouter();
-	const searchParams = useSearchParams();
-
-	const [error, setError] = useState<string | null>(null);
+function ResetPasswordPageChild() {
 	const [isUpdating, setIsUpdating] = useState<boolean>(false);
-	const [isPasswordMismatch, setIsPasswordMismatch] =
-		useState<boolean>(false);
 
-	useEffect(() => {
-		const errorMessage = searchParams.get("error");
-		if (errorMessage !== null) {
-			setError(errorMessage);
-
-			// Remove the error parameter from the URL
-			const params = new URLSearchParams(window.location.search);
-			params.delete("error");
-			router.replace(`?${params.toString()}`);
-		}
-	}, [searchParams, router]);
+	const { error, resetError } = useSearchParameterError();
 
 	const handleSubmit = async (event: any) => {
 		event.preventDefault();
 
 		setIsUpdating(true);
-		setError(null);
+		resetError();
 
 		try {
-			const formData = new FormData(event.currentTarget);
-			if (formData.get("password") !== formData.get("password2")) {
-				setError("Passwords do not match.");
-				return;
-			}
-			await updatePassword(formData);
+			await updatePassword(new FormData(event.currentTarget));
 		} catch (error) {
-			setError("Failed to update password.");
+			console.log("Error during password reset: ", error);
 		} finally {
 			setIsUpdating(false);
 		}
@@ -109,5 +90,13 @@ export default function ResetPasswordPage() {
 				</form>
 			</div>
 		</div>
+	);
+}
+
+export default function ResetPasswordPage() {
+	return (
+		<SearchParameterErrorProvider>
+			<ResetPasswordPageChild />
+		</SearchParameterErrorProvider>
 	);
 }

@@ -3,28 +3,31 @@
 import Link from "next/link";
 import { resetPassowrd } from "./actions";
 import LogoWithName from "@/components/icons/logo-with-name";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
-import { Callout, Flex } from "@radix-ui/themes";
+import { useState } from "react";
+import { Button, Callout, Flex } from "@radix-ui/themes";
 import { InfoCircledIcon } from "@radix-ui/react-icons";
+import useSearchParameterError, {
+	SearchParameterErrorProvider,
+} from "@/providers/search-paramater-error-provider";
 
-export default function ForgotPasswordPage() {
-	const router = useRouter();
-	const searchParams = useSearchParams();
+function ForgotPasswordPageChild() {
+	const [isLoading, setIsLoading] = useState<boolean>(false);
+	const { error, resetError } = useSearchParameterError();
 
-	const [error, setError] = useState<string | null>(null);
+	const handleSubmit = async (event: any) => {
+		event.preventDefault();
 
-	useEffect(() => {
-		const errorMessage = searchParams.get("error");
-		if (errorMessage !== null) {
-			setError(errorMessage);
+		setIsLoading(true);
+		resetError();
 
-			// Remove the error parameter from the URL
-			const params = new URLSearchParams(window.location.search);
-			params.delete("error");
-			router.replace(`?${params.toString()}`);
+		try {
+			await resetPassowrd(new FormData(event.currentTarget));
+		} catch (error) {
+			console.error("Error during password reset: ", error);
+		} finally {
+			setIsLoading(false);
 		}
-	}, [searchParams, router]);
+	};
 
 	return (
 		<div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8 gap-4">
@@ -33,7 +36,7 @@ export default function ForgotPasswordPage() {
 			</div>
 
 			<div className="sm:mx-auto sm:w-full sm:max-w-sm">
-				<form className="space-y-4" action={resetPassowrd}>
+				<form className="space-y-4" action={handleSubmit}>
 					<div>
 						<label htmlFor="email">Email</label>
 						<div className="mt-2">
@@ -58,14 +61,15 @@ export default function ForgotPasswordPage() {
 						</Callout.Root>
 					)}
 
-					<div>
-						<button
+					<Flex width="100%">
+						<Button
+							style={{ width: "100%" }}
 							type="submit"
-							className={`flex w-full justify-center rounded-md bg-blue-800 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-blue-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-800`}
+							loading={isLoading}
 						>
 							Reset password
-						</button>
-					</div>
+						</Button>
+					</Flex>
 				</form>
 			</div>
 
@@ -73,5 +77,13 @@ export default function ForgotPasswordPage() {
 				<Link href="/login">Remember your password?</Link>
 			</div>
 		</div>
+	);
+}
+
+export default function ForgotPasswordPage() {
+	return (
+		<SearchParameterErrorProvider>
+			<ForgotPasswordPageChild />
+		</SearchParameterErrorProvider>
 	);
 }

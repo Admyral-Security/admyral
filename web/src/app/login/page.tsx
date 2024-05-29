@@ -1,7 +1,7 @@
 "use client";
 
 import { login, signup } from "./actions";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import {
 	Button,
@@ -15,39 +15,32 @@ import {
 import GoogleIcon from "@/components/icons/google-icon";
 import GithubIcon from "@/components/icons/github-icon";
 import LogoWithName from "@/components/icons/logo-with-name";
-import { createClient } from "@/utils/supabase/client";
 import Image from "next/image";
 import { InfoCircledIcon } from "@radix-ui/react-icons";
-import { useSearchParams, useRouter } from "next/navigation";
+import useSearchParameterError, {
+	SearchParameterErrorProvider,
+} from "@/providers/search-paramater-error-provider";
+import { createClient } from "@/utils/supabase/client";
+import { useRouter } from "next/navigation";
 
 type OAuthProvider = "google" | "github" | "azure";
 
-export default function LoginPage() {
+function LoginPageChild() {
 	const supabase = createClient();
 
+	const { error, resetError } = useSearchParameterError();
 	const router = useRouter();
-	const searchParams = useSearchParams();
 
 	const [isSignIn, setIsSignIn] = useState<boolean>(true);
 	const [isLoading, setIsLoading] = useState<boolean>(false);
-	const [error, setError] = useState<string | null>(null);
-
-	useEffect(() => {
-		const errorMessage = searchParams.get("error");
-		if (errorMessage !== null) {
-			setError(errorMessage);
-
-			// Remove the error parameter from the URL
-			const params = new URLSearchParams(window.location.search);
-			params.delete("error");
-			router.replace(`?${params.toString()}`);
-		}
-	}, [searchParams, router]);
+	const [loadingOAuth, setLoadingOAuth] = useState<OAuthProvider | null>(
+		null,
+	);
 
 	const handleSubmit = async (event: any) => {
 		event.preventDefault();
 
-		setError(null);
+		resetError();
 		setIsLoading(true);
 
 		try {
@@ -65,8 +58,9 @@ export default function LoginPage() {
 	};
 
 	const handleOAuthLogin = async (provider: OAuthProvider) => {
-		setError(null);
+		resetError();
 
+		setLoadingOAuth(provider);
 		try {
 			const { error } = await supabase.auth.signInWithOAuth({
 				provider,
@@ -75,10 +69,12 @@ export default function LoginPage() {
 				},
 			});
 			if (error) {
-				setError(error.message);
+				setLoadingOAuth(null);
+				router.replace(`/login/?error=TEST`);
 			}
 		} catch (error) {
-			alert(error);
+			setLoadingOAuth(null);
+			console.error(`Error during OAuth: ${error}`);
 		}
 	};
 
@@ -108,7 +104,7 @@ export default function LoginPage() {
 							<button
 								type="button"
 								onClick={() => {
-									setError(null);
+									resetError();
 									setIsSignIn(true);
 								}}
 								disabled={isSignIn || isLoading}
@@ -126,7 +122,7 @@ export default function LoginPage() {
 							<button
 								type="button"
 								onClick={() => {
-									setError(null);
+									resetError();
 									setIsSignIn(false);
 								}}
 								disabled={!isSignIn || isLoading}
@@ -248,6 +244,7 @@ export default function LoginPage() {
 								cursor: "pointer",
 							}}
 							onClick={() => handleOAuthLogin("google")}
+							loading={loadingOAuth === "google"}
 						>
 							<GoogleIcon />
 							<Text
@@ -282,6 +279,7 @@ export default function LoginPage() {
 								cursor: "pointer",
 							}}
 							onClick={() => handleOAuthLogin("azure")}
+							loading={loadingOAuth === "azure"}
 						>
 							<Image
 								src="/microsoft_logo.svg"
@@ -321,6 +319,7 @@ export default function LoginPage() {
 								cursor: "pointer",
 							}}
 							onClick={() => handleOAuthLogin("github")}
+							loading={loadingOAuth === "github"}
 						>
 							<GithubIcon />
 							<Text
@@ -369,5 +368,13 @@ export default function LoginPage() {
 				</div>
 			</Flex>
 		</Flex>
+	);
+}
+
+export default function LoginPage() {
+	return (
+		<SearchParameterErrorProvider>
+			<LoginPageChild />
+		</SearchParameterErrorProvider>
 	);
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import {
 	createContext,
 	useContext,
@@ -14,7 +14,7 @@ type SearchParameterErrorContextType = {
 	resetError: () => void;
 };
 
-export const SearchParameterErrorContext =
+const SearchParameterErrorContext =
 	createContext<SearchParameterErrorContextType>({
 		error: null,
 		resetError: () => {},
@@ -27,13 +27,14 @@ interface SearchParameterErrorProviderProps {
 export function SearchParameterErrorProvider({
 	children,
 }: SearchParameterErrorProviderProps) {
-	const { error: paramError } = useParams<{ error?: string }>();
+	const searchParams = useSearchParams();
 	const router = useRouter();
 
 	const [error, setError] = useState<string | null>(null);
 
 	useEffect(() => {
-		if (paramError !== undefined) {
+		const paramError = searchParams.get("error");
+		if (paramError !== null) {
 			setError(paramError);
 
 			// Remove the error parameter from the URL
@@ -41,11 +42,11 @@ export function SearchParameterErrorProvider({
 			params.delete("error");
 			router.replace(`?${params.toString()}`);
 		}
-	}, [paramError, router]);
+	}, [searchParams, router]);
 
 	const resetError = useCallback(() => {
 		setError(null);
-	}, [paramError]);
+	}, [searchParams]);
 
 	return (
 		<SearchParameterErrorContext.Provider value={{ error, resetError }}>
