@@ -64,7 +64,7 @@ pub struct JwtClaims {
     pub aal: String,
     pub amr: serde_json::Value,
     pub session_id: String,
-    pub is_anonymous: bool,
+    pub is_anonymous: Option<bool>,
 }
 
 impl Display for JwtClaims {
