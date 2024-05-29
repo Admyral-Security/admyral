@@ -6,8 +6,7 @@
   <div>
       <a href="https://admyral.dev/login"><strong>Login</strong></a> ·
       <a href="https://docs.admyral.dev/"><strong>Docs</strong></a> ·
-      <a href="https://discord.gg/GqbJZT9Hbf"><strong>Discord</strong></a> ·
-      <a href="https://join.slack.com/t/admyralcommunity/shared_invite/zt-2hqxj1xrr-YoWXYq7t8l3i5GyTCzEwPg"><strong>Slack</strong></a>
+      <a href="https://discord.gg/GqbJZT9Hbf"><strong>Discord</strong></a>
   </div>
   <div>
 
@@ -115,12 +114,12 @@ docker compose up -d
 
 ## 💬 Feedback & Contributing to Admyral
 
-We value your feedback and contributions! If you have suggestions, questions, or would like to discuss anything related to Admyral, just text us on [Discord](https://discord.gg/GqbJZT9Hbf) or [Slack](https://join.slack.com/t/admyralcommunity/shared_invite/zt-2hqxj1xrr-YoWXYq7t8l3i5GyTCzEwPg).
+We value your feedback and contributions! If you have suggestions, questions, or would like to discuss anything related to Admyral, just text us on [Discord](https://discord.gg/GqbJZT9Hbf).
 
 You can best support this project by:
 
 1. Giving it a star on GitHub
-2. Joining our active community on [Discord](https://discord.gg/GqbJZT9Hbf) and/or [Slack](https://join.slack.com/t/admyralcommunity/shared_invite/zt-2hqxj1xrr-YoWXYq7t8l3i5GyTCzEwPg)
+2. Joining our active community on [Discord](https://discord.gg/GqbJZT9Hbf)
 3. And giving us feedback
 
 ## ❓ FAQ
@@ -148,7 +147,7 @@ Visit [SECURITY.md](https://github.com/Admyral-Security/admyral/blob/main/SECURI
 
 #### What does your pricing look like?
 
-As Admyral is still in its public alpha phase, we have not finalized a specific pricing structure yet. We invite interested organizations to reach out directly via email at [chris@admyral.dev](mailto:chris@admyral.dev) or [Discord](https://discord.gg/GqbJZT9Hbf)/[Slack](https://join.slack.com/t/admyralcommunity/shared_invite/zt-2hqxj1xrr-YoWXYq7t8l3i5GyTCzEwPg) to discuss potential use cases and explore custom pricing options based on their needs and the scale of implementation.
+As Admyral is still in its public alpha phase, we have not finalized a specific pricing structure yet. We invite interested organizations to reach out directly via email at [chris@admyral.dev](mailto:chris@admyral.dev) or [Discord](https://discord.gg/GqbJZT9Hbf) to discuss potential use cases and explore custom pricing options based on their needs and the scale of implementation.
 
 #### Why is Admyral open-source?
 
@@ -165,7 +164,7 @@ We love open-source. Therefore, Admyral stays committed to keep all open-sourced
 
 ## 🏙️ Enterprise Version
 
-_Disclaimer_: Admyral is still in public alpha. If you'd like to use it within your company or try it out, reach out to us via [chris@admyral.dev](mailto:chris@admyral.dev) or directly on [Discord](https://discord.gg/GqbJZT9Hbf)/[Slack](https://join.slack.com/t/admyralcommunity/shared_invite/zt-2hqxj1xrr-YoWXYq7t8l3i5GyTCzEwPg).
+_Disclaimer_: Admyral is still in public alpha. If you'd like to use it within your company or try it out, reach out to us via [chris@admyral.dev](mailto:chris@admyral.dev) or directly on [Discord](https://discord.gg/GqbJZT9Hbf).
 
 As of now, our project does not have a dedicated Enterprise version.
 If you represent an MSSP or an Enterprise and would like to discuss potential collaborations with Admyral, please do not hesitate to reach out directly at [chris@admyral.dev](mailto:chris@admyral.dev) to start a conversation.
@@ -181,6 +180,6 @@ This repository is licensed under Apache License 2.0. See LICENSE for more detai
 
 Admyral automatically collects telemetry data using PostHog with hosting in the EU. We want to emphasize that no personal data is sent to PostHog. The data helps us to understand how Admyral is used and improve our most relevant features as well as track the overall usage for internal and external reporting.
 
-None of data is shared with third parties and does not include any sensitive information. If you would like to opt-out of telemetry or have questions, please reach out to us via [chris@admyral.com](mailto:chris@admyral.dev) or contact us either on Discord or Slack, as we want to be transparent and respect your privacy.
+None of data is shared with third parties and does not include any sensitive information. If you would like to opt-out of telemetry or have questions, please reach out to us via [chris@admyral.com](mailto:chris@admyral.dev) or contact us on Discord, as we want to be transparent and respect your privacy.
 
 For self-hosting, you can opt-out by simply removing `NEXT_PUBLIC_POSTHOG_KEY` and `NEXT_PUBLIC_POSTHOG_HOST` from the environment variables.

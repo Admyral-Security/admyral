@@ -211,7 +211,7 @@ export default function PrivacyPolicyPage() {
 					Business units within Admyral (e.g. sales, marketing, legal,
 					system administration and/or management); External service
 					providers who provide services to the Website or our
-					business (e.g. Slack, Google, Inc., Posthog; and/or
+					business (e.g. Discord, Google, Inc., Posthog; and/or
 					Professional advisors who provide professional services to
 					us such as legal advisors and consultants.
 				</Text>
