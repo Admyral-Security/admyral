@@ -1,0 +1,58 @@
+import { Callout } from "nextra/components";
+
+# Find Users
+
+Returns a list of active users that match the search string and property.
+
+<Callout type="info">
+	For Jira's documentation, see [Find
+	Users](https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-user-search/#api-rest-api-3-user-search-get).
+</Callout>
+
+## Parameters:
+
+| Field           | Description                                                                                                                                                                                                                                                                                                                                                                                                  | Required |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | :------: |
+| **Query**       | A query string that is matched against user attributes (`displayName`, and `emailAddress`) to find relevant users. The string can match the prefix of the attribute's value. For example, `query=john` matches a user with a displayName of `John Smith` and a user with an emailAddress of `johnson@example.com`. **Required, unless Account ID or Property is specified.**                                 |    -     |
+| **Account ID**  | A query string that is matched exactly against a user accountId. **Required, unless Query or Property is specified.** Max length: `128`                                                                                                                                                                                                                                                                      |    -     |
+| **Property**    | A query string used to search properties. Property keys are specified by path, so property keys containing dot (.) or equals (=) characters cannot be used. The query string cannot be specified using a JSON object. Example: To search for the value of nested from `{"something":{"nested":1,"other":2}}` use `thepropertykey.something.nested=1`. **Required, unless Account ID or Query is specified.** |    -     |
+| **Username**    |                                                                                                                                                                                                                                                                                                                                                                                                              |    -     |
+| **Start At**    | The index of the first item to return in a page of filtered results (page offset). Default: `0` Format: `int32`                                                                                                                                                                                                                                                                                              |    -     |
+| **Max Results** | The maximum number of items to return per page. Default: `50` Format: `int32`                                                                                                                                                                                                                                                                                                                                |    -     |
+
+## Example Output:
+
+```json
+[
+	{
+		"accountId": "5b10a2844c20165700ede21g",
+		"accountType": "atlassian",
+		"active": false,
+		"avatarUrls": {
+			"16x16": "https://avatar-management--avatars.server-location.prod.public.atl-paas.net/initials/MK-5.png?size=16&s=16",
+			"24x24": "https://avatar-management--avatars.server-location.prod.public.atl-paas.net/initials/MK-5.png?size=24&s=24",
+			"32x32": "https://avatar-management--avatars.server-location.prod.public.atl-paas.net/initials/MK-5.png?size=32&s=32",
+			"48x48": "https://avatar-management--avatars.server-location.prod.public.atl-paas.net/initials/MK-5.png?size=48&s=48"
+		},
+		"displayName": "Mia Krystof",
+		"key": "",
+		"name": "",
+		"self": "https://your-domain.atlassian.net/rest/api/3/user?accountId=5b10a2844c20165700ede21g"
+	},
+	{
+		"accountId": "5b10ac8d82e05b22cc7d4ef5",
+		"accountType": "atlassian",
+		"active": false,
+		"avatarUrls": {
+			"16x16": "https://avatar-management--avatars.server-location.prod.public.atl-paas.net/initials/AA-3.png?size=16&s=16",
+			"24x24": "https://avatar-management--avatars.server-location.prod.public.atl-paas.net/initials/AA-3.png?size=24&s=24",
+			"32x32": "https://avatar-management--avatars.server-location.prod.public.atl-paas.net/initials/AA-3.png?size=32&s=32",
+			"48x48": "https://avatar-management--avatars.server-location.prod.public.atl-paas.net/initials/AA-3.png?size=48&s=48"
+		},
+		"displayName": "Emma Richards",
+		"key": "",
+		"name": "",
+		"self": "https://your-domain.atlassian.net/rest/api/3/user?accountId=5b10ac8d82e05b22cc7d4ef5"
+	}
+]
+```

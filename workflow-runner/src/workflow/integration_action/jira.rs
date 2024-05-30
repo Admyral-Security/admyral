@@ -3,7 +3,7 @@ use crate::workflow::{
     context,
     http_client::{HttpClient, RequestBodyType},
     secrets::fetch_credential,
-    utils::{get_bool_parameter, get_string_parameter, ParameterType},
+    utils::{get_bool_parameter, get_number_parameter, get_string_parameter, ParameterType},
 };
 use anyhow::{anyhow, Result};
 use base64::{engine::general_purpose::STANDARD, Engine};
@@ -40,6 +40,7 @@ impl IntegrationExecutor for JiraExecutor {
             "ASSIGN_ISSUE" => assign_issue(client, context, &credential, parameters).await,
             "EDIT_ISSUE" => edit_issue(client, context, &credential, parameters).await,
             "GET_ISSUE" => get_issue(client, context, &credential, parameters).await,
+            "FIND_USERS" => find_users(client, context, &credential, parameters).await,
             _ => return Err(anyhow!("API {api} not implemented for {JIRA}.")),
         }
     }
@@ -517,6 +518,61 @@ async fn get_issue(
     jira_get_request(client, &api_url, credential).await
 }
 
+// https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-user-search/#api-rest-api-3-user-search-get
+async fn find_users(
+    client: &dyn HttpClient,
+    context: &context::Context,
+    credential: &JiraCredential,
+    parameters: &HashMap<String, serde_json::Value>,
+) -> Result<serde_json::Value> {
+    let mut query_params = Vec::new();
+
+    for (param_id, value_name) in [
+        ("QUERY", "query"),
+        ("ACCOUNT_ID", "accountId"),
+        ("PROPERTY", "property"),
+        ("USERNAME", "username"),
+    ] {
+        if let Some(param) = get_string_parameter(
+            param_id,
+            JIRA,
+            "FIND_USERS",
+            parameters,
+            context,
+            ParameterType::Optional,
+        )
+        .await?
+        {
+            if !param.is_empty() {
+                query_params.push(format!("{value_name}={param}"));
+            }
+        }
+    }
+
+    for (param_id, value_name) in [("START_AT", "startAt"), ("MAX_RESULTS", "maxResults")] {
+        if let Some(param) = get_number_parameter(
+            param_id,
+            JIRA,
+            "FIND_USERS",
+            parameters,
+            context,
+            ParameterType::Optional,
+        )
+        .await?
+        {
+            query_params.push(format!("{value_name}={param}"));
+        }
+    }
+
+    let query_param_string = query_params.join("&");
+    let api_url = format!(
+        "https://{}.atlassian.net/rest/api/3/user/search?{query_param_string}",
+        credential.domain
+    );
+
+    jira_get_request(client, &api_url, credential).await
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -705,13 +761,7 @@ mod tests {
             "NOTIFY_USERS".to_string() => json!(true)
         };
         let result = JiraExecutor
-            .execute(
-                &*client,
-                &context,
-                "EDIT_ISSUE",
-                "credentials",
-                &parameters,
-            )
+            .execute(&*client, &context, "EDIT_ISSUE", "credentials", &parameters)
             .await;
         assert!(result.is_ok());
         let value = result.unwrap();
@@ -729,13 +779,26 @@ mod tests {
             "PROPERTIES".to_string() => json!("*all,-prop1")
         };
         let result = JiraExecutor
-            .execute(
-                &*client,
-                &context,
-                "GET_ISSUE",
-                "credentials",
-                &parameters,
-            )
+            .execute(&*client, &context, "GET_ISSUE", "credentials", &parameters)
+            .await;
+        assert!(result.is_ok());
+        let value = result.unwrap();
+        assert_eq!(value, json!({"ok": true}));
+    }
+
+    #[tokio::test]
+    async fn test_find_users() {
+        let (client, context) = setup(Arc::new(MockDb)).await;
+        let parameters = hashmap! {
+            "QUERY".to_string() => json!("john"),
+            "ACCOUNT_ID".to_string() => json!("712020:8f417ffa-dc11-42b9-8464-b9e8b7a31559"),
+            "PROPERTY".to_string() => json!("thepropertykey.something.nested=1"),
+            "USERNAME".to_string() => json!("myusername"),
+            "START_AT".to_string() => json!(0),
+            "MAX_RESULTS".to_string() => json!(50)
+        };
+        let result = JiraExecutor
+            .execute(&*client, &context, "FIND_USERS", "credentials", &parameters)
             .await;
         assert!(result.is_ok());
         let value = result.unwrap();
