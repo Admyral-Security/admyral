@@ -3,7 +3,7 @@ use crate::workflow::{
     context,
     http_client::{HttpClient, RequestBodyType},
     secrets::fetch_credential,
-    utils::{get_string_parameter, ParameterType},
+    utils::{get_bool_parameter, get_string_parameter, ParameterType},
 };
 use anyhow::{anyhow, Result};
 use base64::{engine::general_purpose::STANDARD, Engine};
@@ -38,6 +38,7 @@ impl IntegrationExecutor for JiraExecutor {
         match api {
             "CREATE_ISSUE" => create_issue(client, context, &credential, parameters).await,
             "ASSIGN_ISSUE" => assign_issue(client, context, &credential, parameters).await,
+            "EDIT_ISSUE" => edit_issue(client, context, &credential, parameters).await,
             _ => return Err(anyhow!("API {api} not implemented for {JIRA}.")),
         }
     }
@@ -313,6 +314,88 @@ async fn assign_issue(
         json!({"accountId": account_id}),
     )
     .await
+}
+
+// https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issues/#api-rest-api-3-issue-issueidorkey-put
+async fn edit_issue(
+    client: &dyn HttpClient,
+    context: &context::Context,
+    credential: &JiraCredential,
+    parameters: &HashMap<String, serde_json::Value>,
+) -> Result<serde_json::Value> {
+    let mut body = HashMap::new();
+
+    let issue_id_or_key = get_string_parameter(
+        "ISSUE_ID_OR_KEY",
+        JIRA,
+        "EDIT_ISSUE",
+        parameters,
+        context,
+        ParameterType::Required,
+    )
+    .await?
+    .expect("issue_id_or_key is a required parameter!");
+
+    if let Some(fields) = get_string_parameter(
+        "FIELDS",
+        JIRA,
+        "EDIT_ISSUE",
+        parameters,
+        context,
+        ParameterType::Optional,
+    )
+    .await?
+    {
+        if !fields.is_empty() {
+            match serde_json::from_str::<serde_json::Value>(&fields) {
+                Ok(fields) => body.insert("fields", fields),
+                Err(e) => {
+                    return Err(anyhow!(
+                        "Invalid input for \"Fields\". Expected a JSON object."
+                    ))
+                }
+            };
+        }
+    }
+
+    if let Some(update) = get_string_parameter(
+        "UPDATE",
+        JIRA,
+        "EDIT_ISSUE",
+        parameters,
+        context,
+        ParameterType::Optional,
+    )
+    .await?
+    {
+        if !update.is_empty() {
+            match serde_json::from_str::<serde_json::Value>(&update) {
+                Ok(update) => body.insert("update", update),
+                Err(e) => {
+                    return Err(anyhow!(
+                        "Invalid input for \"Update\". Expected a JSON object."
+                    ))
+                }
+            };
+        }
+    }
+
+    let notify_users_opt = get_bool_parameter(
+        "NOTIFY_USERS",
+        JIRA,
+        "EDIT_ISSUE",
+        parameters,
+        context,
+        ParameterType::Optional,
+    )
+    .await?;
+
+    let api_url = match notify_users_opt {
+        Some(notify_users) => format!("https://{}.atlassian.net/rest/api/3/issue/{issue_id_or_key}?notifyUsers={notify_users}", credential.domain),
+        None => format!("https://{}.atlassian.net/rest/api/3/issue/{issue_id_or_key}", credential.domain)
+    };
+
+    jira_put_request(client, &api_url, credential, json!(body)).await
 }
 
 #[cfg(test)]

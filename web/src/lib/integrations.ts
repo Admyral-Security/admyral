@@ -963,6 +963,47 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 					},
 				],
 			},
+			{
+				id: "EDIT_ISSUE",
+				name: "Edit Issue",
+				description: "Edit an issue",
+				documentationUrl:
+					"https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issues/#api-rest-api-3-issue-issueidorkey-put",
+				requiresAuthentication: true,
+				parameters: [
+					{
+						id: "ISSUE_ID_OR_KEY",
+						displayName: "Issue ID or Key",
+						description: "The ID or key of the issue to be edited.",
+						required: true,
+						dataType: ApiParameterDatatype.TEXT,
+					},
+					{
+						id: "FIELDS",
+						displayName: "Fields",
+						description:
+							"Fields to update in the issue defined as a JSON object (e.g., { 'summary': 'New summary' }).",
+						required: false,
+						dataType: ApiParameterDatatype.TEXTAREA,
+					},
+					{
+						id: "UPDATE",
+						displayName: "Update",
+						description:
+							'Some fields cannot be updated using "Fields". To update these fields, explicit-verb updates can be made using this field defined as a JSON object (e.g., { "labels": [ { "add": "triaged" } ] }).',
+						required: false,
+						dataType: ApiParameterDatatype.TEXTAREA,
+					},
+					{
+						id: "NOTIFY_USERS",
+						displayName: "Notify Users",
+						description:
+							"Whether the users watching the issue are notified of the change. Defaults to true.",
+						required: false,
+						dataType: ApiParameterDatatype.BOOLEAN,
+					},
+				],
+			},
 		],
 	},
 	// ...

@@ -1,3 +1,5 @@
 {
-	"create_issue": "Create a new issue"
+	"create_issue": "Create a new issue",
+	"assign_issue": "Assign issue",
+	"edit_issue": "Edit Issue"
 }

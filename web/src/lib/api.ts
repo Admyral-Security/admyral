@@ -368,7 +368,10 @@ export async function updateWorkflowAndCreateIfNotExists(
 	}
 
 	const updatedWorkflow = await result.json();
-	return transformObjectKeysToCamelCase(updatedWorkflow);
+	return transformObjectKeysToCamelCase(
+		updatedWorkflow,
+		new Set(["action_definition"]),
+	);
 }
 
 export async function triggerWorkflowFromAction(
