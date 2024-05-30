@@ -41,6 +41,7 @@ impl IntegrationExecutor for JiraExecutor {
             "EDIT_ISSUE" => edit_issue(client, context, &credential, parameters).await,
             "GET_ISSUE" => get_issue(client, context, &credential, parameters).await,
             "FIND_USERS" => find_users(client, context, &credential, parameters).await,
+            "GET_ISSUE_COMMENTS" => get_issue_comments(client, context, &credential, parameters).await,
             _ => return Err(anyhow!("API {api} not implemented for {JIRA}.")),
         }
     }
@@ -573,6 +574,96 @@ async fn find_users(
     jira_get_request(client, &api_url, credential).await
 }
 
+// https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issue-comments/#api-rest-api-3-issue-issueidorkey-comment-get
+async fn get_issue_comments(
+    client: &dyn HttpClient,
+    context: &context::Context,
+    credential: &JiraCredential,
+    parameters: &HashMap<String, serde_json::Value>,
+) -> Result<serde_json::Value> {
+    let mut query_params = Vec::new();
+
+    let issue_id_or_key = get_string_parameter(
+        "ISSUE_ID_OR_KEY",
+        JIRA,
+        "GET_ISSUE_COMMENTS",
+        parameters,
+        context,
+        ParameterType::Required,
+    )
+    .await?
+    .expect("issue_id_or_key is a required parameter!");
+
+    if let Some(start_at) = get_number_parameter(
+        "START_AT",
+        JIRA,
+        "GET_ISSUE_COMMENTS",
+        parameters,
+        context,
+        ParameterType::Optional,
+    )
+    .await?
+    {
+        query_params.push(format!("startAt={start_at}"));
+    }
+
+    if let Some(max_results) = get_number_parameter(
+        "MAX_RESULTS",
+        JIRA,
+        "GET_ISSUE_COMMENTS",
+        parameters,
+        context,
+        ParameterType::Optional,
+    )
+    .await?
+    {
+        query_params.push(format!("maxResults={max_results}"));
+    }
+
+    if let Some(order_by) = get_string_parameter(
+        "ORDER_BY",
+        JIRA,
+        "GET_ISSUE_COMMENTS",
+        parameters,
+        context,
+        ParameterType::Optional,
+    )
+    .await?
+    {
+        if !order_by.is_empty() {
+            query_params.push(format!("orderBy={order_by}"));
+        }
+    }
+
+    if let Some(expand) = get_string_parameter(
+        "EXPAND",
+        JIRA,
+        "GET_ISSUE_COMMENTS",
+        parameters,
+        context,
+        ParameterType::Optional,
+    )
+    .await?
+    {
+        if !expand.is_empty() {
+            query_params.push(format!("expand={expand}"));
+        }
+    }
+
+    let query_param_str = if query_params.is_empty() {
+        "".to_string()
+    } else {
+        format!("?{}", query_params.join("&"))
+    };
+
+    let api_url = format!(
+        "https://{}.atlassian.net/rest/api/3/issue/{issue_id_or_key}/comment{query_param_str}",
+        credential.domain
+    );
+
+    jira_get_request(client, &api_url, credential).await
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -804,4 +895,23 @@ mod tests {
         let value = result.unwrap();
         assert_eq!(value, json!({"ok": true}));
     }
+
+    #[tokio::test]
+async fn test_get_issue_comments() {
+    let (client, context) = setup(Arc::new(MockDb)).await;
+    let parameters = hashmap! {
+        "ISSUE_ID_OR_KEY".to_string() => json!("ADM-123"),
+        "START_AT".to_string() => json!(0),
+        "MAX_RESULTS".to_string() => json!(10),
+        "ORDER_BY".to_string() => json!("created")
+    };
+    let result = JiraExecutor
+        .execute(&*client, &context, "GET_ISSUE_COMMENTS", "credentials", &parameters)
+        .await;
+    assert!(result.is_ok());
+    let value = result.unwrap();
+    assert_eq!(value, json!({"ok": true}));
+}
+
+
 }

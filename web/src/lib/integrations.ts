@@ -1111,6 +1111,43 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 					},
 				],
 			},
+			{
+                id: "GET_ISSUE_COMMENTS",
+                name: "Get Issue Comments",
+                description: "Get comments for an issue",
+                documentationUrl: "https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issue-comments/#api-rest-api-3-issue-issueidorkey-comment-get",
+                requiresAuthentication: true,
+                parameters: [
+                    {
+                        id: "ISSUE_ID_OR_KEY",
+                        displayName: "Issue ID or Key",
+                        description: "The ID or key of the issue to retrieve comments for.",
+                        required: true,
+                        dataType: ApiParameterDatatype.TEXT,
+                    },
+                    {
+                        id: "START_AT",
+                        displayName: "Start At",
+                        description: "The index of the first item to return in a page of results (page offset). Default: 0",
+                        required: false,
+                        dataType: ApiParameterDatatype.NUMBER,
+                    },
+                    {
+                        id: "MAX_RESULTS",
+                        displayName: "Max Results",
+                        description: "The maximum number of items to return per page. Default: 5000",
+                        required: false,
+                        dataType: ApiParameterDatatype.NUMBER,
+                    },
+                    {
+                        id: "ORDER_BY",
+                        displayName: "Order By",
+                        description: 'Order the results by a field. Accepts "created" to sort comments by their created date. Valid values: "created", "-created", "+created".',
+                        required: false,
+                        dataType: ApiParameterDatatype.TEXT,
+                    },
+                ],
+            },
 		],
 	},
 	// ...
