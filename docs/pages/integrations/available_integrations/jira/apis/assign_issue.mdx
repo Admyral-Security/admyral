@@ -1,4 +1,4 @@
-import { Callout } from "nextra/components";
+import { Callout, Link } from "nextra/components";
 
 # Assign Issue
 
@@ -11,12 +11,10 @@ Assigns an issue to a user.
 
 ## Parameters:
 
-| Field               | Description                                                                                                                                                                                              | Required |
-| ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------: |
-| **Issue ID or Key** | The ID or key of the issue to be assigned.                                                                                                                                                               |   Yes    |
-| **Account ID**      | The account ID of the assignee. You can obtain the ID in the UI (see [here](https://community.atlassian.com/t5/Jira-questions/where-can-i-find-my-Account-ID/qaq-p/976527)) or use the `Find users` API. |   Yes    |
-
-TODO: link to Find Users API.
+| Field               | Description                                                                                                                                                                                                                                                         | Required |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------: |
+| **Issue ID or Key** | The ID or key of the issue to be assigned.                                                                                                                                                                                                                          |   Yes    |
+| **Account ID**      | The account ID of the assignee. You can obtain the ID in the UI (see [here](https://community.atlassian.com/t5/Jira-questions/where-can-i-find-my-Account-ID/qaq-p/976527)) or use the [Find users API](/integrations/available_integrations/jira/apis/find_users). |   Yes    |
 
 ## Example Output:
 
