@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { resetPassowrd } from "./actions";
 import LogoWithName from "@/components/icons/logo-with-name";
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { Button, Callout, Flex } from "@radix-ui/themes";
 import { InfoCircledIcon } from "@radix-ui/react-icons";
 import useSearchParameterError, {
@@ -63,7 +63,7 @@ function ForgotPasswordPageChild() {
 
 					<Flex width="100%">
 						<Button
-							style={{ width: "100%" }}
+							style={{ width: "100%", cursor: "pointer" }}
 							type="submit"
 							loading={isLoading}
 						>
@@ -82,8 +82,10 @@ function ForgotPasswordPageChild() {
 
 export default function ForgotPasswordPage() {
 	return (
-		<SearchParameterErrorProvider>
-			<ForgotPasswordPageChild />
-		</SearchParameterErrorProvider>
+		<Suspense fallback={null}>
+			<SearchParameterErrorProvider>
+				<ForgotPasswordPageChild />
+			</SearchParameterErrorProvider>
+		</Suspense>
 	);
 }

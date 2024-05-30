@@ -1,7 +1,7 @@
 "use client";
 
 import { updatePassword } from "./actions";
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import LogoWithName from "@/components/icons/logo-with-name";
 import { Button, Callout, Flex } from "@radix-ui/themes";
 import { InfoCircledIcon } from "@radix-ui/react-icons";
@@ -69,7 +69,7 @@ function ResetPasswordPageChild() {
 
 					<Flex width="100%">
 						<Button
-							style={{ width: "100%" }}
+							style={{ width: "100%", cursor: "pointer" }}
 							type="submit"
 							loading={isUpdating}
 						>
@@ -95,8 +95,10 @@ function ResetPasswordPageChild() {
 
 export default function ResetPasswordPage() {
 	return (
-		<SearchParameterErrorProvider>
-			<ResetPasswordPageChild />
-		</SearchParameterErrorProvider>
+		<Suspense fallback={null}>
+			<SearchParameterErrorProvider>
+				<ResetPasswordPageChild />
+			</SearchParameterErrorProvider>
+		</Suspense>
 	);
 }

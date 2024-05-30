@@ -1,7 +1,7 @@
 "use client";
 
 import { login, signup } from "./actions";
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import Link from "next/link";
 import {
 	Button,
@@ -373,8 +373,10 @@ function LoginPageChild() {
 
 export default function LoginPage() {
 	return (
-		<SearchParameterErrorProvider>
-			<LoginPageChild />
-		</SearchParameterErrorProvider>
+		<Suspense fallback={null}>
+			<SearchParameterErrorProvider>
+				<LoginPageChild />
+			</SearchParameterErrorProvider>
+		</Suspense>
 	);
 }
