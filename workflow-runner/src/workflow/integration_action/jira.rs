@@ -39,9 +39,34 @@ impl IntegrationExecutor for JiraExecutor {
             "CREATE_ISSUE" => create_issue(client, context, &credential, parameters).await,
             "ASSIGN_ISSUE" => assign_issue(client, context, &credential, parameters).await,
             "EDIT_ISSUE" => edit_issue(client, context, &credential, parameters).await,
+            "GET_ISSUE" => get_issue(client, context, &credential, parameters).await,
             _ => return Err(anyhow!("API {api} not implemented for {JIRA}.")),
         }
     }
+}
+
+async fn jira_get_request(
+    client: &dyn HttpClient,
+    api_url: &str,
+    credential: &JiraCredential,
+) -> Result<serde_json::Value> {
+    // API Key Construction: https://developer.atlassian.com/cloud/jira/platform/basic-auth-for-rest-apis/
+    let api_key = format!("{}:{}", credential.email, credential.api_token);
+    let api_key_base64 = STANDARD.encode(api_key);
+
+    let headers = hashmap! {
+        "Authorization".to_string() => format!("Basic {api_key_base64}"),
+        "Accept".to_string() => "application/json".to_string(),
+    };
+
+    client
+        .get(
+            api_url,
+            headers,
+            200,
+            format!("Error: Failed to call {JIRA} API"),
+        )
+        .await
 }
 
 async fn jira_post_request(
@@ -75,6 +100,7 @@ async fn jira_put_request(
     api_url: &str,
     credential: &JiraCredential,
     body: serde_json::Value,
+    expected_http_status: u16,
 ) -> Result<serde_json::Value> {
     // API Key Construction: https://developer.atlassian.com/cloud/jira/platform/basic-auth-for-rest-apis/
     let api_key = format!("{}:{}", credential.email, credential.api_token);
@@ -90,7 +116,7 @@ async fn jira_put_request(
             api_url,
             headers,
             RequestBodyType::Json { body },
-            204,
+            expected_http_status,
             format!("Error: Failed to call {JIRA} API"),
         )
         .await
@@ -312,6 +338,7 @@ async fn assign_issue(
         &api_url,
         credential,
         json!({"accountId": account_id}),
+        204,
     )
     .await
 }
@@ -391,11 +418,103 @@ async fn edit_issue(
     .await?;
 
     let api_url = match notify_users_opt {
-        Some(notify_users) => format!("https://{}.atlassian.net/rest/api/3/issue/{issue_id_or_key}?notifyUsers={notify_users}", credential.domain),
-        None => format!("https://{}.atlassian.net/rest/api/3/issue/{issue_id_or_key}", credential.domain)
+        Some(notify_users) => format!("https://{}.atlassian.net/rest/api/3/issue/{issue_id_or_key}?returnIssue=true&notifyUsers={notify_users}", credential.domain),
+        None => format!("https://{}.atlassian.net/rest/api/3/issue/{issue_id_or_key}?returnIssue=true", credential.domain)
     };
 
-    jira_put_request(client, &api_url, credential, json!(body)).await
+    jira_put_request(client, &api_url, credential, json!(body), 200).await
+}
+
+// https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issues/#api-rest-api-3-issue-issueidorkey-get
+async fn get_issue(
+    client: &dyn HttpClient,
+    context: &context::Context,
+    credential: &JiraCredential,
+    parameters: &HashMap<String, serde_json::Value>,
+) -> Result<serde_json::Value> {
+    let mut query_params = Vec::new();
+
+    let issue_id_or_key = get_string_parameter(
+        "ISSUE_ID_OR_KEY",
+        JIRA,
+        "GET_ISSUE",
+        parameters,
+        context,
+        ParameterType::Required,
+    )
+    .await?
+    .expect("issue_id_or_key is a required parameter");
+
+    if let Some(fields) = get_string_parameter(
+        "FIELDS",
+        JIRA,
+        "GET_ISSUE",
+        parameters,
+        context,
+        ParameterType::Optional,
+    )
+    .await?
+    {
+        if !fields.is_empty() {
+            query_params.push(format!("fields={fields}"));
+        }
+    }
+
+    if let Some(fields_by_keys) = get_bool_parameter(
+        "FIELDS_BY_KEYS",
+        JIRA,
+        "GET_ISSUE",
+        parameters,
+        context,
+        ParameterType::Optional,
+    )
+    .await?
+    {
+        query_params.push(format!("fieldsByKeys={fields_by_keys}"));
+    }
+
+    if let Some(expand) = get_string_parameter(
+        "EXPAND",
+        JIRA,
+        "GET_ISSUE",
+        parameters,
+        context,
+        ParameterType::Optional,
+    )
+    .await?
+    {
+        if !expand.is_empty() {
+            query_params.push(format!("expand={expand}"));
+        }
+    }
+
+    if let Some(properties) = get_string_parameter(
+        "PROPERTIES",
+        JIRA,
+        "GET_ISSUE",
+        parameters,
+        context,
+        ParameterType::Optional,
+    )
+    .await?
+    {
+        if !properties.is_empty() {
+            query_params.push(format!("properties={properties}"));
+        }
+    }
+
+    let query_param_str = if query_params.is_empty() {
+        "".to_string()
+    } else {
+        format!("?{}", query_params.join("&"))
+    };
+
+    let api_url = format!(
+        "https://{}.atlassian.net/rest/api/3/issue/{issue_id_or_key}{query_param_str}",
+        credential.domain
+    );
+
+    jira_get_request(client, &api_url, credential).await
 }
 
 #[cfg(test)]
@@ -567,6 +686,53 @@ mod tests {
                 &*client,
                 &context,
                 "ASSIGN_ISSUE",
+                "credentials",
+                &parameters,
+            )
+            .await;
+        assert!(result.is_ok());
+        let value = result.unwrap();
+        assert_eq!(value, json!({"ok": true}));
+    }
+
+    #[tokio::test]
+    async fn test_edit_issue() {
+        let (client, context) = setup(Arc::new(MockDb)).await;
+        let parameters = hashmap! {
+            "ISSUE_ID_OR_KEY".to_string() => json!("ADM-123"),
+            "FIELDS".to_string() => json!("{\"summary\": \"new summary\"}"),
+            "UPDATE".to_string() => json!("{\"labels\": [{\"add\": \"triaged\"}]}"),
+            "NOTIFY_USERS".to_string() => json!(true)
+        };
+        let result = JiraExecutor
+            .execute(
+                &*client,
+                &context,
+                "EDIT_ISSUE",
+                "credentials",
+                &parameters,
+            )
+            .await;
+        assert!(result.is_ok());
+        let value = result.unwrap();
+        assert_eq!(value, json!({"ok": true}));
+    }
+
+    #[tokio::test]
+    async fn test_get_issue() {
+        let (client, context) = setup(Arc::new(MockDb)).await;
+        let parameters = hashmap! {
+            "ISSUE_ID_OR_KEY".to_string() => json!("ADM-123"),
+            "FIELDS".to_string() => json!("*all"),
+            "FIELDS_BY_KEYS".to_string() => json!(false),
+            "EXPAND".to_string() => json!("renderedFields,names,schema"),
+            "PROPERTIES".to_string() => json!("*all,-prop1")
+        };
+        let result = JiraExecutor
+            .execute(
+                &*client,
+                &context,
+                "GET_ISSUE",
                 "credentials",
                 &parameters,
             )

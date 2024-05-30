@@ -1004,6 +1004,55 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 					},
 				],
 			},
+			{
+				id: "GET_ISSUE",
+				name: "Get Issue",
+				description: "Get an issue",
+				documentationUrl:
+					"https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issues/#api-rest-api-3-issue-issueidorkey-get",
+				requiresAuthentication: true,
+				parameters: [
+					{
+						id: "ISSUE_ID_OR_KEY",
+						displayName: "Issue ID or Key",
+						description: "The ID or key of the issue to retrieve.",
+						required: true,
+						dataType: ApiParameterDatatype.TEXT,
+					},
+					{
+						id: "FIELDS",
+						displayName: "Fields",
+						description:
+							'A list of fields to return for the issue. Accepts a comma-separated list. Use it to retrieve a subset of fields. Allowed values: "*all" to return all fields, "*navigable" to return navigable fields, or any issue fields prefixed with a minues to exclude. By default, all fields are returned.',
+						required: false,
+						dataType: ApiParameterDatatype.TEXT,
+					},
+					{
+						id: "FIELDS_BY_KEYS",
+						displayName: "Fields by Keys",
+						description:
+							"Reference fields by their key (rather than ID).",
+						required: false,
+						dataType: ApiParameterDatatype.BOOLEAN,
+					},
+					{
+						id: "EXPAND",
+						displayName: "Expand",
+						description:
+							"Use expand to include additional information about the issues in the response. This parameter accepts a comma-separated list. See documentation for allowed values.",
+						required: false,
+						dataType: ApiParameterDatatype.TEXT,
+					},
+					{
+						id: "PROPERTIES",
+						displayName: "Properties",
+						description:
+							'A list of issue properties to return for the issue. This parameter accepts a comma-separated list. Allowed values: "*all" to return all issue properties or prefix any property with a minus to exclude.',
+						required: false,
+						dataType: ApiParameterDatatype.TEXT,
+					},
+				],
+			},
 		],
 	},
 	// ...
