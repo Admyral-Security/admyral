@@ -3,7 +3,7 @@ function isObject(data: any): boolean {
 }
 
 function toCamelCase(s: string): string {
-	return s.replace(/([-_][a-z0-9])/gi, ($1) => {
+	return s.replace(/([-_][a-z0-9])/g, ($1) => {
 		return $1.toUpperCase().replace("-", "").replace("_", "");
 	});
 }
