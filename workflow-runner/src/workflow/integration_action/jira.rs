@@ -42,6 +42,7 @@ impl IntegrationExecutor for JiraExecutor {
             "GET_ISSUE" => get_issue(client, context, &credential, parameters).await,
             "FIND_USERS" => find_users(client, context, &credential, parameters).await,
             "GET_ISSUE_COMMENTS" => get_issue_comments(client, context, &credential, parameters).await,
+            "ADD_COMMENT" => add_comment(client, context, &credential, parameters).await,
             _ => return Err(anyhow!("API {api} not implemented for {JIRA}.")),
         }
     }
@@ -662,6 +663,43 @@ async fn get_issue_comments(
     );
 
     jira_get_request(client, &api_url, credential).await
+}
+
+// https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issue-comments/#api-rest-api-3-issue-issueidorkey-comment-post
+async fn add_comment(
+    client: &dyn HttpClient,
+    context: &context::Context,
+    credential: &JiraCredential,
+    parameters: &HashMap<String, serde_json::Value>,
+) -> Result<serde_json::Value> {
+    let issue_id_or_key = get_string_parameter(
+        "ISSUE_ID_OR_KEY",
+        JIRA,
+        "ADD_COMMENT",
+        parameters,
+        context,
+        ParameterType::Required,
+    )
+    .await?
+    .expect("issue_id_or_key is a required parameter!");
+
+    let body = get_string_parameter(
+        "BODY",
+        JIRA,
+        "ADD_COMMENT",
+        parameters,
+        context,
+        ParameterType::Required,
+    )
+    .await?
+    .expect("body is a required parameter!");
+
+    let api_url = format!(
+        "https://{}.atlassian.net/rest/api/3/issue/{}/comment",
+        credential.domain, issue_id_or_key
+    );
+
+    jira_post_request(client, &api_url, credential, json!({ "body": serde_json::from_str::<serde_json::Value>(&body)? })).await
 }
 
 #[cfg(test)]

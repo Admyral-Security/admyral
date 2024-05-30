@@ -1148,6 +1148,29 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
                     },
                 ],
             },
+			{
+                id: "ADD_COMMENT",
+                name: "Add Comment",
+                description: "Add a comment to an issue",
+                documentationUrl: "https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issue-comments/#api-rest-api-3-issue-issueidorkey-comment-post",
+                requiresAuthentication: true,
+                parameters: [
+                    {
+                        id: "ISSUE_ID_OR_KEY",
+                        displayName: "Issue ID or Key",
+                        description: "The ID or key of the issue to add a comment to.",
+                        required: true,
+                        dataType: ApiParameterDatatype.TEXT,
+                    },
+                    {
+                        id: "BODY",
+                        displayName: "Body",
+                        description: "The comment text in Atlassian Document Format.",
+                        required: true,
+                        dataType: ApiParameterDatatype.TEXTAREA,
+                    },
+                ],
+            },
 		],
 	},
 	// ...
