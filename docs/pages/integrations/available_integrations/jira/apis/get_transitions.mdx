@@ -1,0 +1,133 @@
+import { Callout } from "nextra/components";
+
+# Get Transitions
+
+Returns either all transitions or a transition that can be performed by the user on an issue, based on the issue's status.
+
+<Callout type="info">
+    For Jira's documentation, see [Get Transitions](https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issues/#api-rest-api-3-issue-issueidorkey-transitions-get).
+</Callout>
+
+## Parameters:
+
+| Field               | Description                                                                                                    | Required |
+| ------------------- | -------------------------------------------------------------------------------------------------------------- | :------: |
+| **issueIdOrKey**    | The ID or key of the issue.                                                                                    |   Yes    |
+| **expand**          | Use expand to include additional information about transitions in the response.                                |    No    |
+| **transitionId**    | Use transitionId to filter results to include only the specified transitions. This parameter accepts a comma-separated list. |    No    |
+
+## Example Output:
+
+```json
+{
+  "transitions": [
+    {
+      "fields": {
+        "summary": {
+          "allowedValues": [
+            "red",
+            "blue"
+          ],
+          "defaultValue": "red",
+          "hasDefaultValue": false,
+          "key": "field_key",
+          "name": "My Multi Select",
+          "operations": [
+            "set",
+            "add"
+          ],
+          "required": false,
+          "schema": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:multiselect",
+            "customId": 10001,
+            "items": "option",
+            "type": "array"
+          }
+        }
+      },
+      "hasScreen": false,
+      "id": "2",
+      "isAvailable": true,
+      "isConditional": false,
+      "isGlobal": false,
+      "isInitial": false,
+      "name": "Close Issue",
+      "to": {
+        "description": "The issue is currently being worked on.",
+        "iconUrl": "https://your-domain.atlassian.net/images/icons/progress.gif",
+        "id": "10000",
+        "name": "In Progress",
+        "self": "https://your-domain.atlassian.net/rest/api/3/status/10000",
+        "statusCategory": {
+          "colorName": "yellow",
+          "id": 1,
+          "key": "in-flight",
+          "name": "In Progress",
+          "self": "https://your-domain.atlassian.net/rest/api/3/statuscategory/1"
+        }
+      }
+    },
+    {
+      "fields": {
+        "summary": {
+          "allowedValues": [
+            "red",
+            "blue"
+          ],
+          "defaultValue": "red",
+          "hasDefaultValue": false,
+          "key": "field_key",
+          "name": "My Multi Select",
+          "operations": [
+            "set",
+            "add"
+          ],
+          "required": false,
+          "schema": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:multiselect",
+            "customId": 10001,
+            "items": "option",
+            "type": "array"
+          }
+        },
+        "colour": {
+          "allowedValues": [
+            "red",
+            "blue"
+          ],
+          "defaultValue": "red",
+          "hasDefaultValue": false,
+          "key": "field_key",
+          "name": "My Multi Select",
+          "operations": [
+            "set",
+            "add"
+          ],
+          "required": false,
+          "schema": {
+            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:multiselect",
+            "customId": 10001,
+            "items": "option",
+            "type": "array"
+          }
+        }
+      },
+      "hasScreen": true,
+      "id": "711",
+      "name": "QA Review",
+      "to": {
+        "description": "The issue is closed.",
+        "iconUrl": "https://your-domain.atlassian.net/images/icons/closed.gif",
+        "id": "5",
+        "name": "Closed",
+        "self": "https://your-domain.atlassian.net/rest/api/3/status/5",
+        "statusCategory": {
+          "colorName": "green",
+          "id": 9,
+          "key": "completed",
+          "self": "https://your-domain.atlassian.net/rest/api/3/statuscategory/9"
+        }
+      }
+    }
+  ]
+}

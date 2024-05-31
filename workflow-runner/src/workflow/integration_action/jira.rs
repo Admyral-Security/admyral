@@ -45,6 +45,7 @@ impl IntegrationExecutor for JiraExecutor {
             "ADD_COMMENT" => add_comment(client, context, &credential, parameters).await,
             "GET_FIELDS" => get_fields(client, context, &credential).await,
             "UPDATE_CUSTOM_FIELD" => update_custom_field(client, context, &credential, parameters).await,
+            "GET_ISSUE_TRANSITIONS" => get_issue_transitions(client, context, &credential, parameters).await,
             _ => return Err(anyhow!("API {api} not implemented for {JIRA}.")),
         }
     }
@@ -785,6 +786,70 @@ async fn update_custom_field(
     jira_put_request(client, &api_url, credential, json!(body), 204).await
 }
 
+// https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issues/#api-rest-api-3-issue-issueidorkey-transitions-get
+async fn get_issue_transitions(
+    client: &dyn HttpClient,
+    context: &context::Context,
+    credential: &JiraCredential,
+    parameters: &HashMap<String, serde_json::Value>,
+) -> Result<serde_json::Value> {
+    let mut query_params = Vec::new();
+
+    let issue_id_or_key = get_string_parameter(
+        "ISSUE_ID_OR_KEY",
+        JIRA,
+        "GET_ISSUE_TRANSITIONS",
+        parameters,
+        context,
+        ParameterType::Required,
+    )
+    .await?
+    .expect("issue_id_or_key is a required parameter!");
+
+    if let Some(expand) = get_string_parameter(
+        "EXPAND",
+        JIRA,
+        "GET_ISSUE_TRANSITIONS",
+        parameters,
+        context,
+        ParameterType::Optional,
+    )
+    .await?
+    {
+        if !expand.is_empty() {
+            query_params.push(format!("expand={expand}"));
+        }
+    }
+
+    if let Some(transition_id) = get_string_parameter(
+        "TRANSITION_ID",
+        JIRA,
+        "GET_ISSUE_TRANSITIONS",
+        parameters,
+        context,
+        ParameterType::Optional,
+    )
+    .await?
+    {
+        if !transition_id.is_empty() {
+            query_params.push(format!("transitionId={transition_id}"));
+        }
+    }
+
+    let query_param_str = if query_params.is_empty() {
+        "".to_string()
+    } else {
+        format!("?{}", query_params.join("&"))
+    };
+
+    let api_url = format!(
+        "https://{}.atlassian.net/rest/api/3/issue/{issue_id_or_key}/transitions{query_param_str}",
+        credential.domain
+    );
+
+    jira_get_request(client, &api_url, credential).await
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -1075,5 +1140,20 @@ mod tests {
         assert_eq!(value, json!({"ok": true}));
     }
 
+    #[tokio::test]
+    async fn test_get_issue_transitions() {
+        let (client, context) = setup(Arc::new(MockDb)).await;
+        let parameters = hashmap! {
+            "ISSUE_ID_OR_KEY".to_string() => json!("ADM-123"),
+            "EXPAND".to_string() => json!("transitions.fields"),
+            "TRANSITION_ID".to_string() => json!("5")
+        };
+        let result = JiraExecutor
+            .execute(&*client, &context, "GET_ISSUE_TRANSITIONS", "credentials", &parameters)
+            .await;
+        assert!(result.is_ok());
+        let value = result.unwrap();
+        assert_eq!(value, json!({"ok": true}));
+    }
 
 }

@@ -1216,6 +1216,36 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
                     },
                 ],
             },
+			{
+				id: "GET_ISSUE_TRANSITIONS",
+				name: "Get Issue Transitions",
+				description: "Get transitions for an issue",
+				documentationUrl: "https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issues/#api-rest-api-3-issue-issueidorkey-transitions-get",
+				requiresAuthentication: true,
+				parameters: [
+					{
+						id: "ISSUE_ID_OR_KEY",
+						displayName: "Issue ID or Key",
+						description: "The ID or key of the issue to retrieve transitions for.",
+						required: true,
+						dataType: ApiParameterDatatype.TEXT,
+					},
+					{
+						id: "EXPAND",
+						displayName: "Expand",
+						description: 'Use expand to include additional information about transitions in the response.',
+						required: false,
+						dataType: ApiParameterDatatype.TEXT,
+					},
+					{
+						id: "TRANSITION_ID",
+						displayName: "Transition ID",
+						description: 'Use transitionId to filter results to include only the specified transitions. This parameter accepts a comma-separated list.',
+						required: false,
+						dataType: ApiParameterDatatype.TEXT,
+					},
+				],
+			},
 		],
 	},
 	// ...
