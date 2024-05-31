@@ -44,6 +44,7 @@ impl IntegrationExecutor for JiraExecutor {
             "GET_ISSUE_COMMENTS" => get_issue_comments(client, context, &credential, parameters).await,
             "ADD_COMMENT" => add_comment(client, context, &credential, parameters).await,
             "GET_FIELDS" => get_fields(client, context, &credential).await,
+            "UPDATE_CUSTOM_FIELD" => update_custom_field(client, context, &credential, parameters).await,
             _ => return Err(anyhow!("API {api} not implemented for {JIRA}.")),
         }
     }
@@ -717,6 +718,73 @@ async fn get_fields(
     jira_get_request(client, &api_url, credential).await
 }
 
+// https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issue-fields/#api-rest-api-3-field-fieldid-put
+async fn update_custom_field(
+    client: &dyn HttpClient,
+    context: &context::Context,
+    credential: &JiraCredential,
+    parameters: &HashMap<String, serde_json::Value>,
+) -> Result<serde_json::Value> {
+    let field_id = get_string_parameter(
+        "FIELD_ID",
+        JIRA,
+        "UPDATE_CUSTOM_FIELD",
+        parameters,
+        context,
+        ParameterType::Required,
+    )
+    .await?
+    .expect("field_id is a required parameter!");
+
+    let name = get_string_parameter(
+        "NAME",
+        JIRA,
+        "UPDATE_CUSTOM_FIELD",
+        parameters,
+        context,
+        ParameterType::Required,
+    )
+    .await?
+    .expect("name is a required parameter!");
+
+    let mut body = hashmap! {
+        "name".to_string() => json!(name)
+    };
+
+    if let Some(description) = get_string_parameter(
+        "DESCRIPTION",
+        JIRA,
+        "UPDATE_CUSTOM_FIELD",
+        parameters,
+        context,
+        ParameterType::Optional,
+    )
+    .await?
+    {
+        body.insert("description".to_string(), json!(description));
+    }
+
+    if let Some(searcher_key) = get_string_parameter(
+        "SEARCHER_KEY",
+        JIRA,
+        "UPDATE_CUSTOM_FIELD",
+        parameters,
+        context,
+        ParameterType::Optional,
+    )
+    .await?
+    {
+        body.insert("searcherKey".to_string(), json!(searcher_key));
+    }
+
+    let api_url = format!(
+        "https://{}.atlassian.net/rest/api/3/field/{}",
+        credential.domain, field_id
+    );
+
+    jira_put_request(client, &api_url, credential, json!(body), 204).await
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -983,5 +1051,29 @@ mod tests {
         let value = result.unwrap();
         assert_eq!(value, json!({"ok": true}));
     }
+
+    #[tokio::test]
+    async fn test_update_custom_field() {
+        let (client, context) = setup(Arc::new(MockDb)).await;
+        let parameters = hashmap! {
+            "FIELD_ID".to_string() => json!("customfield_10042"),
+            "NAME".to_string() => json!("New Custom Field Name"),
+            "DESCRIPTION".to_string() => json!("Updated description"),
+            "SEARCHER_KEY".to_string() => json!("com.atlassian.jira.plugin.system.customfieldtypes:textsearcher")
+        };
+        let result = JiraExecutor
+            .execute(
+                &*client,
+                &context,
+                "UPDATE_CUSTOM_FIELD",
+                "credentials",
+                &parameters,
+            )
+            .await;
+        assert!(result.is_ok());
+        let value = result.unwrap();
+        assert_eq!(value, json!({"ok": true}));
+    }
+
 
 }

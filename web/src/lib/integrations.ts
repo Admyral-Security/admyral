@@ -1179,6 +1179,43 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
                 requiresAuthentication: true,
                 parameters: []
             },
+			{
+                id: "UPDATE_CUSTOM_FIELD",
+                name: "Update Custom Field",
+                description: "Update a custom field",
+                documentationUrl: "https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issue-fields/#api-rest-api-3-field-fieldid-put",
+                requiresAuthentication: true,
+                parameters: [
+                    {
+                        id: "FIELD_ID",
+                        displayName: "Field ID",
+                        description: "The ID of the custom field to update",
+                        required: true,
+                        dataType: ApiParameterDatatype.TEXT,
+                    },
+                    {
+                        id: "NAME",
+                        displayName: "Name",
+                        description: "The new name of the custom field",
+                        required: true,
+                        dataType: ApiParameterDatatype.TEXT,
+                    },
+                    {
+                        id: "DESCRIPTION",
+                        displayName: "Description",
+                        description: "The new description of the custom field",
+                        required: false,
+                        dataType: ApiParameterDatatype.TEXT,
+                    },
+                    {
+                        id: "SEARCHER_KEY",
+                        displayName: "Searcher Key",
+                        description: "The searcher to use for the custom field. This is required for fields of type `Text` or `Number`.",
+                        required: false,
+                        dataType: ApiParameterDatatype.TEXT,
+                    },
+                ],
+            },
 		],
 	},
 	// ...
