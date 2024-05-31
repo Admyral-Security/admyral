@@ -81,6 +81,7 @@ async fn jira_post_request(
     api_url: &str,
     credential: &JiraCredential,
     body: serde_json::Value,
+    expected_response_status: u16
 ) -> Result<serde_json::Value> {
     // API Key Construction: https://developer.atlassian.com/cloud/jira/platform/basic-auth-for-rest-apis/
     let api_key = format!("{}:{}", credential.email, credential.api_token);
@@ -96,7 +97,7 @@ async fn jira_post_request(
             api_url,
             headers,
             RequestBodyType::Json { body },
-            201,
+            expected_response_status,
             format!("Error: Failed to call {JIRA} API"),
         )
         .await
@@ -303,7 +304,7 @@ async fn create_issue(
         }
     }
 
-    jira_post_request(client, &api_url, credential, json!({"fields": fields})).await
+    jira_post_request(client, &api_url, credential, json!({"fields": fields}), 201).await
 }
 
 // https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issues/#api-rest-api-3-issue-issueidorkey-assignee-put
@@ -703,7 +704,7 @@ async fn add_comment(
         credential.domain, issue_id_or_key
     );
 
-    jira_post_request(client, &api_url, credential, json!({ "body": serde_json::from_str::<serde_json::Value>(&body)? })).await
+    jira_post_request(client, &api_url, credential, json!({ "body": serde_json::from_str::<serde_json::Value>(&body)? }), 201).await
 }
 
 // https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issue-fields/#api-rest-api-3-field-get
@@ -904,7 +905,7 @@ async fn transition_issue(
         credential.domain, issue_id_or_key
     );
 
-    jira_post_request(client, &api_url, credential, json!(body)).await
+    jira_post_request(client, &api_url, credential, json!(body), 204).await
 }
 
 #[cfg(test)]
