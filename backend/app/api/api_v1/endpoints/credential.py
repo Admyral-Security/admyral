@@ -62,7 +62,8 @@ async def delete_credential(
 ):
     result = await db.exec(
         select(Credential)
-        .where(Credential.user_id == user.user_id and Credential.credential_name == request.credential_name)
+        .where(Credential.user_id == user.user_id)
+        .where(Credential.credential_name == request.credential_name)
         .limit(1)
     )
     existing_credential = result.one_or_none()
