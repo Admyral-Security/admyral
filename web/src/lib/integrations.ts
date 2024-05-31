@@ -1171,6 +1171,14 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
                     },
                 ],
             },
+			{
+                id: "GET_FIELDS",
+                name: "Get Fields",
+                description: "Get all fields",
+                documentationUrl: "https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issue-fields/#api-rest-api-3-field-get",
+                requiresAuthentication: true,
+                parameters: []
+            },
 		],
 	},
 	// ...

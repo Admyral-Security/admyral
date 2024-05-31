@@ -43,6 +43,7 @@ impl IntegrationExecutor for JiraExecutor {
             "FIND_USERS" => find_users(client, context, &credential, parameters).await,
             "GET_ISSUE_COMMENTS" => get_issue_comments(client, context, &credential, parameters).await,
             "ADD_COMMENT" => add_comment(client, context, &credential, parameters).await,
+            "GET_FIELDS" => get_fields(client, context, &credential).await,
             _ => return Err(anyhow!("API {api} not implemented for {JIRA}.")),
         }
     }
@@ -702,6 +703,20 @@ async fn add_comment(
     jira_post_request(client, &api_url, credential, json!({ "body": serde_json::from_str::<serde_json::Value>(&body)? })).await
 }
 
+// https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issue-fields/#api-rest-api-3-field-get
+async fn get_fields(
+    client: &dyn HttpClient,
+    context: &context::Context,
+    credential: &JiraCredential,
+) -> Result<serde_json::Value> {
+    let api_url = format!(
+        "https://{}.atlassian.net/rest/api/3/field",
+        credential.domain
+    );
+
+    jira_get_request(client, &api_url, credential).await
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -935,21 +950,38 @@ mod tests {
     }
 
     #[tokio::test]
-async fn test_get_issue_comments() {
-    let (client, context) = setup(Arc::new(MockDb)).await;
-    let parameters = hashmap! {
-        "ISSUE_ID_OR_KEY".to_string() => json!("ADM-123"),
-        "START_AT".to_string() => json!(0),
-        "MAX_RESULTS".to_string() => json!(10),
-        "ORDER_BY".to_string() => json!("created")
-    };
-    let result = JiraExecutor
-        .execute(&*client, &context, "GET_ISSUE_COMMENTS", "credentials", &parameters)
-        .await;
-    assert!(result.is_ok());
-    let value = result.unwrap();
-    assert_eq!(value, json!({"ok": true}));
-}
+    async fn test_get_issue_comments() {
+        let (client, context) = setup(Arc::new(MockDb)).await;
+        let parameters = hashmap! {
+            "ISSUE_ID_OR_KEY".to_string() => json!("ADM-123"),
+            "START_AT".to_string() => json!(0),
+            "MAX_RESULTS".to_string() => json!(10),
+            "ORDER_BY".to_string() => json!("created")
+        };
+        let result = JiraExecutor
+            .execute(&*client, &context, "GET_ISSUE_COMMENTS", "credentials", &parameters)
+            .await;
+        assert!(result.is_ok());
+        let value = result.unwrap();
+        assert_eq!(value, json!({"ok": true}));
+    }
 
+    #[tokio::test]
+    async fn test_get_fields() {
+        let (client, context) = setup(Arc::new(MockDb)).await;
+        let parameters = hashmap! {}; // No parameters needed for this API
+        let result = JiraExecutor
+            .execute(
+                &*client,
+                &context,
+                "GET_FIELDS",
+                "credentials",
+                &parameters,
+            )
+            .await;
+        assert!(result.is_ok());
+        let value = result.unwrap();
+        assert_eq!(value, json!({"ok": true}));
+    }
 
 }

@@ -4,5 +4,6 @@
 	"edit_issue": "Edit Issue",
 	"find_users": "Find Users",
 	"get_issue": "Get Issue",
-	"get_comments": "Get Comments"
+	"get_comments": "Get Comments",
+	"get_fields": "Get Fields"
 }
