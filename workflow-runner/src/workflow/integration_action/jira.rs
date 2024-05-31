@@ -46,6 +46,7 @@ impl IntegrationExecutor for JiraExecutor {
             "GET_FIELDS" => get_fields(client, context, &credential).await,
             "UPDATE_CUSTOM_FIELD" => update_custom_field(client, context, &credential, parameters).await,
             "GET_ISSUE_TRANSITIONS" => get_issue_transitions(client, context, &credential, parameters).await,
+            "TRANSITION_ISSUE" => transition_issue(client, context, &credential, parameters).await,
             _ => return Err(anyhow!("API {api} not implemented for {JIRA}.")),
         }
     }
@@ -848,6 +849,62 @@ async fn get_issue_transitions(
     );
 
     jira_get_request(client, &api_url, credential).await
+}
+
+// https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issues/#api-rest-api-3-issue-issueidorkey-transitions-post
+async fn transition_issue(
+    client: &dyn HttpClient,
+    context: &context::Context,
+    credential: &JiraCredential,
+    parameters: &HashMap<String, serde_json::Value>,
+) -> Result<serde_json::Value> {
+    let issue_id_or_key = get_string_parameter(
+        "ISSUE_ID_OR_KEY",
+        JIRA,
+        "TRANSITION_ISSUE",
+        parameters,
+        context,
+        ParameterType::Required,
+    )
+    .await?
+    .expect("issue_id_or_key is a required parameter!");
+
+    let transition = get_string_parameter(
+        "TRANSITION",
+        JIRA,
+        "TRANSITION_ISSUE",
+        parameters,
+        context,
+        ParameterType::Required,
+    )
+    .await?
+    .expect("transition is a required parameter!");
+
+    let mut body = hashmap! {
+        "transition".to_string() => json!({"id": transition}),
+    };
+
+    if let Some(fields) = get_string_parameter(
+        "FIELDS",
+        JIRA,
+        "TRANSITION_ISSUE",
+        parameters,
+        context,
+        ParameterType::Optional,
+    )
+    .await?
+    {
+        if !fields.is_empty() {
+            body.insert("fields".to_string(), serde_json::from_str(&fields)?);
+        }
+    }
+
+    let api_url = format!(
+        "https://{}.atlassian.net/rest/api/3/issue/{}/transitions",
+        credential.domain, issue_id_or_key
+    );
+
+    jira_post_request(client, &api_url, credential, json!(body)).await
 }
 
 #[cfg(test)]

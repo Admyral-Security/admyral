@@ -1246,6 +1246,36 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 					},
 				],
 			},
+			{
+                id: "TRANSITION_ISSUE",
+                name: "Transition Issue",
+                description: "Transition an issue to a new status",
+                documentationUrl: "https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issues/#api-rest-api-3-issue-issueidorkey-transitions-post",
+                requiresAuthentication: true,
+                parameters: [
+                    {
+                        id: "ISSUE_ID_OR_KEY",
+                        displayName: "Issue ID or Key",
+                        description: "The ID or key of the issue to be transitioned.",
+                        required: true,
+                        dataType: ApiParameterDatatype.TEXT,
+                    },
+                    {
+                        id: "TRANSITION",
+                        displayName: "Transition",
+                        description: "The ID or key of the transition.",
+                        required: true,
+                        dataType: ApiParameterDatatype.TEXT,
+                    },
+                    {
+                        id: "FIELDS",
+                        displayName: "Fields",
+                        description: "Fields to set as part of the transition, provided as a JSON object.",
+                        required: false,
+                        dataType: ApiParameterDatatype.TEXTAREA,
+                    },
+                ],
+            },
 		],
 	},
 	// ...

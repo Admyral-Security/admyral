@@ -1,0 +1,21 @@
+import { Callout } from "nextra/components";
+
+# Transition Issue
+
+Transitions an issue to a new status.
+
+<Callout type="info">
+	For Jira's documentation, see [Transition Issue](https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issues/#api-rest-api-3-issue-issueidorkey-transitions-post).
+</Callout>
+
+## Parameters:
+
+| Field               | Description                                                                                                                  | Required |
+| ------------------- | ---------------------------------------------------------------------------------------------------------------------------- | :------: |
+| **issueIdOrKey**    | The ID or key of the issue to transition.                                                                                     |   Yes    |
+| **transition**      | The ID or name of the transition.                                                                                            |   Yes    |
+| **fields**          | List of issue screen fields to update provided as a JSON object.                                                             |    No    |
+
+## Example Output:
+
+No content is returned.
