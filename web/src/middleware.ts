@@ -22,6 +22,6 @@ export const config = {
 		 * - /dpa
 		 * - /impressum
 		 */
-		"/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$|auth/confirm|auth/callback|terms-of-service|privacy-policy|dpa|impressum).*)",
+		"/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$|auth/confirm|auth/callback|terms-of-service|privacy-policy|dpa|impressum|.well-known/microsoft-identity-association.json).*)",
 	],
 };
