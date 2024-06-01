@@ -114,13 +114,11 @@ docker compose up -d
 
 ## 💬 Feedback & Contributing to Admyral
 
-We value your feedback and contributions! If you have suggestions, questions, or would like to discuss anything related to Admyral, just text us on [Discord](https://discord.gg/GqbJZT9Hbf).
+We value your feedback and contributions! 
+For details on how to contribute, check out the (Contribution Guideline)[https://github.com/Admyral-Security/admyral/blob/main/CONTRIBUTING.md].
 
-You can best support this project by:
+If you have suggestions, questions, or would like to discuss anything related to Admyral, just text us on [Discord](https://discord.gg/GqbJZT9Hbf).
 
-1. Giving it a star on GitHub
-2. Joining our active community on [Discord](https://discord.gg/GqbJZT9Hbf)
-3. And giving us feedback
 
 ## ❓ FAQ
 
