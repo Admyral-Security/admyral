@@ -5,5 +5,6 @@
 	"threatpost": "Threatpost",
 	"virus_total": "VirusTotal",
 	"yaraify": "YARAify",
-	"jira": "Jira"
+	"jira": "Jira",
+	"ms_teams": "Microsoft Teams"
 }

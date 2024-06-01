@@ -6,6 +6,7 @@ export enum IntegrationType {
 	PHISH_REPORT = "PHISH_REPORT",
 	SLACK = "SLACK",
 	JIRA = "JIRA",
+	MS_TEAMS = "MS_TEAMS",
 }
 
 export enum ApiParameterDatatype {
@@ -32,10 +33,37 @@ export type IntegrationApiDefinition = {
 	requiresAuthentication: boolean;
 };
 
-export type IntegrationCredentialDefinition = {
+export enum AuthType {
+	NONE = "NONE",
+	// Secret-based credentials (e.g. username/password, API key, client ID and secret, etc.) are represented as a form
+	SECRET = "SECRET",
+	MS_TEAMS_OAUTH = "MS_TEAMS_OAUTH",
+}
+
+export type IntegrationCredentialFormParameter = {
 	id: string;
 	displayName: string;
 };
+
+export interface NoAuthentication {
+	authType: AuthType.NONE;
+}
+
+export interface SecretAuthentication {
+	authType: AuthType.SECRET;
+	parameters: IntegrationCredentialFormParameter[];
+}
+
+export interface MSTeamsOAuth {
+	authType: AuthType.MS_TEAMS_OAUTH;
+	// Note: changing the scopes requires users to delete the MS Teams integration and re-add it
+	scope: string;
+}
+
+export type CredentialDefinition =
+	| NoAuthentication
+	| SecretAuthentication
+	| MSTeamsOAuth;
 
 export type Icon = {
 	src: string;
@@ -46,7 +74,7 @@ export type IntegrationDefinition = {
 	name: string;
 	icon?: Icon;
 	apis: IntegrationApiDefinition[];
-	credentials: IntegrationCredentialDefinition[];
+	credential: CredentialDefinition;
 };
 
 export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
@@ -57,12 +85,15 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 			src: "/virustotal-icon.svg",
 			isSquareIcon: true,
 		},
-		credentials: [
-			{
-				id: "API_KEY",
-				displayName: "API Key",
-			},
-		],
+		credential: {
+			authType: AuthType.SECRET,
+			parameters: [
+				{
+					id: "API_KEY",
+					displayName: "API Key",
+				},
+			],
+		},
 		apis: [
 			{
 				id: "GET_A_FILE_REPORT",
@@ -336,12 +367,15 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 			src: "/alienvault_otx_icon.png",
 			isSquareIcon: true,
 		},
-		credentials: [
-			{
-				id: "API_KEY",
-				displayName: "API Key",
-			},
-		],
+		credential: {
+			authType: AuthType.SECRET,
+			parameters: [
+				{
+					id: "API_KEY",
+					displayName: "API Key",
+				},
+			],
+		},
 		apis: [
 			{
 				id: "GET_DOMAIN_INFORMATION",
@@ -370,7 +404,7 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 			src: "/threatpost_logo.svg",
 			isSquareIcon: false,
 		},
-		credentials: [],
+		credential: { authType: AuthType.NONE },
 		apis: [
 			{
 				id: "FETCH_RSS_FEED",
@@ -390,7 +424,7 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 			src: "/abusech_yaraify_logo.svg",
 			isSquareIcon: false,
 		},
-		credentials: [],
+		credential: { authType: AuthType.NONE },
 		apis: [
 			{
 				id: "QUERY_A_FILE_HASH",
@@ -547,12 +581,15 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 			src: "/phish_report.svg",
 			isSquareIcon: true,
 		},
-		credentials: [
-			{
-				id: "API_KEY",
-				displayName: "API Key",
-			},
-		],
+		credential: {
+			authType: AuthType.SECRET,
+			parameters: [
+				{
+					id: "API_KEY",
+					displayName: "API Key",
+				},
+			],
+		},
 		apis: [
 			{
 				id: "GET_HOSTING_CONTACT_INFORMATION",
@@ -663,12 +700,15 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 			src: "/slack_logo_color.svg",
 			isSquareIcon: true,
 		},
-		credentials: [
-			{
-				id: "API_KEY",
-				displayName: "API Key",
-			},
-		],
+		credential: {
+			authType: AuthType.SECRET,
+			parameters: [
+				{
+					id: "API_KEY",
+					displayName: "API Key",
+				},
+			],
+		},
 		apis: [
 			{
 				id: "SEND_MESSAGE",
@@ -841,22 +881,25 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 			src: "/jira_logo.svg",
 			isSquareIcon: true,
 		},
-		credentials: [
-			{
-				id: "DOMAIN",
-				displayName:
-					"Domain (e.g., the your-domain part of https://your-domain.atlassian.net)",
-			},
-			{
-				id: "EMAIL",
-				displayName:
-					"Email of the account who provisioned the API token",
-			},
-			{
-				id: "API_TOKEN",
-				displayName: "API Token",
-			},
-		],
+		credential: {
+			authType: AuthType.SECRET,
+			parameters: [
+				{
+					id: "DOMAIN",
+					displayName:
+						"Domain (e.g., the your-domain part of https://your-domain.atlassian.net)",
+				},
+				{
+					id: "EMAIL",
+					displayName:
+						"Email of the account who provisioned the API token",
+				},
+				{
+					id: "API_TOKEN",
+					displayName: "API Token",
+				},
+			],
+		},
 		apis: [
 			{
 				id: "CREATE_ISSUE",
@@ -1112,170 +1155,247 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 				],
 			},
 			{
-                id: "GET_ISSUE_COMMENTS",
-                name: "Get Issue Comments",
-                description: "Get comments for an issue",
-                documentationUrl: "https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issue-comments/#api-rest-api-3-issue-issueidorkey-comment-get",
-                requiresAuthentication: true,
-                parameters: [
-                    {
-                        id: "ISSUE_ID_OR_KEY",
-                        displayName: "Issue ID or Key",
-                        description: "The ID or key of the issue to retrieve comments for.",
-                        required: true,
-                        dataType: ApiParameterDatatype.TEXT,
-                    },
-                    {
-                        id: "START_AT",
-                        displayName: "Start At",
-                        description: "The index of the first item to return in a page of results (page offset). Default: 0",
-                        required: false,
-                        dataType: ApiParameterDatatype.NUMBER,
-                    },
-                    {
-                        id: "MAX_RESULTS",
-                        displayName: "Max Results",
-                        description: "The maximum number of items to return per page. Default: 5000",
-                        required: false,
-                        dataType: ApiParameterDatatype.NUMBER,
-                    },
-                    {
-                        id: "ORDER_BY",
-                        displayName: "Order By",
-                        description: 'Order the results by a field. Accepts "created" to sort comments by their created date. Valid values: "created", "-created", "+created".',
-                        required: false,
-                        dataType: ApiParameterDatatype.TEXT,
-                    },
-                ],
-            },
-			{
-                id: "ADD_COMMENT",
-                name: "Add Comment",
-                description: "Add a comment to an issue",
-                documentationUrl: "https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issue-comments/#api-rest-api-3-issue-issueidorkey-comment-post",
-                requiresAuthentication: true,
-                parameters: [
-                    {
-                        id: "ISSUE_ID_OR_KEY",
-                        displayName: "Issue ID or Key",
-                        description: "The ID or key of the issue to add a comment to.",
-                        required: true,
-                        dataType: ApiParameterDatatype.TEXT,
-                    },
-                    {
-                        id: "BODY",
-                        displayName: "Body",
-                        description: "The comment text in Atlassian Document Format.",
-                        required: true,
-                        dataType: ApiParameterDatatype.TEXTAREA,
-                    },
-                ],
-            },
-			{
-                id: "GET_FIELDS",
-                name: "Get Fields",
-                description: "Get all fields",
-                documentationUrl: "https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issue-fields/#api-rest-api-3-field-get",
-                requiresAuthentication: true,
-                parameters: []
-            },
-			{
-                id: "UPDATE_CUSTOM_FIELD",
-                name: "Update Custom Field",
-                description: "Update a custom field",
-                documentationUrl: "https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issue-fields/#api-rest-api-3-field-fieldid-put",
-                requiresAuthentication: true,
-                parameters: [
-                    {
-                        id: "FIELD_ID",
-                        displayName: "Field ID",
-                        description: "The ID of the custom field to update",
-                        required: true,
-                        dataType: ApiParameterDatatype.TEXT,
-                    },
-                    {
-                        id: "NAME",
-                        displayName: "Name",
-                        description: "The new name of the custom field",
-                        required: true,
-                        dataType: ApiParameterDatatype.TEXT,
-                    },
-                    {
-                        id: "DESCRIPTION",
-                        displayName: "Description",
-                        description: "The new description of the custom field",
-                        required: false,
-                        dataType: ApiParameterDatatype.TEXT,
-                    },
-                    {
-                        id: "SEARCHER_KEY",
-                        displayName: "Searcher Key",
-                        description: "The searcher to use for the custom field. This is required for fields of type `Text` or `Number`.",
-                        required: false,
-                        dataType: ApiParameterDatatype.TEXT,
-                    },
-                ],
-            },
-			{
-				id: "GET_ISSUE_TRANSITIONS",
-				name: "Get Issue Transitions",
-				description: "Get transitions for an issue",
-				documentationUrl: "https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issues/#api-rest-api-3-issue-issueidorkey-transitions-get",
+				id: "GET_ISSUE_COMMENTS",
+				name: "Get Issue Comments",
+				description: "Get comments for an issue",
+				documentationUrl:
+					"https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issue-comments/#api-rest-api-3-issue-issueidorkey-comment-get",
 				requiresAuthentication: true,
 				parameters: [
 					{
 						id: "ISSUE_ID_OR_KEY",
 						displayName: "Issue ID or Key",
-						description: "The ID or key of the issue to retrieve transitions for.",
+						description:
+							"The ID or key of the issue to retrieve comments for.",
 						required: true,
 						dataType: ApiParameterDatatype.TEXT,
 					},
 					{
-						id: "EXPAND",
-						displayName: "Expand",
-						description: 'Use expand to include additional information about transitions in the response.',
+						id: "START_AT",
+						displayName: "Start At",
+						description:
+							"The index of the first item to return in a page of results (page offset). Default: 0",
 						required: false,
-						dataType: ApiParameterDatatype.TEXT,
+						dataType: ApiParameterDatatype.NUMBER,
 					},
 					{
-						id: "TRANSITION_ID",
-						displayName: "Transition ID",
-						description: 'Use transitionId to filter results to include only the specified transitions. This parameter accepts a comma-separated list.',
+						id: "MAX_RESULTS",
+						displayName: "Max Results",
+						description:
+							"The maximum number of items to return per page. Default: 5000",
+						required: false,
+						dataType: ApiParameterDatatype.NUMBER,
+					},
+					{
+						id: "ORDER_BY",
+						displayName: "Order By",
+						description:
+							'Order the results by a field. Accepts "created" to sort comments by their created date. Valid values: "created", "-created", "+created".',
 						required: false,
 						dataType: ApiParameterDatatype.TEXT,
 					},
 				],
 			},
 			{
-                id: "TRANSITION_ISSUE",
-                name: "Transition Issue",
-                description: "Transition an issue to a new status",
-                documentationUrl: "https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issues/#api-rest-api-3-issue-issueidorkey-transitions-post",
-                requiresAuthentication: true,
-                parameters: [
-                    {
-                        id: "ISSUE_ID_OR_KEY",
-                        displayName: "Issue ID or Key",
-                        description: "The ID or key of the issue to be transitioned.",
-                        required: true,
-                        dataType: ApiParameterDatatype.TEXT,
-                    },
-                    {
-                        id: "TRANSITION",
-                        displayName: "Transition",
-                        description: "The ID or key of the transition.",
-                        required: true,
-                        dataType: ApiParameterDatatype.TEXT,
-                    },
-                    {
-                        id: "FIELDS",
-                        displayName: "Fields",
-                        description: "Fields to set as part of the transition, provided as a JSON object.",
-                        required: false,
-                        dataType: ApiParameterDatatype.TEXTAREA,
-                    },
-                ],
-            },
+				id: "ADD_COMMENT",
+				name: "Add Comment",
+				description: "Add a comment to an issue",
+				documentationUrl:
+					"https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issue-comments/#api-rest-api-3-issue-issueidorkey-comment-post",
+				requiresAuthentication: true,
+				parameters: [
+					{
+						id: "ISSUE_ID_OR_KEY",
+						displayName: "Issue ID or Key",
+						description:
+							"The ID or key of the issue to add a comment to.",
+						required: true,
+						dataType: ApiParameterDatatype.TEXT,
+					},
+					{
+						id: "BODY",
+						displayName: "Body",
+						description:
+							"The comment text in Atlassian Document Format.",
+						required: true,
+						dataType: ApiParameterDatatype.TEXTAREA,
+					},
+				],
+			},
+			{
+				id: "GET_FIELDS",
+				name: "Get Fields",
+				description: "Get all fields",
+				documentationUrl:
+					"https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issue-fields/#api-rest-api-3-field-get",
+				requiresAuthentication: true,
+				parameters: [],
+			},
+			{
+				id: "UPDATE_CUSTOM_FIELD",
+				name: "Update Custom Field",
+				description: "Update a custom field",
+				documentationUrl:
+					"https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issue-fields/#api-rest-api-3-field-fieldid-put",
+				requiresAuthentication: true,
+				parameters: [
+					{
+						id: "FIELD_ID",
+						displayName: "Field ID",
+						description: "The ID of the custom field to update",
+						required: true,
+						dataType: ApiParameterDatatype.TEXT,
+					},
+					{
+						id: "NAME",
+						displayName: "Name",
+						description: "The new name of the custom field",
+						required: true,
+						dataType: ApiParameterDatatype.TEXT,
+					},
+					{
+						id: "DESCRIPTION",
+						displayName: "Description",
+						description: "The new description of the custom field",
+						required: false,
+						dataType: ApiParameterDatatype.TEXT,
+					},
+					{
+						id: "SEARCHER_KEY",
+						displayName: "Searcher Key",
+						description:
+							"The searcher to use for the custom field. This is required for fields of type `Text` or `Number`.",
+						required: false,
+						dataType: ApiParameterDatatype.TEXT,
+					},
+				],
+			},
+			{
+				id: "GET_ISSUE_TRANSITIONS",
+				name: "Get Issue Transitions",
+				description: "Get transitions for an issue",
+				documentationUrl:
+					"https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issues/#api-rest-api-3-issue-issueidorkey-transitions-get",
+				requiresAuthentication: true,
+				parameters: [
+					{
+						id: "ISSUE_ID_OR_KEY",
+						displayName: "Issue ID or Key",
+						description:
+							"The ID or key of the issue to retrieve transitions for.",
+						required: true,
+						dataType: ApiParameterDatatype.TEXT,
+					},
+					{
+						id: "EXPAND",
+						displayName: "Expand",
+						description:
+							"Use expand to include additional information about transitions in the response.",
+						required: false,
+						dataType: ApiParameterDatatype.TEXT,
+					},
+					{
+						id: "TRANSITION_ID",
+						displayName: "Transition ID",
+						description:
+							"Use transitionId to filter results to include only the specified transitions. This parameter accepts a comma-separated list.",
+						required: false,
+						dataType: ApiParameterDatatype.TEXT,
+					},
+				],
+			},
+			{
+				id: "TRANSITION_ISSUE",
+				name: "Transition Issue",
+				description: "Transition an issue to a new status",
+				documentationUrl:
+					"https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issues/#api-rest-api-3-issue-issueidorkey-transitions-post",
+				requiresAuthentication: true,
+				parameters: [
+					{
+						id: "ISSUE_ID_OR_KEY",
+						displayName: "Issue ID or Key",
+						description:
+							"The ID or key of the issue to be transitioned.",
+						required: true,
+						dataType: ApiParameterDatatype.TEXT,
+					},
+					{
+						id: "TRANSITION",
+						displayName: "Transition",
+						description: "The ID or key of the transition.",
+						required: true,
+						dataType: ApiParameterDatatype.TEXT,
+					},
+					{
+						id: "FIELDS",
+						displayName: "Fields",
+						description:
+							"Fields to set as part of the transition, provided as a JSON object.",
+						required: false,
+						dataType: ApiParameterDatatype.TEXTAREA,
+					},
+				],
+			},
+		],
+	},
+	// MS Teams
+	[IntegrationType.MS_TEAMS]: {
+		name: "Microsoft Teams",
+		icon: {
+			src: "/ms_teams_logo.svg",
+			isSquareIcon: true,
+		},
+		credential: {
+			authType: AuthType.MS_TEAMS_OAUTH,
+			// Note: changing the scopes will require the user to re-authenticate, i.e., remove the integration and add it again!
+			// scope: "offline_access user.read channelmessage.send",
+			scope: [
+				"offline_access",
+				"user.read",
+				"channelmessage.send",
+				"chat.create",
+				"chat.read",
+				"chatmessage.send",
+				"directory.read.all",
+				"team.readbasic.all",
+				"user.read.all",
+			].join(" "),
+		},
+		apis: [
+			{
+				id: "SEND_MESSAGE_IN_CHANNEL",
+				name: "Send a Message in a Channel",
+				description: "Send a message in a channel",
+				documentationUrl:
+					"https://learn.microsoft.com/en-us/graph/api/channel-post-messages?view=graph-rest-1.0&tabs=http#http-request",
+				requiresAuthentication: true,
+				parameters: [
+					{
+						id: "TEAM_ID",
+						displayName: "Team ID",
+						description:
+							"The ID of the team to send the message to.",
+						required: true,
+						dataType: ApiParameterDatatype.TEXT,
+					},
+					{
+						id: "CHANNEL_ID",
+						displayName: "Channel ID",
+						description:
+							"The ID of the channel to send the message to.",
+						required: true,
+						dataType: ApiParameterDatatype.TEXT,
+					},
+					{
+						id: "MESSAGE",
+						displayName: "Message",
+						description: "The message to send.",
+						required: true,
+						dataType: ApiParameterDatatype.TEXTAREA,
+					},
+				],
+			},
 		],
 	},
 	// ...

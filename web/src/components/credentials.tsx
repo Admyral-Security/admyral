@@ -14,17 +14,26 @@ import {
 	Text,
 	TextField,
 } from "@radix-ui/themes";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import TrashIcon from "./icons/trash-icon";
 import {
 	INTEGRATIONS,
 	IntegrationType,
-	IntegrationCredentialDefinition,
+	AuthType,
+	SecretAuthentication,
+	IntegrationCredentialFormParameter,
+	MSTeamsOAuth,
 } from "@/lib/integrations";
 import IntegrationLogoIcon from "./integration-logo-icon";
 import { Credential } from "@/lib/types";
 import ArrowDownIcon from "./icons/arrow-down-icon";
 import FloppyDiskIcon from "./icons/floppy-disk-icon";
+import useSearchParameterError, {
+	SearchParameterErrorProvider,
+} from "@/providers/search-paramater-error-provider";
+import useCsrfToken, {
+	CsrfTokenProvider,
+} from "@/providers/csrf-token-provider";
 
 const IS_LOADING: boolean = true;
 const IS_NOT_LOADING: boolean = false;
@@ -112,7 +121,38 @@ function isIntegrationCredential(credentials: Credential): boolean {
 	return credentials.credentialType !== null;
 }
 
-export default function Credentials() {
+function generateEmptyValueCredentialParameter(
+	integration: IntegrationType,
+): { id: string; value: string }[] {
+	return INTEGRATIONS[integration].credential.authType === AuthType.SECRET
+		? (
+				INTEGRATIONS[integration].credential as SecretAuthentication
+			).parameters.map((def: IntegrationCredentialFormParameter) => ({
+				id: def.id,
+				value: "",
+			}))
+		: [];
+}
+
+function getMSTeamOAuthLoginUrl(csrfToken: string | null): string | null {
+	if (
+		csrfToken === null ||
+		process.env.NEXT_PUBLIC_MS_TEAMS_OAUTH_CLIENT_ID === undefined ||
+		process.env.NEXT_PUBLIC_DOMAIN === undefined
+	) {
+		return null;
+	}
+
+	// Generate a random value to prevent CSRF attacks
+	const clientId = process.env.NEXT_PUBLIC_MS_TEAMS_OAUTH_CLIENT_ID;
+	const redirectUri = `${process.env.NEXT_PUBLIC_DOMAIN}/integrations/callback/ms-teams`;
+	const scope = (
+		INTEGRATIONS[IntegrationType.MS_TEAMS].credential as MSTeamsOAuth
+	).scope;
+	return `https://login.microsoftonline.com/common/oauth2/v2.0/authorize?client_id=${clientId}&response_type=code&redirect_uri=${redirectUri}&response_mode=query&scope=${encodeURI(scope)}&state=${csrfToken}`;
+}
+
+function CredentialsChild() {
 	const [integrationsCredentials, setIntegrationsCredentials] = useState<
 		IntegrationCredential[]
 	>([]);
@@ -120,6 +160,18 @@ export default function Credentials() {
 		[],
 	);
 	const [error, setError] = useState<string | null>(null);
+
+	const { csrfToken } = useCsrfToken();
+
+	// Check for OAuth errors. If yes, display an error message
+	const { error: oauthError, resetError: resetOAuthError } =
+		useSearchParameterError();
+	useEffect(() => {
+		if (oauthError !== null) {
+			setError(oauthError);
+			resetOAuthError();
+		}
+	}, [oauthError]);
 
 	useEffect(() => {
 		listCredentials()
@@ -144,13 +196,8 @@ export default function Credentials() {
 							key: `integration_credentials_${Math.random()}`,
 							name: credential.name,
 							integrationType: credential.credentialType!,
-							values: INTEGRATIONS[
-								credential.credentialType!
-							].credentials.map(
-								(def: IntegrationCredentialDefinition) => ({
-									id: def.id,
-									value: "",
-								}),
+							values: generateEmptyValueCredentialParameter(
+								credential.credentialType as IntegrationType,
 							),
 							isPersisted: true,
 							loading: false,
@@ -194,7 +241,6 @@ export default function Credentials() {
 		}
 
 		const credentialName = integrationsCredentials[integrationIdx].name;
-
 		try {
 			setLoading(credentialName, IS_LOADING);
 			await deleteCredential(credentialName);
@@ -342,13 +388,8 @@ export default function Credentials() {
 							key: credential.key,
 							name: credential.name,
 							integrationType: credential.integrationType,
-							values: INTEGRATIONS[
-								credential.integrationType!
-							].credentials.map(
-								(def: IntegrationCredentialDefinition) => ({
-									id: def.id,
-									value: "",
-								}),
+							values: generateEmptyValueCredentialParameter(
+								credential.integrationType,
 							),
 							isPersisted: true,
 							loading: false,
@@ -391,61 +432,106 @@ export default function Credentials() {
 								{Object.keys(INTEGRATIONS)
 									.filter(
 										(integration: string) =>
-											INTEGRATIONS[integration]
-												.credentials.length > 0,
+											INTEGRATIONS[integration].credential
+												.authType !== AuthType.NONE,
 									)
-									.map((integration: string) => (
-										<DropdownMenu.Item
-											key={`credentials_integrations_${integration}`}
-											style={{
-												cursor: "pointer",
-											}}
-											onClick={() =>
-												setIntegrationsCredentials([
-													...integrationsCredentials,
-													{
-														key: `integration_credentials_${Math.random()}`,
-														name: "",
-														integrationType:
-															integration as IntegrationType,
-														values: INTEGRATIONS[
-															integration as IntegrationType
-														].credentials.map(
-															(
-																def: IntegrationCredentialDefinition,
-															) => ({
-																id: def.id,
-																value: "",
-															}),
-														),
-														isPersisted: false,
-														loading: false,
-														error: null,
-													},
-												])
+									.map((integration: string) => {
+										const authType =
+											INTEGRATIONS[integration].credential
+												.authType;
+
+										if (
+											authType === AuthType.MS_TEAMS_OAUTH
+										) {
+											const url =
+												getMSTeamOAuthLoginUrl(
+													csrfToken,
+												);
+											if (url === null) {
+												// MS Teams OAuth not configured
+												return <></>;
 											}
-										>
-											<Grid
-												columns="20px 1fr"
-												gap="2"
-												justify="center"
-												align="center"
+
+											return (
+												<a
+													key={`credentials_integrations_${integration}`}
+													href={url}
+												>
+													<DropdownMenu.Item
+														style={{
+															cursor: "pointer",
+														}}
+													>
+														<Grid
+															columns="20px 1fr"
+															gap="2"
+															justify="center"
+															align="center"
+														>
+															<IntegrationLogoIcon
+																integration={
+																	integration as IntegrationType
+																}
+															/>
+															<Text>
+																{
+																	INTEGRATIONS[
+																		integration as IntegrationType
+																	].name
+																}
+															</Text>
+														</Grid>
+													</DropdownMenu.Item>
+												</a>
+											);
+										}
+
+										return (
+											<DropdownMenu.Item
+												key={`credentials_integrations_${integration}`}
+												style={{
+													cursor: "pointer",
+												}}
+												onClick={() => {
+													setIntegrationsCredentials([
+														...integrationsCredentials,
+														{
+															key: `integration_credentials_${Math.random()}`,
+															name: "",
+															integrationType:
+																integration as IntegrationType,
+															values: generateEmptyValueCredentialParameter(
+																integration as IntegrationType,
+															),
+															isPersisted: false,
+															loading: false,
+															error: null,
+														},
+													]);
+												}}
 											>
-												<IntegrationLogoIcon
-													integration={
-														integration as IntegrationType
-													}
-												/>
-												<Text>
-													{
-														INTEGRATIONS[
+												<Grid
+													columns="20px 1fr"
+													gap="2"
+													justify="center"
+													align="center"
+												>
+													<IntegrationLogoIcon
+														integration={
 															integration as IntegrationType
-														].name
-													}
-												</Text>
-											</Grid>
-										</DropdownMenu.Item>
-									))}
+														}
+													/>
+													<Text>
+														{
+															INTEGRATIONS[
+																integration as IntegrationType
+															].name
+														}
+													</Text>
+												</Grid>
+											</DropdownMenu.Item>
+										);
+									})}
 								<DropdownMenu.Item
 									style={{
 										cursor: "pointer",
@@ -533,53 +619,59 @@ export default function Credentials() {
 									/>
 								</Flex>
 
-								{credential.values.map(
-									(credentialParameter, idx) => (
-										<Flex
-											key={`credentials_${credential.integrationType}_${integrationIdx}_${credentialParameter.id}`}
-											direction="column"
-											gap="2"
-										>
-											<Text>
-												{
-													INTEGRATIONS[
-														credential
-															.integrationType
-													].credentials[idx]
-														.displayName
-												}
-											</Text>
-											<TextField.Root
-												variant="surface"
-												disabled={
-													credential.isPersisted
-												}
-												type={
-													credential.isPersisted
-														? "password"
-														: undefined
-												}
-												value={
-													credential.isPersisted
-														? "some-random-stuff"
-														: credentialParameter.value
-												}
-												onChange={(event) => {
-													const credentialsCopy = [
-														...integrationsCredentials,
-													];
-													credentialsCopy[
-														integrationIdx
-													].values[idx].value =
-														event.target.value;
-													setIntegrationsCredentials(
-														credentialsCopy,
-													);
-												}}
-											/>
-										</Flex>
-									),
-								)}
+								{INTEGRATIONS[credential.integrationType]
+									.credential.authType === AuthType.SECRET &&
+									credential.values.map(
+										(credentialParameter, idx) => (
+											<Flex
+												key={`credentials_${credential.integrationType}_${integrationIdx}_${credentialParameter.id}`}
+												direction="column"
+												gap="2"
+											>
+												<Text>
+													{
+														(
+															INTEGRATIONS[
+																credential
+																	.integrationType
+															]
+																.credential as SecretAuthentication
+														).parameters[idx]
+															.displayName
+													}
+												</Text>
+												<TextField.Root
+													variant="surface"
+													disabled={
+														credential.isPersisted
+													}
+													type={
+														credential.isPersisted
+															? "password"
+															: undefined
+													}
+													value={
+														credential.isPersisted
+															? "some-random-stuff"
+															: credentialParameter.value
+													}
+													onChange={(event) => {
+														const credentialsCopy =
+															[
+																...integrationsCredentials,
+															];
+														credentialsCopy[
+															integrationIdx
+														].values[idx].value =
+															event.target.value;
+														setIntegrationsCredentials(
+															credentialsCopy,
+														);
+													}}
+												/>
+											</Flex>
+										),
+									)}
 
 								{credential.error &&
 									!credential.isPersisted && (
@@ -737,5 +829,17 @@ export default function Credentials() {
 				</Flex>
 			</Card>
 		</Box>
+	);
+}
+
+export default function Credentials() {
+	return (
+		<Suspense fallback={null}>
+			<CsrfTokenProvider>
+				<SearchParameterErrorProvider>
+					<CredentialsChild />
+				</SearchParameterErrorProvider>
+			</CsrfTokenProvider>
+		</Suspense>
 	);
 }

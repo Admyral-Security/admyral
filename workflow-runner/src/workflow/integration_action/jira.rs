@@ -2,7 +2,6 @@ use super::IntegrationExecutor;
 use crate::workflow::{
     context,
     http_client::{HttpClient, RequestBodyType},
-    secrets::fetch_credential,
     utils::{get_bool_parameter, get_number_parameter, get_string_parameter, ParameterType},
 };
 use anyhow::{anyhow, Result};
@@ -34,18 +33,27 @@ impl IntegrationExecutor for JiraExecutor {
         credential_name: &str,
         parameters: &HashMap<String, serde_json::Value>,
     ) -> Result<serde_json::Value> {
-        let credential = fetch_credential::<JiraCredential>(credential_name, context).await?;
+        let credential = context
+            .secrets_manager
+            .fetch_secret::<JiraCredential>(credential_name, &context.workflow_id)
+            .await?;
         match api {
             "CREATE_ISSUE" => create_issue(client, context, &credential, parameters).await,
             "ASSIGN_ISSUE" => assign_issue(client, context, &credential, parameters).await,
             "EDIT_ISSUE" => edit_issue(client, context, &credential, parameters).await,
             "GET_ISSUE" => get_issue(client, context, &credential, parameters).await,
             "FIND_USERS" => find_users(client, context, &credential, parameters).await,
-            "GET_ISSUE_COMMENTS" => get_issue_comments(client, context, &credential, parameters).await,
+            "GET_ISSUE_COMMENTS" => {
+                get_issue_comments(client, context, &credential, parameters).await
+            }
             "ADD_COMMENT" => add_comment(client, context, &credential, parameters).await,
             "GET_FIELDS" => get_fields(client, context, &credential).await,
-            "UPDATE_CUSTOM_FIELD" => update_custom_field(client, context, &credential, parameters).await,
-            "GET_ISSUE_TRANSITIONS" => get_issue_transitions(client, context, &credential, parameters).await,
+            "UPDATE_CUSTOM_FIELD" => {
+                update_custom_field(client, context, &credential, parameters).await
+            }
+            "GET_ISSUE_TRANSITIONS" => {
+                get_issue_transitions(client, context, &credential, parameters).await
+            }
             "TRANSITION_ISSUE" => transition_issue(client, context, &credential, parameters).await,
             _ => return Err(anyhow!("API {api} not implemented for {JIRA}.")),
         }
@@ -81,7 +89,7 @@ async fn jira_post_request(
     api_url: &str,
     credential: &JiraCredential,
     body: serde_json::Value,
-    expected_response_status: u16
+    expected_response_status: u16,
 ) -> Result<serde_json::Value> {
     // API Key Construction: https://developer.atlassian.com/cloud/jira/platform/basic-auth-for-rest-apis/
     let api_key = format!("{}:{}", credential.email, credential.api_token);
@@ -704,7 +712,14 @@ async fn add_comment(
         credential.domain, issue_id_or_key
     );
 
-    jira_post_request(client, &api_url, credential, json!({ "body": serde_json::from_str::<serde_json::Value>(&body)? }), 201).await
+    jira_post_request(
+        client,
+        &api_url,
+        credential,
+        json!({ "body": serde_json::from_str::<serde_json::Value>(&body)? }),
+        201,
+    )
+    .await
 }
 
 // https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issue-fields/#api-rest-api-3-field-get
@@ -911,7 +926,7 @@ async fn transition_issue(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::postgres::Database;
+    use crate::postgres::{Credential, Database};
     use async_trait::async_trait;
     use serde_json::json;
     use std::sync::Arc;
@@ -961,8 +976,8 @@ mod tests {
             &self,
             _workflow_id: &str,
             _credential_name: &str,
-        ) -> Result<Option<String>> {
-            Ok(Some("{\"API_TOKEN\": \"some-api-key\", \"DOMAIN\": \"test\", \"EMAIL\": \"chris@admyral.dev\"}".to_string()))
+        ) -> Result<Option<Credential>> {
+            Ok(Some(Credential { secret: "{\"API_TOKEN\": \"some-api-key\", \"DOMAIN\": \"test\", \"EMAIL\": \"chris@admyral.dev\"}".to_string(), credential_type: Some("JIRA".to_string()) }))
         }
     }
 
@@ -973,7 +988,7 @@ mod tests {
             &self,
             _workflow_id: &str,
             _credential_name: &str,
-        ) -> Result<Option<String>> {
+        ) -> Result<Option<Credential>> {
             Ok(None)
         }
     }
@@ -985,8 +1000,11 @@ mod tests {
             &self,
             _workflow_id: &str,
             _credential_name: &str,
-        ) -> Result<Option<String>> {
-            Ok(Some("{\"API_TOKEN\": \"some-api-key\"}".to_string()))
+        ) -> Result<Option<Credential>> {
+            Ok(Some(Credential {
+                secret: "{\"API_TOKEN\": \"some-api-key\"}".to_string(),
+                credential_type: Some("JIRA".to_string()),
+            }))
         }
     }
 
@@ -1150,7 +1168,13 @@ mod tests {
             "ORDER_BY".to_string() => json!("created")
         };
         let result = JiraExecutor
-            .execute(&*client, &context, "GET_ISSUE_COMMENTS", "credentials", &parameters)
+            .execute(
+                &*client,
+                &context,
+                "GET_ISSUE_COMMENTS",
+                "credentials",
+                &parameters,
+            )
             .await;
         assert!(result.is_ok());
         let value = result.unwrap();
@@ -1162,13 +1186,7 @@ mod tests {
         let (client, context) = setup(Arc::new(MockDb)).await;
         let parameters = hashmap! {}; // No parameters needed for this API
         let result = JiraExecutor
-            .execute(
-                &*client,
-                &context,
-                "GET_FIELDS",
-                "credentials",
-                &parameters,
-            )
+            .execute(&*client, &context, "GET_FIELDS", "credentials", &parameters)
             .await;
         assert!(result.is_ok());
         let value = result.unwrap();
@@ -1207,11 +1225,16 @@ mod tests {
             "TRANSITION_ID".to_string() => json!("5")
         };
         let result = JiraExecutor
-            .execute(&*client, &context, "GET_ISSUE_TRANSITIONS", "credentials", &parameters)
+            .execute(
+                &*client,
+                &context,
+                "GET_ISSUE_TRANSITIONS",
+                "credentials",
+                &parameters,
+            )
             .await;
         assert!(result.is_ok());
         let value = result.unwrap();
         assert_eq!(value, json!({"ok": true}));
     }
-
 }

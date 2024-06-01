@@ -105,7 +105,7 @@ pub async fn resolve_references(value: &str, context: &Context) -> Result<Resolv
                     .fetch_secret(&context.workflow_id, credential_name)
                     .await?
                 {
-                    Some(secret) => secret,
+                    Some(credential) => credential.secret,
                     None => "".to_string(),
                 };
                 return Ok((reference, (secret, false)));

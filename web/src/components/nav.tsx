@@ -152,27 +152,6 @@ export default function Nav() {
 					<HoverCard.Root>
 						<HoverCard.Trigger>
 							<Link
-								href="https://join.slack.com/t/admyralcommunity/shared_invite/zt-2hqxj1xrr-YoWXYq7t8l3i5GyTCzEwPg"
-								target="_blank"
-							>
-								<Image
-									src="/slack_logo.svg"
-									alt="Slack"
-									width={18}
-									height={18}
-								/>
-							</Link>
-						</HoverCard.Trigger>
-						<HoverCard.Content style={{ padding: 0 }}>
-							<Badge size="3" color="green">
-								Join us on Slack!
-							</Badge>
-						</HoverCard.Content>
-					</HoverCard.Root>
-
-					<HoverCard.Root>
-						<HoverCard.Trigger>
-							<Link
 								href="https://github.com/admyral-security/admyral"
 								target="_blank"
 							>

@@ -1,4 +1,5 @@
 mod postgres;
+mod secrets_manager;
 mod server;
 mod workflow;
 

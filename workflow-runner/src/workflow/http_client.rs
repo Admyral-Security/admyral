@@ -7,6 +7,7 @@ use serde_json::json;
 use std::collections::HashMap;
 use std::str::FromStr;
 
+use super::context::Context;
 use super::utils::xml_to_json;
 
 lazy_static! {
@@ -52,9 +53,47 @@ pub trait HttpClient: Send + Sync {
     ) -> Result<serde_json::Value> {
         Ok(serde_json::json!({}))
     }
+
+    async fn get_with_oauth_refresh(
+        &self,
+        context: &Context,
+        url: &str,
+        oauth_token_name: &str,
+        headers: HashMap<String, String>,
+        expected_response_status: u16,
+        error_message: String,
+    ) -> Result<serde_json::Value> {
+        Ok(serde_json::json!({}))
+    }
+
+    async fn post_with_oauth_refresh(
+        &self,
+        context: &Context,
+        url: &str,
+        oauth_token_name: &str,
+        headers: HashMap<String, String>,
+        body: RequestBodyType,
+        expected_response_status: u16,
+        error_message: String,
+    ) -> Result<serde_json::Value> {
+        Ok(serde_json::json!({}))
+    }
+
+    async fn put_with_oauth_refresh(
+        &self,
+        context: &Context,
+        url: &str,
+        oauth_token_name: &str,
+        headers: HashMap<String, String>,
+        body: RequestBodyType,
+        expected_response_status: u16,
+        error_message: String,
+    ) -> Result<serde_json::Value> {
+        Ok(serde_json::json!({}))
+    }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct ReqwestClient {
     client: reqwest::Client,
 }
@@ -109,6 +148,170 @@ async fn decode_response(
         .map_err(|e| anyhow!(e))
 }
 
+async fn make_get_request(
+    client: &reqwest::Client,
+    url: &str,
+    header_parameters: &HashMap<String, String>,
+) -> Result<Response> {
+    let mut headers = HeaderMap::new();
+    for (key, value) in header_parameters.iter() {
+        headers.insert(HeaderName::from_str(key)?, HeaderValue::from_str(value)?);
+    }
+
+    client
+        .get(url)
+        .headers(headers)
+        .send()
+        .await
+        .map_err(|e| anyhow!(e))
+}
+
+async fn make_post_request(
+    client: &reqwest::Client,
+    url: &str,
+    header_parameters: &HashMap<String, String>,
+    body: &RequestBodyType,
+) -> Result<Response> {
+    let mut headers = HeaderMap::new();
+    for (key, value) in header_parameters.iter() {
+        headers.insert(HeaderName::from_str(key)?, HeaderValue::from_str(value)?);
+    }
+
+    match body {
+        RequestBodyType::Form { params } => {
+            // TODO: Remove content type
+            headers.insert(
+                "content-type",
+                HeaderValue::from_str("application/x-www-form-urlencoded")?,
+            );
+            client
+                .post(url)
+                .headers(headers)
+                .form(params)
+                .send()
+                .await
+                .map_err(|e| anyhow!(e))
+        }
+        RequestBodyType::Json { body } => {
+            // TODO: Remove content type
+            headers.insert("content-type", HeaderValue::from_str("application/json")?);
+            client
+                .post(url)
+                .headers(headers)
+                .json(body)
+                .send()
+                .await
+                .map_err(|e| anyhow!(e))
+        }
+    }
+}
+
+async fn make_put_request(
+    client: &reqwest::Client,
+    url: &str,
+    header_parameters: &HashMap<String, String>,
+    body: &RequestBodyType,
+) -> Result<Response> {
+    let mut headers = HeaderMap::new();
+    for (key, value) in header_parameters.iter() {
+        headers.insert(HeaderName::from_str(key)?, HeaderValue::from_str(value)?);
+    }
+
+    match body {
+        RequestBodyType::Form { params } => {
+            // TODO: Remove content type
+            headers.insert(
+                "content-type",
+                HeaderValue::from_str("application/x-www-form-urlencoded")?,
+            );
+            client
+                .put(url)
+                .headers(headers)
+                .form(&params)
+                .send()
+                .await
+                .map_err(|e| anyhow!(e))
+        }
+        RequestBodyType::Json { body } => {
+            // TODO: Remove content type
+            headers.insert("content-type", HeaderValue::from_str("application/json")?);
+            client
+                .put(url)
+                .headers(headers)
+                .json(&body)
+                .send()
+                .await
+                .map_err(|e| anyhow!(e))
+        }
+    }
+}
+
+enum Operation {
+    Get,
+    Post { body: RequestBodyType },
+    Put { body: RequestBodyType },
+}
+
+impl ReqwestClient {
+    async fn with_oauth_refresh(
+        &self,
+        context: &Context,
+        url: &str,
+        oauth_token_name: &str,
+        mut headers: HashMap<String, String>,
+        expected_response_status: u16,
+        error_message: String,
+        operation: Operation,
+    ) -> Result<serde_json::Value> {
+        let oauth_token = context
+            .secrets_manager
+            .fetch_oauth_token_and_refresh_if_necessary(oauth_token_name, &context.workflow_id)
+            .await?;
+        headers.insert(
+            "Authorization".to_string(),
+            format!("{} {}", oauth_token.token_type, oauth_token.access_token),
+        );
+
+        let response = match &operation {
+            Operation::Get => make_get_request(&self.client, url, &headers).await?,
+            Operation::Post { body } => {
+                make_post_request(&self.client, url, &headers, body).await?
+            }
+            Operation::Put { body } => make_put_request(&self.client, url, &headers, body).await?,
+        };
+        let response_status = response.status().as_u16();
+        if response_status == expected_response_status {
+            return decode_response(response, expected_response_status, error_message).await;
+        }
+
+        if response_status != 401 {
+            // We have an error, but it is not an unauthorized error. Hence, it is not due to expired oauth token.
+            let error_response = response.text().await?;
+            let error = format!("{error_message}. Response Status: {response_status}. Error Response Message: {error_response}");
+            tracing::error!(error);
+            return Err(anyhow!(error));
+        }
+
+        // Fetch token again (it will automatically refresh) and retry again.
+        let oauth_token = context
+            .secrets_manager
+            .fetch_oauth_token_and_refresh_if_necessary(oauth_token_name, &context.workflow_id)
+            .await?;
+        headers.insert(
+            "Authorization".to_string(),
+            format!("{} {}", oauth_token.token_type, oauth_token.access_token),
+        );
+        let response = match &operation {
+            Operation::Get => make_get_request(&self.client, url, &headers).await?,
+            Operation::Post { body } => {
+                make_post_request(&self.client, url, &headers, body).await?
+            }
+            Operation::Put { body } => make_put_request(&self.client, url, &headers, body).await?,
+        };
+        decode_response(response, expected_response_status, error_message).await
+    }
+}
+
 #[async_trait]
 impl HttpClient for ReqwestClient {
     async fn get(
@@ -118,97 +321,96 @@ impl HttpClient for ReqwestClient {
         expected_response_status: u16,
         error_message: String,
     ) -> Result<serde_json::Value> {
-        let mut headers = HeaderMap::new();
-        for (key, value) in header_parameters.iter() {
-            headers.insert(HeaderName::from_str(key)?, HeaderValue::from_str(value)?);
-        }
-
-        let response = self.client.get(url).headers(headers).send().await?;
-
+        let response = make_get_request(&self.client, url, &header_parameters).await?;
         decode_response(response, expected_response_status, error_message).await
     }
 
     async fn post(
         &self,
         url: &str,
-        header_parameters: HashMap<String, String>,
+        headers: HashMap<String, String>,
         body: RequestBodyType,
         expected_response_status: u16,
         error_message: String,
     ) -> Result<serde_json::Value> {
-        let mut headers = HeaderMap::new();
-        for (key, value) in header_parameters.iter() {
-            headers.insert(HeaderName::from_str(key)?, HeaderValue::from_str(value)?);
-        }
-
-        let response = match body {
-            RequestBodyType::Form { params } => {
-                // TODO: Remove content type
-                headers.insert(
-                    "content-type",
-                    HeaderValue::from_str("application/x-www-form-urlencoded")?,
-                );
-                self.client
-                    .post(url)
-                    .headers(headers)
-                    .form(&params)
-                    .send()
-                    .await?
-            }
-            RequestBodyType::Json { body } => {
-                // TODO: Remove content type
-                headers.insert("content-type", HeaderValue::from_str("application/json")?);
-                self.client
-                    .post(url)
-                    .headers(headers)
-                    .json(&body)
-                    .send()
-                    .await?
-            }
-        };
-
+        let response = make_post_request(&self.client, url, &headers, &body).await?;
         decode_response(response, expected_response_status, error_message).await
     }
 
     async fn put(
         &self,
         url: &str,
-        header_parameters: HashMap<String, String>,
+        headers: HashMap<String, String>,
         body: RequestBodyType,
         expected_response_status: u16,
         error_message: String,
     ) -> Result<serde_json::Value, Error> {
-        let mut headers = HeaderMap::new();
-        for (key, value) in header_parameters.iter() {
-            headers.insert(HeaderName::from_str(key)?, HeaderValue::from_str(value)?);
-        }
-
-        let response = match body {
-            RequestBodyType::Form { params } => {
-                // TODO: Remove content type
-                headers.insert(
-                    "content-type",
-                    HeaderValue::from_str("application/x-www-form-urlencoded")?,
-                );
-                self.client
-                    .put(url)
-                    .headers(headers)
-                    .form(&params)
-                    .send()
-                    .await?
-            }
-            RequestBodyType::Json { body } => {
-                // TODO: Remove content type
-                headers.insert("content-type", HeaderValue::from_str("application/json")?);
-                self.client
-                    .put(url)
-                    .headers(headers)
-                    .json(&body)
-                    .send()
-                    .await?
-            }
-        };
-
+        let response = make_put_request(&self.client, url, &headers, &body).await?;
         decode_response(response, expected_response_status, error_message).await
+    }
+
+    async fn get_with_oauth_refresh(
+        &self,
+        context: &Context,
+        url: &str,
+        oauth_token_name: &str,
+        headers: HashMap<String, String>,
+        expected_response_status: u16,
+        error_message: String,
+    ) -> Result<serde_json::Value> {
+        self.with_oauth_refresh(
+            context,
+            url,
+            oauth_token_name,
+            headers,
+            expected_response_status,
+            error_message,
+            Operation::Get,
+        )
+        .await
+    }
+
+    async fn post_with_oauth_refresh(
+        &self,
+        context: &Context,
+        url: &str,
+        oauth_token_name: &str,
+        headers: HashMap<String, String>,
+        body: RequestBodyType,
+        expected_response_status: u16,
+        error_message: String,
+    ) -> Result<serde_json::Value> {
+        self.with_oauth_refresh(
+            context,
+            url,
+            oauth_token_name,
+            headers,
+            expected_response_status,
+            error_message,
+            Operation::Post { body },
+        )
+        .await
+    }
+
+    async fn put_with_oauth_refresh(
+        &self,
+        context: &Context,
+        url: &str,
+        oauth_token_name: &str,
+        headers: HashMap<String, String>,
+        body: RequestBodyType,
+        expected_response_status: u16,
+        error_message: String,
+    ) -> Result<serde_json::Value> {
+        self.with_oauth_refresh(
+            context,
+            url,
+            oauth_token_name,
+            headers,
+            expected_response_status,
+            error_message,
+            Operation::Put { body },
+        )
+        .await
     }
 }

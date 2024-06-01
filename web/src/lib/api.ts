@@ -263,7 +263,9 @@ export async function createCredential(
 		},
 	);
 	if (result.status !== 204) {
-		throw new Error("Failed to create credential!");
+		// TODO: return better error messages (e.g., we need to distinguish between duplicate credential names and other errors)
+		const error = await result.text();
+		throw new Error("Failed to create credential! Error: " + error);
 	}
 }
 

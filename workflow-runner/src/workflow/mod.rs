@@ -8,7 +8,6 @@ mod if_condition_action;
 mod integration_action;
 mod manual_start_action;
 mod reference_resolution;
-mod secrets;
 mod send_email_action;
 mod utils;
 mod webhook_action;

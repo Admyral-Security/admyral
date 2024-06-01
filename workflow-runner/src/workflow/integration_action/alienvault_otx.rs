@@ -2,7 +2,6 @@ use super::IntegrationExecutor;
 use crate::workflow::{
     context,
     http_client::HttpClient,
-    secrets::fetch_credential,
     utils::{get_string_parameter, ParameterType},
 };
 use anyhow::{anyhow, Result};
@@ -30,7 +29,9 @@ impl IntegrationExecutor for AlienvaultOtxExecutor {
         credential_name: &str,
         parameters: &HashMap<String, serde_json::Value>,
     ) -> Result<serde_json::Value> {
-        let api_key = fetch_credential::<AlienvaultOtxCredential>(credential_name, context)
+        let api_key = context
+            .secrets_manager
+            .fetch_secret::<AlienvaultOtxCredential>(credential_name, &context.workflow_id)
             .await?
             .api_key;
         match api {
@@ -88,7 +89,7 @@ async fn get_domain_information(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::postgres::Database;
+    use crate::postgres::{Credential, Database};
     use async_trait::async_trait;
     use serde_json::json;
     use std::sync::Arc;
@@ -116,8 +117,11 @@ mod tests {
             &self,
             _workflow_id: &str,
             _credential_name: &str,
-        ) -> Result<Option<String>> {
-            Ok(Some("{\"API_KEY\": \"some-api-key\"}".to_string()))
+        ) -> Result<Option<Credential>> {
+            Ok(Some(Credential {
+                secret: "{\"API_KEY\": \"some-api-key\"}".to_string(),
+                credential_type: Some("ALIENVAULT_OTX".to_string()),
+            }))
         }
     }
 
@@ -128,7 +132,7 @@ mod tests {
             &self,
             _workflow_id: &str,
             _credential_name: &str,
-        ) -> Result<Option<String>> {
+        ) -> Result<Option<Credential>> {
             Ok(None)
         }
     }

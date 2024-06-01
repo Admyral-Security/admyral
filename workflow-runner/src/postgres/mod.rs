@@ -83,8 +83,9 @@ struct WorkflowValidation {
 }
 
 #[derive(sqlx::FromRow, Debug)]
-struct CredentialRow {
-    encrypted_secret: String,
+pub struct Credential {
+    pub secret: String,
+    pub credential_type: Option<String>,
 }
 
 #[derive(sqlx::FromRow, Debug)]
@@ -151,10 +152,19 @@ pub trait Database: Send + Sync {
 
     async fn fetch_secret(
         &self,
-        _workflow_id: &str,
-        _credential_name: &str,
-    ) -> Result<Option<String>> {
+        workflow_id: &str,
+        credential_name: &str,
+    ) -> Result<Option<Credential>> {
         Ok(None)
+    }
+
+    async fn update_secret(
+        &self,
+        workflow_id: &str,
+        credential_name: &str,
+        secret: &str,
+    ) -> Result<()> {
+        Ok(())
     }
 
     async fn get_workflow_owner(&self, _workflow_id: &str) -> Result<String> {
@@ -449,17 +459,17 @@ impl Database for PostgresDatabase {
         &self,
         workflow_id: &str,
         credential_name: &str,
-    ) -> Result<Option<String>> {
+    ) -> Result<Option<Credential>> {
         tracing::info!(
             "Fetching secret - worklow_id = {workflow_id}, credential_name = {credential_name}"
         );
 
         let workflow_uuid = str_to_uuid(workflow_id)?;
 
-        let credential: Option<CredentialRow> = sqlx::query_as!(
-            CredentialRow,
+        let credential: Option<Credential> = sqlx::query_as!(
+            Credential,
             r#"
-            SELECT c.encrypted_secret
+            SELECT c.encrypted_secret AS secret, c.credential_type
             FROM admyral.workflow w
             JOIN admyral.credential c ON w.user_id = c.user_id
             WHERE c.credential_name = $1 AND w.workflow_id = $2 AND w.user_id IS NOT NULL AND w.is_template = false
@@ -475,12 +485,39 @@ impl Database for PostgresDatabase {
 
         match credential {
             None => Ok(None),
-            Some(credential) => {
-                let decrypted_secret =
-                    crypto::decrypt_aes256_gcm(&credential.encrypted_secret).await?;
-                Ok(Some(decrypted_secret))
+            Some(mut credential) => {
+                credential.secret = crypto::decrypt_aes256_gcm(&credential.secret).await?;
+                Ok(Some(credential))
             }
         }
+    }
+
+    async fn update_secret(
+        &self,
+        workflow_id: &str,
+        credential_name: &str,
+        secret: &str,
+    ) -> Result<()> {
+        tracing::info!("Updating secret - workflow id = {workflow_id}, secret = {secret}");
+
+        let workflow_uuid = str_to_uuid(workflow_id)?;
+
+        let encrypted_secret = crypto::encrypt_aes256_gcm(secret).await?;
+
+        sqlx::query!(
+            r#"
+            UPDATE admyral.credential
+            SET encrypted_secret = $1
+            WHERE credential_name = $2 AND user_id IN (SELECT user_id FROM admyral.workflow WHERE workflow_id = $3 LIMIT 1)
+            "#,
+            encrypted_secret,
+            credential_name,
+            workflow_uuid
+        )
+        .execute(&self.pg_pool)
+        .await?;
+
+        Ok(())
     }
 
     async fn get_workflow_owner(&self, workflow_id: &str) -> Result<String> {

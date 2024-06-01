@@ -1,4 +1,4 @@
-use crate::postgres::Database;
+use crate::{postgres::Database, secrets_manager::SecretsManager};
 use anyhow::Result;
 use std::sync::Arc;
 
@@ -11,6 +11,7 @@ pub struct Context {
     pub db: Arc<dyn Database>,
     pub run_id: String,
     pub execution_time_limit_in_sec: Option<u64>,
+    pub secrets_manager: SecretsManager,
 }
 
 impl Context {
@@ -20,12 +21,14 @@ impl Context {
         db: Arc<dyn Database>,
     ) -> Result<Self> {
         let run_id = db.init_run_state(&workflow_id).await?;
+        let secrets_manager = SecretsManager::new(db.clone());
         Ok(Self {
             workflow_id,
             execution_state: ExecutionState::default(),
             db,
             run_id,
             execution_time_limit_in_sec,
+            secrets_manager,
         })
     }
 

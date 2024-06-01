@@ -44,6 +44,8 @@ services:
             OPENAI_API_KEY: ${OPENAI_API_KEY}
             RESEND_API_KEY: ${RESEND_API_KEY}
             RESEND_EMAIL: ${RESEND_EMAIL}
+            MS_TEAMS_OAUTH_CLIENT_ID: ${MS_TEAMS_OAUTH_CLIENT_ID}
+            MS_TEAMS_OAUTH_CLIENT_SECRET: ${MS_TEAMS_OAUTH_CLIENT_SECRET}
 
             # Uncomment to enable quotas - the quotas can be set in the .env file
             # WORKFLOW_RUN_HOURLY_QUOTA: ${WORKFLOW_RUN_HOURLY_QUOTA}
@@ -68,11 +70,13 @@ services:
                 NEXT_PUBLIC_SUPABASE_ANON_KEY: ${ANON_KEY}
                 NEXT_PUBLIC_SUPPORT_EMAIL: ${SUPPORT_EMAIL}
                 NEXT_PUBLIC_WORKFLOW_RUNNER_API_URL: ${ADMYRAL_WORKFLOW_RUNNER_API_URL}
-                NEXT_PUBLIC_POSTHOG_KEY: ${NEXT_PUBLIC_POSTHOG_KEY}
-                NEXT_PUBLIC_POSTHOG_HOST: ${NEXT_PUBLIC_POSTHOG_HOST}
+                NEXT_PUBLIC_POSTHOG_KEY: ${POSTHOG_KEY}
+                NEXT_PUBLIC_POSTHOG_HOST: ${POSTHOG_HOST}
                 NEXT_PUBLIC_DISABLE_GOOGLE_AUTH: true
                 NEXT_PUBLIC_DISABLE_MICROSOFT_AUTH: true
                 NEXT_PUBLIC_DISABLE_GITHUB_AUTH: true
+                NEXT_PUBLIC_DOMAIN: ${ADMYRAL_SITE_URL}
+                NEXT_PUBLIC_MS_TEAMS_OAUTH_CLIENT_ID: ${MS_TEAMS_OAUTH_CLIENT_ID}
         env_file:
             - ./.env
         ports:
@@ -83,6 +87,7 @@ services:
             BACKEND_API_URL: http://backend
             CREDENTIALS_SECRET: ${CREDENTIALS_SECRET}
             WEBHOOK_SIGNING_SECRET: ${WEBHOOK_SIGNING_SECRET}
+            MS_TEAMS_OAUTH_CLIENT_SECRET: ${MS_TEAMS_OAUTH_CLIENT_SECRET}
         depends_on:
             backend:
                 condition: service_healthy

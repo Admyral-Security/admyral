@@ -144,6 +144,12 @@ export class AdmyralStack extends cdk.Stack {
 			workflowRunnerServiceEnvironment.WORKFLOW_RUN_TIMEOUT_IN_MINUTES =
 				process.env.WORKFLOW_RUN_TIMEOUT_IN_MINUTES;
 		}
+		if (process.env.MS_TEAMS_OAUTH_CLIENT_ID !== undefined) {
+			workflowRunnerServiceEnvironment.MS_TEAMS_OAUTH_CLIENT_ID = process.env.MS_TEAMS_OAUTH_CLIENT_ID;
+ 		}
+	 	if (process.env.MS_TEAMS_OAUTH_CLIENT_SECRET !== undefined) {
+			workflowRunnerServiceEnvironment.MS_TEAMS_OAUTH_CLIENT_SECRET = process.env.MS_TEAMS_OAUTH_CLIENT_SECRET;
+		}
 
 		const workflowRunnerService =
 			new ecsPatterns.ApplicationLoadBalancedFargateService(

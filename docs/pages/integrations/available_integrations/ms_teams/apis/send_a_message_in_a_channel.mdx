@@ -1,0 +1,66 @@
+import { Callout } from "nextra/components";
+
+# Send a Message in a Channel
+
+Send a new message in the specified channel. Requires the scope `ChannelMessage.Send`.
+
+Please note that the sender of the message is the user who created the connection.
+
+<Callout type="info">
+	For Microsoft Team's documentation, see [Send chatMessage in
+	channel](https://learn.microsoft.com/en-us/graph/api/channel-post-messages?view=graph-rest-1.0&tabs=http#http-request).
+</Callout>
+
+## Parameters:
+
+| Field          | Description                                                                                                                                                                                                                               | Required |
+| -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------: |
+| **Team ID**    | The ID of the Team. To find the ID, go to your Microsoft Teams app and get the sharing link for your team. The value after `groupId=` unitl the next `&` is your team ID.                                                                 |   Yes    |
+| **Channel ID** | The ID of the Channel. To find the ID, go your Microsoft Teams app and get the sharing link for the channel. The value after `channel/` until the next `/` your channel ID. Note that you must replace `%3A` with `:` and `%40` with `@`. |   Yes    |
+| **Message**    | Your message.                                                                                                                                                                                                                             |   Yes    |
+
+## Example Output:
+
+```json
+{
+	"id": "1717239241026",
+	"body": {
+		"content": "Hello from Admyral",
+		"contentType": "text"
+	},
+	"etag": "1717239241026",
+	"from": {
+		"user": {
+			"id": "...",
+			"tenantId": "...",
+			"@odata.type": "#microsoft.graph.teamworkUserIdentity",
+			"displayName": "Daniel Grittner",
+			"userIdentityType": "aadUser"
+		},
+		"device": null,
+		"application": null
+	},
+	"chatId": null,
+	"locale": "en-us",
+	"webUrl": "https://teams.microsoft.com/l/message/...",
+	"subject": null,
+	"summary": null,
+	"mentions": [],
+	"reactions": [],
+	"replyToId": null,
+	"importance": "normal",
+	"attachments": [],
+	"eventDetail": null,
+	"messageType": "message",
+	"@odata.context": "https://graph.microsoft.com/v1.0/$metadata#teams('...",
+	"channelIdentity": {
+		"teamId": "...",
+		"channelId": "..."
+	},
+	"createdDateTime": "2024-06-01T10:54:01.026Z",
+	"deletedDateTime": null,
+	"policyViolation": null,
+	"lastEditedDateTime": null,
+	"lastModifiedDateTime": "2024-06-01T10:54:01.026Z"
+}
+```
