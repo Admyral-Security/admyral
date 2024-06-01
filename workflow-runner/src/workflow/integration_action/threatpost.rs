@@ -71,14 +71,16 @@ mod tests {
     impl Database for MockDb {}
 
     async fn setup() -> (Arc<MockHttpClient>, context::Context) {
+        let client = Arc::new(MockHttpClient);
         let context = context::Context::init(
             "ddd54f25-0537-4e40-ab96-c93beee543de".to_string(),
             None,
             Arc::new(MockDb),
+            client.clone(),
         )
         .await
         .unwrap();
-        (Arc::new(MockHttpClient), context)
+        (client, context)
     }
 
     #[tokio::test]

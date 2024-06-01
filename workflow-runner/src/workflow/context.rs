@@ -2,7 +2,7 @@ use crate::{postgres::Database, secrets_manager::SecretsManager};
 use anyhow::Result;
 use std::sync::Arc;
 
-use super::{execution_state::ExecutionState, ReferenceHandle};
+use super::{execution_state::ExecutionState, http_client::HttpClient, ReferenceHandle};
 
 #[derive(Clone)]
 pub struct Context {
@@ -19,9 +19,10 @@ impl Context {
         workflow_id: String,
         execution_time_limit_in_sec: Option<u64>,
         db: Arc<dyn Database>,
+        client: Arc<dyn HttpClient>,
     ) -> Result<Self> {
         let run_id = db.init_run_state(&workflow_id).await?;
-        let secrets_manager = SecretsManager::new(db.clone());
+        let secrets_manager = SecretsManager::new(db.clone(), client.clone());
         Ok(Self {
             workflow_id,
             execution_state: ExecutionState::default(),

@@ -490,11 +490,16 @@ mod tests {
     }
 
     async fn setup(db: Arc<dyn Database>) -> (Arc<MockHttpClient>, context::Context) {
-        let context =
-            context::Context::init("ddd54f25-0537-4e40-ab96-c93beee543de".to_string(), None, db)
-                .await
-                .unwrap();
-        (Arc::new(MockHttpClient), context)
+        let client = Arc::new(MockHttpClient);
+        let context = context::Context::init(
+            "ddd54f25-0537-4e40-ab96-c93beee543de".to_string(),
+            None,
+            db,
+            client.clone(),
+        )
+        .await
+        .unwrap();
+        (client, context)
     }
 
     #[tokio::test]
@@ -654,12 +659,13 @@ mod tests {
                 }
             }
 
-            let client = MockHttpClientWithPagination::default();
+            let client = Arc::new(MockHttpClientWithPagination::default());
 
             let context = context::Context::init(
                 "ddd54f25-0537-4e40-ab96-c93beee543de".to_string(),
                 None,
                 Arc::new(MockDb),
+                client.clone(),
             )
             .await
             .unwrap();
@@ -670,7 +676,7 @@ mod tests {
                 "RETURN_ALL_PAGES".to_string() => json!(true)
             };
             let result = SlackExecutor
-                .execute(&client, &context, "LIST_USERS", "credentials", &parameters)
+                .execute(&*client, &context, "LIST_USERS", "credentials", &parameters)
                 .await;
             assert!(result.is_ok());
             let value = result.unwrap();

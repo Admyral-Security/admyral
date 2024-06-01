@@ -96,3 +96,89 @@ async fn send_message_in_channel(
         )
         .await
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::postgres::{Credential, Database};
+    use async_trait::async_trait;
+    use std::sync::Arc;
+
+    struct MockHttpClient;
+    #[async_trait]
+    impl HttpClient for MockHttpClient {
+        async fn get_with_oauth_refresh(
+            &self,
+            _context: &Context,
+            _url: &str,
+            _oauth_token_name: &str,
+            _headers: HashMap<String, String>,
+            _expected_response_status: u16,
+            _error_message: String,
+        ) -> Result<serde_json::Value> {
+            Ok(json!({
+                "ok": true,
+            }))
+        }
+
+        async fn post_with_oauth_refresh(
+            &self,
+            _context: &Context,
+            _url: &str,
+            _oauth_token_name: &str,
+            _headers: HashMap<String, String>,
+            _body: RequestBodyType,
+            _expected_response_status: u16,
+            _error_message: String,
+        ) -> Result<serde_json::Value> {
+            Ok(serde_json::json!({"ok": true}))
+        }
+    }
+
+    struct MockDb;
+    #[async_trait]
+    impl Database for MockDb {
+        async fn fetch_secret(
+            &self,
+            _workflow_id: &str,
+            _credential_name: &str,
+        ) -> Result<Option<Credential>> {
+            Ok(Some(Credential { secret: "{\"access_token\": \"dsaddsad\", \"refresh_token\": \"sdasdasd\", \"expires_at\": 23000, \"scope\": \"offline_access\", \"token_type\": \"Bearer\"}".to_string(), credential_type: Some("MS_TEAMS".to_string()) }))
+        }
+    }
+
+    async fn setup(db: Arc<dyn Database>) -> (Arc<MockHttpClient>, Context) {
+        let client = Arc::new(MockHttpClient);
+        let context = Context::init(
+            "ddd54f25-0537-4e40-ab96-c93beee543de".to_string(),
+            None,
+            db,
+            client.clone(),
+        )
+        .await
+        .unwrap();
+        (client, context)
+    }
+
+    #[tokio::test]
+    async fn test_send_message_in_channel() {
+        let (client, context) = setup(Arc::new(MockDb)).await;
+        let parameters = hashmap! {
+            "TEAM_ID".to_string() => json!("asdsadds"),
+            "CHANNEL_ID".to_string() => json!("sddsa"),
+            "MESSAGE".to_string() => json!("hello from Admyral")
+        };
+        let result = MsTeamsExecutor
+            .execute(
+                &*client,
+                &context,
+                "SEND_MESSAGE_IN_CHANNEL",
+                "credentials",
+                &parameters,
+            )
+            .await;
+        assert!(result.is_ok());
+        let value = result.unwrap();
+        assert_eq!(value, json!({"ok": true}));
+    }
+}

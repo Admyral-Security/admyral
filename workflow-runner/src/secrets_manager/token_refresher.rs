@@ -1,8 +1,9 @@
 use crate::postgres::Database;
+use crate::workflow::http_client::HttpClient;
 use anyhow::{anyhow, Result};
 use async_once::AsyncOnce;
 use lazy_static::lazy_static;
-use reqwest::Client;
+use maplit::hashmap;
 
 use super::utils::{current_timestamp, fetch_secret_impl};
 use super::OAuthToken;
@@ -24,21 +25,28 @@ impl TokenRefresher {
     pub async fn refresh(
         &self,
         db: &dyn Database,
+        client: &dyn HttpClient,
         credential_name: &str,
         workflow_id: &str,
     ) -> Result<OAuthToken> {
         let (mut oauth_token, integration_type_opt) =
             fetch_secret_impl::<OAuthToken>(db, credential_name, workflow_id).await?;
-        if oauth_token.expires_at < current_timestamp() {
+        if oauth_token.expires_at >= current_timestamp() {
             // while we were waiting for the lock, the token was already updated!
             return Ok(oauth_token);
         }
 
         // the token is still not valid. hence, we refresh it
 
+        tracing::info!("Refreshing token for \"{credential_name}\" for workflow id \"{workflow_id}\"");
+
         let integration_type = match integration_type_opt {
             Some(integration_type) => integration_type,
-            None => return Err(anyhow!("Credential {credential_name} has no integration type. Can't perform OAuth token refresh."))
+            None => {
+                let error_message = format!("Credential \"{credential_name}\" has no integration type. Can't perform OAuth token refresh.");
+                tracing::error!(error_message);
+                return Err(anyhow!(error_message));
+            }
         };
 
         // determine the correct parameters for the current integration
@@ -47,29 +55,35 @@ impl TokenRefresher {
                 // Docs: https://learn.microsoft.com/en-us/graph/auth-v2-user?tabs=curl#use-the-microsoft-authentication-library-msal
                 let client_id = MS_TEAMS_OAUTH_CLIENT_ID.get().await;
                 let client_secret = MS_TEAMS_OAUTH_CLIENT_SECRET.get().await;
-                let params = vec![
-                    ("client_id", client_id.as_str()),
-                    ("scope", oauth_token.scope.as_str()),
-                    ("refresh_token", oauth_token.refresh_token.as_str()),
-                    ("grant_type", "refresh_token"),
-                    ("client_secret", client_secret.as_str()),
-                ];
+                let params = hashmap! {
+                    "client_id".to_string() => client_id.clone(),
+                    "scope".to_string() => oauth_token.scope.to_string(),
+                    "refresh_token".to_string() => oauth_token.refresh_token.to_string(),
+                    "grant_type".to_string() => "refresh_token".to_string(),
+                    "client_secret".to_string() => client_secret.to_string()
+                };
                 let api_url = "https://login.microsoftonline.com/common/oauth2/v2.0/token";
                 (params, api_url)
             }
-            _ => return Err(anyhow!("Credential {credential_name} requires integration {integration_type}. Can't perform OAuth token refresh on unknown integration."))
+            _ => {
+                let error_message = format!("Credential {credential_name} requires integration {integration_type}. Can't perform OAuth token refresh on unknown integration.");
+                tracing::error!(error_message);
+                return Err(anyhow!(error_message));
+            }
         };
 
         let now = current_timestamp();
 
-        let client = Client::new();
         let res = client
-            .post(url)
-            .header("Content-type", "application/x-www-form-urlencoded")
-            .form(&params)
-            .send()
-            .await?
-            .json::<serde_json::Value>()
+            .post(
+                url,
+                hashmap! {
+                    "Content-type".to_string() => "application/x-www-form-urlencoded".to_string()
+                },
+                crate::workflow::http_client::RequestBodyType::Form { params },
+                200,
+                format!("Error: Failed to refresh token!"),
+            )
             .await?;
 
         let expires_in = res

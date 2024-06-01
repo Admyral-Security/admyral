@@ -1,6 +1,7 @@
 use crate::postgres::Database;
 use crate::workflow::EdgeType;
 
+use super::http_client::ReqwestClient;
 use super::{context::Context, ActionExecutor, ReferenceHandle, Workflow};
 use anyhow::Result;
 use serde_json::json;
@@ -28,10 +29,12 @@ impl WorkflowExecutor {
         start_node_reference_handle: ReferenceHandle,
         execution_time_limit_in_sec: Option<u64>,
     ) -> Result<Self> {
+        let client = Arc::new(ReqwestClient::new());
         let context = Context::init(
             workflow.workflow_id.clone(),
             execution_time_limit_in_sec,
             db,
+            client,
         )
         .await?;
         Ok(Self {

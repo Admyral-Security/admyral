@@ -2,7 +2,7 @@ mod ai_action;
 mod context;
 mod execution_state;
 pub mod executor;
-mod http_client;
+pub mod http_client;
 mod http_request_action;
 mod if_condition_action;
 mod integration_action;
