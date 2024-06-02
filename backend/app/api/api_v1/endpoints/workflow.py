@@ -210,22 +210,26 @@ async def get_workflow_impl(
     )
 
     # Enrich action data with input templates
+    # If the workflow was generated from a template, the start nodes might have example inputs
     for action in action_nodes:
-        result = await db.exec(
-            select(ActionInputTemplate)
-                .where(ActionInputTemplate.action_id == action.action_id)
-        )
-        action.input_templates = list(
-            map(
-                lambda template: InputTemplate(
-                    template_name=template.template_name,
-                    template=template.template
-                ),
-                result.all()
+        if action.action_type == ActionType.WEBHOOK or action.action_type == ActionType.MANUAL_START:
+            result = await db.exec(
+                select(ActionInputTemplate)
+                    .where(ActionInputTemplate.action_id == action.action_id)
             )
-        )
+            action.input_templates = list(
+                map(
+                    lambda template: InputTemplate(
+                        template_name=template.template_name,
+                        template=template.template
+                    ),
+                    result.all()
+                )
+            )
 
-    # Enrich webhook actions with webhook data
+    # Attach webhook ID and secret to existing webhook actions
+    # Note: if we are fetching a template, the webhook does not yet have an ID or secret. This will be
+    #       generated when the template is imported into a new workflow.
     if not is_template:
         for action in action_nodes:
             if action.action_type == ActionType.WEBHOOK:
