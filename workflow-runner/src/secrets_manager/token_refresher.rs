@@ -38,7 +38,9 @@ impl TokenRefresher {
 
         // the token is still not valid. hence, we refresh it
 
-        tracing::info!("Refreshing token for \"{credential_name}\" for workflow id \"{workflow_id}\"");
+        tracing::info!(
+            "Refreshing token for \"{credential_name}\" for workflow id \"{workflow_id}\""
+        );
 
         let integration_type = match integration_type_opt {
             Some(integration_type) => integration_type,

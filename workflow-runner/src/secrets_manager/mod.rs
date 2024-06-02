@@ -62,7 +62,7 @@ impl SecretsManager {
 
         // The token is expired. Hence, we need to refresh it!
         // However, for a credential, we must synchronize the token refresh across tasks
-    
+
         tracing::info!("Performing OAuth token refresh - credential = \"{credential_name}\" , workflow = \"{workflow_id}\"");
 
         // acquire lock to only allow a single writer => make more finegrained in the future
@@ -78,13 +78,19 @@ impl SecretsManager {
 mod tests {
     use super::*;
     use crate::postgres::{Credential, Database};
+    use crate::workflow::http_client::RequestBodyType;
     use async_trait::async_trait;
     use serde_json::json;
-    use std::sync::Arc;
-    use crate::workflow::http_client::RequestBodyType;
     use std::collections::HashMap;
+    use std::sync::Mutex;
+    use std::{cell::RefCell, sync::Arc};
+    use tokio::sync::Barrier;
+    use tokio::task;
 
-    struct MockHttpClient;
+    #[derive(Default)]
+    struct MockHttpClient {
+        state: Mutex<RefCell<usize>>,
+    }
     #[async_trait]
     impl HttpClient for MockHttpClient {
         async fn post(
@@ -95,6 +101,18 @@ mod tests {
             _expected_response_status: u16,
             _error_message: String,
         ) -> Result<serde_json::Value> {
+            let lock_guard = self.state.lock().unwrap();
+            let mut state = lock_guard.borrow_mut();
+            *state += 1;
+
+            if *state > 1 {
+                return Ok(json!({
+                    "access_token": "failed",
+                    "refresh_token": "failed",
+                    "expires_in": 3600
+                }));
+            }
+
             Ok(json!({
                 "access_token": "new_access_token",
                 "refresh_token": "new_refresh_token",
@@ -103,7 +121,18 @@ mod tests {
         }
     }
 
-    struct MockDb;
+    struct MockDb {
+        secret: Mutex<RefCell<String>>,
+    }
+    impl MockDb {
+        fn new() -> Self {
+            Self {
+                secret: Mutex::new(RefCell::new(
+                    "{\"access_token\": \"saasd\", \"refresh_token\": \"msads\", \"expires_at\": 1717267296, \"scope\": \"offline_access\", \"token_type\": \"Bearer\"}".to_string()
+                ))
+            }
+        }
+    }
     #[async_trait]
     impl Database for MockDb {
         async fn fetch_secret(
@@ -111,21 +140,78 @@ mod tests {
             _workflow_id: &str,
             _credential_name: &str,
         ) -> Result<Option<Credential>> {
+            let lock_guard = self.secret.lock().unwrap();
+            let secret = lock_guard.borrow();
+
             Ok(Some(Credential {
-                secret: "{\"access_token\": \"saasd\", \"refresh_token\": \"msads\", \"expires_at\": 1717267296, \"scope\": \"offline_access\", \"token_type\": \"Bearer\"}".to_string(),
-                credential_type: Some("MS_TEAMS".to_string())
+                secret: secret.clone(),
+                credential_type: Some("MS_TEAMS".to_string()),
             }))
         }
+
+        async fn update_secret(
+            &self,
+            workflow_id: &str,
+            credential_name: &str,
+            secret: &str,
+        ) -> Result<()> {
+            let lock_guard = self.secret.lock().unwrap();
+            let mut current_secret = lock_guard.borrow_mut();
+
+            *current_secret = secret.to_string();
+
+            Ok(())
+        }
     }
- 
+
     #[tokio::test]
     async fn test_fetch_oauth_token_and_refresh_if_necessary() {
-        let secrets_manager = SecretsManager::new(Arc::new(MockDb), Arc::new(MockHttpClient));
-        let result = secrets_manager.fetch_oauth_token_and_refresh_if_necessary("my_credential", "workflow_id").await;
+        let secrets_manager =
+            SecretsManager::new(Arc::new(MockDb::new()), Arc::new(MockHttpClient::default()));
+        let result = secrets_manager
+            .fetch_oauth_token_and_refresh_if_necessary("my_credential", "workflow_id")
+            .await;
         assert!(result.is_ok());
 
         let oauth_token = result.unwrap();
         assert_eq!(oauth_token.access_token, "new_access_token");
         assert_eq!(oauth_token.refresh_token, "new_refresh_token");
+    }
+
+    #[tokio::test(flavor = "multi_thread")]
+    async fn test_fetch_oauth_token_and_refresh_if_necessary_multi_threaded() {
+        let secrets_manager = Arc::new(SecretsManager::new(
+            Arc::new(MockDb::new()),
+            Arc::new(MockHttpClient::default()),
+        ));
+
+        let num_tasks = 10;
+        let barrier = Arc::new(Barrier::new(num_tasks));
+
+        let handles = (0..num_tasks)
+            .map(|_| {
+                let barrier_clone = Arc::clone(&barrier);
+                let secrets_manager_clone = Arc::clone(&secrets_manager);
+
+                let handle = task::spawn(async move {
+                    // let the task wait until all tasks are launched
+                    barrier_clone.wait().await;
+
+                    secrets_manager_clone
+                        .fetch_oauth_token_and_refresh_if_necessary("my_credential", "workflow_id")
+                        .await
+                });
+                handle
+            })
+            .collect::<Vec<_>>();
+
+        for handle in handles {
+            let result = handle.await.unwrap();
+            assert!(result.is_ok());
+
+            let oauth_token = result.unwrap();
+            assert_eq!(oauth_token.access_token, "new_access_token");
+            assert_eq!(oauth_token.refresh_token, "new_refresh_token");
+        }
     }
 }
