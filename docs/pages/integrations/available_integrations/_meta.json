@@ -1,10 +1,10 @@
 {
 	"alienvault_otx": "AlienVault OTX",
-	"phish_report": "Phish Report",
-	"slack": "Slack",
-	"threatpost": "Threatpost",
-	"virus_total": "VirusTotal",
-	"yaraify": "YARAify",
 	"jira": "Jira",
-	"ms_teams": "Microsoft Teams"
+	"ms_teams": "Microsoft Teams",
+	"slack": "Slack",
+	"phish_report": "Phish Report",
+	"threatpost": "Threatpost",
+	"yaraify": "YARAify",
+	"virus_total": "VirusTotal"
 }

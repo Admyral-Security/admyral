@@ -1,0 +1,58 @@
+import { Callout } from "nextra/components";
+
+# URL Info
+
+Retrieve detailed information about a URL.
+
+<Callout type="info">
+	For VirusTotal's documentation, see
+	[URL Info](https://docs.virustotal.com/reference/url-info).
+</Callout>
+
+## Parameters:
+
+| Field               | Description                                                                                                       | Required |
+| ------------------- | ----------------------------------------------------------------------------------------------------------------- | :------: |
+| **URL**             | The URL to retrieve information for.                                                                              |   Yes    |
+
+
+## Example Output:
+
+Typical successful response:
+
+```json
+{
+	"data": {
+		"id": "http://example.com",
+		"type": "url",
+		"attributes": {
+			"last_analysis_date": 1593782400,
+			"last_analysis_stats": {
+				"harmless": 90,
+				"malicious": 2,
+				"suspicious": 0,
+				"undetected": 8
+			},
+			"last_analysis_results": {
+				"Scanner1": {
+					"category": "malicious",
+					"result": "malware",
+					"method": "blacklist",
+					"engine_name": "Engine1"
+				},
+				"Scanner2": {
+					"category": "harmless",
+					"result": "clean",
+					"method": "whitelist",
+					"engine_name": "Engine2"
+				}
+			},
+			"total_votes": {
+				"harmless": 10,
+				"malicious": 1
+			},
+			"scan_date": "2023-01-01T12:00:00Z",
+			"url": "http://example.com"
+		}
+	}
+}
