@@ -31,8 +31,8 @@ The only file you need to modify in the UI is `web/src/lib/integrations.ts`. Her
     // File: web/src/lib/integrations.ts
 
     export enum IntegrationType {
-    ...,
-    JIRA = "JIRA", // New integration type
+        ...,
+        JIRA = "JIRA", // New integration type
     }
     ```
 
@@ -40,7 +40,11 @@ The only file you need to modify in the UI is `web/src/lib/integrations.ts`. Her
 
     - `name`: The display name of the integration
     - `icon`: The path to the logo icon located in `web/public` and whether it is a square or a rectangle icon
-    - `credentials`: The necessary fields which are needed to authenticate with the integration
+    - `credential`: The necessary fields which are needed to authenticate with the integration
+        - `authType`: The type of authentication:
+            - `AuthType.SECRET`: The integration requires one or more secrets/values (API key, token, username/password, etc.)
+            - `AuthType.NONE`: No authentication is required
+        - `parameters`: The parameters of the credential (e.g., API key, token, username, password, etc.). **Note:** This field is only needed for `AuthType.SECRET`
     - `apis`: The APIs of the integration (we leave this empty for now)
 
     ```typescript
@@ -54,21 +58,26 @@ The only file you need to modify in the UI is `web/src/lib/integrations.ts`. Her
     			src: "/jira_logo.svg", // Path to the logo icon located in web/public
     			isSquareIcon: true, // Do we have a square or a rectangle icon?
     		},
-    		credentials: [
+    		credential: {
     			// Define the necessary fields here which are needed to authenticate with the integration
-    			{
-    				name: "API_TOKEN",
-    				displayName: "API Token",
-    			},
-    			{
-    				name: "EMAIL",
-    				displayName: "Email",
-    			},
-    			{
-    				name: "DOMAIN",
-    				displayName: "Domain",
-    			},
-    		],
+    			authType: AuthType.SECRET,
+    			parameters: [
+    				{
+    					id: "DOMAIN",
+    					displayName:
+    						"Domain (e.g., the your-domain part of https://your-domain.atlassian.net)",
+    				},
+    				{
+    					id: "EMAIL",
+    					displayName:
+    						"Email of the account who provisioned the API token",
+    				},
+    				{
+    					id: "API_TOKEN",
+    					displayName: "API Token",
+    				},
+    			],
+    		},
     		apis: [], // We leave the APIs empty for now. We add them later.
     	},
     };
@@ -573,7 +582,6 @@ In order to add an integration to the workflow runner, we'll need to adapt the f
     ```
 
 6.  In order to document the API, create a new file in the `apis` directory with the name of the API using snake_case (e.g., `assign_issue.mdx`)
-
 
 <Callout type="info">
 	If you require any help while building or setting up the project or have any
