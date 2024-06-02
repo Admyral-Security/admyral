@@ -11,7 +11,7 @@ import { cookies } from "next/headers";
 
 // Following https://learn.microsoft.com/en-us/graph/auth-v2-user?tabs=http#use-the-microsoft-authentication-library-msal
 export async function GET(request: Request) {
-	const { searchParams, origin } = new URL(request.url);
+	const { searchParams } = new URL(request.url);
 
 	if (searchParams.has("error")) {
 		// Redirect to settings page with error message
@@ -20,7 +20,10 @@ export async function GET(request: Request) {
 		);
 		const errorMessage = `Failed to authenticate with Microsoft Teams. Please try again. If the problem persists, please reach out to us.`;
 		return NextResponse.redirect(
-			new URL(`/settings?error=${encodeURI(errorMessage)}`, request.url),
+			new URL(
+				`/settings?error=${encodeURI(errorMessage)}`,
+				process.env.NEXT_PUBLIC_DOMAIN,
+			),
 		);
 	}
 
@@ -41,7 +44,10 @@ export async function GET(request: Request) {
 		const errorMessage =
 			"Failed to authenticate with Microsoft Teams. Please try again. If the problem persists, please reach out to us.";
 		return NextResponse.redirect(
-			new URL(`/settings?error=${encodeURI(errorMessage)}`, request.url),
+			new URL(
+				`/settings?error=${encodeURI(errorMessage)}`,
+				process.env.NEXT_PUBLIC_DOMAIN,
+			),
 		);
 	}
 
@@ -56,7 +62,10 @@ export async function GET(request: Request) {
 		);
 		const errorMessage = `Failed to authenticate with Microsoft Teams due to a misconfiguration. Please contact support.`;
 		return NextResponse.redirect(
-			new URL(`/settings?error=${encodeURI(errorMessage)}`, request.url),
+			new URL(
+				`/settings?error=${encodeURI(errorMessage)}`,
+				process.env.NEXT_PUBLIC_DOMAIN,
+			),
 		);
 	}
 
@@ -64,7 +73,7 @@ export async function GET(request: Request) {
 	const scope = (
 		INTEGRATIONS[IntegrationType.MS_TEAMS].credential as MSTeamsOAuth
 	).scope;
-	const url = `https://login.microsoftonline.com/common/oauth2/v2.0/token?client_id=${clientId}&grant_type=authorization_code&scope=${encodeURI(scope)}&code=${code}&redirect_uri=${redirectUri}&client_secret=${clientSecret}`;
+	const url = `https://login.microsoftonline.com/common/oauth2/v2.0/token`;
 
 	const params = new URLSearchParams();
 	params.append("client_id", clientId);
@@ -122,10 +131,15 @@ export async function GET(request: Request) {
 		);
 		const errorMessage = `Failed to create credential for Microsoft Teams. Please try again. If the problem persists, please reach out to us.`;
 		return NextResponse.redirect(
-			new URL(`/settings?error=${encodeURI(errorMessage)}`, request.url),
+			new URL(
+				`/settings?error=${encodeURI(errorMessage)}`,
+				process.env.NEXT_PUBLIC_DOMAIN,
+			),
 		);
 	}
 
 	// Return the user to the settings page
-	return NextResponse.redirect(new URL(`${origin}/settings`, request.url));
+	return NextResponse.redirect(
+		new URL("/settings", process.env.NEXT_PUBLIC_DOMAIN),
+	);
 }
