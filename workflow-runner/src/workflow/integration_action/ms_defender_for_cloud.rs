@@ -1,7 +1,7 @@
 use super::IntegrationExecutor;
 use crate::workflow::{
     context::Context,
-    http_client::HttpClient,
+    http_client::{HttpClient, RequestBodyType},
     utils::{get_number_parameter, get_string_parameter, ParameterType},
 };
 use anyhow::{anyhow, Result};
@@ -25,6 +25,9 @@ impl IntegrationExecutor for MsDefenderForCloudExecutor {
     ) -> Result<serde_json::Value> {
         match api {
             "LIST_ALERTS" => list_alerts(client, context, credential_name, parameters).await,
+            "UPDATE_ALERT_STATUS" => {
+                update_alert_status(client, context, credential_name, parameters).await
+            }
             _ => return Err(anyhow!("API {api} not implemented for {INTEGRATION}.")),
         }
     }
@@ -151,6 +154,72 @@ async fn list_alerts(
     }))
 }
 
+// /subscriptions/037a123d-cce9-4543-b9ca-9015960f86b2/resourceGroups/Sample-RG/providers/Microsoft.Security/locations/westeurope/alerts/2516848965789300143_b82d0127-536c-4b52-8b44-58a4bffa4818
+
+// Activate - https://learn.microsoft.com/en-us/rest/api/defenderforcloud/alerts/update-resource-group-level-state-to-activate?view=rest-defenderforcloud-2022-01-01&tabs=HTTP
+// Dismiss - https://learn.microsoft.com/en-us/rest/api/defenderforcloud/alerts/update-resource-group-level-state-to-dismiss?view=rest-defenderforcloud-2022-01-01&tabs=HTTP
+// In Progress - https://learn.microsoft.com/en-us/rest/api/defenderforcloud/alerts/update-resource-group-level-state-to-in-progress?view=rest-defenderforcloud-2022-01-01&tabs=HTTP
+// Resolve - https://learn.microsoft.com/en-us/rest/api/defenderforcloud/alerts/update-resource-group-level-state-to-resolve?view=rest-defenderforcloud-2022-01-01&tabs=HTTP
+async fn update_alert_status(
+    client: &dyn HttpClient,
+    context: &Context,
+    credential_name: &str,
+    parameters: &HashMap<String, serde_json::Value>,
+) -> Result<serde_json::Value> {
+    let alert_id = get_string_parameter(
+        "ALERT_ID",
+        INTEGRATION,
+        "UPDATE_ALERT_STATUS",
+        parameters,
+        context,
+        ParameterType::Required,
+    )
+    .await?
+    .expect("alert_id is a required parameter");
+
+    let status = get_string_parameter(
+        "ALERT_STATUS",
+        INTEGRATION,
+        "UPDATE_ALERT_STATUS",
+        parameters,
+        context,
+        ParameterType::Required,
+    )
+    .await?
+    .expect("alert status is a required parameter")
+    .to_lowercase();
+
+    let api_version = "2022-01-01".to_string();
+
+    let new_alert_status = match status.as_str() {
+        "active" => "activate",
+        // Note: inprogress is currently blocked. for some reason, the permission "Microsoft.Security/locations/alerts/inprogress/action" is not available when creating a role.
+        // "inprogress" => "inProgress",
+        "dismissed" => "dismiss",
+        "resolved" => "resolve",
+        _ => {
+            tracing::error!("Error: Unknown alert status for Microsoft Defender for Cloud Update Alert Status API: {status}");
+            return Err(anyhow!("Error: Unknown alert status for Microsoft Defender for Cloud Update Alert Status API: {status}"));
+        }
+    };
+
+    let api_url = format!(
+        "https://management.azure.com{alert_id}/{new_alert_status}?api-version={api_version}"
+    );
+
+    client
+        .post_with_oauth_refresh(
+            context,
+            &api_url,
+            credential_name,
+            HashMap::new(),
+            RequestBodyType::Json { body: json!({}) },
+            204,
+            format!("Error: Failed to call {INTEGRATION} List Alerts API"),
+        )
+        .await
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -175,6 +244,19 @@ mod tests {
             Ok(json!({
                 "value": [url],
             }))
+        }
+
+        async fn post_with_oauth_refresh(
+            &self,
+            context: &Context,
+            url: &str,
+            oauth_token_name: &str,
+            headers: HashMap<String, String>,
+            body: RequestBodyType,
+            expected_response_status: u16,
+            error_message: String,
+        ) -> Result<serde_json::Value> {
+            Ok(serde_json::json!({"ok": true}))
         }
     }
 
@@ -288,5 +370,26 @@ mod tests {
                 json!({"value": ["https://management.azure.com/subscriptions/some-subscription-id/resourceGroups/myRg1/providers/Microsoft.Security/locations/westeurope/alerts?api-version=2022-01-01"]})
             );
         }
+    }
+
+    #[tokio::test]
+    async fn test_update_alert() {
+        let (client, context) = setup().await;
+        let parameters = hashmap! {
+            "ALERT_ID".to_string() => json!("/subscriptions/037a123d-cce9-4543-b9ca-9015960f86b2/resourceGroups/Sample-RG/providers/Microsoft.Security/locations/westeurope/alerts/2516848965789300143_b82d0127-536c-4b52-8b44-58a4bffa4818"),
+            "ALERT_STATUS".to_string() => json!("Resolved")
+        };
+        let result = MsDefenderForCloudExecutor
+            .execute(
+                &*client,
+                &context,
+                "UPDATE_ALERT_STATUS",
+                "credentials",
+                &parameters,
+            )
+            .await;
+        assert!(result.is_ok());
+        let value = result.unwrap();
+        assert_eq!(value, json!({"ok": true}));
     }
 }

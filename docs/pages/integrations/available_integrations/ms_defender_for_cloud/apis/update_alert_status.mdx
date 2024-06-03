@@ -1,0 +1,33 @@
+import { Callout } from "nextra/components";
+
+# Update Alert Status
+
+Update the status of alerts from Microsoft Defender for Cloud.
+
+<Callout type="info">
+	For Microsoft Defender for Cloud's documentation, see [Update
+	Alert](https://learn.microsoft.com/en-us/rest/api/defenderforcloud/alerts/update-resource-group-level-state-to-resolve?view=rest-defenderforcloud-2022-01-01&tabs=HTTP).
+</Callout>
+
+## Parameters:
+
+| Field            | Description                                                                                                                                                                                 | Required |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------: |
+| **Alert ID**     | The ID of the alert. It usually has the following form: `/subscriptions/your-subscription-id/resourceGroups/your-rg/providers/Microsoft.Security/locations/your-location/alerts/alert-name` |   Yes    |
+| **Alert Status** | The status of the alert. Allowed values: 'Active', 'Resolved', 'Dismissed'.                                                                                                                 |   Yes    |
+
+## Example Output:
+
+For a successful update, the API returns an empty JSON object:
+
+```json
+{}
+```
+
+For an unsuccessful update, the API returns an error message:
+
+```json
+{
+	"error": "error message"
+}
+```

@@ -22,7 +22,7 @@
 
 9. In Azure, go to **Subscriptions** and copy the **Subscription ID** of the subscription you want to use.
 
-10. In your subscrption, go to **Access Control (IAM). **Click on **Add** and then **Add role assignment**.
+10. In your subscrption, go to **Access Control (IAM)**. Click on **Add** and then **Add role assignment**.
 
 <img src="/ms_defender_for_cloud2.png" />
 
@@ -35,3 +35,27 @@
 <img src="/ms_defender_for_cloud4.png" />
 
 13. Click on **Review + assign**.
+
+14. In your subscrption, go to **Access Control (IAM)**. Click on **Add** and then **Add custom role**.
+
+<img src="/ms_defender_for_cloud5.png" />
+
+15. Give the role a name, e.g. `Alert Handler`,
+
+<img src="/ms_defender_for_cloud6.png" />
+
+16. Go to the **Permissions** tab by clicking **Next**.
+
+17. Click on **Add permissions** and type into the search bar `Microsoft.Security/locations/alerts/`. Check all the permissions.
+
+<img src="/ms_defender_for_cloud7.png" />
+
+18. Now, we need to assign the new role to the app. Go to **Access Control (IAM)** and click on **Add** and then **Add role assignment**.
+
+19. Search for **Alert Handler** and select it.
+
+<img src="/ms_defender_for_cloud8.png" />
+
+20. Go to the **Members** tab next. Click on **Select members** and search for the app you created in the first steps (e.g. `admyral-azure-integration`). Select it and then click on **Select**.
+
+21. Click on **Review + assign**.

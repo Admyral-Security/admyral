@@ -1398,83 +1398,93 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 				],
 			},
 			{
-                id: "SEND_MESSAGE_IN_CHAT",
-                name: "Send Message in Chat",
-                description: "Send a message in a chat",
-                documentationUrl: "https://learn.microsoft.com/en-us/graph/api/chat-post-messages?view=graph-rest-1.0&tabs=http",
-                requiresAuthentication: true,
-                parameters: [
-                    {
-                        id: "CHAT_ID",
-                        displayName: "Chat ID",
-                        description: "The ID of the chat. E.g. 19:2da4c29f6d7041eca70b638b43d45437@thread.v2",
-                        required: true,
-                        dataType: ApiParameterDatatype.TEXT,
-                    },
-                    {
-                        id: "MESSAGE",
-                        displayName: "Message",
-                        description: "The content of the message",
-                        required: true,
-                        dataType: ApiParameterDatatype.TEXTAREA,
-                    },
-                ],
-            },
+				id: "SEND_MESSAGE_IN_CHAT",
+				name: "Send Message in Chat",
+				description: "Send a message in a chat",
+				documentationUrl:
+					"https://learn.microsoft.com/en-us/graph/api/chat-post-messages?view=graph-rest-1.0&tabs=http",
+				requiresAuthentication: true,
+				parameters: [
+					{
+						id: "CHAT_ID",
+						displayName: "Chat ID",
+						description:
+							"The ID of the chat. E.g. 19:2da4c29f6d7041eca70b638b43d45437@thread.v2",
+						required: true,
+						dataType: ApiParameterDatatype.TEXT,
+					},
+					{
+						id: "MESSAGE",
+						displayName: "Message",
+						description: "The content of the message",
+						required: true,
+						dataType: ApiParameterDatatype.TEXTAREA,
+					},
+				],
+			},
 			{
-                id: "SEND_REPLY_IN_CHANNEL",
-                name: "Send Reply in Channel",
-                description: "Send a reply to a message in a specified channel.",
-                documentationUrl: "https://learn.microsoft.com/en-us/graph/api/chatmessage-post-replies?view=graph-rest-1.0&tabs=http",
-                requiresAuthentication: true,
-                parameters: [
-                    {
-                        id: "TEAM_ID",
-                        displayName: "Team ID",
-                        description: "The ID of the team, e.g. e065XXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
-                        required: true,
-                        dataType: ApiParameterDatatype.TEXT,
-                    },
-                    {
-                        id: "CHANNEL_ID",
-                        displayName: "Channel ID",
-                        description: "The ID of the channel, e.g. 19:XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX@thread.tacv2",
-                        required: true,
-                        dataType: ApiParameterDatatype.TEXT,
-                    },
-                    {
-                        id: "MESSAGE_ID",
-                        displayName: "Message ID",
-                        description: "The ID of the message to reply to, e.g. XXXXXXXXXXXXX",
-                        required: true,
-                        dataType: ApiParameterDatatype.TEXT,
-                    },
-                    {
-                        id: "MESSAGE",
-                        displayName: "Message",
-                        description: "The reply message content.",
-                        required: true,
-                        dataType: ApiParameterDatatype.TEXTAREA,
-                    },
-                ],
-            },
+				id: "SEND_REPLY_IN_CHANNEL",
+				name: "Send Reply in Channel",
+				description:
+					"Send a reply to a message in a specified channel.",
+				documentationUrl:
+					"https://learn.microsoft.com/en-us/graph/api/chatmessage-post-replies?view=graph-rest-1.0&tabs=http",
+				requiresAuthentication: true,
+				parameters: [
+					{
+						id: "TEAM_ID",
+						displayName: "Team ID",
+						description:
+							"The ID of the team, e.g. e065XXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
+						required: true,
+						dataType: ApiParameterDatatype.TEXT,
+					},
+					{
+						id: "CHANNEL_ID",
+						displayName: "Channel ID",
+						description:
+							"The ID of the channel, e.g. 19:XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX@thread.tacv2",
+						required: true,
+						dataType: ApiParameterDatatype.TEXT,
+					},
+					{
+						id: "MESSAGE_ID",
+						displayName: "Message ID",
+						description:
+							"The ID of the message to reply to, e.g. XXXXXXXXXXXXX",
+						required: true,
+						dataType: ApiParameterDatatype.TEXT,
+					},
+					{
+						id: "MESSAGE",
+						displayName: "Message",
+						description: "The reply message content.",
+						required: true,
+						dataType: ApiParameterDatatype.TEXTAREA,
+					},
+				],
+			},
 			{
 				id: "CREATE_CHAT",
 				name: "Create Chat",
 				description: "Create a new chat",
-				documentationUrl: "https://learn.microsoft.com/en-us/graph/api/chat-post?view=graph-rest-1.0&tabs=http",
+				documentationUrl:
+					"https://learn.microsoft.com/en-us/graph/api/chat-post?view=graph-rest-1.0&tabs=http",
 				requiresAuthentication: true,
 				parameters: [
 					{
 						id: "CHAT_TYPE",
 						displayName: "Chat Type",
-						description: "The type of the chat: 'group' or 'oneOnOne'",
+						description:
+							"The type of the chat: 'group' or 'oneOnOne'",
 						required: true,
 						dataType: ApiParameterDatatype.TEXT,
 					},
 					{
 						id: "MEMBERS",
 						displayName: "Members",
-						description: "The members of the chat. Review docs for format.",
+						description:
+							"The members of the chat. Review docs for format.",
 						required: true,
 						dataType: ApiParameterDatatype.TEXTAREA,
 					},
@@ -1491,22 +1501,25 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 				id: "LIST_USERS",
 				name: "List Users",
 				description: "Retrieve a list of users in Microsoft Teams",
-				documentationUrl: "https://learn.microsoft.com/en-us/graph/api/user-list?view=graph-rest-1.0&tabs=http",
+				documentationUrl:
+					"https://learn.microsoft.com/en-us/graph/api/user-list?view=graph-rest-1.0&tabs=http",
 				requiresAuthentication: true,
-				parameters: [
-				],
+				parameters: [],
 			},
 			{
 				id: "LIST_CHANNELS",
 				name: "List Channels",
-				description: "Retrieve the list of channels in a Microsoft Teams team",
-				documentationUrl: "https://learn.microsoft.com/en-us/graph/api/channel-list?view=graph-rest-1.0&tabs=http#http-request",
+				description:
+					"Retrieve the list of channels in a Microsoft Teams team",
+				documentationUrl:
+					"https://learn.microsoft.com/en-us/graph/api/channel-list?view=graph-rest-1.0&tabs=http#http-request",
 				requiresAuthentication: true,
 				parameters: [
 					{
 						id: "TEAM_ID",
 						displayName: "Team ID",
-						description: "The ID of the team to send the message to, e.g. e065XXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
+						description:
+							"The ID of the team to send the message to, e.g. e065XXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
 						required: true,
 						dataType: ApiParameterDatatype.TEXT,
 					},
@@ -1516,19 +1529,19 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 				id: "LIST_TEAMS",
 				name: "List Teams",
 				description: "Retrieve a list of all teams in Microsoft Teams",
-				documentationUrl: "https://learn.microsoft.com/en-us/graph/teams-list-all-teams?context=graph%2Fapi%2F1.0&view=graph-rest-1.0#request",
+				documentationUrl:
+					"https://learn.microsoft.com/en-us/graph/teams-list-all-teams?context=graph%2Fapi%2F1.0&view=graph-rest-1.0#request",
 				requiresAuthentication: true,
-				parameters: [
-				],
+				parameters: [],
 			},
 			{
 				id: "LIST_CHATS",
 				name: "List Chats",
 				description: "Retrieve a list of chats in Microsoft Teams",
-				documentationUrl: "https://learn.microsoft.com/en-us/graph/api/chat-list?view=graph-rest-1.0&tabs=http#http-request",
+				documentationUrl:
+					"https://learn.microsoft.com/en-us/graph/api/chat-list?view=graph-rest-1.0&tabs=http#http-request",
 				requiresAuthentication: true,
-				parameters: [
-				],
+				parameters: [],
 			},
 		],
 	},
@@ -1595,6 +1608,31 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 							"The maximum number of pages to fetch. One page consists of up to 100 alerts. Default: 1",
 						required: false,
 						dataType: ApiParameterDatatype.NUMBER,
+					},
+				],
+			},
+			{
+				id: "UPDATE_ALERT_STATUS",
+				name: "Update Alert Status",
+				description: "Update the status of an alert.",
+				documentationUrl:
+					"https://learn.microsoft.com/en-us/rest/api/defenderforcloud/alerts/list?view=rest-defenderforcloud-2022-01-01&tabs=HTTP",
+				requiresAuthentication: true,
+				parameters: [
+					{
+						id: "ALERT_ID",
+						displayName: "Alert ID",
+						description: "The ID of the alert.",
+						required: true,
+						dataType: ApiParameterDatatype.TEXT,
+					},
+					{
+						id: "ALERT_STATUS",
+						displayName: "Alert Status",
+						description:
+							"The status of the alert. Allowed values: 'Active', 'Resolved', 'Dismissed'.",
+						required: true,
+						dataType: ApiParameterDatatype.TEXT,
 					},
 				],
 			},
