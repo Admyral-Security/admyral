@@ -1636,6 +1636,23 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 					},
 				],
 			},
+			{
+				id: "GET_ALERT",
+				name: "Get Alert",
+				description: "Get an alert.",
+				documentationUrl:
+					"https://learn.microsoft.com/en-us/rest/api/defenderforcloud/alerts/get-resource-group-level?view=rest-defenderforcloud-2022-01-01&tabs=HTTP",
+				requiresAuthentication: true,
+				parameters: [
+					{
+						id: "ALERT_ID",
+						displayName: "Alert ID",
+						description: "The ID of the alert.",
+						required: true,
+						dataType: ApiParameterDatatype.TEXT,
+					},
+				],
+			},
 		],
 	},
 	// ...

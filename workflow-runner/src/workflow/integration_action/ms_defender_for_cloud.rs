@@ -28,6 +28,7 @@ impl IntegrationExecutor for MsDefenderForCloudExecutor {
             "UPDATE_ALERT_STATUS" => {
                 update_alert_status(client, context, credential_name, parameters).await
             }
+            "GET_ALERT" => get_alert(client, context, credential_name, parameters).await,
             _ => return Err(anyhow!("API {api} not implemented for {INTEGRATION}.")),
         }
     }
@@ -215,7 +216,41 @@ async fn update_alert_status(
             HashMap::new(),
             RequestBodyType::Json { body: json!({}) },
             204,
-            format!("Error: Failed to call {INTEGRATION} List Alerts API"),
+            format!("Error: Failed to call {INTEGRATION} Update Alert Status API"),
+        )
+        .await
+}
+
+// https://learn.microsoft.com/en-us/rest/api/defenderforcloud/alerts/get-resource-group-level?view=rest-defenderforcloud-2022-01-01&tabs=HTTP
+async fn get_alert(
+    client: &dyn HttpClient,
+    context: &Context,
+    credential_name: &str,
+    parameters: &HashMap<String, serde_json::Value>,
+) -> Result<serde_json::Value> {
+    let alert_id = get_string_parameter(
+        "ALERT_ID",
+        INTEGRATION,
+        "GET_ALERT",
+        parameters,
+        context,
+        ParameterType::Required,
+    )
+    .await?
+    .expect("alert_id is a required parameter");
+
+    let api_version = "2022-01-01";
+
+    let api_url = format!("https://management.azure.com{alert_id}?api-version={api_version}");
+
+    client
+        .get_with_oauth_refresh(
+            context,
+            &api_url,
+            credential_name,
+            HashMap::new(),
+            200,
+            format!("Error: Failed to call {INTEGRATION} Update Alert Status API"),
         )
         .await
 }
@@ -391,5 +426,22 @@ mod tests {
         assert!(result.is_ok());
         let value = result.unwrap();
         assert_eq!(value, json!({"ok": true}));
+    }
+
+    #[tokio::test]
+    async fn test_get_alert() {
+        let (client, context) = setup().await;
+        let parameters = hashmap! {
+            "ALERT_ID".to_string() => json!("/subscriptions/037a123d-cce9-4543-b9ca-9015960f86b2/resourceGroups/Sample-RG/providers/Microsoft.Security/locations/westeurope/alerts/2516848965789300143_b82d0127-536c-4b52-8b44-58a4bffa4818"),
+        };
+        let result = MsDefenderForCloudExecutor
+            .execute(&*client, &context, "GET_ALERT", "credentials", &parameters)
+            .await;
+        assert!(result.is_ok());
+        let value = result.unwrap();
+        assert_eq!(
+            value,
+            json!({"value": ["https://management.azure.com/subscriptions/037a123d-cce9-4543-b9ca-9015960f86b2/resourceGroups/Sample-RG/providers/Microsoft.Security/locations/westeurope/alerts/2516848965789300143_b82d0127-536c-4b52-8b44-58a4bffa4818?api-version=2022-01-01"]})
+        );
     }
 }
