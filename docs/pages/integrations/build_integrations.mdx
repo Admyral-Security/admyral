@@ -145,7 +145,6 @@ In order to add an integration to the workflow runner, we'll need to adapt the f
     use crate::workflow::{
         context,
         http_client::{HttpClient, RequestBodyType},
-        secrets::fetch_secret,
         utils::{get_string_parameter, ParameterType},
     };
     use anyhow::{anyhow, Result};
@@ -196,7 +195,7 @@ In order to add an integration to the workflow runner, we'll need to adapt the f
     // ...
     ```
 
-6. Additionally, we adapt the `execute` function of the `IntegrationExecutor` trait to fetch the secret by adding the line `let credential = fetch_secret::<T>(context, credential_name).await?;` where `T` is the name of the struct we just implemented (e.g., `JiraCredential`):
+6. Additionally, we adapt the `execute` function of the `IntegrationExecutor` trait to fetch the secret by adding the line `let credential = context.secrets_manager.fetch_secret::<T>(credential_name, &context.workflow_id).await?;` where `T` is the name of the struct we just implemented (e.g., `JiraCredential`):
 
     ```rust
     // File: workflow-runner/src/workflow/integration_action/jira.rs
@@ -211,7 +210,7 @@ In order to add an integration to the workflow runner, we'll need to adapt the f
             parameters: &HashMap<String, serde_json::Value>,
         ) -> Result<serde_json::Value> {
             // TODO: Fetch the secret from the database, decrypt and parse it
-            let credential = fetch_secret::<JiraCredential>(context, credential_name).await?;
+            let credential = context.secrets_manager.fetch_secret::<JiraCredential>(credential_name, &context.workflow_id).await?;
 
             match api {
                 // APIs will be added here later
@@ -361,7 +360,7 @@ In order to add an integration to the workflow runner, we'll need to adapt the f
             parameters: &HashMap<String, serde_json::Value>,
         ) -> Result<serde_json::Value> {
             // Fetch the secret
-            let credential = fetch_secret::<JiraCredential>(context, credential_name).await?;
+            let credential = context.secrets_manager.fetch_secret::<JiraCredential>(credential_name, &context.workflow_id).await?;
 
             match api {
                 // TODO: Add the API match + function call here
