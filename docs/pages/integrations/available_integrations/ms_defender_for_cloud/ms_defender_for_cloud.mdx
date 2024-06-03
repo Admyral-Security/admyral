@@ -1,0 +1,37 @@
+# Microsoft Defender for Cloud
+
+## App Registration Connection
+
+1. Go to your [Azure Portal](https://portal.azure.com/) and login.
+
+2. Go to **Microsoft Entra ID**.
+
+3. In the left menu, click on **App registrations**.
+
+4. Click on **New registration**.
+
+5. Name your app, e.g. `admyral-azure-integration` and click on **Register**.
+
+6. Copy your **Client ID** and **Tenant ID**.
+
+<img src="/ms_defender_for_cloud1.png" />
+
+7. In the left menu, click on **Certificates & secrets** and then on **New client secret**.
+
+8. Copy the **Value** of the secret.
+
+9. In Azure, go to **Subscriptions** and copy the **Subscription ID** of the subscription you want to use.
+
+10. In your subscrption, go to **Access Control (IAM). **Click on **Add** and then **Add role assignment**.
+
+<img src="/ms_defender_for_cloud2.png" />
+
+11. Select the role **Security Reader** and click on **Next**.
+
+<img src="/ms_defender_for_cloud3.png" />
+
+12. Click **Select members** and search for the app you created in the first steps (e.g. `admyral-azure-integration`). Select it and then click on **Select**.
+
+<img src="/ms_defender_for_cloud4.png" />
+
+13. Click on **Review + assign**.

@@ -7,6 +7,7 @@ export enum IntegrationType {
 	SLACK = "SLACK",
 	JIRA = "JIRA",
 	MS_TEAMS = "MS_TEAMS",
+	MS_DEFENDER_FOR_CLOUD = "MS_DEFENDER_FOR_CLOUD",
 }
 
 export enum ApiParameterDatatype {
@@ -1527,6 +1528,74 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 				documentationUrl: "https://learn.microsoft.com/en-us/graph/api/chat-list?view=graph-rest-1.0&tabs=http#http-request",
 				requiresAuthentication: true,
 				parameters: [
+				],
+			},
+		],
+	},
+	// MS Defender for Cloud
+	[IntegrationType.MS_DEFENDER_FOR_CLOUD]: {
+		name: "Microsoft Defender for Cloud",
+		icon: {
+			src: "/ms_defender_for_cloud_logo.svg",
+			isSquareIcon: true,
+		},
+		credential: {
+			authType: AuthType.SECRET,
+			parameters: [
+				{
+					id: "TENANT_ID",
+					displayName: "Your Tenant ID",
+				},
+				{
+					id: "CLIENT_ID",
+					displayName: "Your Client ID",
+				},
+				{
+					id: "CLIENT_SECRET",
+					displayName: "Your Client Secret",
+				},
+			],
+		},
+		apis: [
+			{
+				id: "LIST_ALERTS",
+				name: "List Alerts",
+				description:
+					"List all the alerts that are associated with a subscription ID",
+				documentationUrl:
+					"https://learn.microsoft.com/en-us/rest/api/defenderforcloud/alerts/list?view=rest-defenderforcloud-2022-01-01&tabs=HTTP",
+				requiresAuthentication: true,
+				parameters: [
+					{
+						id: "SUBSCRIPTION_ID",
+						displayName: "Subscription ID",
+						description: "The ID of the Azure subscription.",
+						required: true,
+						dataType: ApiParameterDatatype.TEXT,
+					},
+					{
+						id: "RESOURCE_GROUP",
+						displayName: "Resource Group",
+						description: "The name of the resource group.",
+						required: false,
+						dataType: ApiParameterDatatype.TEXT,
+					},
+					{
+						id: "ASC_LOCATION",
+						displayName: "ASC Location",
+						description:
+							"The location of the Azure Security Center.",
+						required: false,
+						dataType: ApiParameterDatatype.TEXT,
+					},
+					{
+						id: "PAGE_LIMIT",
+						displayName: "Page Limit",
+						description:
+							"The maximum number of pages to fetch. One page consists of up to 100 alerts. Default: 1",
+						required: false,
+						dataType: ApiParameterDatatype.NUMBER,
+					},
 				],
 			},
 		],

@@ -1,13 +1,19 @@
 use crate::postgres::Database;
 use crate::workflow::http_client::HttpClient;
-use anyhow::Result;
+use anyhow::{anyhow, Result};
+use moka::future::Cache;
 use serde::de::DeserializeOwned;
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
+use std::time::Duration;
 use tokio::sync::Mutex;
+use utils::fetch_secret_impl;
 
 mod token_refresher;
 mod utils;
+
+const CACHE_MAX_CAPACITY: u64 = 1_024;
+const CACHE_TTL_IN_SEC: u64 = 60 * 60;
 
 #[derive(Debug, Clone, Deserialize, Serialize, Default)]
 pub struct OAuthToken {
@@ -18,20 +24,31 @@ pub struct OAuthToken {
     pub token_type: String,
 }
 
+#[derive(Debug, Clone, Deserialize, Serialize, Default)]
+pub struct OAuthAccessToken {
+    pub access_token: String,
+    pub token_type: String,
+    pub expires_at: u64,
+}
+
 #[derive(Clone)]
 pub struct SecretsManager {
     db: Arc<dyn Database>,
     client: Arc<dyn HttpClient>,
     token_refresher: Arc<Mutex<token_refresher::TokenRefresher>>,
+    oauth_access_token_cache: Cache<(String, String), OAuthAccessToken>,
 }
 
-// TODO: caching could make sense here
 impl SecretsManager {
     pub fn new(db: Arc<dyn Database>, client: Arc<dyn HttpClient>) -> Self {
         Self {
             db,
             client,
             token_refresher: Arc::new(Mutex::new(token_refresher::TokenRefresher)),
+            oauth_access_token_cache: Cache::builder()
+                .max_capacity(CACHE_MAX_CAPACITY)
+                .time_to_live(Duration::from_secs(CACHE_TTL_IN_SEC))
+                .build(),
         }
     }
 
@@ -45,32 +62,126 @@ impl SecretsManager {
         }
     }
 
-    pub async fn fetch_oauth_token_and_refresh_if_necessary(
+    pub async fn fetch_oauth_access_token(
         &self,
         credential_name: &str,
         workflow_id: &str,
-    ) -> Result<OAuthToken> {
-        let oauth_token = self
-            .fetch_secret::<OAuthToken>(credential_name, workflow_id)
-            .await?;
+    ) -> Result<OAuthAccessToken> {
+        // We first fetch the secrets from the store to check whether the credential exists
+        let (stored_secret, integration_type_opt) =
+            fetch_secret_impl::<serde_json::Value>(&*self.db, credential_name, workflow_id).await?;
+        let integration_type = match integration_type_opt {
+            Some(integration_type) => integration_type,
+            None => {
+                let error_message = format!("Credential \"{credential_name}\" has no integration type. Can't perform OAuth token refresh.");
+                tracing::error!(error_message);
+                return Err(anyhow!(error_message));
+            }
+        };
 
-        // We check if the token is expired
-        if oauth_token.expires_at >= utils::current_timestamp() {
-            // token is valid!
-            return Ok(oauth_token);
+        // Check for existing and valid access token
+        match integration_type.as_str() {
+            // Case 1: Integration with stored refresh token?
+            "MS_TEAMS" => {
+                // Check whether we still have a valid token stored in the db
+                let expires_at = stored_secret
+                    .get("expires_at")
+                    .expect("integration with oauth refresh token must have parameter expires_at stored!")
+                    .as_u64()
+                    .expect("expires_at must be an integer");
+
+                if expires_at >= utils::current_timestamp() {
+                    // We have a valid token!
+                    let access_token = stored_secret
+                        .get("access_token")
+                        .expect("integration with oauth refresh token must have parameter access_token stored!")
+                        .as_str()
+                        .expect("access_token must be a string");
+                    let token_type = stored_secret
+                        .get("token_type")
+                        .expect("integration with oauth refresh token must have parameter token_type stored!")
+                        .as_str()
+                        .expect("token_type must be a string");
+
+                    let token = OAuthAccessToken {
+                        access_token: access_token.to_string(),
+                        token_type: token_type.to_string(),
+                        expires_at,
+                    };
+
+                    return Ok(token);
+                }
+            }
+            // Case 2: For integrations without a refresh token, we check the cache for a valid access token
+            "MS_DEFENDER_FOR_CLOUD" => {
+                let cache_key = (credential_name.to_string(), workflow_id.to_string());
+                if let Some(oauth_token) = self.oauth_access_token_cache.get(&cache_key).await {
+                    if oauth_token.expires_at > utils::current_timestamp() {
+                        return Ok(oauth_token);
+                    }
+                }
+            }
+            _ => {
+                let error_message = format!("Unknown integration: \"{integration_type}\".");
+                tracing::error!(error_message);
+                return Err(anyhow!(error_message));
+            }
         }
 
-        // The token is expired. Hence, we need to refresh it!
-        // However, for a credential, we must synchronize the token refresh across tasks
+        tracing::info!("Performing OAuth token refresh - credential = \"{credential_name}\" , workflow = \"{workflow_id}\" , integratino_type = \"{integration_type}\"");
 
-        tracing::info!("Performing OAuth token refresh - credential = \"{credential_name}\" , workflow = \"{workflow_id}\"");
-
-        // acquire lock to only allow a single writer => make more finegrained in the future
-        // TODO: if there are two workflow runners, then we must also synchronize token refreshing => DB lock? separate secrets manager service?
         let locked_token_refresher = self.token_refresher.lock().await;
-        locked_token_refresher
-            .refresh(&*self.db, &*self.client, credential_name, workflow_id)
-            .await
+
+        // Still invalid - check for valid token again and if not exists then refresh
+        let token = match integration_type.as_str() {
+            "MS_TEAMS" => {
+                let oauth_token = locked_token_refresher
+                    .refresh_with_refresh_token(
+                        &*self.db,
+                        &*self.client,
+                        credential_name,
+                        workflow_id,
+                    )
+                    .await?;
+                OAuthAccessToken {
+                    access_token: oauth_token.access_token,
+                    token_type: oauth_token.token_type,
+                    expires_at: oauth_token.expires_at,
+                }
+            }
+            "MS_DEFENDER_FOR_CLOUD" => {
+                let cache_key = (credential_name.to_string(), workflow_id.to_string());
+                if let Some(oauth_token) = self.oauth_access_token_cache.get(&cache_key).await {
+                    if oauth_token.expires_at > utils::current_timestamp() {
+                        return Ok(oauth_token);
+                    }
+                }
+
+                let token = locked_token_refresher
+                    .refresh_without_refresh_token(
+                        &stored_secret,
+                        &integration_type,
+                        &*self.client,
+                        credential_name,
+                        workflow_id,
+                    )
+                    .await?;
+
+                // Update the cache
+                self.oauth_access_token_cache
+                    .insert(cache_key, token.clone())
+                    .await;
+
+                token
+            }
+            _ => {
+                return Err(anyhow!(
+                    "Unknown integration type {integration_type} for oauth token refreshing"
+                ));
+            }
+        };
+
+        Ok(token)
     }
 }
 
@@ -107,6 +218,7 @@ mod tests {
 
             if *state > 1 {
                 return Ok(json!({
+                    "token_type": "failed",
                     "access_token": "failed",
                     "refresh_token": "failed",
                     "expires_in": 3600
@@ -114,6 +226,7 @@ mod tests {
             }
 
             Ok(json!({
+                "token_type": "Bearer",
                 "access_token": "new_access_token",
                 "refresh_token": "new_refresh_token",
                 "expires_in": 3600
@@ -121,20 +234,20 @@ mod tests {
         }
     }
 
-    struct MockDb {
+    struct MockDbMSTeams {
         secret: Mutex<RefCell<String>>,
     }
-    impl MockDb {
+    impl MockDbMSTeams {
         fn new() -> Self {
             Self {
                 secret: Mutex::new(RefCell::new(
                     "{\"access_token\": \"saasd\", \"refresh_token\": \"msads\", \"expires_at\": 1717267296, \"scope\": \"offline_access\", \"token_type\": \"Bearer\"}".to_string()
-                ))
+                )),
             }
         }
     }
     #[async_trait]
-    impl Database for MockDb {
+    impl Database for MockDbMSTeams {
         async fn fetch_secret(
             &self,
             _workflow_id: &str,
@@ -165,23 +278,24 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_fetch_oauth_token_and_refresh_if_necessary() {
-        let secrets_manager =
-            SecretsManager::new(Arc::new(MockDb::new()), Arc::new(MockHttpClient::default()));
+    async fn test_fetch_oauth_access_token_ms_teams() {
+        let secrets_manager = SecretsManager::new(
+            Arc::new(MockDbMSTeams::new()),
+            Arc::new(MockHttpClient::default()),
+        );
         let result = secrets_manager
-            .fetch_oauth_token_and_refresh_if_necessary("my_credential", "workflow_id")
+            .fetch_oauth_access_token("my_credential", "workflow_id")
             .await;
         assert!(result.is_ok());
 
         let oauth_token = result.unwrap();
         assert_eq!(oauth_token.access_token, "new_access_token");
-        assert_eq!(oauth_token.refresh_token, "new_refresh_token");
     }
 
     #[tokio::test(flavor = "multi_thread")]
-    async fn test_fetch_oauth_token_and_refresh_if_necessary_multi_threaded() {
+    async fn test_fetch_oauth_access_token_ms_teams_multi_threaded() {
         let secrets_manager = Arc::new(SecretsManager::new(
-            Arc::new(MockDb::new()),
+            Arc::new(MockDbMSTeams::new()),
             Arc::new(MockHttpClient::default()),
         ));
 
@@ -198,7 +312,7 @@ mod tests {
                     barrier_clone.wait().await;
 
                     secrets_manager_clone
-                        .fetch_oauth_token_and_refresh_if_necessary("my_credential", "workflow_id")
+                        .fetch_oauth_access_token("my_credential", "workflow_id")
                         .await
                 });
                 handle
@@ -211,7 +325,72 @@ mod tests {
 
             let oauth_token = result.unwrap();
             assert_eq!(oauth_token.access_token, "new_access_token");
-            assert_eq!(oauth_token.refresh_token, "new_refresh_token");
+        }
+    }
+
+    struct MockDbMSDefenderForCloud;
+    #[async_trait]
+    impl Database for MockDbMSDefenderForCloud {
+        async fn fetch_secret(
+            &self,
+            _workflow_id: &str,
+            _credential_name: &str,
+        ) -> Result<Option<Credential>> {
+            Ok(Some(Credential {
+                secret: "{\"TENANT_ID\": \"my-tenant\", \"CLIENT_ID\": \"my-client\", \"CLIENT_SECRET\": \"my-secret\"}".to_string(),
+                credential_type: Some("MS_DEFENDER_FOR_CLOUD".to_string()),
+            }))
+        }
+    }
+
+    #[tokio::test]
+    async fn test_fetch_oauth_access_token_ms_defender_for_cloud() {
+        let secrets_manager = SecretsManager::new(
+            Arc::new(MockDbMSDefenderForCloud),
+            Arc::new(MockHttpClient::default()),
+        );
+        let result = secrets_manager
+            .fetch_oauth_access_token("my_credential", "workflow_id")
+            .await;
+        assert!(result.is_ok());
+
+        let oauth_token = result.unwrap();
+        assert_eq!(oauth_token.access_token, "new_access_token");
+    }
+
+    #[tokio::test(flavor = "multi_thread")]
+    async fn test_fetch_oauth_access_token_ms_defender_for_cloud_multi_threaded() {
+        let secrets_manager = Arc::new(SecretsManager::new(
+            Arc::new(MockDbMSDefenderForCloud),
+            Arc::new(MockHttpClient::default()),
+        ));
+
+        let num_tasks = 10;
+        let barrier = Arc::new(Barrier::new(num_tasks));
+
+        let handles = (0..num_tasks)
+            .map(|_| {
+                let barrier_clone = Arc::clone(&barrier);
+                let secrets_manager_clone = Arc::clone(&secrets_manager);
+
+                let handle = task::spawn(async move {
+                    // let the task wait until all tasks are launched
+                    barrier_clone.wait().await;
+
+                    secrets_manager_clone
+                        .fetch_oauth_access_token("my_credential", "workflow_id")
+                        .await
+                });
+                handle
+            })
+            .collect::<Vec<_>>();
+
+        for handle in handles {
+            let result = handle.await.unwrap();
+            assert!(result.is_ok());
+
+            let oauth_token = result.unwrap();
+            assert_eq!(oauth_token.access_token, "new_access_token");
         }
     }
 }

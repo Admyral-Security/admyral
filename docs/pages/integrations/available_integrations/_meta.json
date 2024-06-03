@@ -6,5 +6,6 @@
 	"phish_report": "Phish Report",
 	"threatpost": "Threatpost",
 	"yaraify": "YARAify",
-	"virus_total": "VirusTotal"
+	"virus_total": "VirusTotal",
+	"ms_defender_for_cloud": "Microsoft Defender for Cloud"
 }

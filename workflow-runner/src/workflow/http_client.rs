@@ -263,9 +263,14 @@ impl ReqwestClient {
         error_message: String,
         operation: Operation,
     ) -> Result<serde_json::Value> {
+        // In a very rare case, it could happen that task 1 fetches a valid oauth access token.
+        // Then, task 2 refreshes the oauth token immediately after that causing the access token
+        // of task 1 to become invalid. However, task 1 would then retry and
+        // is then guaranteed to fetch a valid token.
+
         let oauth_token = context
             .secrets_manager
-            .fetch_oauth_token_and_refresh_if_necessary(oauth_token_name, &context.workflow_id)
+            .fetch_oauth_access_token(oauth_token_name, &context.workflow_id)
             .await?;
         headers.insert(
             "Authorization".to_string(),
@@ -279,6 +284,7 @@ impl ReqwestClient {
             }
             Operation::Put { body } => make_put_request(&self.client, url, &headers, body).await?,
         };
+
         let response_status = response.status().as_u16();
         if response_status == expected_response_status {
             return decode_response(response, expected_response_status, error_message).await;
@@ -295,12 +301,13 @@ impl ReqwestClient {
         // Fetch token again (it will automatically refresh) and retry again.
         let oauth_token = context
             .secrets_manager
-            .fetch_oauth_token_and_refresh_if_necessary(oauth_token_name, &context.workflow_id)
+            .fetch_oauth_access_token(oauth_token_name, &context.workflow_id)
             .await?;
         headers.insert(
             "Authorization".to_string(),
             format!("{} {}", oauth_token.token_type, oauth_token.access_token),
         );
+
         let response = match &operation {
             Operation::Get => make_get_request(&self.client, url, &headers).await?,
             Operation::Post { body } => {
@@ -308,6 +315,7 @@ impl ReqwestClient {
             }
             Operation::Put { body } => make_put_request(&self.client, url, &headers, body).await?,
         };
+
         decode_response(response, expected_response_status, error_message).await
     }
 }

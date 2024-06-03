@@ -9,6 +9,7 @@ use std::collections::HashMap;
 
 mod alienvault_otx;
 mod jira;
+mod ms_defender_for_cloud;
 mod ms_teams;
 mod phish_report;
 mod slack;
@@ -38,6 +39,7 @@ pub enum IntegrationType {
     Slack,
     Jira,
     MsTeams,
+    MsDefenderForCloud,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -90,6 +92,11 @@ impl ActionExecutor for Integration {
             }
             IntegrationType::MsTeams => {
                 ms_teams::MsTeamsExecutor
+                    .execute(&client, context, &self.api, &self.credential, &self.params)
+                    .await
+            }
+            IntegrationType::MsDefenderForCloud => {
+                ms_defender_for_cloud::MsDefenderForCloudExecutor
                     .execute(&client, context, &self.api, &self.credential, &self.params)
                     .await
             }
