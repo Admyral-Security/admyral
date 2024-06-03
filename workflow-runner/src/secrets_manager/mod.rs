@@ -90,7 +90,7 @@ impl SecretsManager {
                     .as_u64()
                     .expect("expires_at must be an integer");
 
-                if expires_at >= utils::current_timestamp() {
+                if expires_at > utils::current_timestamp() {
                     // We have a valid token!
                     let access_token = stored_secret
                         .get("access_token")
