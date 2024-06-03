@@ -1,0 +1,61 @@
+import { Callout } from "nextra/components";
+
+# Send message in a chat
+
+Creates a new chat message in a specified chat.
+
+<Callout type="info">
+	For Microsoft's documentation, see [Send message in a chat](https://learn.microsoft.com/en-us/graph/api/chat-post-messages?view=graph-rest-1.0&tabs=http).
+</Callout>
+
+## Parameters:
+
+| Field          | Description                                                                                                                                                 | Required |
+| -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | :------: |
+| **Chat ID**    | The ID of the chat where the message will be sent. Example: `19:2da4c29f6d7041eca70b638b43d45437@thread.v2`                                                                                                        |   Yes    |
+| **Message**    | The content of the message to be sent.                                                                                                                       |   Yes    |
+
+## Example Output:
+
+```json
+HTTP/1.1 201 Created
+Content-type: application/json
+
+{
+    "@odata.context": "https://graph.microsoft.com/v1.0/$metadata#chats('19%3A2da4c29f6d7041eca70b638b43d45437%40thread.v2')/messages/$entity",
+    "id": "1616991463150",
+    "replyToId": null,
+    "etag": "1616991463150",
+    "messageType": "message",
+    "createdDateTime": "2021-03-29T04:17:43.15Z",
+    "lastModifiedDateTime": "2021-03-29T04:17:43.15Z",
+    "lastEditedDateTime": null,
+    "deletedDateTime": null,
+    "subject": null,
+    "summary": null,
+    "chatId": "19:2da4c29f6d7041eca70b638b43d45437@thread.v2",
+    "importance": "normal",
+    "locale": "en-us",
+    "webUrl": null,
+    "channelIdentity": null,
+    "policyViolation": null,
+    "eventDetail": null,
+    "from": {
+        "application": null,
+        "device": null,
+        "conversation": null,
+        "user": {
+            "id": "8ea0e38b-efb3-4757-924a-5f94061cf8c2",
+            "displayName": "Robin Kline",
+            "userIdentityType": "aadUser"
+        }
+    },
+    "body": {
+        "contentType": "text",
+        "content": "Hello World"
+    },
+    "attachments": [],
+    "mentions": [],
+    "reactions": [],
+    "messageHistory": []
+}
