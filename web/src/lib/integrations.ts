@@ -8,6 +8,7 @@ export enum IntegrationType {
 	JIRA = "JIRA",
 	MS_TEAMS = "MS_TEAMS",
 	MS_DEFENDER_FOR_CLOUD = "MS_DEFENDER_FOR_CLOUD",
+	PULSEDIVE = "PULSEDIVE",
 }
 
 export enum ApiParameterDatatype {
@@ -1653,6 +1654,48 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 					},
 				],
 			},
+		],
+	},
+	// Pulsedive
+	[IntegrationType.PULSEDIVE]: {
+		name: "Pulsedive",
+		icon: {
+			src: "/pulsedive_logo.svg",
+			isSquareIcon: true,
+		},
+		credential: {
+			authType: AuthType.SECRET,
+			parameters: [
+				{
+					id: "API_KEY",
+					displayName: "API Key",
+				},
+			],
+		},
+		apis: [
+			{
+                id: "EXPLORE",
+                name: "Explore",
+                description: "Retrieve information from Pulsedive using the Explore API",
+                documentationUrl: "https://pulsedive.com/api/explore",
+                requiresAuthentication: true,
+                parameters: [
+                    {
+                        id: "QUERY",
+                        displayName: "Query",
+                        description: "The query to search Pulsedive.",
+                        required: true,
+                        dataType: ApiParameterDatatype.TEXT,
+                    },
+                    {
+                        id: "LIMIT",
+                        displayName: "Limit",
+                        description: "The number of records to return. Default: 10",
+                        required: false,
+                        dataType: ApiParameterDatatype.NUMBER,
+                    },
+                ],
+            },
 		],
 	},
 	// ...

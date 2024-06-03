@@ -12,6 +12,7 @@ mod jira;
 mod ms_defender_for_cloud;
 mod ms_teams;
 mod phish_report;
+mod pulsedive;
 mod slack;
 mod threatpost;
 mod virustotal;
@@ -40,6 +41,7 @@ pub enum IntegrationType {
     Jira,
     MsTeams,
     MsDefenderForCloud,
+    Pulsedive,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -97,6 +99,11 @@ impl ActionExecutor for Integration {
             }
             IntegrationType::MsDefenderForCloud => {
                 ms_defender_for_cloud::MsDefenderForCloudExecutor
+                    .execute(&client, context, &self.api, &self.credential, &self.params)
+                    .await
+            }
+            IntegrationType::Pulsedive => {
+                pulsedive::PulsediveExecutor
                     .execute(&client, context, &self.api, &self.credential, &self.params)
                     .await
             }
