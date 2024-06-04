@@ -20,6 +20,11 @@ import Link from "next/link";
 import ArrowRightUpIcon from "../icons/arrow-right-up";
 import { useEffect, useState } from "react";
 import { listCredentials } from "@/lib/api";
+import {
+	REFERENCE_HANDLE_EXAMPLE1,
+	REFERENCE_HANDLE_EXAMPLE2,
+	REFERENCE_HANDLE_EXPLANATION,
+} from "@/lib/constants";
 
 export interface IntegrationProps {
 	id: string;
@@ -162,6 +167,15 @@ export default function Integration({
 
 			<Flex direction="column" gap="2">
 				<Text>Reference Handle</Text>
+				<Text color="gray" weight="light" size="1">
+					{REFERENCE_HANDLE_EXPLANATION}
+				</Text>
+				<Text color="gray" weight="light" size="1">
+					{REFERENCE_HANDLE_EXAMPLE1}
+				</Text>
+				<Text color="gray" weight="light" size="1">
+					{REFERENCE_HANDLE_EXAMPLE2}
+				</Text>
 				<CopyText text={data.referenceHandle} />
 			</Flex>
 

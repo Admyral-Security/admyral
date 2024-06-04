@@ -5,6 +5,11 @@ import { SendEmailData } from "@/lib/types";
 import { generateReferenceHandle } from "@/lib/workflow-node";
 import { cloneDeep } from "lodash";
 import useWorkflowStore from "@/lib/workflow-store";
+import {
+	REFERENCE_HANDLE_EXAMPLE1,
+	REFERENCE_HANDLE_EXAMPLE2,
+	REFERENCE_HANDLE_EXPLANATION,
+} from "@/lib/constants";
 
 export interface SendEmailProps {
 	id: string;
@@ -40,6 +45,15 @@ export default function SendEmail({ id }: SendEmailProps) {
 
 			<Flex direction="column" gap="2">
 				<Text>Reference Handle</Text>
+				<Text color="gray" weight="light" size="1">
+					{REFERENCE_HANDLE_EXPLANATION}
+				</Text>
+				<Text color="gray" weight="light" size="1">
+					{REFERENCE_HANDLE_EXAMPLE1}
+				</Text>
+				<Text color="gray" weight="light" size="1">
+					{REFERENCE_HANDLE_EXAMPLE2}
+				</Text>
 				<CopyText text={data.referenceHandle} />
 			</Flex>
 
