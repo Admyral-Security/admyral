@@ -113,7 +113,7 @@ impl SecretsManager {
                 }
             }
             // Case 2: For integrations without a refresh token, we check the cache for a valid access token
-            "MS_DEFENDER_FOR_CLOUD" => {
+            "MS_DEFENDER_FOR_CLOUD" | "MS_DEFENDER" => {
                 let cache_key = (credential_name.to_string(), workflow_id.to_string());
                 if let Some(oauth_token) = self.oauth_access_token_cache.get(&cache_key).await {
                     if oauth_token.expires_at > utils::current_timestamp() {
@@ -149,7 +149,7 @@ impl SecretsManager {
                     expires_at: oauth_token.expires_at,
                 }
             }
-            "MS_DEFENDER_FOR_CLOUD" => {
+            "MS_DEFENDER_FOR_CLOUD" | "MS_DEFENDER" => {
                 let cache_key = (credential_name.to_string(), workflow_id.to_string());
                 if let Some(oauth_token) = self.oauth_access_token_cache.get(&cache_key).await {
                     if oauth_token.expires_at > utils::current_timestamp() {

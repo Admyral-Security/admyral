@@ -9,6 +9,7 @@ use std::collections::HashMap;
 
 mod alienvault_otx;
 mod jira;
+mod ms_defender;
 mod ms_defender_for_cloud;
 mod ms_teams;
 mod phish_report;
@@ -42,6 +43,7 @@ pub enum IntegrationType {
     MsTeams,
     MsDefenderForCloud,
     Pulsedive,
+    MsDefender,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -104,6 +106,11 @@ impl ActionExecutor for Integration {
             }
             IntegrationType::Pulsedive => {
                 pulsedive::PulsediveExecutor
+                    .execute(&client, context, &self.api, &self.credential, &self.params)
+                    .await
+            }
+            IntegrationType::MsDefender => {
+                ms_defender::MsDefenderExecutor
                     .execute(&client, context, &self.api, &self.credential, &self.params)
                     .await
             }

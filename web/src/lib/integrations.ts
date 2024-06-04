@@ -9,6 +9,7 @@ export enum IntegrationType {
 	MS_TEAMS = "MS_TEAMS",
 	MS_DEFENDER_FOR_CLOUD = "MS_DEFENDER_FOR_CLOUD",
 	PULSEDIVE = "PULSEDIVE",
+	MS_DEFENDER = "MS_DEFENDER",
 }
 
 export enum ApiParameterDatatype {
@@ -1674,28 +1675,99 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 		},
 		apis: [
 			{
-                id: "EXPLORE",
-                name: "Explore",
-                description: "Retrieve information from Pulsedive using the Explore API",
-                documentationUrl: "https://pulsedive.com/api/explore",
-                requiresAuthentication: true,
-                parameters: [
-                    {
-                        id: "QUERY",
-                        displayName: "Query",
-                        description: "The query to search Pulsedive.",
-                        required: true,
-                        dataType: ApiParameterDatatype.TEXT,
-                    },
-                    {
-                        id: "LIMIT",
-                        displayName: "Limit",
-                        description: "The number of records to return. Default: 10",
-                        required: false,
-                        dataType: ApiParameterDatatype.NUMBER,
-                    },
-                ],
-            },
+				id: "EXPLORE",
+				name: "Explore",
+				description:
+					"Retrieve information from Pulsedive using the Explore API",
+				documentationUrl: "https://pulsedive.com/api/explore",
+				requiresAuthentication: true,
+				parameters: [
+					{
+						id: "QUERY",
+						displayName: "Query",
+						description: "The query to search Pulsedive.",
+						required: true,
+						dataType: ApiParameterDatatype.TEXT,
+					},
+					{
+						id: "LIMIT",
+						displayName: "Limit",
+						description:
+							"The number of records to return. Default: 10",
+						required: false,
+						dataType: ApiParameterDatatype.NUMBER,
+					},
+				],
+			},
+		],
+	},
+	// MS Defender XDR
+	[IntegrationType.MS_DEFENDER]: {
+		name: "Microsoft Defender",
+		icon: {
+			src: "/ms_defender_logo.png",
+			isSquareIcon: true,
+		},
+		credential: {
+			authType: AuthType.SECRET,
+			parameters: [
+				{
+					id: "TENANT_ID",
+					displayName: "Your Tenant ID",
+				},
+				{
+					id: "CLIENT_ID",
+					displayName: "Your Client ID",
+				},
+				{
+					id: "CLIENT_SECRET",
+					displayName: "Your Client Secret",
+				},
+			],
+		},
+		apis: [
+			{
+				id: "LIST_ALERTS_V2",
+				name: "List Alerts v2",
+				description:
+					"Get a list of alert resources created to track suspicious activities in an organization.",
+				documentationUrl:
+					"https://learn.microsoft.com/en-us/graph/api/security-list-alerts_v2?view=graph-rest-1.0&tabs=http",
+				requiresAuthentication: true,
+				parameters: [
+					{
+						id: "FILTER",
+						displayName: "OData Filter",
+						description:
+							"An OData filter to apply to the alert list. The following properties support filter: assignedTo, classification, determination, createdDateTime, lastUpdateDateTime, severity, serviceSource and status. Example: serviceSource eq 'microsoftDefenderForEndpoint' and createdDateTime gt 2021-01-01T00:00:00Z",
+						required: false,
+						dataType: ApiParameterDatatype.TEXT,
+					},
+					{
+						id: "LIMIT",
+						displayName: "Limit",
+						description: "The maximum number of alerts to return.",
+						required: false,
+						dataType: ApiParameterDatatype.NUMBER,
+					},
+					{
+						id: "SKIP",
+						displayName: "Skip",
+						description:
+							"The number of alerts to skip before returning the results.",
+						required: false,
+						dataType: ApiParameterDatatype.NUMBER,
+					},
+					{
+						id: "COUNT",
+						displayName: "Count Alerts",
+						description:
+							"Instead of returning all the results, the count parameter returns the number of items in the result set. Default: false",
+						required: false,
+						dataType: ApiParameterDatatype.BOOLEAN,
+					},
+				],
+			},
 		],
 	},
 	// ...

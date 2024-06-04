@@ -35,7 +35,7 @@ impl TokenRefresher {
         );
 
         let (params, url) = match integration_type {
-            "MS_DEFENDER_FOR_CLOUD" => {
+            "MS_DEFENDER_FOR_CLOUD" | "MS_DEFENDER" => {
                 let tenant_id = stored_secret
                     .get("TENANT_ID")
                     .expect("Missing tenant ID in credentials for MS Defender for Cloud")
@@ -56,7 +56,13 @@ impl TokenRefresher {
                     format!("https://login.microsoftonline.com/{tenant_id}/oauth2/v2.0/token");
                 let params = hashmap! {
                     "client_id".to_string() => client_id.to_string(),
-                    "scope".to_string() => "https://management.azure.com/.default".to_string(),
+                    "scope".to_string() => {
+                        match integration_type {
+                            "MS_DEFENDER_FOR_CLOUD" => "https://management.azure.com/.default".to_string(),
+                            "MS_DEFENDER" => "https://graph.microsoft.com/.default".to_string(),
+                            _ => return Err(anyhow!("Unknown integration type {integration_type}"))
+                        }
+                    },
                     "client_secret".to_string() => client_secret.to_string(),
                     "grant_type".to_string() => "client_credentials".to_string()
                 };

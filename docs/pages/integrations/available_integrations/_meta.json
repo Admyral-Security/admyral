@@ -8,5 +8,6 @@
 	"threatpost": "Threatpost",
 	"yaraify": "YARAify",
 	"virus_total": "VirusTotal",
-	"ms_defender_for_cloud": "Microsoft Defender for Cloud"
+	"ms_defender_for_cloud": "Microsoft Defender for Cloud",
+	"ms_defender": "Microsoft Defender"
 }
