@@ -10,7 +10,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::json;
 use std::collections::HashMap;
 
-const PHISH_REPORT: &str = "Phish Report";
+const INTEGRATION: &str = "Phish Report";
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
@@ -27,15 +27,18 @@ impl IntegrationExecutor for PhishReportExecutor {
         client: &dyn HttpClient,
         context: &context::Context,
         api: &str,
-        credential_name: &str,
+        credential_name: &Option<String>,
         parameters: &HashMap<String, serde_json::Value>,
     ) -> Result<serde_json::Value> {
+        let credential_name = match credential_name {
+            Some(credential) => credential.as_str(),
+            None => return Err(anyhow!("Error: Missing credential for {INTEGRATION}")),
+        };
         let api_key = context
             .secrets_manager
             .fetch_secret::<PhishReportCredential>(credential_name, &context.workflow_id)
             .await?
             .api_key;
-
         match api {
             "GET_HOSTING_CONTACT_INFORMATION" => {
                 get_hosting_contact_information(client, &api_key, context, parameters).await
@@ -44,7 +47,7 @@ impl IntegrationExecutor for PhishReportExecutor {
             "START_TAKEDOWN" => start_takedown(client, &api_key, context, parameters).await,
             "GET_TAKEDOWN" => get_takedown(client, &api_key, context, parameters).await,
             "CLOSE_TAKEDOWN_CASE" => close_takedown(client, &api_key, context, parameters).await,
-            _ => return Err(anyhow!("API {api} not implemented for {PHISH_REPORT}.")),
+            _ => return Err(anyhow!("API {api} not implemented for {INTEGRATION}.")),
         }
     }
 }
@@ -73,7 +76,7 @@ async fn phish_report_request(
                     api_url,
                     headers,
                     200,
-                    format!("Error: Failed to call {PHISH_REPORT} API"),
+                    format!("Error: Failed to call {INTEGRATION} API"),
                 )
                 .await?
         }
@@ -84,7 +87,7 @@ async fn phish_report_request(
                     headers,
                     RequestBodyType::Json { body: body },
                     200,
-                    format!("Error: Failed to call {PHISH_REPORT} API"),
+                    format!("Error: Failed to call {INTEGRATION} API"),
                 )
                 .await?
         }
@@ -95,7 +98,7 @@ async fn phish_report_request(
                     headers,
                     RequestBodyType::Json { body: body },
                     200,
-                    format!("Error: Failed to call {PHISH_REPORT} API"),
+                    format!("Error: Failed to call {INTEGRATION} API"),
                 )
                 .await?
         }
@@ -113,7 +116,7 @@ async fn get_hosting_contact_information(
 ) -> Result<serde_json::Value> {
     let url = get_string_parameter(
         "URL",
-        PHISH_REPORT,
+        INTEGRATION,
         "GET_HOSTING_CONTACT_INFORMATION",
         parameters,
         context,
@@ -142,7 +145,7 @@ async fn start_takedown(
 ) -> Result<serde_json::Value> {
     let url = get_string_parameter(
         "URL",
-        PHISH_REPORT,
+        INTEGRATION,
         "START_TAKEDOWN",
         parameters,
         context,
@@ -153,7 +156,7 @@ async fn start_takedown(
 
     let ignore_duplicates = get_bool_parameter(
         "IGNORE_DUPLICATES",
-        PHISH_REPORT,
+        INTEGRATION,
         "START_TAKEDOWN",
         parameters,
         context,
@@ -185,7 +188,7 @@ async fn get_takedown(
 ) -> Result<serde_json::Value> {
     let case_id = get_string_parameter(
         "ID",
-        PHISH_REPORT,
+        INTEGRATION,
         "GET_TAKEDOWN",
         parameters,
         context,
@@ -208,7 +211,7 @@ async fn close_takedown(
 ) -> Result<serde_json::Value> {
     let case_id = get_string_parameter(
         "ID",
-        PHISH_REPORT,
+        INTEGRATION,
         "GET_TAKEDOWN",
         parameters,
         context,
@@ -219,7 +222,7 @@ async fn close_takedown(
 
     let comment = get_string_parameter(
         "COMMENT",
-        PHISH_REPORT,
+        INTEGRATION,
         "GET_TAKEDOWN",
         parameters,
         context,
@@ -327,7 +330,7 @@ mod tests {
                 &*client,
                 &context,
                 "GET_TAKEDOWN",
-                "credentials",
+                &Some("credentials".to_string()),
                 &HashMap::new(),
             )
             .await;
@@ -346,7 +349,7 @@ mod tests {
                 &*client,
                 &context,
                 "GET_HOSTING_CONTACT_INFORMATION",
-                "credentials",
+                &Some("credentials".to_string()),
                 &hashmap! {
                     "URL".to_string() => json!("admyral.dev")
                 },
@@ -364,7 +367,7 @@ mod tests {
                 &*client,
                 &context,
                 "LIST_TAKEDOWNS",
-                "credentials",
+                &Some("credentials".to_string()),
                 &HashMap::new(),
             )
             .await;
@@ -380,7 +383,7 @@ mod tests {
                 &*client,
                 &context,
                 "START_TAKEDOWN",
-                "credentials",
+                &Some("credentials".to_string()),
                 &hashmap! {
                     "URL".to_string() => json!("admyral.dev")
                 },
@@ -395,7 +398,7 @@ mod tests {
                 &*client,
                 &context,
                 "START_TAKEDOWN",
-                "credentials",
+                &Some("credentials".to_string()),
                 &hashmap! {
                     "URL".to_string() => json!("admyral.dev"),
                     "IGNORE_DUPLICATES".to_string() => json!(true)
@@ -414,7 +417,7 @@ mod tests {
                 &*client,
                 &context,
                 "GET_TAKEDOWN",
-                "credentials",
+                &Some("credentials".to_string()),
                 &hashmap! {
                     "ID".to_string() => json!("abcdef")
                 },
@@ -432,7 +435,7 @@ mod tests {
                 &*client,
                 &context,
                 "GET_TAKEDOWN",
-                "credentials",
+                &Some("credentials".to_string()),
                 &hashmap! {
                     "ID".to_string() => json!("abcdef")
                 },
@@ -447,7 +450,7 @@ mod tests {
                 &*client,
                 &context,
                 "GET_TAKEDOWN",
-                "credentials",
+                &Some("credentials".to_string()),
                 &hashmap! {
                     "ID".to_string() => json!("abcdef"),
                     "COMMENT".to_string() => json!("this is a comment")

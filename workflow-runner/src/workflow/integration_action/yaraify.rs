@@ -9,7 +9,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::json;
 use std::collections::HashMap;
 
-const YARAIFY: &str = "YARAify";
+const INTEGRATION: &str = "YARAify";
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct YaraifyExecutor;
@@ -20,7 +20,7 @@ impl IntegrationExecutor for YaraifyExecutor {
         client: &dyn HttpClient,
         context: &context::Context,
         api: &str,
-        _credential_name: &str,
+        _credential_name: &Option<String>,
         parameters: &HashMap<String, serde_json::Value>,
     ) -> Result<serde_json::Value> {
         match api {
@@ -33,7 +33,7 @@ impl IntegrationExecutor for YaraifyExecutor {
             "QUERY_GIMPHASH" => query_gimphash(client, context, parameters).await,
             "QUERY_ICON_DHASH" => query_icon_dhash(client, context, parameters).await,
             "LIST_RECENTLY_DEPLOYED_YARA_RULES" => list_recently_deployed_yara_rules(client).await,
-            _ => return Err(anyhow!("API {api} not implemented for {YARAIFY}.")),
+            _ => return Err(anyhow!("API {api} not implemented for {INTEGRATION}.")),
         }
     }
 }
@@ -54,7 +54,7 @@ async fn query_yaraify(
             HashMap::new(),
             RequestBodyType::Json { body },
             200,
-            format!("Error: Failed to call {YARAIFY} API"),
+            format!("Error: Failed to call {INTEGRATION} API"),
         )
         .await?;
 
@@ -69,7 +69,7 @@ async fn query_a_file_hash(
 ) -> Result<serde_json::Value> {
     let file_hash = get_string_parameter(
         "HASH",
-        YARAIFY,
+        INTEGRATION,
         "QUERY_A_FILE_HASH",
         parameters,
         context,
@@ -89,7 +89,7 @@ async fn query_yara_rule(
 ) -> Result<serde_json::Value> {
     let yara_rule = get_string_parameter(
         "YARA",
-        YARAIFY,
+        INTEGRATION,
         "QUERY_YARA_RULE",
         parameters,
         context,
@@ -108,7 +108,7 @@ async fn query_clamav_signature(
 ) -> Result<serde_json::Value> {
     let clamav = get_string_parameter(
         "CLAMAV",
-        YARAIFY,
+        INTEGRATION,
         "QUERY_CLAMAV_SIGNATURE",
         parameters,
         context,
@@ -127,7 +127,7 @@ async fn query_imphash(
 ) -> Result<serde_json::Value> {
     let imphash = get_string_parameter(
         "IMPHASH",
-        YARAIFY,
+        INTEGRATION,
         "QUERY_IMPHASH",
         parameters,
         context,
@@ -146,7 +146,7 @@ async fn query_tlsh(
 ) -> Result<serde_json::Value> {
     let tlsh = get_string_parameter(
         "TLSH",
-        YARAIFY,
+        INTEGRATION,
         "QUERY_TLSH",
         parameters,
         context,
@@ -165,7 +165,7 @@ async fn query_telfhash(
 ) -> Result<serde_json::Value> {
     let telfhash = get_string_parameter(
         "TELFHASH",
-        YARAIFY,
+        INTEGRATION,
         "QUERY_TELFHASH",
         parameters,
         context,
@@ -184,7 +184,7 @@ async fn query_gimphash(
 ) -> Result<serde_json::Value> {
     let gimphash = get_string_parameter(
         "GIMPHASH",
-        YARAIFY,
+        INTEGRATION,
         "QUERY_GIMPHASH",
         parameters,
         context,
@@ -203,7 +203,7 @@ async fn query_icon_dhash(
 ) -> Result<serde_json::Value> {
     let icon_dhash = get_string_parameter(
         "ICON_DHASH",
-        YARAIFY,
+        INTEGRATION,
         "QUERY_ICON_DHASH",
         parameters,
         context,
@@ -269,7 +269,7 @@ mod tests {
                 &*client,
                 &context,
                 "QUERY_A_FILE_HASH",
-                "credentials",
+                &Some("credentials".to_string()),
                 &hashmap! {
                     "HASH".to_string() => json!("c0202cf6aeab8437c638533d14563d35")
                 },
@@ -287,7 +287,7 @@ mod tests {
                 &*client,
                 &context,
                 "QUERY_YARA_RULE",
-                "credentials",
+                &Some("credentials".to_string()),
                 &hashmap! {
                     "YARA".to_string() => json!("MALWARE_Win_Neshta")
                 },
@@ -305,7 +305,7 @@ mod tests {
                 &*client,
                 &context,
                 "QUERY_CLAMAV_SIGNATURE",
-                "credentials",
+                &Some("credentials".to_string()),
                 &hashmap! {
                     "CLAMAV".to_string() => json!("Win.Dropper.Gh0stRAT-9789290-0")
                 },
@@ -323,7 +323,7 @@ mod tests {
                 &*client,
                 &context,
                 "QUERY_IMPHASH",
-                "credentials",
+                &Some("credentials".to_string()),
                 &hashmap! {
                     "IMPHASH".to_string() => json!("680b9682922177224183342c299d809f")
                 },
@@ -341,7 +341,7 @@ mod tests {
                 &*client,
                 &context,
                 "QUERY_TLSH",
-                "credentials",
+                &Some("credentials".to_string()),
                 &hashmap! {
                     "TLSH".to_string() => json!("T140551236C8E05951CAEFD73315186AF983182477CCC9E5BB0E6B36D62CB6431A36B06D")
                 }
@@ -359,7 +359,7 @@ mod tests {
                 &*client,
                 &context,
                 "QUERY_TELFHASH",
-                "credentials",
+                &Some("credentials".to_string()),
                 &hashmap! {
                     "TELFHASH".to_string() => json!("t1dd211d716b2195266ea0cd9088eca7b2512c97072349df33cf31849c24140aeea3ac4f")
                 }
@@ -377,7 +377,7 @@ mod tests {
                 &*client,
                 &context,
                 "QUERY_GIMPHASH",
-                "credentials",
+                &Some("credentials".to_string()),
                 &hashmap! {
                     "GIMPHASH".to_string() => json!("a081e2fab5999d99ed6be718af55e93df171d14bc83c7ca5fdc0907edba0d338c")
                 }
@@ -395,7 +395,7 @@ mod tests {
                 &*client,
                 &context,
                 "QUERY_ICON_DHASH",
-                "credentials",
+                &Some("credentials".to_string()),
                 &hashmap! {
                     "ICON_DHASH".to_string() => json!("d8d0d4d8ececece4")
                 },
@@ -413,7 +413,7 @@ mod tests {
                 &*client,
                 &context,
                 "LIST_RECENTLY_DEPLOYED_YARA_RULES",
-                "credentials",
+                &Some("credentials".to_string()),
                 &HashMap::new(),
             )
             .await;

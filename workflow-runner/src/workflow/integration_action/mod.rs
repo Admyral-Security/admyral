@@ -25,7 +25,7 @@ pub trait IntegrationExecutor {
         client: &dyn HttpClient,
         context: &Context,
         api: &str,
-        credential_name: &str,
+        credential_name: &Option<String>,
         parameters: &HashMap<String, serde_json::Value>,
     ) -> Result<serde_json::Value>;
 }
@@ -51,7 +51,7 @@ pub struct Integration {
     integration_type: IntegrationType,
     api: String,
     params: HashMap<String, serde_json::Value>,
-    credential: String,
+    credential: Option<String>,
 }
 
 impl ActionExecutor for Integration {
@@ -149,7 +149,7 @@ mod tests {
         );
         assert_eq!(
             parsed_integration.credential,
-            "My VirusTotal API Key".to_string()
+            Some("My VirusTotal API Key".to_string())
         );
     }
 }

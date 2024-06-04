@@ -1,16 +1,15 @@
 use super::IntegrationExecutor;
 use crate::workflow::{
     context,
-    http_client::{HttpClient, RequestBodyType},
+    http_client::HttpClient,
     utils::{get_number_parameter, get_string_parameter, ParameterType},
 };
 use anyhow::{anyhow, Result};
 use maplit::hashmap;
 use serde::{Deserialize, Serialize};
-use serde_json::json;
 use std::collections::HashMap;
 
-const INTEGRATION_NAME: &str = "Pulsedive";
+const INTEGRATION: &str = "Pulsedive";
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct PulsediveExecutor;
@@ -21,17 +20,20 @@ impl IntegrationExecutor for PulsediveExecutor {
         client: &dyn HttpClient,
         context: &context::Context,
         api: &str,
-        credential_name: &str,
+        credential_name: &Option<String>,
         parameters: &HashMap<String, serde_json::Value>,
     ) -> Result<serde_json::Value> {
+        let credential_name = match credential_name {
+            Some(credential) => credential.as_str(),
+            None => return Err(anyhow!("Error: Missing credential for {INTEGRATION}")),
+        };
         let credential = context
             .secrets_manager
             .fetch_secret::<PulsediveCredential>(credential_name, &context.workflow_id)
             .await?;
-
         match api {
             "EXPLORE" => explore(client, context, &credential, parameters).await,
-            _ => return Err(anyhow!("API {api} not implemented for {INTEGRATION_NAME}")),
+            _ => return Err(anyhow!("API {api} not implemented for {INTEGRATION}")),
         }
     }
 }
@@ -52,7 +54,7 @@ async fn explore(
 
     let query = get_string_parameter(
         "QUERY",
-        INTEGRATION_NAME,
+        INTEGRATION,
         "EXPLORE",
         parameters,
         context,
@@ -64,7 +66,7 @@ async fn explore(
 
     let limit_opt = get_number_parameter(
         "LIMIT",
-        INTEGRATION_NAME,
+        INTEGRATION,
         "EXPLORE",
         parameters,
         context,
@@ -95,7 +97,7 @@ async fn explore(
             &api_url,
             headers,
             200,
-            format!("Error: Failed to call {INTEGRATION_NAME} API Explore"),
+            format!("Error: Failed to call {INTEGRATION} API Explore"),
         )
         .await
 }

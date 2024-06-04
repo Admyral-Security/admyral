@@ -10,7 +10,7 @@ use maplit::hashmap;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
-const VIRUS_TOTAL: &str = "VirusTotal";
+const INTEGRATION: &str = "VirusTotal";
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct VirusTotalExecutor;
@@ -27,15 +27,18 @@ impl IntegrationExecutor for VirusTotalExecutor {
         client: &dyn HttpClient,
         context: &context::Context,
         api: &str,
-        credential_name: &str,
+        credential_name: &Option<String>,
         parameters: &HashMap<String, serde_json::Value>,
     ) -> Result<serde_json::Value> {
+        let credential_name = match credential_name {
+            Some(credential) => credential.as_str(),
+            None => return Err(anyhow!("Error: Missing credential for {INTEGRATION}")),
+        };
         let api_key = context
             .secrets_manager
             .fetch_secret::<VirusTotalCredential>(credential_name, &context.workflow_id)
             .await?
             .api_key;
-
         match api {
             "GET_A_FILE_REPORT" => get_a_file_report(client, context, &api_key, parameters).await,
             "GET_A_DOMAIN_REPORT" => {
@@ -70,7 +73,7 @@ impl IntegrationExecutor for VirusTotalExecutor {
             "GET_COMMENTS_FILE" => get_comments_file(client, context, &api_key, parameters).await,
             "GET_COMMENTS_URL" => get_comments_url(client, context, &api_key, parameters).await,
             "SEARCH" => search(client, context, &api_key, parameters).await,
-            _ => return Err(anyhow!("API {api} not implemented for {VIRUS_TOTAL}.")),
+            _ => return Err(anyhow!("API {api} not implemented for {INTEGRATION}.")),
         }
     }
 }
@@ -91,7 +94,7 @@ async fn virus_total_get_request(
             api_url,
             headers,
             200,
-            format!("Error: Failed to call {VIRUS_TOTAL} API"),
+            format!("Error: Failed to call {INTEGRATION} API"),
         )
         .await
 }
@@ -123,7 +126,7 @@ async fn virus_total_post_request(
             headers,
             request_type,
             200,
-            format!("Error: Failed to call {VIRUS_TOTAL} API"),
+            format!("Error: Failed to call {INTEGRATION} API"),
         )
         .await
 }
@@ -142,7 +145,7 @@ async fn get_a_file_report(
 ) -> Result<serde_json::Value> {
     let file_hash = get_string_parameter(
         "HASH",
-        VIRUS_TOTAL,
+        INTEGRATION,
         "GET_A_FILE_REPORT",
         parameters,
         context,
@@ -163,7 +166,7 @@ async fn get_a_domain_report(
 ) -> Result<serde_json::Value> {
     let domain = get_string_parameter(
         "DOMAIN",
-        VIRUS_TOTAL,
+        INTEGRATION,
         "GET_A_DOMAIN_REPORT",
         parameters,
         context,
@@ -186,7 +189,7 @@ async fn get_ip_address_report(
 ) -> Result<serde_json::Value> {
     let ip = get_string_parameter(
         "IP",
-        VIRUS_TOTAL,
+        INTEGRATION,
         "GET_IP_ADDRESS_REPORT",
         parameters,
         context,
@@ -209,7 +212,7 @@ async fn get_url_analysis_report(
 ) -> Result<serde_json::Value> {
     let url = get_string_parameter(
         "URL",
-        VIRUS_TOTAL,
+        INTEGRATION,
         "GET_URL_ANALYSIS_REPORT",
         parameters,
         context,
@@ -233,7 +236,7 @@ async fn get_file_behavior_reports_summary(
 ) -> Result<serde_json::Value> {
     let hash = get_string_parameter(
         "HASH",
-        VIRUS_TOTAL,
+        INTEGRATION,
         "GET_FILE_BEHAVIOR_REPORTS_SUMMARY",
         parameters,
         context,
@@ -256,7 +259,7 @@ async fn get_votes_on_a_domain(
 ) -> Result<serde_json::Value> {
     let domain = get_string_parameter(
         "DOMAIN",
-        VIRUS_TOTAL,
+        INTEGRATION,
         "GET_VOTES_ON_A_DOMAIN",
         parameters,
         context,
@@ -280,7 +283,7 @@ async fn get_votes_on_a_file(
 ) -> Result<serde_json::Value> {
     let hash = get_string_parameter(
         "HASH",
-        VIRUS_TOTAL,
+        INTEGRATION,
         "GET_VOTES_ON_A_FILE",
         parameters,
         context,
@@ -303,7 +306,7 @@ async fn get_votes_on_an_ip_address(
 ) -> Result<serde_json::Value> {
     let ip = get_string_parameter(
         "IP",
-        VIRUS_TOTAL,
+        INTEGRATION,
         "GET_VOTES_ON_AN_IP_ADDRESS",
         parameters,
         context,
@@ -327,7 +330,7 @@ async fn get_votes_on_a_url(
 ) -> Result<serde_json::Value> {
     let url = get_string_parameter(
         "URL",
-        VIRUS_TOTAL,
+        INTEGRATION,
         "GET_VOTES_ON_A_URL",
         parameters,
         context,
@@ -351,7 +354,7 @@ async fn scan_url(
 ) -> Result<serde_json::Value> {
     let url = get_string_parameter(
         "URL",
-        VIRUS_TOTAL,
+        INTEGRATION,
         "SCAN_URL",
         parameters,
         context,
@@ -385,7 +388,7 @@ async fn get_comments_ip_address(
 ) -> Result<serde_json::Value> {
     let ip = get_string_parameter(
         "IP",
-        VIRUS_TOTAL,
+        INTEGRATION,
         "GET_COMMENTS_IP_ADDRESS",
         parameters,
         context,
@@ -409,7 +412,7 @@ async fn get_comments_domain(
 ) -> Result<serde_json::Value> {
     let domain = get_string_parameter(
         "DOMAIN",
-        VIRUS_TOTAL,
+        INTEGRATION,
         "GET_COMMENTS_DOMAIN",
         parameters,
         context,
@@ -433,7 +436,7 @@ async fn get_comments_file(
 ) -> Result<serde_json::Value> {
     let hash = get_string_parameter(
         "HASH",
-        VIRUS_TOTAL,
+        INTEGRATION,
         "GET_COMMENTS_FILE",
         parameters,
         context,
@@ -455,7 +458,7 @@ async fn get_comments_url(
 ) -> Result<serde_json::Value> {
     let url = get_string_parameter(
         "URL",
-        VIRUS_TOTAL,
+        INTEGRATION,
         "GET_COMMENTS_URL",
         parameters,
         context,
@@ -478,7 +481,7 @@ async fn search(
 ) -> Result<serde_json::Value> {
     let query = get_string_parameter(
         "QUERY",
-        VIRUS_TOTAL,
+        INTEGRATION,
         "SEARCH",
         parameters,
         context,
@@ -575,7 +578,7 @@ mod tests {
                 &*client,
                 &context,
                 "GET_A_FILE_REPORT",
-                "credentials",
+                &Some("credentials".to_string()),
                 &HashMap::new(),
             )
             .await;
@@ -594,7 +597,7 @@ mod tests {
                 &*client,
                 &context,
                 "GET_A_FILE_REPORT",
-                "credentials",
+                &Some("credentials".to_string()),
                 &hashmap! {
                     "HASH".to_string() => json!("c0202cf6aeab8437c638533d14563d35")
                 },
@@ -612,7 +615,7 @@ mod tests {
                 &*client,
                 &context,
                 "GET_A_DOMAIN_REPORT",
-                "credentials",
+                &Some("credentials".to_string()),
                 &hashmap! {
                     "DOMAIN".to_string() => json!("admyral.dev")
                 },
@@ -630,7 +633,7 @@ mod tests {
                 &*client,
                 &context,
                 "GET_IP_ADDRESS_REPORT",
-                "credentials",
+                &Some("credentials".to_string()),
                 &hashmap! {
                     "IP".to_string() => json!("8.8.8.8")
                 },
@@ -648,7 +651,7 @@ mod tests {
                 &*client,
                 &context,
                 "GET_URL_ANALYSIS_REPORT",
-                "credentials",
+                &Some("credentials".to_string()),
                 &hashmap! {
                     "URL".to_string() => json!("https://www.google.com")
                 },
@@ -666,7 +669,7 @@ mod tests {
                 &*client,
                 &context,
                 "GET_FILE_BEHAVIOR_REPORTS_SUMMARY",
-                "credentials",
+                &Some("credentials".to_string()),
                 &hashmap! {
                     "HASH".to_string() => json!("c0202cf6aeab8437c638533d14563d35")
                 },
@@ -684,7 +687,7 @@ mod tests {
                 &*client,
                 &context,
                 "GET_VOTES_ON_A_DOMAIN",
-                "credentials",
+                &Some("credentials".to_string()),
                 &hashmap! {
                     "DOMAIN".to_string() => json!("admyral.dev")
                 },
@@ -702,7 +705,7 @@ mod tests {
                 &*client,
                 &context,
                 "GET_VOTES_ON_A_FILE",
-                "credentials",
+                &Some("credentials".to_string()),
                 &hashmap! {
                     "HASH".to_string() => json!("c0202cf6aeab8437c638533d14563d35")
                 },
@@ -720,7 +723,7 @@ mod tests {
                 &*client,
                 &context,
                 "GET_VOTES_ON_AN_IP_ADDRESS",
-                "credentials",
+                &Some("credentials".to_string()),
                 &hashmap! {
                     "IP".to_string() => json!("8.8.8.8")
                 },
@@ -738,7 +741,7 @@ mod tests {
                 &*client,
                 &context,
                 "GET_VOTES_ON_A_URL",
-                "credentials",
+                &Some("credentials".to_string()),
                 &hashmap! {
                     "URL".to_string() => json!("https://www.google.com")
                 },
@@ -756,7 +759,7 @@ mod tests {
                 &*client,
                 &context,
                 "SCAN_URL",
-                "credentials",
+                &Some("credentials".to_string()),
                 &hashmap! {
                     "URL".to_string() => json!("https://www.google.com")
                 },
@@ -774,7 +777,7 @@ mod tests {
                 &*client,
                 &context,
                 "GET_COMMENTS_IP_ADDRESS",
-                "credentials",
+                &Some("credentials".to_string()),
                 &hashmap! {
                     "IP".to_string() => json!("8.8.8.8")
                 },
@@ -792,7 +795,7 @@ mod tests {
                 &*client,
                 &context,
                 "GET_COMMENTS_DOMAIN",
-                "credentials",
+                &Some("credentials".to_string()),
                 &hashmap! {
                     "DOMAIN".to_string() => json!("admyral.dev")
                 },
@@ -810,7 +813,7 @@ mod tests {
                 &*client,
                 &context,
                 "GET_COMMENTS_FILE",
-                "credentials",
+                &Some("credentials".to_string()),
                 &hashmap! {
                     "HASH".to_string() => json!("c0202cf6aeab8437c638533d14563d35")
                 },
@@ -828,7 +831,7 @@ mod tests {
                 &*client,
                 &context,
                 "GET_COMMENTS_URL",
-                "credentials",
+                &Some("credentials".to_string()),
                 &hashmap! {
                     "URL".to_string() => json!("https://www.google.com")
                 },
@@ -846,7 +849,7 @@ mod tests {
                 &*client,
                 &context,
                 "SEARCH",
-                "credentials",
+                &Some("credentials".to_string()),
                 &hashmap! {
                     "QUERY".to_string() => json!("https://www.google.com")
                 },

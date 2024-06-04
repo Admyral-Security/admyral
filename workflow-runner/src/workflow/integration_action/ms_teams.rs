@@ -21,9 +21,13 @@ impl IntegrationExecutor for MsTeamsExecutor {
         client: &dyn HttpClient,
         context: &Context,
         api: &str,
-        credential_name: &str,
+        credential_name: &Option<String>,
         parameters: &HashMap<String, serde_json::Value>,
     ) -> Result<serde_json::Value> {
+        let credential_name = match credential_name {
+            Some(credential) => credential.as_str(),
+            None => return Err(anyhow!("Error: Missing credential for {INTEGRATION}")),
+        };
         match api {
             "SEND_MESSAGE_IN_CHANNEL" => {
                 send_message_in_channel(client, context, credential_name, parameters).await
@@ -630,7 +634,7 @@ mod tests {
                 &*client,
                 &context,
                 "SEND_MESSAGE_IN_CHANNEL",
-                "credentials",
+                &Some("credentials".to_string()),
                 &parameters,
             )
             .await;
@@ -651,7 +655,7 @@ mod tests {
                 &*client,
                 &context,
                 "SEND_MESSAGE_IN_CHAT",
-                "credentials",
+                &Some("credentials".to_string()),
                 &parameters,
             )
             .await;
@@ -673,7 +677,7 @@ mod tests {
                 &*client,
                 &context,
                 "CREATE_CHAT",
-                "credentials",
+                &Some("credentials".to_string()),
                 &parameters,
             )
             .await;
@@ -696,7 +700,7 @@ mod tests {
                 &*client,
                 &context,
                 "SEND_REPLY_IN_CHANNEL",
-                "credentials",
+                &Some("credentials".to_string()),
                 &parameters,
             )
             .await;
@@ -714,7 +718,13 @@ mod tests {
             "FILTER".to_string() => json!("startsWith(displayName,'J')")
         };
         let result = MsTeamsExecutor
-            .execute(&*client, &context, "LIST_USERS", "credentials", &parameters)
+            .execute(
+                &*client,
+                &context,
+                "LIST_USERS",
+                &Some("credentials".to_string()),
+                &parameters,
+            )
             .await;
         assert!(result.is_ok());
         let value = result.unwrap();
@@ -732,7 +742,7 @@ mod tests {
                 &*client,
                 &context,
                 "LIST_CHANNELS",
-                "credentials",
+                &Some("credentials".to_string()),
                 &parameters,
             )
             .await;
@@ -749,7 +759,13 @@ mod tests {
             "SKIP".to_string() => json!("5")
         };
         let result = MsTeamsExecutor
-            .execute(&*client, &context, "LIST_TEAMS", "credentials", &parameters)
+            .execute(
+                &*client,
+                &context,
+                "LIST_TEAMS",
+                &Some("credentials".to_string()),
+                &parameters,
+            )
             .await;
         assert!(result.is_ok());
         let value = result.unwrap();
@@ -765,7 +781,13 @@ mod tests {
             "FILTER".to_string() => json!("chatType eq 'group'")
         };
         let result = MsTeamsExecutor
-            .execute(&*client, &context, "LIST_CHATS", "credentials", &parameters)
+            .execute(
+                &*client,
+                &context,
+                "LIST_CHATS",
+                &Some("credentials".to_string()),
+                &parameters,
+            )
             .await;
         assert!(result.is_ok());
         let value = result.unwrap();

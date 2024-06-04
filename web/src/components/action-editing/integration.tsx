@@ -29,9 +29,10 @@ export default function Integration({ id }: IntegrationProps) {
 		[],
 	);
 
-	const integrationType = (data.actionDefinition as any).integrationType;
-	const apiId = (data.actionDefinition as any).api;
-	const requiresAuthentication = INTEGRATIONS[integrationType].apis.find(
+	const integrationType = (data as IntegrationData).actionDefinition
+		.integrationType;
+	const apiId = (data as IntegrationData).actionDefinition.api;
+	const requiresAuthentication = INTEGRATIONS[integrationType!].apis.find(
 		(api) => api.id === apiId,
 	)?.requiresAuthentication;
 
@@ -43,25 +44,30 @@ export default function Integration({ id }: IntegrationProps) {
 		// if the credential is already selected, then we already know that it exists
 		// and we add it directly to the available credentials so that it is immediately
 		// shown in the UI
-		const previouslySelectedCredential = (data.actionDefinition as any)
-			.credential;
+		const previouslySelectedCredential = (data as IntegrationData)
+			.actionDefinition.credential;
 		setAvailableCredentials(
 			previouslySelectedCredential ? [previouslySelectedCredential] : [],
 		);
 
-		listCredentials((data.actionDefinition as any).integrationType)
+		listCredentials(
+			(data as IntegrationData).actionDefinition.integrationType,
+		)
 			.then((credentials: Credential[]) => {
 				if (
-					(data.actionDefinition as any).credential &&
+					(data as IntegrationData).actionDefinition.credential &&
 					!credentials.find(
 						(c) =>
 							c.name ===
-							(data.actionDefinition as any).credential,
+							(data as IntegrationData).actionDefinition
+								.credential,
 					)
 				) {
 					// The credential does not exist anymore! Hence, we reset the selected the credential
 					const clonedData = cloneDeep(data);
-					(clonedData.actionDefinition as any).credential = "";
+					(
+						clonedData as IntegrationData
+					).actionDefinition.credential = "";
 					updateData(clonedData);
 					// Note: the following alert is shown twice in development mode due to react strictmode which renders every component twice
 					alert(
@@ -84,12 +90,14 @@ export default function Integration({ id }: IntegrationProps) {
 
 	const integration =
 		INTEGRATIONS[
-			(data.actionDefinition as any).integrationType as IntegrationType
+			(data as IntegrationData).actionDefinition
+				.integrationType as IntegrationType
 		];
 	const apiDefinition =
 		integration.apis[
 			integration.apis.findIndex(
-				(api) => api.id === (data.actionDefinition as any).api,
+				(api) =>
+					api.id === (data as IntegrationData).actionDefinition.api,
 			)
 		];
 
@@ -102,7 +110,7 @@ export default function Integration({ id }: IntegrationProps) {
 
 				<Flex direction="column">
 					<Text weight="medium">
-						{INTEGRATIONS[integrationType].name}
+						{INTEGRATIONS[integrationType!].name}
 					</Text>
 					<Text color="gray" weight="light">
 						{apiDefinition.name}
@@ -171,12 +179,15 @@ export default function Integration({ id }: IntegrationProps) {
 					<Text>Credential</Text>
 					<Flex direction="column" gap="0">
 						<Select.Root
-							value={(data.actionDefinition as any).credential}
+							value={
+								(data as IntegrationData).actionDefinition
+									.credential
+							}
 							onValueChange={(credential) => {
 								const clonedData = cloneDeep(data);
 								(
-									clonedData.actionDefinition as any
-								).credential = credential;
+									clonedData as IntegrationData
+								).actionDefinition.credential = credential;
 								updateData(clonedData);
 							}}
 						>
@@ -221,16 +232,16 @@ export default function Integration({ id }: IntegrationProps) {
 							<TextField.Root
 								variant="surface"
 								value={
-									(data.actionDefinition as any).params[
-										parameter.id
-									]
+									(data as IntegrationData).actionDefinition
+										.params[parameter.id]
 								}
 								onChange={(event) => {
 									const value = parseInt(event.target.value);
 									const clonedData = cloneDeep(data);
-									(clonedData.actionDefinition as any).params[
-										parameter.id
-									] = Number.isNaN(value) ? undefined : value;
+									(
+										clonedData as IntegrationData
+									).actionDefinition.params[parameter.id] =
+										Number.isNaN(value) ? undefined : value;
 
 									updateData(clonedData);
 								}}
@@ -240,15 +251,15 @@ export default function Integration({ id }: IntegrationProps) {
 							<TextField.Root
 								variant="surface"
 								value={
-									(data.actionDefinition as any).params[
-										parameter.id
-									]
+									(data as IntegrationData).actionDefinition
+										.params[parameter.id]
 								}
 								onChange={(event) => {
 									const clonedData = cloneDeep(data);
-									(clonedData.actionDefinition as any).params[
-										parameter.id
-									] = event.target.value;
+									(
+										clonedData as IntegrationData
+									).actionDefinition.params[parameter.id] =
+										event.target.value;
 									updateData(clonedData);
 								}}
 							/>
@@ -259,16 +270,18 @@ export default function Integration({ id }: IntegrationProps) {
 								<TextArea
 									variant="surface"
 									value={
-										(data.actionDefinition as any).params[
+										(data as IntegrationData)
+											.actionDefinition.params[
 											parameter.id
 										]
 									}
 									onChange={(event) => {
 										const clonedData = cloneDeep(data);
 										(
-											clonedData.actionDefinition as any
-										).params[parameter.id] =
-											event.target.value;
+											clonedData as IntegrationData
+										).actionDefinition.params[
+											parameter.id
+										] = event.target.value;
 										updateData(clonedData);
 									}}
 									style={{ width: "100%" }}
@@ -279,19 +292,21 @@ export default function Integration({ id }: IntegrationProps) {
 							ApiParameterDatatype.BOOLEAN && (
 							<Select.Root
 								value={
-									(data.actionDefinition as any).params[
-										parameter.id
-									] === undefined
+									(data as IntegrationData).actionDefinition
+										.params[parameter.id] === undefined
 										? undefined
-										: (data.actionDefinition as any).params[
+										: (
+												data as IntegrationData
+											).actionDefinition.params[
 												parameter.id
 											].toString()
 								}
 								onValueChange={(value) => {
 									const clonedData = cloneDeep(data);
-									(clonedData.actionDefinition as any).params[
-										parameter.id
-									] = value === "true";
+									(
+										clonedData as IntegrationData
+									).actionDefinition.params[parameter.id] =
+										value === "true";
 									updateData(clonedData);
 								}}
 							>

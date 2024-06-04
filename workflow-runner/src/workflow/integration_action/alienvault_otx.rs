@@ -26,9 +26,13 @@ impl IntegrationExecutor for AlienvaultOtxExecutor {
         client: &dyn HttpClient,
         context: &context::Context,
         api: &str,
-        credential_name: &str,
+        credential_name: &Option<String>,
         parameters: &HashMap<String, serde_json::Value>,
     ) -> Result<serde_json::Value> {
+        let credential_name = match credential_name {
+            Some(credential) => credential.as_str(),
+            None => return Err(anyhow!("Error: Missing credential for {ALIENVAULT_OTX}")),
+        };
         let api_key = context
             .secrets_manager
             .fetch_secret::<AlienvaultOtxCredential>(credential_name, &context.workflow_id)
@@ -161,7 +165,7 @@ mod tests {
                 &*client,
                 &context,
                 "GET_DOMAIN_INFORMATION",
-                "credentials",
+                &Some("credentials".to_string()),
                 &parameters,
             )
             .await;
@@ -182,7 +186,7 @@ mod tests {
                 &*client,
                 &context,
                 "GET_DOMAIN_INFORMATION",
-                "credentials",
+                &Some("credentials".to_string()),
                 &HashMap::new(),
             )
             .await;

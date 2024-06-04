@@ -44,7 +44,12 @@ export async function initActionData(
 		case ActionNode.INTEGRATION:
 			return {
 				...base,
-				actionDefinition: {},
+				actionDefinition: {
+					integrationType: null,
+					api: null,
+					credential: undefined,
+					parameters: [],
+				},
 			};
 
 		case ActionNode.HTTP_REQUEST:

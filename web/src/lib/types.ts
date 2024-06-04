@@ -171,14 +171,12 @@ export type ReceiveEmailData = ActionDataBase<{}>;
 
 export type NoteData = ActionDataBase<{ note: string }>;
 
-export type IntegrationData = ActionDataBase<
-	| {
-			integrationType: IntegrationType;
-			api: string;
-			params: Record<string, any>;
-	  }
-	| {}
->;
+export type IntegrationData = ActionDataBase<{
+	integrationType: IntegrationType | null;
+	api: string | null;
+	params: Record<string, any>;
+	credential: string | undefined;
+}>;
 
 export type ActionData =
 	| AiActionData

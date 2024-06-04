@@ -19,9 +19,13 @@ impl IntegrationExecutor for MsDefenderExecutor {
         client: &dyn HttpClient,
         context: &Context,
         api: &str,
-        credential_name: &str,
+        credential_name: &Option<String>,
         parameters: &HashMap<String, serde_json::Value>,
     ) -> Result<serde_json::Value> {
+        let credential_name = match credential_name {
+            Some(credential) => credential.as_str(),
+            None => return Err(anyhow!("Error: Missing credential for {INTEGRATION}")),
+        };
         match api {
             "LIST_ALERTS_V2" => list_alerts_v2(client, context, credential_name, parameters).await,
             _ => return Err(anyhow!("API {api} not implemented for {INTEGRATION}.")),
@@ -166,7 +170,7 @@ mod tests {
                     &*client,
                     &context,
                     "LIST_ALERTS_V2",
-                    "credentials",
+                    &Some("credentials".to_string()),
                     &parameters,
                 )
                 .await;
@@ -191,7 +195,7 @@ mod tests {
                     &*client,
                     &context,
                     "LIST_ALERTS_V2",
-                    "credentials",
+                    &Some("credentials".to_string()),
                     &parameters,
                 )
                 .await;

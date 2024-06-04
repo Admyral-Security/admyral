@@ -10,7 +10,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::json;
 use std::collections::HashMap;
 
-const SLACK: &str = "Slack";
+const INTEGRATION: &str = "Slack";
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
@@ -27,22 +27,25 @@ impl IntegrationExecutor for SlackExecutor {
         client: &dyn HttpClient,
         context: &context::Context,
         api: &str,
-        credential_name: &str,
+        credential_name: &Option<String>,
         parameters: &HashMap<String, serde_json::Value>,
     ) -> Result<serde_json::Value> {
+        let credential_name = match credential_name {
+            Some(credential) => credential.as_str(),
+            None => return Err(anyhow!("Error: Missing credential for {INTEGRATION}")),
+        };
         let api_key = context
             .secrets_manager
             .fetch_secret::<SlackCredential>(credential_name, &context.workflow_id)
             .await?
             .api_key;
-
         match api {
             "SEND_MESSAGE" => send_message(client, context, &api_key, parameters).await,
             "LIST_USERS" => list_users(client, context, &api_key, parameters).await,
             "LOOKUP_BY_EMAIL" => lookup_by_email(client, context, &api_key, parameters).await,
             "CONVERSATIONS_OPEN" => conversations_open(client, context, &api_key, parameters).await,
             "REACTIONS_ADD" => reactions_add(client, context, &api_key, parameters).await,
-            _ => return Err(anyhow!("API {api} not implemented for {SLACK}.")),
+            _ => return Err(anyhow!("API {api} not implemented for {INTEGRATION}.")),
         }
     }
 }
@@ -64,7 +67,7 @@ async fn slack_post_request(
             headers,
             RequestBodyType::Json { body },
             200,
-            format!("Error: Failed to call {SLACK} API"),
+            format!("Error: Failed to call {INTEGRATION} API"),
         )
         .await
 }
@@ -84,7 +87,7 @@ async fn slack_get_request(
             api_url,
             headers,
             200,
-            format!("Error: Failed to call {SLACK} API"),
+            format!("Error: Failed to call {INTEGRATION} API"),
         )
         .await
 }
@@ -98,7 +101,7 @@ async fn send_message(
 ) -> Result<serde_json::Value> {
     let channel = get_string_parameter(
         "CHANNEL",
-        SLACK,
+        INTEGRATION,
         "SEND_MESSAGE",
         parameters,
         context,
@@ -109,7 +112,7 @@ async fn send_message(
 
     let text = get_string_parameter(
         "TEXT",
-        SLACK,
+        INTEGRATION,
         "SEND_MESSAGE",
         parameters,
         context,
@@ -120,7 +123,7 @@ async fn send_message(
 
     let mut blocks = get_string_parameter(
         "BLOCKS",
-        SLACK,
+        INTEGRATION,
         "SEND_MESSAGE",
         parameters,
         context,
@@ -134,7 +137,7 @@ async fn send_message(
 
     let mut thread_ts = get_string_parameter(
         "THREAD_TS",
-        SLACK,
+        INTEGRATION,
         "SEND_MESSAGE",
         parameters,
         context,
@@ -184,7 +187,7 @@ async fn list_users(
 
     if let Some(include_local) = get_bool_parameter(
         "INCLUDE_LOCALE",
-        SLACK,
+        INTEGRATION,
         "LIST_USERS",
         parameters,
         context,
@@ -197,7 +200,7 @@ async fn list_users(
 
     match get_number_parameter(
         "LIMIT",
-        SLACK,
+        INTEGRATION,
         "LIST_USERS",
         parameters,
         context,
@@ -227,7 +230,7 @@ async fn list_users(
 
     let handle_pagination = match get_bool_parameter(
         "RETURN_ALL_PAGES",
-        SLACK,
+        INTEGRATION,
         "LIST_USERS",
         parameters,
         context,
@@ -302,7 +305,7 @@ async fn lookup_by_email(
 ) -> Result<serde_json::Value> {
     let email = get_string_parameter(
         "EMAIL",
-        SLACK,
+        INTEGRATION,
         "LOOKUP_BY_EMAIL",
         parameters,
         context,
@@ -327,7 +330,7 @@ async fn conversations_open(
 
     if let Some(users) = get_string_parameter(
         "USERS",
-        SLACK,
+        INTEGRATION,
         "CONVERSATIONS_OPEN",
         parameters,
         context,
@@ -342,7 +345,7 @@ async fn conversations_open(
 
     if let Some(channel) = get_string_parameter(
         "CHANNEL",
-        SLACK,
+        INTEGRATION,
         "CONVERSATIONS_OPEN",
         parameters,
         context,
@@ -357,7 +360,7 @@ async fn conversations_open(
 
     if let Some(return_im) = get_bool_parameter(
         "RETURN_IM",
-        SLACK,
+        INTEGRATION,
         "CONVERSATIONS_OPEN",
         parameters,
         context,
@@ -382,7 +385,7 @@ async fn reactions_add(
 ) -> Result<serde_json::Value> {
     let channel = get_string_parameter(
         "CHANNEL",
-        SLACK,
+        INTEGRATION,
         "REACTIONS_ADD",
         parameters,
         context,
@@ -393,7 +396,7 @@ async fn reactions_add(
 
     let name = get_string_parameter(
         "NAME",
-        SLACK,
+        INTEGRATION,
         "REACTIONS_ADD",
         parameters,
         context,
@@ -404,7 +407,7 @@ async fn reactions_add(
 
     let timestamp = get_string_parameter(
         "TIMESTAMP",
-        SLACK,
+        INTEGRATION,
         "REACTIONS_ADD",
         parameters,
         context,
@@ -510,7 +513,7 @@ mod tests {
                 &*client,
                 &context,
                 "SEND_MESSAGE",
-                "credentials",
+                &Some("credentials".to_string()),
                 &HashMap::new(),
             )
             .await;
@@ -534,7 +537,7 @@ mod tests {
                     &*client,
                     &context,
                     "SEND_MESSAGE",
-                    "credentials",
+                    &Some("credentials".to_string()),
                     &parameters,
                 )
                 .await;
@@ -556,7 +559,7 @@ mod tests {
                     &*client,
                     &context,
                     "SEND_MESSAGE",
-                    "credentials",
+                    &Some("credentials".to_string()),
                     &parameters,
                 )
                 .await;
@@ -575,7 +578,13 @@ mod tests {
                 "LIMIT".to_string() => json!(1),
             };
             let result = SlackExecutor
-                .execute(&*client, &context, "LIST_USERS", "credentials", &parameters)
+                .execute(
+                    &*client,
+                    &context,
+                    "LIST_USERS",
+                    &Some("credentials".to_string()),
+                    &parameters,
+                )
                 .await;
             assert!(result.is_ok());
             let value = result.unwrap();
@@ -592,7 +601,13 @@ mod tests {
                 "LIMIT".to_string() => json!(-1),
             };
             let result = SlackExecutor
-                .execute(&*client, &context, "LIST_USERS", "credentials", &parameters)
+                .execute(
+                    &*client,
+                    &context,
+                    "LIST_USERS",
+                    &Some("credentials".to_string()),
+                    &parameters,
+                )
                 .await;
             assert!(result.is_err());
             assert_eq!(
@@ -608,7 +623,13 @@ mod tests {
                 "LIMIT".to_string() => json!(1.0),
             };
             let result = SlackExecutor
-                .execute(&*client, &context, "LIST_USERS", "credentials", &parameters)
+                .execute(
+                    &*client,
+                    &context,
+                    "LIST_USERS",
+                    &Some("credentials".to_string()),
+                    &parameters,
+                )
                 .await;
             assert!(result.is_err());
             assert_eq!(
@@ -676,7 +697,13 @@ mod tests {
                 "RETURN_ALL_PAGES".to_string() => json!(true)
             };
             let result = SlackExecutor
-                .execute(&*client, &context, "LIST_USERS", "credentials", &parameters)
+                .execute(
+                    &*client,
+                    &context,
+                    "LIST_USERS",
+                    &Some("credentials".to_string()),
+                    &parameters,
+                )
                 .await;
             assert!(result.is_ok());
             let value = result.unwrap();
@@ -714,7 +741,7 @@ mod tests {
                     &*client,
                     &context,
                     "LOOKUP_BY_EMAIL",
-                    "credentials",
+                    &Some("credentials".to_string()),
                     &parameters,
                 )
                 .await;
@@ -734,7 +761,7 @@ mod tests {
                     &*client,
                     &context,
                     "LOOKUP_BY_EMAIL",
-                    "credentials",
+                    &Some("credentials".to_string()),
                     &parameters,
                 )
                 .await;
@@ -758,7 +785,7 @@ mod tests {
                 &*client,
                 &context,
                 "CONVERSATIONS_OPEN",
-                "credentials",
+                &Some("credentials".to_string()),
                 &parameters,
             )
             .await;
@@ -780,7 +807,7 @@ mod tests {
                 &*client,
                 &context,
                 "REACTIONS_ADD",
-                "credentials",
+                &Some("credentials".to_string()),
                 &parameters,
             )
             .await;

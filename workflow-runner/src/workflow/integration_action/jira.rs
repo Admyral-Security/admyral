@@ -30,9 +30,13 @@ impl IntegrationExecutor for JiraExecutor {
         client: &dyn HttpClient,
         context: &context::Context,
         api: &str,
-        credential_name: &str,
+        credential_name: &Option<String>,
         parameters: &HashMap<String, serde_json::Value>,
     ) -> Result<serde_json::Value> {
+        let credential_name = match credential_name {
+            Some(credential) => credential.as_str(),
+            None => return Err(anyhow!("Error: Missing credential for {JIRA}")),
+        };
         let credential = context
             .secrets_manager
             .fetch_secret::<JiraCredential>(credential_name, &context.workflow_id)
@@ -1030,7 +1034,7 @@ mod tests {
                     &*client,
                     &context,
                     "CREATE_ISSUE",
-                    "credentials",
+                    &Some("credentials".to_string()),
                     &HashMap::new(),
                 )
                 .await;
@@ -1048,7 +1052,7 @@ mod tests {
                     &*client,
                     &context,
                     "CREATE_ISSUE",
-                    "credentials",
+                    &Some("credentials".to_string()),
                     &HashMap::new(),
                 )
                 .await;
@@ -1079,7 +1083,7 @@ mod tests {
                 &*client,
                 &context,
                 "CREATE_ISSUE",
-                "credentials",
+                &Some("credentials".to_string()),
                 &parameters,
             )
             .await;
@@ -1100,7 +1104,7 @@ mod tests {
                 &*client,
                 &context,
                 "ASSIGN_ISSUE",
-                "credentials",
+                &Some("credentials".to_string()),
                 &parameters,
             )
             .await;
@@ -1119,7 +1123,13 @@ mod tests {
             "NOTIFY_USERS".to_string() => json!(true)
         };
         let result = JiraExecutor
-            .execute(&*client, &context, "EDIT_ISSUE", "credentials", &parameters)
+            .execute(
+                &*client,
+                &context,
+                "EDIT_ISSUE",
+                &Some("credentials".to_string()),
+                &parameters,
+            )
             .await;
         assert!(result.is_ok());
         let value = result.unwrap();
@@ -1137,7 +1147,13 @@ mod tests {
             "PROPERTIES".to_string() => json!("*all,-prop1")
         };
         let result = JiraExecutor
-            .execute(&*client, &context, "GET_ISSUE", "credentials", &parameters)
+            .execute(
+                &*client,
+                &context,
+                "GET_ISSUE",
+                &Some("credentials".to_string()),
+                &parameters,
+            )
             .await;
         assert!(result.is_ok());
         let value = result.unwrap();
@@ -1156,7 +1172,13 @@ mod tests {
             "MAX_RESULTS".to_string() => json!(50)
         };
         let result = JiraExecutor
-            .execute(&*client, &context, "FIND_USERS", "credentials", &parameters)
+            .execute(
+                &*client,
+                &context,
+                "FIND_USERS",
+                &Some("credentials".to_string()),
+                &parameters,
+            )
             .await;
         assert!(result.is_ok());
         let value = result.unwrap();
@@ -1177,7 +1199,7 @@ mod tests {
                 &*client,
                 &context,
                 "GET_ISSUE_COMMENTS",
-                "credentials",
+                &Some("credentials".to_string()),
                 &parameters,
             )
             .await;
@@ -1191,7 +1213,13 @@ mod tests {
         let (client, context) = setup(Arc::new(MockDb)).await;
         let parameters = hashmap! {}; // No parameters needed for this API
         let result = JiraExecutor
-            .execute(&*client, &context, "GET_FIELDS", "credentials", &parameters)
+            .execute(
+                &*client,
+                &context,
+                "GET_FIELDS",
+                &Some("credentials".to_string()),
+                &parameters,
+            )
             .await;
         assert!(result.is_ok());
         let value = result.unwrap();
@@ -1212,7 +1240,7 @@ mod tests {
                 &*client,
                 &context,
                 "UPDATE_CUSTOM_FIELD",
-                "credentials",
+                &Some("credentials".to_string()),
                 &parameters,
             )
             .await;
@@ -1234,7 +1262,7 @@ mod tests {
                 &*client,
                 &context,
                 "GET_ISSUE_TRANSITIONS",
-                "credentials",
+                &Some("credentials".to_string()),
                 &parameters,
             )
             .await;

@@ -20,9 +20,13 @@ impl IntegrationExecutor for MsDefenderForCloudExecutor {
         client: &dyn HttpClient,
         context: &Context,
         api: &str,
-        credential_name: &str,
+        credential_name: &Option<String>,
         parameters: &HashMap<String, serde_json::Value>,
     ) -> Result<serde_json::Value> {
+        let credential_name = match credential_name {
+            Some(credential) => credential.as_str(),
+            None => return Err(anyhow!("Error: Missing credential for {INTEGRATION}")),
+        };
         match api {
             "LIST_ALERTS" => list_alerts(client, context, credential_name, parameters).await,
             "UPDATE_ALERT_STATUS" => {
@@ -324,7 +328,7 @@ mod tests {
                     &*client,
                     &context,
                     "LIST_ALERTS",
-                    "credentials",
+                    &Some("credentials".to_string()),
                     &parameters,
                 )
                 .await;
@@ -347,7 +351,7 @@ mod tests {
                     &*client,
                     &context,
                     "LIST_ALERTS",
-                    "credentials",
+                    &Some("credentials".to_string()),
                     &parameters,
                 )
                 .await;
@@ -370,7 +374,7 @@ mod tests {
                     &*client,
                     &context,
                     "LIST_ALERTS",
-                    "credentials",
+                    &Some("credentials".to_string()),
                     &parameters,
                 )
                 .await;
@@ -394,7 +398,7 @@ mod tests {
                     &*client,
                     &context,
                     "LIST_ALERTS",
-                    "credentials",
+                    &Some("credentials".to_string()),
                     &parameters,
                 )
                 .await;
@@ -419,7 +423,7 @@ mod tests {
                 &*client,
                 &context,
                 "UPDATE_ALERT_STATUS",
-                "credentials",
+                &Some("credentials".to_string()),
                 &parameters,
             )
             .await;
@@ -435,7 +439,13 @@ mod tests {
             "ALERT_ID".to_string() => json!("/subscriptions/037a123d-cce9-4543-b9ca-9015960f86b2/resourceGroups/Sample-RG/providers/Microsoft.Security/locations/westeurope/alerts/2516848965789300143_b82d0127-536c-4b52-8b44-58a4bffa4818"),
         };
         let result = MsDefenderForCloudExecutor
-            .execute(&*client, &context, "GET_ALERT", "credentials", &parameters)
+            .execute(
+                &*client,
+                &context,
+                "GET_ALERT",
+                &Some("credentials".to_string()),
+                &parameters,
+            )
             .await;
         assert!(result.is_ok());
         let value = result.unwrap();

@@ -153,7 +153,7 @@ In order to add an integration to the workflow runner, we'll need to adapt the f
     use serde_json::json;
     use std::collections::HashMap;
 
-    const INTEGRATION_NAME: &str = "Jira"; // TODO: Adjust the integration name here
+    const INTEGRATION: &str = "Jira"; // TODO: Adjust the integration name here
 
     #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
     pub struct JiraExecutor; // TODO: Rename this struct according to the integration. Naming Convention: <IntegrationName>Executor
@@ -164,12 +164,12 @@ In order to add an integration to the workflow runner, we'll need to adapt the f
             client: &dyn HttpClient,
             context: &context::Context,
             api: &str,
-            credential_name: &str,
+            credential_name: &Option<String>,
             parameters: &HashMap<String, serde_json::Value>,
         ) -> Result<serde_json::Value> {
             match api {
                 // APIs will be added here later
-                _ => return Err(anyhow!("API {api} not implemented for {INTEGRATION_NAME}.")),
+                _ => return Err(anyhow!("API {api} not implemented for {INTEGRATION}.")),
             }
         }
     }
@@ -206,15 +206,19 @@ In order to add an integration to the workflow runner, we'll need to adapt the f
             client: &dyn HttpClient,
             context: &context::Context,
             api: &str,
-            credential_name: &str,
+            credential_name: &Option<String>,
             parameters: &HashMap<String, serde_json::Value>,
         ) -> Result<serde_json::Value> {
+            let credential_name = match credential_name {
+                Some(credential) => credential.as_str(),
+                None => return Err(anyhow!("Error: Missing credential for {INTEGRATION}"))
+            };
             // TODO: Fetch the secret from the database, decrypt and parse it
             let credential = context.secrets_manager.fetch_secret::<JiraCredential>(credential_name, &context.workflow_id).await?;
 
             match api {
                 // APIs will be added here later
-                _ => return Err(anyhow!("API {api} not implemented for {INTEGRATION_NAME}.")),
+                _ => return Err(anyhow!("API {api} not implemented for {INTEGRATION}.")),
             }
         }
     }
@@ -356,16 +360,20 @@ In order to add an integration to the workflow runner, we'll need to adapt the f
             client: &dyn HttpClient,
             context: &context::Context,
             api: &str,
-            credential_name: &str,
+            credential_name: &Option<String>,
             parameters: &HashMap<String, serde_json::Value>,
         ) -> Result<serde_json::Value> {
+            let credential_name = match credential_name {
+                Some(credential) => credential.as_str(),
+                None => return Err(anyhow!("Error: Missing credential for {INTEGRATION}"))
+            };
             // Fetch the secret
             let credential = context.secrets_manager.fetch_secret::<JiraCredential>(credential_name, &context.workflow_id).await?;
 
             match api {
                 // TODO: Add the API match + function call here
                 "ASSIGN_ISSUE" => assign_issue(client, context, &credential, parameters).await,
-                _ => return Err(anyhow!("API {api} not implemented for {INTEGRATION_NAME}.")),
+                _ => return Err(anyhow!("API {api} not implemented for {INTEGRATION}.")),
             }
         }
     }
@@ -386,7 +394,7 @@ In order to add an integration to the workflow runner, we'll need to adapt the f
         ```rust
         let your_parameter_name = get_string_parameter(
             "YOUR_PARAMETER_ID", // The ID of the parameter which you defined in the API definition in web/src/lib/integrations.ts
-            INTEGRATION_NAME,
+            INTEGRATION,
             "API_NAME", // Naming Convention: SCREAMING_SNAKE_CASE of the API name
             parameters,
             context,
@@ -401,7 +409,7 @@ In order to add an integration to the workflow runner, we'll need to adapt the f
         ```rust
         let your_parameter_name = get_string_parameter(
             "YOUR_PARAMETER_ID", // The ID of the parameter which you defined in the API definition in web/src/lib/integrations.ts
-            INTEGRATION_NAME,
+            INTEGRATION,
             "API_NAME", // Naming Convention: SCREAMING_SNAKE_CASE of the API name
             parameters,
             context,
@@ -460,7 +468,7 @@ In order to add an integration to the workflow runner, we'll need to adapt the f
             api_url,
             headers,
             200, // Expected status code
-            format!("Error: Failed to call {INTEGRATION_NAME} API <todo-add-the-api-name-here>"), // Error message
+            format!("Error: Failed to call {INTEGRATION} API <todo-add-the-api-name-here>"), // Error message
         )
         .await
         ```
@@ -473,7 +481,7 @@ In order to add an integration to the workflow runner, we'll need to adapt the f
             headers,
             RequestBodyType::Json { body }, // RequestBodyType::Json { body } for JSON body
             201, // Expected status code
-            format!("Error: Failed to call {INTEGRATION_NAME} API <todo-add-the-api-name-here>"), // Error message
+            format!("Error: Failed to call {INTEGRATION} API <todo-add-the-api-name-here>"), // Error message
         )
         .await
         ```
@@ -541,7 +549,7 @@ In order to add an integration to the workflow runner, we'll need to adapt the f
                 headers,
                 RequestBodyType::Json { body },
                 204,
-                format!("Error: Failed to call {INTEGRATION_NAME} API Assign Issue"),
+                format!("Error: Failed to call {INTEGRATION} API Assign Issue"),
             )
             .await
     }

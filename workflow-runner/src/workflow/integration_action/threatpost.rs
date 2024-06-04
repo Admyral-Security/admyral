@@ -4,7 +4,7 @@ use anyhow::{anyhow, Result};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
-const THREATPOST: &str = "Threatpost";
+const INTEGRATION: &str = "Threatpost";
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct ThreatpostExecutor;
@@ -15,12 +15,12 @@ impl IntegrationExecutor for ThreatpostExecutor {
         client: &dyn HttpClient,
         _context: &context::Context,
         api: &str,
-        _credential_name: &str,
+        _credential_name: &Option<String>,
         _parameters: &HashMap<String, serde_json::Value>,
     ) -> Result<serde_json::Value> {
         match api {
             "FETCH_RSS_FEED" => fetch_rss_feed(client).await,
-            _ => return Err(anyhow!("API {api} not implemented for {THREATPOST}.")),
+            _ => return Err(anyhow!("API {api} not implemented for {INTEGRATION}.")),
         }
     }
 }
@@ -34,7 +34,7 @@ async fn fetch_rss_feed(client: &dyn HttpClient) -> Result<serde_json::Value> {
             api_url,
             HashMap::new(),
             200,
-            format!("Error: Failed to call {THREATPOST} API"),
+            format!("Error: Failed to call {INTEGRATION} API"),
         )
         .await?;
 
@@ -92,7 +92,7 @@ mod tests {
                 &*client,
                 &context,
                 "FETCH_RSS_FEED",
-                "credentials",
+                &Some("credentials".to_string()),
                 &HashMap::new(),
             )
             .await;
