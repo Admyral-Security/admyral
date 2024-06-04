@@ -1773,38 +1773,39 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 	},
 	// GreyNoise
 	[IntegrationType.GREY_NOISE]: {
-        name: "GreyNoise",
-        icon: {
-            src: "/greynoise_logo.svg",
-            isSquareIcon: true,
-        },
-        credential: {
-            authType: AuthType.SECRET,
-            parameters: [
-                {
-                    id: "API_KEY",
-                    displayName: "API Key",
-                },
-            ],
-        },
-        apis: [
-            {
-                id: "IP_LOOKUP",
-                name: "IP Lookup",
-                description: "Lookup information about an IP address.",
-                documentationUrl: "https://docs.greynoise.io/reference/community-api",
-                requiresAuthentication: true,
-                parameters: [
-                    {
-                        id: "IP_ADDRESS",
-                        displayName: "IP Address",
-                        description: "The IP address to lookup.",
-                        required: true,
-                        dataType: ApiParameterDatatype.TEXT,
-                    },
-                ],
-            },
-        ],
-    },
+		name: "GreyNoise",
+		icon: {
+			src: "/greynoise_logo.svg",
+			isSquareIcon: true,
+		},
+		credential: {
+			authType: AuthType.SECRET,
+			parameters: [
+				{
+					id: "API_KEY",
+					displayName: "API Key",
+				},
+			],
+		},
+		apis: [
+			{
+				id: "IP_LOOKUP",
+				name: "IP Lookup",
+				description: "Lookup information about an IP address.",
+				documentationUrl:
+					"https://docs.greynoise.io/reference/community-api",
+				requiresAuthentication: true,
+				parameters: [
+					{
+						id: "IP_ADDRESS",
+						displayName: "IP Address",
+						description: "The IP address to lookup.",
+						required: true,
+						dataType: ApiParameterDatatype.TEXT,
+					},
+				],
+			},
+		],
+	},
 	// ...
 };

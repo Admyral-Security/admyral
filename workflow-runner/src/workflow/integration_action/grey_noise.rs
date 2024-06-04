@@ -9,12 +9,12 @@ use maplit::hashmap;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
-const GREYNOISE: &str = "GreyNoise";
+const INTEGRATION: &str = "GreyNoise";
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 struct GreyNoiseCredential {
-    api_token: String,
+    api_key: String,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
@@ -31,28 +31,28 @@ impl IntegrationExecutor for GreyNoiseExecutor {
     ) -> Result<serde_json::Value> {
         let credential_name = match credential_name {
             Some(credential) => credential.as_str(),
-            None => return Err(anyhow!("Error: Missing credential for {GREYNOISE}")),
+            None => return Err(anyhow!("Error: Missing credential for {INTEGRATION}")),
         };
-        let api_token = context
+        let api_key = context
             .secrets_manager
             .fetch_secret::<GreyNoiseCredential>(credential_name, &context.workflow_id)
             .await?
-            .api_token;
+            .api_key;
         match api {
-            "IP_LOOKUP" => ip_lookup(client, &api_token, context, parameters).await,
-            _ => return Err(anyhow!("API {api} not implemented for {GREYNOISE}.")),
+            "IP_LOOKUP" => ip_lookup(client, &api_key, context, parameters).await,
+            _ => return Err(anyhow!("API {api} not implemented for {INTEGRATION}.")),
         }
     }
 }
 
 // TODO: add retry, timeout
-async fn greynoise_get_request(
+async fn greynoise_community_get_request(
     client: &dyn HttpClient,
-    api_token: &str,
+    api_key: &str,
     api_url: &str,
 ) -> Result<serde_json::Value> {
     let headers = hashmap! {
-        "key".to_string() => api_token.to_string(),
+        "x-apikey".to_string() => api_key.to_string(),
         "Accept".to_string() => "application/json".to_string()
     };
     let response = client
@@ -60,7 +60,7 @@ async fn greynoise_get_request(
             api_url,
             headers,
             200,
-            format!("Error: Failed to call {GREYNOISE} API"),
+            format!("Error: Failed to call {INTEGRATION} API"),
         )
         .await?;
     Ok(response)
@@ -68,13 +68,13 @@ async fn greynoise_get_request(
 
 async fn ip_lookup(
     client: &dyn HttpClient,
-    api_token: &str,
+    api_key: &str,
     context: &context::Context,
     parameters: &HashMap<String, serde_json::Value>,
 ) -> Result<serde_json::Value> {
     let ip_address = get_string_parameter(
         "IP_ADDRESS",
-        GREYNOISE,
+        INTEGRATION,
         "IP_LOOKUP",
         parameters,
         context,
@@ -82,9 +82,8 @@ async fn ip_lookup(
     )
     .await?
     .expect("IP_ADDRESS is required");
-
-    let api_url = format!("https://api.greynoise.io/v2/noise/context/{ip_address}");
-    greynoise_get_request(client, api_token, &api_url).await
+    let api_url = format!("https://api.greynoise.io/v3/community/{ip_address}");
+    greynoise_community_get_request(client, api_key, &api_url).await
 }
 
 #[cfg(test)]
@@ -120,8 +119,8 @@ mod tests {
             _credential_name: &str,
         ) -> Result<Option<Credential>> {
             Ok(Some(Credential {
-                secret: "{\"API_TOKEN\": \"some-api-token\"}".to_string(),
-                credential_type: Some("GREYNOISE".to_string()),
+                secret: "{\"API_KEY\": \"some-api-token\"}".to_string(),
+                credential_type: Some("GREY_NOISE".to_string()),
             }))
         }
     }
@@ -187,7 +186,7 @@ mod tests {
         assert!(result.is_err());
         assert_eq!(
             result.err().unwrap().to_string(),
-            "Error: Missing credential for GreyNoise"
+            "Missing credentials: \"credentials\""
         );
     }
 }
