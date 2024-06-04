@@ -35,7 +35,6 @@ import NoteNode from "./workflow-graph/note-node";
 import StartWorkflow from "./action-editing/start-workflow";
 import IntegrationNode from "./workflow-graph/integration-node";
 import IntegrationSelection from "./action-editing/integration-selection";
-import _ from "lodash";
 import Integration from "./action-editing/integration";
 
 interface IntegrationDetailsProps {
@@ -44,7 +43,9 @@ interface IntegrationDetailsProps {
 }
 
 function IntegrationDetails({ id, integrationData }: IntegrationDetailsProps) {
-	const isIntegrationSelection = _.isEmpty(integrationData.actionDefinition);
+	const isIntegrationSelection =
+		integrationData.actionDefinition.integrationType === null &&
+		integrationData.actionDefinition.api === null;
 	return isIntegrationSelection ? (
 		<IntegrationSelection id={id} />
 	) : (
@@ -210,7 +211,9 @@ function WorkflowBuilderEditor() {
 							ActionNode.INTEGRATION && (
 							<IntegrationDetails
 								id={nodes[selectNodeIdx].id}
-								integrationData={nodes[selectNodeIdx].data}
+								integrationData={
+									nodes[selectNodeIdx].data as IntegrationData
+								}
 							/>
 						)}
 
