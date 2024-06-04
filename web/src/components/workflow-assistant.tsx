@@ -8,6 +8,11 @@ import { generateWorkflowGraph } from "@/lib/workflow-generation";
 import useWorkflowStore from "@/lib/workflow-store";
 import useWorkflowAssistantStore from "@/lib/workflow-assistant-store";
 
+const WORKLFOW_ASSISTANT_PLACEHOLDER = `Describe the workflow you want to generate. Make sure to specify which tools you want to use.
+
+Example:
+Create a workflow that takes an IP address as input, runs it through the following services: AbuseIPDB, VirusTotal, GreyNoise, and Pulsedive. Then, generate a report and send me the report via email.`;
+
 export default function WorkflowAssistant() {
 	const [userInput, setUserInput] = useState<string>("");
 	const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -112,10 +117,15 @@ export default function WorkflowAssistant() {
 
 				<Flex width="100%" height="100%">
 					<TextArea
+						rows={10}
 						value={userInput}
 						onChange={(e) => setUserInput(e.target.value)}
-						style={{ width: "100%", height: "100%" }}
-						placeholder="Describe your process..."
+						style={{
+							width: "100%",
+							height: "100%",
+							whiteSpace: "pre-line",
+						}}
+						placeholder={WORKLFOW_ASSISTANT_PLACEHOLDER}
 					/>
 				</Flex>
 
