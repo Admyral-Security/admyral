@@ -9,7 +9,7 @@ export interface IntegrationLogoIconProps {
 export default function IntegrationLogoIcon({
 	integration,
 }: IntegrationLogoIconProps) {
-	if (integration === null || !INTEGRATIONS[integration].icon === undefined) {
+	if (integration === null || INTEGRATIONS[integration].icon === undefined) {
 		return <IntegrationIcon />;
 	}
 

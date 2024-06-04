@@ -1,12 +1,12 @@
 import { INTEGRATIONS, IntegrationType } from "@/lib/integrations";
-import { Card, Flex } from "@radix-ui/themes";
+import { Flex } from "@radix-ui/themes";
 import Image from "next/image";
 
 function getIcon(integration?: IntegrationType | null) {
 	if (
 		integration === null ||
 		integration === undefined ||
-		!INTEGRATIONS[integration].icon === undefined
+		INTEGRATIONS[integration].icon === undefined
 	) {
 		return <Image src="/logo.svg" alt="Admyral" height="32" width="32" />;
 	}
