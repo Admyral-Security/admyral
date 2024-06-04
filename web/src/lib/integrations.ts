@@ -1,5 +1,5 @@
 export enum IntegrationType {
-	VIRUSTOTAL = "VIRUS_TOTAL",
+	VIRUS_TOTAL = "VIRUS_TOTAL",
 	ALIENVAULT_OTX = "ALIENVAULT_OTX",
 	YARAIFY = "YARAIFY",
 	THREATPOST = "THREATPOST",
@@ -82,7 +82,7 @@ export type IntegrationDefinition = {
 
 export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 	// VirusTotal
-	[IntegrationType.VIRUSTOTAL]: {
+	[IntegrationType.VIRUS_TOTAL]: {
 		name: "VirusTotal",
 		icon: {
 			src: "/virustotal-icon.svg",
