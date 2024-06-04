@@ -40,16 +40,24 @@ import Integration from "./action-editing/integration";
 interface IntegrationDetailsProps {
 	id: string;
 	integrationData: IntegrationData;
+	saveWorkflowAndRedirect: (destintation: string) => void;
 }
 
-function IntegrationDetails({ id, integrationData }: IntegrationDetailsProps) {
+function IntegrationDetails({
+	id,
+	integrationData,
+	saveWorkflowAndRedirect,
+}: IntegrationDetailsProps) {
 	const isIntegrationSelection =
 		integrationData.actionDefinition.integrationType === null &&
 		integrationData.actionDefinition.api === null;
 	return isIntegrationSelection ? (
 		<IntegrationSelection id={id} />
 	) : (
-		<Integration id={id} />
+		<Integration
+			id={id}
+			saveWorkflowAndRedirect={saveWorkflowAndRedirect}
+		/>
 	);
 }
 
@@ -70,7 +78,13 @@ const edgeTypes = {
 	[EdgeType.FALSE]: DirectedEdgeComponent,
 };
 
-function WorkflowBuilderEditor() {
+interface WorkflowBuilderEditorProps {
+	saveWorkflowAndRedirect: (destintation: string) => void;
+}
+
+function WorkflowBuilderEditor({
+	saveWorkflowAndRedirect,
+}: WorkflowBuilderEditorProps) {
 	const [reactFlowInstance, setReactFlowInstance] = useState<any>(null);
 
 	const {
@@ -213,6 +227,9 @@ function WorkflowBuilderEditor() {
 								id={nodes[selectNodeIdx].id}
 								integrationData={
 									nodes[selectNodeIdx].data as IntegrationData
+								}
+								saveWorkflowAndRedirect={
+									saveWorkflowAndRedirect
 								}
 							/>
 						)}

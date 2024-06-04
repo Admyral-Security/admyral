@@ -1,6 +1,13 @@
 "use client";
 
-import { Flex, Select, Text, TextArea, TextField } from "@radix-ui/themes";
+import {
+	Button,
+	Flex,
+	Select,
+	Text,
+	TextArea,
+	TextField,
+} from "@radix-ui/themes";
 import CopyText from "../copy-text";
 import { generateReferenceHandle } from "@/lib/workflow-node";
 import { cloneDeep } from "lodash";
@@ -16,9 +23,13 @@ import { listCredentials } from "@/lib/api";
 
 export interface IntegrationProps {
 	id: string;
+	saveWorkflowAndRedirect: (destintation: string) => void;
 }
 
-export default function Integration({ id }: IntegrationProps) {
+export default function Integration({
+	id,
+	saveWorkflowAndRedirect,
+}: IntegrationProps) {
 	const { data, updateData } = useWorkflowStore((state) => ({
 		data: state.nodes.find((node) => node.id === id)
 			?.data as IntegrationData,
@@ -184,6 +195,10 @@ export default function Integration({ id }: IntegrationProps) {
 									.credential
 							}
 							onValueChange={(credential) => {
+								if (credential === "$$$save_and_redirect$$$") {
+									saveWorkflowAndRedirect("/settings");
+									return;
+								}
 								const clonedData = cloneDeep(data);
 								(
 									clonedData as IntegrationData
@@ -192,7 +207,7 @@ export default function Integration({ id }: IntegrationProps) {
 							}}
 						>
 							<Select.Trigger placeholder="Select a credential" />
-							<Select.Content>
+							<Select.Content variant="soft">
 								{availableCredentials.map(
 									(credential: string) => (
 										<Select.Item
@@ -203,6 +218,19 @@ export default function Integration({ id }: IntegrationProps) {
 										</Select.Item>
 									),
 								)}
+								{/* TODO: is there a better way to handle the onclick event than a reserved key/value? */}
+								<Select.Item
+									key="$$$save_and_redirect$$$"
+									value="$$$save_and_redirect$$$"
+								>
+									<Flex justify="start" align="center">
+										<Text>
+											Save workflow and create new
+											credentials
+										</Text>
+										<ArrowRightUpIcon fill="#1C2024" />
+									</Flex>
+								</Select.Item>
 							</Select.Content>
 						</Select.Root>
 

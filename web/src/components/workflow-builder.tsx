@@ -20,7 +20,7 @@ import WorkflowBuilderRightPanelBase from "./workflow-builder-right-panel-base";
 import {
 	deleteWorkflow,
 	getWorkflow,
-	triggerWorkflowFromAction,
+	// triggerWorkflowFromAction,
 	updateWorkflowAndCreateIfNotExists,
 } from "@/lib/api";
 import TrashIcon from "./icons/trash-icon";
@@ -32,6 +32,7 @@ import useWorkflowStore from "@/lib/workflow-store";
 import RunWorkflow from "./run-workflow";
 import BackIcon from "./icons/back-icon";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 function buildInitialWorkflowGraph(
 	actionData: ActionData[],
@@ -92,7 +93,7 @@ export default function WorkflowBuilder({ workflowId }: WorkflowBuilderProps) {
 		clearWorkflowState,
 		// triggerNodeId,
 		// setTriggerNodeId,
-		// hasUnsavedChanges,
+		hasUnsavedChanges,
 		setPersistedNodes,
 		setPersistedEdges,
 	} = useWorkflowStore((state) => ({
@@ -107,10 +108,12 @@ export default function WorkflowBuilder({ workflowId }: WorkflowBuilderProps) {
 		clearWorkflowState: state.clear,
 		// triggerNodeId: state.triggerNodeId,
 		// setTriggerNodeId: state.setTriggerNodeId,
-		// hasUnsavedChanges: state.hasUnsavedChanges,
+		hasUnsavedChanges: state.hasUnsavedChanges,
 		setPersistedNodes: state.setPersistedNodes,
 		setPersistedEdges: state.setPersistedEdges,
 	}));
+
+	const router = useRouter();
 
 	const [isSavingWorkflow, setIsSavingWorkflow] = useState<boolean>(false);
 	const [isDeletingWorkflow, setIsDeletingWorkflow] =
@@ -251,6 +254,15 @@ export default function WorkflowBuilder({ workflowId }: WorkflowBuilderProps) {
 		}
 	};
 
+	const saveWorkflowAndRedirect = async (destintation: string) => {
+		await handleSaveWorkflow();
+		if (hasUnsavedChanges()) {
+			alert("Failed to save workflow. Please try again.");
+			return;
+		}
+		router.replace(destintation);
+	};
+
 	return (
 		<Grid rows="50px 1fr" width="auto" height="100%" align="center">
 			<Box width="100%" height="100%">
@@ -367,7 +379,11 @@ export default function WorkflowBuilder({ workflowId }: WorkflowBuilderProps) {
 			</Box>
 
 			<Box height="100%" width="100%">
-				{view === "workflowBuilder" && <WorkflowBuilderEditor />}
+				{view === "workflowBuilder" && (
+					<WorkflowBuilderEditor
+						saveWorkflowAndRedirect={saveWorkflowAndRedirect}
+					/>
+				)}
 				{view === "runHistory" && (
 					<WorkflowBuilderRunHistory workflowId={workflowId} />
 				)}
