@@ -8,6 +8,7 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
 mod alienvault_otx;
+mod grey_noise;
 mod jira;
 mod ms_defender;
 mod ms_defender_for_cloud;
@@ -44,6 +45,7 @@ pub enum IntegrationType {
     MsDefenderForCloud,
     Pulsedive,
     MsDefender,
+    GreyNoise,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -111,6 +113,11 @@ impl ActionExecutor for Integration {
             }
             IntegrationType::MsDefender => {
                 ms_defender::MsDefenderExecutor
+                    .execute(&client, context, &self.api, &self.credential, &self.params)
+                    .await
+            }
+            IntegrationType::GreyNoise => {
+                grey_noise::GreyNoiseExecutor
                     .execute(&client, context, &self.api, &self.credential, &self.params)
                     .await
             }

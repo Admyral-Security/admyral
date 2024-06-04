@@ -1,0 +1,30 @@
+import { Callout } from "nextra/components";
+
+# IP Lookup
+
+Lookup information about an IP address using GreyNoise.
+
+<Callout type="info">
+	For GreyNoise's documentation, see [GreyNoise IP Lookup via Community API](https://docs.greynoise.io/reference/get_v3-community-ip).
+</Callout>
+
+## Parameters:
+
+| Field             | Description                                                                                                                                                 | Required |
+| ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | :------: |
+| **IP Address**    | The IP address to query                                                                                                                                     |   Yes    |
+
+
+
+## Example Output
+```json
+{
+    "ip":"51.91.185.74",
+    "noise":true,
+    "riot":false,
+    "classification":"malicious",
+    "name":"unknown",
+    "link":"https://viz.greynoise.io/ip/51.91.185.74",
+    "last_seen":"2021-03-18",
+    "message":"Success"
+}

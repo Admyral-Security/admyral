@@ -1,13 +1,14 @@
 {
 	"alienvault_otx": "AlienVault OTX",
+	"greynoise": "GreyNoise",
 	"jira": "Jira",
+	"ms_defender_for_cloud": "Microsoft Defender for Cloud",
+	"ms_defender": "Microsoft Defender",
 	"ms_teams": "Microsoft Teams",
-	"slack": "Slack",
 	"pulsedive": "Pulsedive",
-	"phish_report": "Phish Report",
+	"phish_report": "PhishReport",
+	"slack": "Slack",
 	"threatpost": "Threatpost",
 	"yaraify": "YARAify",
-	"virus_total": "VirusTotal",
-	"ms_defender_for_cloud": "Microsoft Defender for Cloud",
-	"ms_defender": "Microsoft Defender"
+	"virus_total": "VirusTotal"
 }
