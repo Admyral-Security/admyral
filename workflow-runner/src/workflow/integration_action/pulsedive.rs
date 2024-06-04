@@ -101,3 +101,106 @@ async fn explore(
         )
         .await
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::postgres::{Credential, Database};
+    use async_trait::async_trait;
+    use serde_json::json;
+    use std::sync::Arc;
+
+    struct MockHttpClient;
+    #[async_trait]
+    impl HttpClient for MockHttpClient {
+        async fn get(
+            &self,
+            _url: &str,
+            _headers: HashMap<String, String>,
+            _expected_response_status: u16,
+            _error_message: String,
+        ) -> Result<serde_json::Value> {
+            Ok(json!({
+                "result": "ok"
+            }))
+        }
+    }
+
+    struct MockDb;
+    #[async_trait]
+    impl Database for MockDb {
+        async fn fetch_secret(
+            &self,
+            _workflow_id: &str,
+            _credential_name: &str,
+        ) -> Result<Option<Credential>> {
+            Ok(Some(Credential {
+                secret: "{\"API_KEY\": \"some-api-key\"}".to_string(),
+                credential_type: Some("PULSEDIVE".to_string()),
+            }))
+        }
+    }
+
+    struct MockDbUnknownSecret;
+    #[async_trait]
+    impl Database for MockDbUnknownSecret {
+        async fn fetch_secret(
+            &self,
+            _workflow_id: &str,
+            _credential_name: &str,
+        ) -> Result<Option<Credential>> {
+            Ok(None)
+        }
+    }
+
+    async fn setup(db: Arc<dyn Database>) -> (Arc<MockHttpClient>, context::Context) {
+        let client = Arc::new(MockHttpClient);
+        let context = context::Context::init(
+            "ddd54f25-0537-4e40-ab96-c93beee543de".to_string(),
+            None,
+            db,
+            client.clone(),
+        )
+        .await
+        .unwrap();
+        (client, context)
+    }
+
+    #[tokio::test]
+    async fn test_missing_credential() {
+        let (client, context) = setup(Arc::new(MockDbUnknownSecret)).await;
+        let result = PulsediveExecutor
+            .execute(
+                &*client,
+                &context,
+                "EXPLORE",
+                &Some("credentials".to_string()),
+                &HashMap::new(),
+            )
+            .await;
+        assert!(result.is_err());
+        assert_eq!(
+            result.err().unwrap().to_string(),
+            "Missing credentials: \"credentials\""
+        );
+    }
+
+    #[tokio::test]
+    async fn test_explore() {
+        let (client, context) = setup(Arc::new(MockDb)).await;
+        let result = PulsediveExecutor
+            .execute(
+                &*client,
+                &context,
+                "EXPLORE",
+                &Some("credentials".to_string()),
+                &hashmap! {
+                    "QUERY".to_string() => json!("ioc=pulsedive.com or threat=ryuk"),
+                    "LIMIT".to_string() => json!(10)
+                },
+            )
+            .await;
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap(), json!({ "result": "ok" }));
+    }
+}
