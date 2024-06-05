@@ -265,7 +265,8 @@ export default function Integration({
 					</Flex>
 
 					<Flex direction="column" gap="0" width="100%">
-						{parameter.dataType === ApiParameterDatatype.NUMBER && (
+						{parameter.dataType ===
+							ApiParameterDatatype.INTEGER && (
 							<TextField.Root
 								variant="surface"
 								value={
@@ -273,7 +274,33 @@ export default function Integration({
 										.params[parameter.id]
 								}
 								onChange={(event) => {
+									if (!/^-?\d*$/.test(event.target.value)) {
+										return;
+									}
 									const value = parseInt(event.target.value);
+									const clonedData = cloneDeep(data);
+									(
+										clonedData as IntegrationData
+									).actionDefinition.params[parameter.id] =
+										Number.isNaN(value) ? undefined : value;
+
+									updateData(clonedData);
+								}}
+							/>
+						)}
+						{parameter.dataType === ApiParameterDatatype.FLOAT && (
+							<TextField.Root
+								variant="surface"
+								type="number"
+								step="any"
+								value={
+									(data as IntegrationData).actionDefinition
+										.params[parameter.id]
+								}
+								onChange={(event) => {
+									const value = parseFloat(
+										event.target.value,
+									);
 									const clonedData = cloneDeep(data);
 									(
 										clonedData as IntegrationData

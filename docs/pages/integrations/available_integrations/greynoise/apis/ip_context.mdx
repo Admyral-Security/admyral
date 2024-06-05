@@ -5,72 +5,65 @@ import { Callout } from "nextra/components";
 Get more information about a given IP address. Returns time ranges, IP metadata (network owner, ASN, reverse DNS pointer, country), associated actors, activity tags, and raw port scan and web request information.
 
 <Callout type="info">
-	For GreyNoise's documentation, see [GreyNoise IP Context via Enterprise API](https://docs.greynoise.io/reference/noisecontextip-1).
+	For GreyNoise's documentation, see [GreyNoise IP Context via Enterprise
+	API](https://docs.greynoise.io/reference/noisecontextip-1).
 </Callout>
 
 ## Parameters:
 
-| Field             | Description                                                                                                                                                 | Required |
-| ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | :------: |
-| **IP Address**    | The IP address to query                                                                                                                                     |   Yes    |
-
-
+| Field          | Description             | Required |
+| -------------- | ----------------------- | :------: |
+| **IP Address** | The IP address to query |   Yes    |
 
 ## Example Output
+
 ```json
 {
-  "ip": "217.76.155.236",
-  "first_seen": "2024-04-21",
-  "last_seen": "2024-05-09",
-  "seen": true,
-  "tags": [
-    "Web Crawler"
-  ],
-  "actor": "unknown",
-  "spoofable": false,
-  "classification": "unknown",
-  "cve": [],
-  "bot": false,
-  "vpn": false,
-  "vpn_service": "N/A",
-  "metadata": {
-    "asn": "AS8560",
-    "city": "Logroño",
-    "country": "Spain",
-    "country_code": "ES",
-    "organization": "IONOS SE",
-    "category": "hosting",
-    "tor": false,
-    "rdns": "",
-    "os": "Linux 3.11+",
-    "sensor_count": 1,
-    "sensor_hits": 1,
-    "region": "La Rioja",
-    "destination_countries": [
-      "United States"
-    ],
-    "destination_country_codes": [
-      "US"
-    ],
-    "source_country": "Spain",
-    "source_country_code": "ES"
-  },
-  "raw_data": {
-    "scan": [
-      {
-        "port": 80,
-        "protocol": "TCP"
-      }
-    ],
-    "web": {
-      "paths": [
-        "/wp-login.php"
-      ],
-      "useragents": [
-        "Mozilla/5.0 (X11; Fedora; Linux x86_64; rv:94.0) Gecko/20100101 Firefox/95.0"
-      ]
-    },
-    "ja3": [],
-    "hassh": []
-  }
+	"ip": "217.76.155.236",
+	"first_seen": "2024-04-21",
+	"last_seen": "2024-05-09",
+	"seen": true,
+	"tags": ["Web Crawler"],
+	"actor": "unknown",
+	"spoofable": false,
+	"classification": "unknown",
+	"cve": [],
+	"bot": false,
+	"vpn": false,
+	"vpn_service": "N/A",
+	"metadata": {
+		"asn": "AS8560",
+		"city": "Logroño",
+		"country": "Spain",
+		"country_code": "ES",
+		"organization": "IONOS SE",
+		"category": "hosting",
+		"tor": false,
+		"rdns": "",
+		"os": "Linux 3.11+",
+		"sensor_count": 1,
+		"sensor_hits": 1,
+		"region": "La Rioja",
+		"destination_countries": ["United States"],
+		"destination_country_codes": ["US"],
+		"source_country": "Spain",
+		"source_country_code": "ES"
+	},
+	"raw_data": {
+		"scan": [
+			{
+				"port": 80,
+				"protocol": "TCP"
+			}
+		],
+		"web": {
+			"paths": ["/wp-login.php"],
+			"useragents": [
+				"Mozilla/5.0 (X11; Fedora; Linux x86_64; rv:94.0) Gecko/20100101 Firefox/95.0"
+			]
+		},
+		"ja3": [],
+		"hassh": []
+	}
 }
+```

@@ -5,108 +5,110 @@ import { Callout } from "nextra/components";
 Retrieve an IP address' daily summary of noise activity.
 
 <Callout type="info">
-	For GreyNoise's documentation, see [GreyNoise IP Timeline Daily Summary via Enterprise API](https://docs.greynoise.io/reference/get_v3-noise-ips-ip-daily-summary).
+	For GreyNoise's documentation, see [GreyNoise IP Timeline Daily Summary via
+	Enterprise
+	API](https://docs.greynoise.io/reference/get_v3-noise-ips-ip-daily-summary).
 </Callout>
 
 ## Parameters:
-| Field          | Description                                                                        | Required |
-| -------------- | ---------------------------------------------------------------------------------- | :------: |
-| **IP Address** | The IP address to query                                                            |   Yes    |
-| **Days**       | The number of lookback days to include events for                                  |    No    |
-| **Cursor**     | The cursor is a pointer from which to start returning results                      |    No    |
-| **Limit**      | The total number of events to return in the response                               |    No    |
 
+| Field          | Description                                                   | Required |
+| -------------- | ------------------------------------------------------------- | :------: |
+| **IP Address** | The IP address to query                                       |   Yes    |
+| **Days**       | The number of lookback days to include events for             |    -     |
+| **Cursor**     | The cursor is a pointer from which to start returning results |    -     |
+| **Limit**      | The total number of events to return in the response          |    -     |
 
 ## Example Output
+
 ```json
 {
-    "activity": [
-        {
-            "timestamp": "2024-06-04T00:00:00Z",
-            "country": "",
-            "country_code": "",
-            "asn": "AS17421",
-            "region": "",
-            "city": "",
-            "category": "",
-            "rdns": "221-120-48-165.emome-ip.hinet.net",
-            "organization": "Mobile Business Group",
-            "vpn": false,
-            "vpn_service": "",
-            "tor": false,
-            "spoofable": true,
-            "destinations": [
-                {
-                    "country": "Ukraine",
-                    "country_code": "UA"
-                },
-                {
-                    "country": "United Kingdom",
-                    "country_code": "GB"
-                },
-                {
-                    "country": "United States",
-                    "country_code": "US"
-                },
-                {
-                    "country": "Austria",
-                    "country_code": "AT"
-                },
-                {
-                    "country": "",
-                    "country_code": ""
-                },
-                {
-                    "country": "Spain",
-                    "country_code": "ES"
-                }
-            ],
-            "protocols": [
-                {
-                    "transport_protocol": "TCP",
-                    "port": 22
-                },
-                {
-                    "transport_protocol": "",
-                    "port": 22
-                },
-                {
-                    "transport_protocol": "TCP",
-                    "app_protocol": "SSH",
-                    "port": 22
-                },
-                {
-                    "transport_protocol": "TCP",
-                    "app_protocol": "SSH",
-                    "port": 2222
-                },
-                {
-                    "transport_protocol": "TCP",
-                    "port": 2222
-                }
-            ],
-            "classification": "malicious",
-            "tags": [
-                {
-                    "name": "SSH Bruteforcer",
-                    "description": "IP addresses with this tag have been observed attempting to bruteforce SSH server credentials.",
-                    "category": "worm",
-                    "intention": "malicious"
-                }
-            ],
-            "ja3_fingerprints": [],
-            "hassh_fingerprints": [
-                "f555226df1963d1d3c09daf865abdc9a"
-            ],
-            "http_paths": [],
-            "http_user_agents": []
-        }
-    ],
-    "metadata": {
-        "start_time": "2024-06-04T00:00:00Z",
-        "end_time": "2024-06-05T10:02:12.874916377Z",
-        "ip": "221.120.48.165",
-        "limit": 50,
-        "next_cursor": ""
-    }
+	"activity": [
+		{
+			"timestamp": "2024-06-04T00:00:00Z",
+			"country": "",
+			"country_code": "",
+			"asn": "AS17421",
+			"region": "",
+			"city": "",
+			"category": "",
+			"rdns": "221-120-48-165.emome-ip.hinet.net",
+			"organization": "Mobile Business Group",
+			"vpn": false,
+			"vpn_service": "",
+			"tor": false,
+			"spoofable": true,
+			"destinations": [
+				{
+					"country": "Ukraine",
+					"country_code": "UA"
+				},
+				{
+					"country": "United Kingdom",
+					"country_code": "GB"
+				},
+				{
+					"country": "United States",
+					"country_code": "US"
+				},
+				{
+					"country": "Austria",
+					"country_code": "AT"
+				},
+				{
+					"country": "",
+					"country_code": ""
+				},
+				{
+					"country": "Spain",
+					"country_code": "ES"
+				}
+			],
+			"protocols": [
+				{
+					"transport_protocol": "TCP",
+					"port": 22
+				},
+				{
+					"transport_protocol": "",
+					"port": 22
+				},
+				{
+					"transport_protocol": "TCP",
+					"app_protocol": "SSH",
+					"port": 22
+				},
+				{
+					"transport_protocol": "TCP",
+					"app_protocol": "SSH",
+					"port": 2222
+				},
+				{
+					"transport_protocol": "TCP",
+					"port": 2222
+				}
+			],
+			"classification": "malicious",
+			"tags": [
+				{
+					"name": "SSH Bruteforcer",
+					"description": "IP addresses with this tag have been observed attempting to bruteforce SSH server credentials.",
+					"category": "worm",
+					"intention": "malicious"
+				}
+			],
+			"ja3_fingerprints": [],
+			"hassh_fingerprints": ["f555226df1963d1d3c09daf865abdc9a"],
+			"http_paths": [],
+			"http_user_agents": []
+		}
+	],
+	"metadata": {
+		"start_time": "2024-06-04T00:00:00Z",
+		"end_time": "2024-06-05T10:02:12.874916377Z",
+		"ip": "221.120.48.165",
+		"limit": 50,
+		"next_cursor": ""
+	}
 }
+```
