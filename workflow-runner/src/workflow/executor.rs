@@ -1,6 +1,6 @@
 use crate::workflow::EdgeType;
 
-use super::{context::Context, ActionExecutor, ReferenceHandle, Workflow};
+use super::{context::Context, ActionExecutor, Workflow};
 use anyhow::Result;
 use serde_json::json;
 use std::collections::VecDeque;
@@ -8,7 +8,7 @@ use std::time::Instant;
 
 #[derive(Debug, Clone)]
 struct QueueElement {
-    reference_handle: ReferenceHandle,
+    action_id: String,
     prev_action_state_id: Option<String>,
 }
 
@@ -16,19 +16,15 @@ struct QueueElement {
 pub struct WorkflowExecutor {
     workflow: Workflow,
     context: Context,
-    start_node_reference_handle: ReferenceHandle,
+    start_action_id: String,
 }
 
 impl WorkflowExecutor {
-    pub fn init(
-        context: Context,
-        workflow: Workflow,
-        start_node_reference_handle: ReferenceHandle,
-    ) -> Self {
+    pub fn init(context: Context, workflow: Workflow, start_action_id: String) -> Self {
         Self {
             workflow,
             context,
-            start_node_reference_handle,
+            start_action_id,
         }
     }
 
@@ -37,7 +33,7 @@ impl WorkflowExecutor {
 
         let mut queue = VecDeque::new();
         queue.push_back(QueueElement {
-            reference_handle: self.start_node_reference_handle.clone(),
+            action_id: self.start_action_id.clone(),
             prev_action_state_id: None,
         });
 
@@ -47,7 +43,7 @@ impl WorkflowExecutor {
             let action = self
                 .workflow
                 .actions
-                .get(&queue_element.reference_handle)
+                .get(&queue_element.action_id)
                 .expect("Failed to dereference reference handle!");
 
             if self.context.execution_time_limit_in_sec.is_some()
@@ -63,7 +59,7 @@ impl WorkflowExecutor {
 
                 self.context
                     .persist_run_state(
-                        &queue_element.reference_handle,
+                        &action.reference_handle,
                         &action.id,
                         queue_element
                             .prev_action_state_id
@@ -97,7 +93,7 @@ impl WorkflowExecutor {
 
                     self.context
                         .persist_run_state(
-                            &queue_element.reference_handle,
+                            &action.reference_handle,
                             &action.id,
                             queue_element
                                 .prev_action_state_id
@@ -132,7 +128,7 @@ impl WorkflowExecutor {
             let action_state_id = self
                 .context
                 .persist_run_state(
-                    &queue_element.reference_handle,
+                    &action.reference_handle,
                     &action.id,
                     queue_element
                         .prev_action_state_id
@@ -143,11 +139,11 @@ impl WorkflowExecutor {
                 )
                 .await?;
 
-            if let Some(children) = self.workflow.adj_list.get(&queue_element.reference_handle) {
-                for (next_action, next_edge_type) in children {
+            if let Some(children) = self.workflow.adj_list.get(&action.id) {
+                for (next_action_id, next_edge_type) in children {
                     if *next_edge_type == allowed_edge_type {
                         queue.push_back(QueueElement {
-                            reference_handle: next_action.clone(),
+                            action_id: next_action_id.clone(),
                             prev_action_state_id: Some(action_state_id.clone()),
                         });
                     }

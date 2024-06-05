@@ -48,19 +48,15 @@ async fn health_check() -> impl IntoResponse {
 
 async fn enqueue_workflow_job(
     workflow_id: String,
-    start_reference_handle: String,
+    start_action_id: String,
     trigger_event: Option<serde_json::Value>,
     db: Arc<dyn Database>,
 ) {
     tokio::spawn(async move {
-        tracing::info!("Running workflow {workflow_id} starting at {start_reference_handle}");
-        if let Err(e) = run_workflow(
-            workflow_id.clone(),
-            start_reference_handle,
-            trigger_event,
-            db,
-        )
-        .await
+        tracing::info!(
+            "Running workflow {workflow_id} starting at action with id {start_action_id}"
+        );
+        if let Err(e) = run_workflow(workflow_id.clone(), start_action_id, trigger_event, db).await
         {
             tracing::error!("Error running workflow with id {workflow_id}: {}", e);
         }
@@ -190,7 +186,7 @@ async fn webhook_handler(
 
     enqueue_workflow_job(
         webhook.workflow_id,
-        webhook.reference_handle,
+        webhook.action_id,
         Some(trigger_event),
         db,
     )
@@ -273,40 +269,13 @@ async fn post_trigger_workflow_handler(
         }
     }
 
-    let action_opt = match state.db.fetch_action(&workflow_id, &action_id).await {
-        Ok(action_opt) => action_opt,
-        Err(e) => {
-            tracing::error!("Error fetching action: {e}");
-            return (StatusCode::INTERNAL_SERVER_ERROR, "Internal server error");
-        }
-    };
-    let start_reference_handle = match action_opt {
-        None => return (StatusCode::NOT_FOUND, "Action does not exist."),
-        Some(action) => {
-            if action.action_type != "WEBHOOK"
-                && action.action_type != "MANUAL_START"
-                && !request.is_null()
-            {
-                return (StatusCode::BAD_REQUEST, "Triggering workflow action with initial payload is only allowed with webhook actions!");
-            }
-
-            action.reference_handle
-        }
-    };
-
     let trigger_event = if request.is_null() {
         None
     } else {
         Some(request)
     };
 
-    enqueue_workflow_job(
-        workflow_id,
-        start_reference_handle,
-        trigger_event,
-        state.db.clone(),
-    )
-    .await;
+    enqueue_workflow_job(workflow_id, action_id, trigger_event, state.db.clone()).await;
 
     (StatusCode::ACCEPTED, "Ok")
 }

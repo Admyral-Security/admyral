@@ -131,6 +131,13 @@ impl ActionNode {
             _ => false,
         }
     }
+
+    fn is_start_node(&self) -> bool {
+        match self {
+            Self::Webhook(_) | Self::ManualStart(_) => true,
+            _ => false,
+        }
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -146,8 +153,8 @@ pub struct Workflow {
     pub workflow_id: String,
     pub workflow_name: String,
     pub is_live: bool,
-    pub adj_list: HashMap<ReferenceHandle, Vec<(ReferenceHandle, EdgeType)>>,
-    pub actions: HashMap<ReferenceHandle, Action>,
+    pub adj_list: HashMap<String, Vec<(ReferenceHandle, EdgeType)>>,
+    pub actions: HashMap<String, Action>,
 }
 
 impl Workflow {
@@ -156,7 +163,7 @@ impl Workflow {
 
         let mut actions = HashMap::new();
         for action_row in action_rows {
-            let ref_handle = action_row.reference_handle.clone();
+            let action_id = action_row.action_id.clone();
             let node = ActionNode::from(
                 &action_row.action_name,
                 &action_row.action_type,
@@ -168,7 +175,7 @@ impl Workflow {
                 reference_handle: action_row.reference_handle,
                 node,
             };
-            actions.insert(ref_handle, parsed_action);
+            actions.insert(action_id, parsed_action);
         }
 
         let mut adj_list = HashMap::new();
@@ -176,11 +183,11 @@ impl Workflow {
             let edge_type = EdgeType::from_str(&edge_row.edge_type).expect("Illegal edge type!");
 
             adj_list
-                .entry(edge_row.parent_reference_handle)
-                .and_modify(|children: &mut Vec<(ReferenceHandle, EdgeType)>| {
-                    children.push((edge_row.child_reference_handle.clone(), edge_type))
+                .entry(edge_row.parent_action_id)
+                .and_modify(|children: &mut Vec<(String, EdgeType)>| {
+                    children.push((edge_row.child_action_id.clone(), edge_type))
                 })
-                .or_insert_with(|| vec![(edge_row.child_reference_handle, edge_type)]);
+                .or_insert_with(|| vec![(edge_row.child_action_id, edge_type)]);
         });
 
         Ok(Self {
@@ -195,7 +202,7 @@ impl Workflow {
 
 pub async fn run_workflow(
     workflow_id: String,
-    start_node_reference_handle: String,
+    start_action_id: String,
     trigger_event: Option<serde_json::Value>,
     db: Arc<dyn Database>,
 ) -> Result<()> {
@@ -219,8 +226,28 @@ pub async fn run_workflow(
         }
     };
 
+    // check that start_action_id exists and is a start workflow node
+    match workflow.actions.get(&start_action_id) {
+        None => {
+            let error_message = format!("Failed to start workflow {workflow_id} because action with id {start_action_id} does not exist.");
+            tracing::error!(error_message);
+            db.store_workflow_run_error(&context.run_id, &error_message)
+                .await?;
+            return Ok(());
+        }
+        Some(action) => {
+            if !action.node.is_start_node() {
+                let error_message = format!("Failed to start workflow {workflow_id} because action with id {start_action_id} is not a start node.");
+                tracing::error!(error_message);
+                db.store_workflow_run_error(&context.run_id, &error_message)
+                    .await?;
+                return Ok(());
+            }
+        }
+    };
+
+    // check that workflow is live
     if !workflow.is_live {
-        // Workflow is offline
         let error_message =
             format!("Failed to start workflow {workflow_id} because it is offline.");
         tracing::error!(error_message);
@@ -233,7 +260,7 @@ pub async fn run_workflow(
     if let Some(initial_event) = trigger_event {
         let action = workflow
             .actions
-            .get_mut(&start_node_reference_handle)
+            .get_mut(&start_action_id)
             .expect("Start node reference handle does not exist!");
         if let ActionNode::Webhook(webhook_action) = &mut action.node {
             webhook_action.set_input(initial_event);
@@ -250,7 +277,7 @@ pub async fn run_workflow(
 
     let run_id = context.run_id.clone();
 
-    let mut executor = WorkflowExecutor::init(context, workflow, start_node_reference_handle);
+    let mut executor = WorkflowExecutor::init(context, workflow, start_action_id);
 
     if let Err(e) = executor.execute().await {
         tracing::error!("Internal error - Failed to execute workflow \"{workflow_id}\" on run \"{run_id}\": {e}");

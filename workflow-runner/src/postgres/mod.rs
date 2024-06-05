@@ -45,8 +45,8 @@ pub struct ActionRow {
 
 #[derive(sqlx::FromRow, Debug, Default)]
 pub struct WorkflowEdgeRow {
-    pub parent_reference_handle: String,
-    pub child_reference_handle: String,
+    pub parent_action_id: String,
+    pub child_action_id: String,
     pub edge_type: String,
 }
 
@@ -63,7 +63,7 @@ struct WorkflowRunActionStateRow {
 #[derive(sqlx::FromRow, Debug)]
 pub struct WebhookRow {
     pub webhook_id: String,
-    pub reference_handle: String,
+    pub action_id: String,
     pub workflow_id: String,
 }
 
@@ -223,7 +223,7 @@ impl Database for PostgresDatabase {
         let workflow_edges: Vec<WorkflowEdgeRow> = sqlx::query_as!(
             WorkflowEdgeRow,
             r#"
-            SELECT parent.reference_handle as parent_reference_handle, child.reference_handle as child_reference_handle, we.edge_type::TEXT as "edge_type!: String"
+            SELECT parent.action_id as parent_action_id, child.action_id as child_action_id, we.edge_type::TEXT as "edge_type!: String"
             FROM admyral.workflow_edge we
             JOIN admyral.action_node parent ON parent.action_id = we.parent_action_id
             JOIN admyral.action_node child ON child.action_id = we.child_action_id
@@ -371,7 +371,7 @@ impl Database for PostgresDatabase {
         let webhook: Option<WebhookRow> = sqlx::query_as!(
             WebhookRow,
             r#"
-            SELECT w.webhook_id, a.reference_handle, workflow_id
+            SELECT w.webhook_id, a.action_id, a.workflow_id
             FROM admyral.webhook w
             JOIN admyral.action_node a ON w.action_id = a.action_id
             WHERE w.webhook_id = $1
