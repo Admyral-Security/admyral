@@ -46,11 +46,11 @@ impl WorkflowExecutor {
                 .get(&queue_element.action_id)
                 .expect("Failed to dereference reference handle!");
 
+            // Stop execution if execution time limit is exceeded.
             if self.context.execution_time_limit_in_sec.is_some()
                 && start_time.elapsed().as_secs()
                     >= self.context.execution_time_limit_in_sec.unwrap()
             {
-                // Stop execution. Execution time was exceeded.
                 tracing::info!(
                     "Workflow {} exceeded timeout limit of {}",
                     self.workflow.workflow_id,
@@ -90,39 +90,23 @@ impl WorkflowExecutor {
                         action.name,
                         self.workflow.workflow_id,
                     );
-
-                    self.context
-                        .persist_run_state(
-                            &action.reference_handle,
-                            &action.id,
-                            queue_element
-                                .prev_action_state_id
-                                .as_ref()
-                                .map(|s| s.as_str()),
-                            json!({"error": format!("Failed to execute action {}: {e}", action.name)}),
-                            true,
-                        )
-                        .await?;
-                    break;
+                    json!({"error": format!("Failed to execute action {}: {e}", action.name)})
                 }
             };
 
             // If the current action node is an if-condition, we must decide which
             // path the execution should follow.
             if action.node.is_if_condition() {
-                let condition_result = output
-                    .as_object()
-                    .expect("If-Condition action result must be an object!")
-                    .get("condition_result")
-                    .expect("If-Condition action result object must have key \"condition_result\"")
-                    .as_bool()
-                    .expect(
-                        "If-Condition action result object with key \"condition_result\" must be bool",
-                    );
-                allowed_edge_type = match condition_result {
-                    true => EdgeType::True,
-                    false => EdgeType::False,
-                };
+                // If the if-condition failed to execute, we can't choose an edge type.
+                if let Some(condition_result_value) = output.get("condition_result") {
+                    let condition_result = condition_result_value
+                        .as_bool()
+                        .expect("If-Condition action result object with key \"condition_result\" must be bool");
+                    allowed_edge_type = match condition_result {
+                        true => EdgeType::True,
+                        false => EdgeType::False,
+                    };
+                }
             }
 
             let action_state_id = self
