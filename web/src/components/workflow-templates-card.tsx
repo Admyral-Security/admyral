@@ -2,6 +2,7 @@ import { importWorkflowFromTemplate } from "@/lib/api";
 import { Badge, Box, Card, Flex, Grid, Text } from "@radix-ui/themes";
 import IntegrationLogoIconCard from "./integration-logo-icon-card";
 import { IntegrationType } from "@/lib/integrations";
+import { errorToast } from "@/lib/toast";
 
 interface WorkflowTemplateCardProps {
 	workflowId: string;
@@ -27,7 +28,9 @@ export default function WorkflowTemplateCard({
 				callback();
 			}
 		} catch (error) {
-			alert("Failed to import workflow from template!");
+			errorToast(
+				"Failed to import workflow from template. Please try again.",
+			);
 		}
 	};
 

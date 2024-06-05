@@ -21,6 +21,7 @@ import ArrowRightUpIcon from "../icons/arrow-right-up";
 import { useEffect, useState } from "react";
 import { listCredentials } from "@/lib/api";
 import { REFERENCE_HANDLE_EXPLANATION } from "@/lib/constants";
+import { errorToast } from "@/lib/toast";
 
 export interface IntegrationProps {
 	id: string;
@@ -82,7 +83,7 @@ export default function Integration({
 					).actionDefinition.credential = "";
 					updateData(clonedData);
 					// Note: the following alert is shown twice in development mode due to react strictmode which renders every component twice
-					alert(
+					errorToast(
 						`The previously selected credential for ${data.actionName} does not exist anymore. Please select a new one.`,
 					);
 				}
@@ -94,7 +95,7 @@ export default function Integration({
 				);
 			})
 			.catch((error) => {
-				alert(
+				errorToast(
 					"Failed to fetch available credentials. Please unselect and select the integration node again.",
 				);
 			});

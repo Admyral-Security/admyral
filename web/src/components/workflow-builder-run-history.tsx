@@ -8,6 +8,7 @@ import ActionNodeIcon from "./action-node-icon";
 import Image from "next/image";
 import IntegrationLogoIcon from "./integration-logo-icon";
 import { InfoCircledIcon } from "@radix-ui/react-icons";
+import { errorToast } from "@/lib/toast";
 
 const MONTHS = [
 	"Jan",
@@ -203,13 +204,11 @@ export default function WorkflowBuilderRunHistory({
 	useEffect(() => {
 		loadWorkflowRuns(workflowId)
 			.then((workflowRuns) => {
-				console.log("Workflow runs:"); // FIXME:
-				console.log(workflowRuns); // FIXME:
 				setWorkflowRuns(workflowRuns);
 			})
 			.catch((error) => {
-				alert(
-					"Failed to load workflow runs. Please try again by refreshing the site.",
+				errorToast(
+					"Failed to load workflow runs. Please refresh the site.",
 				);
 			});
 	}, [workflowId]);
@@ -240,7 +239,7 @@ export default function WorkflowBuilderRunHistory({
 			setWorkflowRunEvents(workflowRunEvents);
 		} catch (err) {
 			setSelectedWorkflowRunId(null);
-			alert("Failed to load workflow run events! Please try again.");
+			errorToast("Failed to load workflow run events. Please try again.");
 		}
 	};
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { deleteAccount } from "@/lib/api";
+import { errorToast } from "@/lib/toast";
 import { AlertDialog, Button, Flex } from "@radix-ui/themes";
 import { useState } from "react";
 
@@ -12,8 +13,7 @@ export default function DeleteAccountButton() {
 		try {
 			await deleteAccount();
 		} catch (err) {
-			console.error(err);
-			alert(
+			errorToast(
 				`Failed to delete account! Please try again. If the problem persists, please contact us on Discord or via email at ${process.env.NEXT_PUBLIC_SUPPORT_EMAIL}`,
 			);
 		} finally {

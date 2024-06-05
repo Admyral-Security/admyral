@@ -15,6 +15,7 @@ import {
 } from "@radix-ui/themes";
 import { triggerWorkflowFromAction } from "@/lib/api";
 import { triggerWorkflowWebhook } from "@/lib/api";
+import { successToast } from "@/lib/toast";
 
 export interface RunWorkflowProps {
 	workflowId: string;
@@ -73,6 +74,8 @@ export default function RunWorkflow({
 					triggerPayload.length > 0 ? triggerPayload : null,
 				);
 			}
+
+			successToast("Successfully triggered workflow.");
 
 			setShowModal(false);
 		} catch (error) {

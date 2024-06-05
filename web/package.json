@@ -21,6 +21,7 @@
 		"react": "^18",
 		"react-dom": "^18",
 		"react-markdown": "^9.0.1",
+		"react-toastify": "^10.0.5",
 		"reactflow": "^11.11.3",
 		"rehype-external-links": "^3.0.0",
 		"remark-gfm": "^4.0.0",

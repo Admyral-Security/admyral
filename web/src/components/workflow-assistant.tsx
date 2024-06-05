@@ -7,6 +7,7 @@ import { Cross1Icon } from "@radix-ui/react-icons";
 import { generateWorkflowGraph } from "@/lib/workflow-generation";
 import useWorkflowStore from "@/lib/workflow-store";
 import useWorkflowAssistantStore from "@/lib/workflow-assistant-store";
+import { errorToast } from "@/lib/toast";
 
 const WORKLFOW_ASSISTANT_PLACEHOLDER = `Describe the workflow you want to generate. Make sure to specify which tools you want to use.
 
@@ -63,11 +64,13 @@ export default function WorkflowAssistant() {
 				error.message ===
 				"Quota limit exceeded. You have reached the maximum number of workflow generations per day."
 			) {
-				alert(
+				errorToast(
 					"Quota limit exceeded. You have reached the maximum number of workflow generations per day.",
 				);
 			} else {
-				alert("Failed to generate workflow. Please try again later.");
+				errorToast(
+					"Failed to generate workflow. Please try again later.",
+				);
 			}
 		} finally {
 			setIsLoading(false);

@@ -7,6 +7,7 @@ import { WorkflowTemplate } from "@/lib/types";
 import WorkflowTemplateCard from "./workflow-templates-card";
 import { Cross1Icon } from "@radix-ui/react-icons";
 import useGettingStartedStore from "@/lib/getting-started-store";
+import { errorToast } from "@/lib/toast";
 
 export interface CreateNewWorkflowButtonProps {
 	size: "1" | "2" | "3" | "4";
@@ -30,7 +31,9 @@ export default function CreateNewWorkflowButton({
 				setTemplates(templates);
 			})
 			.catch((error) => {
-				// alert("Failed to load workflow templates!");
+				errorToast(
+					"Failed to load workflow templates. Please refresh the page.",
+				);
 			});
 	}, []);
 
@@ -44,7 +47,7 @@ export default function CreateNewWorkflowButton({
 			await createNewWorkflow();
 			clearShowGettingStarted();
 		} catch (error) {
-			alert("Failed to create new workflow. Please try again.");
+			errorToast("Failed to create new workflow. Please try again.");
 		} finally {
 			setLoading(false);
 		}

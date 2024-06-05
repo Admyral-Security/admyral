@@ -13,6 +13,7 @@ import { loadWorkflowTemplates } from "@/lib/api";
 import { useEffect, useState } from "react";
 import { WorkflowTemplate } from "@/lib/types";
 import WorkflowTemplateCard from "./workflow-templates-card";
+import { errorToast } from "@/lib/toast";
 
 function WorkflowTemplatesDialog() {
 	const [templates, setTemplates] = useState<WorkflowTemplate[]>([]);
@@ -24,7 +25,9 @@ function WorkflowTemplatesDialog() {
 				setTemplates(templates);
 			})
 			.catch((error) => {
-				alert("Failed to load workflow templates!");
+				errorToast(
+					"Failed to load workflow templates. Please refresh the page.",
+				);
 			})
 			.finally(() => setIsLoading(false));
 	}, []);

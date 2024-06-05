@@ -33,6 +33,7 @@ import RunWorkflow from "./run-workflow";
 import BackIcon from "./icons/back-icon";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { errorToast } from "@/lib/toast";
 
 function buildInitialWorkflowGraph(
 	actionData: ActionData[],
@@ -185,7 +186,7 @@ export default function WorkflowBuilder({ workflowId }: WorkflowBuilderProps) {
 		try {
 			await deleteWorkflow(workflowId);
 		} catch (error) {
-			alert("Failed to delete workflow. ");
+			errorToast("Failed to delete workflow. Please try again.");
 		} finally {
 			setIsDeletingWorkflow(false);
 		}
@@ -248,7 +249,7 @@ export default function WorkflowBuilder({ workflowId }: WorkflowBuilderProps) {
 				isLive: update.isLive,
 			});
 		} catch (error) {
-			alert("Failed to save workflow. Please try again.");
+			errorToast("Failed to save workflow. Please try again.");
 		} finally {
 			setIsSavingWorkflow(false);
 		}
@@ -257,7 +258,7 @@ export default function WorkflowBuilder({ workflowId }: WorkflowBuilderProps) {
 	const saveWorkflowAndRedirect = async (destintation: string) => {
 		await handleSaveWorkflow();
 		if (hasUnsavedChanges()) {
-			alert("Failed to save workflow. Please try again.");
+			errorToast("Failed to save workflow. Please try again.");
 			return;
 		}
 		router.replace(destintation);
@@ -367,9 +368,13 @@ export default function WorkflowBuilder({ workflowId }: WorkflowBuilderProps) {
 								}
 								onError={() => {
 									if (workflowData.isLive) {
-										alert("Failed to deactivate workflow");
+										errorToast(
+											"Failed to deactivate workflow. Please try again.",
+										);
 									} else {
-										alert("Failed to activate workflow");
+										errorToast(
+											"Failed to activate workflow. Please try again.",
+										);
 									}
 								}}
 							/>
