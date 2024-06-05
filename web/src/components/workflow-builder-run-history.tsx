@@ -1,12 +1,13 @@
 import { loadWorkflowRunEvents, loadWorkflowRuns } from "@/lib/api";
 import { ActionNode, WorkflowRun, WorkflowRunEvent } from "@/lib/types";
 import { IntegrationType } from "@/lib/integrations";
-import { Badge, Box, Card, Flex, Text } from "@radix-ui/themes";
+import { Badge, Box, Callout, Card, Flex, Text } from "@radix-ui/themes";
 import { useEffect, useState } from "react";
 import "@/components/workflow-builder-run-history.css";
 import ActionNodeIcon from "./action-node-icon";
 import Image from "next/image";
 import IntegrationLogoIcon from "./integration-logo-icon";
+import { InfoCircledIcon } from "@radix-ui/react-icons";
 
 const MONTHS = [
 	"Jan",
@@ -162,6 +163,19 @@ function TraceEvent({ event }: { event: WorkflowRunEvent }) {
 	);
 }
 
+function WorkflowRunError({ error }: { error: string }) {
+	return (
+		<Callout.Root color="red">
+			<Flex align="center" gap="5">
+				<Callout.Icon>
+					<InfoCircledIcon width="20" height="20" />
+				</Callout.Icon>
+				<Callout.Text size="2">{error}</Callout.Text>
+			</Flex>
+		</Callout.Root>
+	);
+}
+
 export interface WorkflowBuilderRunHistoryProps {
 	workflowId: string;
 }
@@ -180,11 +194,17 @@ export default function WorkflowBuilderRunHistory({
 	const [selectedWorkflowRunEventId, setSelectedWorkflowRunEventId] =
 		useState<string | null>(null);
 
+	const [selectedWorkflowRunError, setSelectedWorkflowRunError] = useState<
+		string | null
+	>(null);
+
 	const [trace, setTrace] = useState<WorkflowRunEvent[] | null>(null);
 
 	useEffect(() => {
 		loadWorkflowRuns(workflowId)
 			.then((workflowRuns) => {
+				console.log("Workflow runs:"); // FIXME:
+				console.log(workflowRuns); // FIXME:
 				setWorkflowRuns(workflowRuns);
 			})
 			.catch((error) => {
@@ -200,6 +220,16 @@ export default function WorkflowBuilderRunHistory({
 		setWorkflowRunEvents([]);
 		setSelectedWorkflowRunEventId(null);
 		setTrace(null);
+		setSelectedWorkflowRunError(null);
+
+		// We check whether there was an error for starting the workflow.
+		const idx = workflowRuns.findIndex(
+			(workflowRun) => workflowRun.runId === workflowRunId,
+		);
+		if (workflowRuns[idx].error !== null) {
+			setSelectedWorkflowRunError(workflowRuns[idx].error);
+			return;
+		}
 
 		try {
 			const workflowRunEvents = await loadWorkflowRunEvents(
@@ -357,52 +387,66 @@ export default function WorkflowBuilderRunHistory({
 				className="border-r-2 border-r-gray-200"
 				style={{ position: "fixed" }}
 			>
-				{selectedWorkflowRunEventId === null ? (
+				{selectedWorkflowRunError !== null && (
 					<Flex
 						justify="center"
 						align="center"
 						width="100%"
 						height="100%"
+						p="2"
 					>
-						<Text size="4" weight="medium">
-							No event selected.
-						</Text>
+						<WorkflowRunError error={selectedWorkflowRunError} />
 					</Flex>
-				) : (
-					<>
-						<Box
-							width="100%"
-							height="54px"
-							p="16px"
-							className="border-b-2 border-b-gray-200"
-						>
-							<Text size="3" weight="medium">
-								Trace to event {selectedWorkflowRunEventId}
-							</Text>
-						</Box>
-
-						<Flex
-							mt="16px"
-							px="4"
-							direction="column"
-							gap="4"
-							height="calc(100vh - 54px - 56px - 16px)"
-							width="90%"
-							style={{ flex: 1, overflowY: "auto" }}
-						>
-							{trace !== null && (
-								<>
-									{trace.map((event, idx) => (
-										<TraceEvent
-											key={`trace_event_${idx}`}
-											event={event}
-										/>
-									))}
-								</>
-							)}
-						</Flex>
-					</>
 				)}
+				{selectedWorkflowRunEventId === null &&
+					selectedWorkflowRunError === null && (
+						<Flex
+							justify="center"
+							align="center"
+							width="100%"
+							height="100%"
+						>
+							<Text size="4" weight="medium">
+								No event selected.
+							</Text>
+						</Flex>
+					)}
+				{selectedWorkflowRunEventId !== null &&
+					selectedWorkflowRunError === null && (
+						<>
+							<Box
+								width="100%"
+								height="54px"
+								p="16px"
+								className="border-b-2 border-b-gray-200"
+							>
+								<Text size="3" weight="medium">
+									Trace to event {selectedWorkflowRunEventId}
+								</Text>
+							</Box>
+
+							<Flex
+								mt="16px"
+								px="4"
+								direction="column"
+								gap="4"
+								height="calc(100vh - 54px - 56px - 16px)"
+								width="90%"
+								style={{ flex: 1, overflowY: "auto" }}
+							>
+								{trace !== null && (
+									<>
+										{trace.map((event, idx) => (
+											<TraceEvent
+												key={`trace_event_${idx}`}
+												event={event}
+											/>
+										))}
+									</>
+								)}
+							</Flex>
+						</>
+					)}
 			</Box>
 		</Flex>
 	);

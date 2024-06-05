@@ -292,6 +292,17 @@ pub struct IfCondition {
     conditions: Vec<ConditionExpression>,
 }
 
+impl IfCondition {
+    pub fn from_json(action_name: &str, definition: serde_json::Value) -> Result<Self> {
+        match serde_json::from_value::<IfCondition>(definition) {
+            Ok(if_condition) => Ok(if_condition),
+            Err(e) => Err(anyhow!(
+                "Configuration Error for If-Condition Action \"{action_name}\": {e}"
+            )),
+        }
+    }
+}
+
 impl ActionExecutor for IfCondition {
     /// Resolve reference possible in lhs, rhs
     /// Returns JSON of the following form: { "condition_result": <condition-evaluation-result> }
@@ -316,6 +327,21 @@ impl ActionExecutor for IfCondition {
 mod tests {
     use super::*;
     use serde_json::json;
+
+    #[test]
+    fn test_from_json() {
+        let action_definition = json!({
+            "conditions": [
+                {
+                    "lhs": "1",
+                    "rhs": "1",
+                    "operator": "EQUALS"
+                }
+            ]
+        });
+        let action = IfCondition::from_json("My Action", action_definition);
+        assert!(action.is_ok());
+    }
 
     #[test]
     fn test_comparison_numbers() {

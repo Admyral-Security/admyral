@@ -88,6 +88,40 @@ pub struct AiAction {
     prompt: String,
 }
 
+impl AiAction {
+    fn from_json_impl(definition: serde_json::Value) -> Result<Self> {
+        // Manual parsing to provide the user with better error messages
+
+        let model = serde_json::from_value::<LLM>(json!(definition
+            .get("model")
+            .ok_or(anyhow!("Unknown model"))?
+            .as_str()
+            .ok_or(anyhow!("Unknown model"))?))?;
+
+        let prompt = definition
+            .get("prompt")
+            .ok_or(anyhow!("Missing prompt."))?
+            .as_str()
+            .ok_or(anyhow!("Missing prompt."))?
+            .to_string();
+
+        if prompt.is_empty() {
+            return Err(anyhow!("Provided empty prompt"));
+        }
+
+        Ok(Self { model, prompt })
+    }
+
+    pub fn from_json(action_name: &str, definition: serde_json::Value) -> Result<Self> {
+        match Self::from_json_impl(definition) {
+            Ok(http_request) => Ok(http_request),
+            Err(e) => Err(anyhow!(
+                "Configuration Error for AI Action \"{action_name}\": {e}"
+            )),
+        }
+    }
+}
+
 impl ActionExecutor for AiAction {
     /// Outputs: {"output": "<llm-response>"}
     async fn execute(&self, context: &Context) -> Result<serde_json::Value> {
@@ -118,5 +152,45 @@ mod tests {
 
         let out = llm.to_string();
         assert_eq!("gpt-4-turbo", &out);
+    }
+
+    #[test]
+    fn test_from_json() {
+        let action_definition = json!({
+            "model": "gpt-4-turbo",
+            "prompt": "You are a cybersecurity expert. Help me classify the following alert...",
+        });
+        let action = AiAction::from_json("My Action", action_definition);
+        assert!(action.is_ok());
+    }
+
+    macro_rules! from_json_error_tests {
+        ($($name:ident: $value:expr,)*) => {
+        $(
+            #[test]
+            fn $name() {
+                let (input, expected) = $value;
+                let result = AiAction::from_json("My Action", input);
+                assert!(result.is_err());
+                assert_eq!(expected, result.err().unwrap().to_string());
+            }
+        )*
+        }
+    }
+
+    from_json_error_tests! {
+        invalid_model: (
+            json!({
+                "model": "llama3",
+            }),
+            "Configuration Error for AI Action \"My Action\": unknown variant `llama3`, expected `gpt-4-turbo` or `gpt-3.5-turbo`"
+        ),
+        empty_prompt: (
+            json!({
+                "model": "gpt-4-turbo",
+                "prompt": ""
+            }),
+            "Configuration Error for AI Action \"My Action\": Provided empty prompt"
+        ),
     }
 }

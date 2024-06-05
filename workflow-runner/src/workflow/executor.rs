@@ -1,12 +1,9 @@
-use crate::postgres::Database;
 use crate::workflow::EdgeType;
 
-use super::http_client::ReqwestClient;
 use super::{context::Context, ActionExecutor, ReferenceHandle, Workflow};
 use anyhow::Result;
 use serde_json::json;
 use std::collections::VecDeque;
-use std::sync::Arc;
 use std::time::Instant;
 
 #[derive(Debug, Clone)]
@@ -23,28 +20,18 @@ pub struct WorkflowExecutor {
 }
 
 impl WorkflowExecutor {
-    pub async fn init(
-        db: Arc<dyn Database>,
+    pub fn init(
+        context: Context,
         workflow: Workflow,
         start_node_reference_handle: ReferenceHandle,
-        execution_time_limit_in_sec: Option<u64>,
-    ) -> Result<Self> {
-        let client = Arc::new(ReqwestClient::new());
-        let context = Context::init(
-            workflow.workflow_id.clone(),
-            execution_time_limit_in_sec,
-            db,
-            client,
-        )
-        .await?;
-        Ok(Self {
+    ) -> Self {
+        Self {
             workflow,
             context,
             start_node_reference_handle,
-        })
+        }
     }
 
-    // TODO: if an error occurrs, we do not execute complete run
     pub async fn execute(&mut self) -> Result<()> {
         let start_time = Instant::now();
 
@@ -98,6 +85,7 @@ impl WorkflowExecutor {
             );
 
             let mut allowed_edge_type = EdgeType::Default;
+            // TODO: double-check all actions for useful error messages
             let output = match action.node.execute(&self.context).await {
                 Ok(value) => value,
                 Err(e) => {
@@ -106,7 +94,7 @@ impl WorkflowExecutor {
                         action.name,
                         self.workflow.workflow_id,
                     );
-                    // TODO: propagate good error messages for displaying to the user
+
                     self.context
                         .persist_run_state(
                             &queue_element.reference_handle,

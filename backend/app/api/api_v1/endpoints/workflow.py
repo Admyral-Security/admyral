@@ -626,6 +626,7 @@ class WorkflowRunEntry(BaseModel):
     started_at: datetime
     completed_at: Optional[datetime]
     action_state_count: int
+    error: Optional[str]
 
 
 @router.get(
@@ -644,7 +645,7 @@ async def get_workflow_runs(
                 func.count(WorkflowRunActionState.action_state_id).label("action_state_count")                
             )
             .join(Workflow)
-            .join(WorkflowRunActionState)
+            .join(WorkflowRunActionState, isouter=True)
             .where(WorkflowRun.workflow_id == workflow_id)
             .where(Workflow.user_id == user.user_id)
             .group_by(WorkflowRun)
@@ -657,7 +658,8 @@ async def get_workflow_runs(
                 run_id=run.WorkflowRun.run_id,
                 started_at=run.WorkflowRun.started_timestamp,
                 completed_at=run.WorkflowRun.completed_timestamp,
-                action_state_count=run.action_state_count
+                action_state_count=run.action_state_count,
+                error=run.WorkflowRun.error
             ),
             workflow_runs
         )
@@ -673,7 +675,6 @@ class WorkflowRunEvent(BaseModel):
     action_state: Any 
     prev_action_state_id: Optional[str]
     is_error: bool
-
 
 @router.get(
     "/{workflow_id}/runs/{run_id}",

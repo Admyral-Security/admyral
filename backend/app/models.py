@@ -175,6 +175,8 @@ class WorkflowRun(Base, table=True):
     started_timestamp: datetime = Field(sa_type=TIMESTAMP(), sa_column_kwargs=dict(server_default=func.now()))
     completed_timestamp: Optional[datetime] = Field(sa_type=TIMESTAMP())
 
+    error: Optional[str] = Field(sa_type=TEXT(), nullable=True)
+
     workflow_run_action_states: list["WorkflowRunActionState"] = Relationship(back_populates="workflow_run", sa_relationship_kwargs=dict(cascade="all, delete"))
 
     workflow: Workflow = Relationship(back_populates="workflow_runs")

@@ -16,7 +16,9 @@ use self::executor::WorkflowExecutor;
 use crate::postgres::Database;
 use anyhow::{anyhow, Result};
 use async_once::AsyncOnce;
+use context::Context;
 use enum_dispatch::enum_dispatch;
+use http_client::ReqwestClient;
 use lazy_static::lazy_static;
 use serde::{Deserialize, Serialize};
 use std::borrow::Borrow;
@@ -80,27 +82,33 @@ pub enum ActionNode {
 }
 
 impl ActionNode {
-    fn from(action_type: &str, action_definition: serde_json::Value) -> Result<Self> {
+    fn from(
+        action_name: &str,
+        action_type: &str,
+        action_definition: serde_json::Value,
+    ) -> Result<Self> {
         match action_type {
             "WEBHOOK" => Ok(Self::Webhook(webhook_action::Webhook::default())),
-            "HTTP_REQUEST" => Ok(Self::HttpRequest(serde_json::from_value::<
-                http_request_action::HttpRequest,
-            >(action_definition)?)),
-            "IF_CONDITION" => Ok(Self::IfCondition(serde_json::from_value::<
-                if_condition_action::IfCondition,
-            >(action_definition)?)),
-            "AI_ACTION" => Ok(Self::AiAction(
-                serde_json::from_value::<ai_action::AiAction>(action_definition)?,
+            "HTTP_REQUEST" => Ok(Self::HttpRequest(
+                http_request_action::HttpRequest::from_json(action_name, action_definition)?,
             )),
-            "SEND_EMAIL" => Ok(Self::SendEmail(serde_json::from_value::<
-                send_email_action::SendEmail,
-            >(action_definition)?)),
+            "IF_CONDITION" => Ok(Self::IfCondition(
+                if_condition_action::IfCondition::from_json(action_name, action_definition)?,
+            )),
+            "AI_ACTION" => Ok(Self::AiAction(ai_action::AiAction::from_json(
+                action_name,
+                action_definition,
+            )?)),
+            "SEND_EMAIL" => Ok(Self::SendEmail(send_email_action::SendEmail::from_json(
+                action_name,
+                action_definition,
+            )?)),
             "MANUAL_START" => Ok(Self::ManualStart(
                 manual_start_action::ManualStart::default(),
             )),
-            "INTEGRATION" => Ok(Self::Integration(serde_json::from_value::<
-                integration_action::Integration,
-            >(action_definition)?)),
+            "INTEGRATION" => Ok(Self::Integration(
+                integration_action::Integration::from_json(action_name, action_definition)?,
+            )),
             _ => Err(anyhow!("Unknown action type: {action_type}")),
         }
     }
@@ -144,26 +152,24 @@ pub struct Workflow {
 
 impl Workflow {
     pub async fn load_from_db(workflow_id: &str, db: &dyn Database) -> Result<Self> {
-        let (workflow, actions, edges) = db.fetch_workflow_data(workflow_id).await?;
+        let (workflow, action_rows, edges) = db.fetch_workflow_data(workflow_id).await?;
 
-        let actions = actions
-            .into_iter()
-            .map(|action_row| {
-                (
-                    action_row.reference_handle.clone(),
-                    Action {
-                        id: action_row.action_id,
-                        name: action_row.action_name,
-                        reference_handle: action_row.reference_handle,
-                        node: ActionNode::from(
-                            &action_row.action_type,
-                            action_row.action_definition,
-                        )
-                        .expect("ActionNode parsing went wrong"),
-                    },
-                )
-            })
-            .collect::<HashMap<ReferenceHandle, Action>>();
+        let mut actions = HashMap::new();
+        for action_row in action_rows {
+            let ref_handle = action_row.reference_handle.clone();
+            let node = ActionNode::from(
+                &action_row.action_name,
+                &action_row.action_type,
+                action_row.action_definition,
+            )?;
+            let parsed_action = Action {
+                id: action_row.action_id,
+                name: action_row.action_name,
+                reference_handle: action_row.reference_handle,
+                node,
+            };
+            actions.insert(ref_handle, parsed_action);
+        }
 
         let mut adj_list = HashMap::new();
         edges.into_iter().for_each(|edge_row| {
@@ -193,11 +199,33 @@ pub async fn run_workflow(
     trigger_event: Option<serde_json::Value>,
     db: Arc<dyn Database>,
 ) -> Result<()> {
-    let mut workflow = Workflow::load_from_db(&workflow_id, db.borrow()).await?;
+    let timeout_in_seconds = WORKFLOW_RUN_TIMEOUT_IN_SECONDS.get().await.clone();
+    let context = Context::init(
+        workflow_id.clone(),
+        timeout_in_seconds,
+        db.clone(),
+        Arc::new(ReqwestClient::new()),
+    )
+    .await?;
+
+    let mut workflow = match Workflow::load_from_db(&workflow_id, db.borrow()).await {
+        Ok(workflow) => workflow,
+        Err(e) => {
+            tracing::error!("Failed to start workflow {workflow_id}. {e}");
+            let error_message = format!("Failed to start workflow. {e}");
+            db.store_workflow_run_error(&context.run_id, &error_message)
+                .await?;
+            return Err(e);
+        }
+    };
 
     if !workflow.is_live {
         // Workflow is offline
-        tracing::info!("Workflow {workflow_id} could not be executed because it is offline.");
+        let error_message =
+            format!("Failed to start workflow {workflow_id} because it is offline.");
+        tracing::error!(error_message);
+        db.store_workflow_run_error(&context.run_id, &error_message)
+            .await?;
         return Ok(());
     }
 
@@ -212,6 +240,7 @@ pub async fn run_workflow(
         } else if let ActionNode::ManualStart(manual_start_action) = &mut action.node {
             manual_start_action.set_input(initial_event);
         } else {
+            // TODO: enable starting workflows from arbitrary nodes
             tracing::error!("Trying to run workflow {workflow_id} from non-start workflow node (not a webhook or manual start) with initial data!");
             return Err(anyhow!(
                 "Trying to run workflow from non-start workflow action type (not a webhook or manual start) with initial data!"
@@ -219,16 +248,16 @@ pub async fn run_workflow(
         }
     }
 
-    let timeout_in_seconds = WORKFLOW_RUN_TIMEOUT_IN_SECONDS.get().await.clone();
+    let run_id = context.run_id.clone();
 
-    let mut executor = WorkflowExecutor::init(
-        db,
-        workflow,
-        start_node_reference_handle,
-        timeout_in_seconds,
-    )
-    .await?;
-    executor.execute().await?;
+    let mut executor = WorkflowExecutor::init(context, workflow, start_node_reference_handle);
+
+    if let Err(e) = executor.execute().await {
+        tracing::error!("Internal error - Failed to execute workflow \"{workflow_id}\" on run \"{run_id}\": {e}");
+        let error_message = format!("Internal error - failed to execute workflow. Please contact support. Workflow Id: \"{workflow_id}\", Run Id: \"{run_id}\"");
+        db.store_workflow_run_error(&run_id, &error_message).await?;
+    }
+
     Ok(())
 }
 

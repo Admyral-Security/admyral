@@ -218,6 +218,7 @@ export type WorkflowRun = {
 	startedAt: string;
 	completeddAt: string | null;
 	actionStateCount: number;
+	error: string | null;
 };
 
 export type WorkflowRunEvent = {

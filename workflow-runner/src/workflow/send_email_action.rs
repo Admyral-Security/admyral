@@ -32,6 +32,65 @@ pub struct SendEmail {
     sender_name: String,
 }
 
+impl SendEmail {
+    fn from_json_impl(definition: serde_json::Value) -> Result<Self> {
+        // Manual parsing to provide the user with better error messages
+
+        let recipients = serde_json::from_value::<Vec<String>>(
+            definition
+                .get("recipients")
+                .ok_or(anyhow!("Integration Type not configured correctly"))?
+                .clone(),
+        )?;
+        if recipients.is_empty() {
+            return Err(anyhow!("Missing recipient"));
+        }
+
+        let subject = definition
+            .get("subject")
+            .ok_or(anyhow!("Subject not configured correctly"))?
+            .as_str()
+            .ok_or(anyhow!("Subject not configured correctly"))?
+            .to_string();
+        if subject.is_empty() {
+            return Err(anyhow!("Empty subject"));
+        }
+
+        let body = definition
+            .get("body")
+            .ok_or(anyhow!("Body not configured correctly"))?
+            .as_str()
+            .ok_or(anyhow!("Body not configured correctly"))?
+            .to_string();
+
+        let sender_name = definition
+            .get("sender_name")
+            .ok_or(anyhow!("Sender Name not configured correctly"))?
+            .as_str()
+            .ok_or(anyhow!("Sender Name not configured correctly"))?
+            .to_string();
+        if sender_name.is_empty() {
+            return Err(anyhow!("Empty sender name"));
+        }
+
+        Ok(Self {
+            recipients,
+            subject,
+            body,
+            sender_name,
+        })
+    }
+
+    pub fn from_json(action_name: &str, definition: serde_json::Value) -> Result<Self> {
+        match Self::from_json_impl(definition) {
+            Ok(integration) => Ok(integration),
+            Err(e) => Err(anyhow!(
+                "Configuration Error for Send Email Action \"{action_name}\": {e}"
+            )),
+        }
+    }
+}
+
 impl ActionExecutor for SendEmail {
     async fn execute(&self, context: &Context) -> Result<serde_json::Value> {
         let recipients = self
@@ -86,5 +145,71 @@ impl ActionExecutor for SendEmail {
         }
 
         Ok(body)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_from_json() {
+        let action_definition = json!({
+            "recipients": ["mail@admyral.dev"],
+            "subject": "test 123",
+            "body": "hello",
+            "sender_name": "Hello Admyral"
+        });
+        let action = SendEmail::from_json("My Action", action_definition);
+        assert!(action.is_ok());
+    }
+
+    macro_rules! from_json_error_tests {
+        ($($name:ident: $value:expr,)*) => {
+        $(
+            #[test]
+            fn $name() {
+                let (input, expected) = $value;
+                let result = SendEmail::from_json("My Action", input);
+                assert!(result.is_err());
+                assert_eq!(expected, result.err().unwrap().to_string());
+            }
+        )*
+        }
+    }
+
+    from_json_error_tests! {
+        missing_recipient: (
+            json!({
+                "recipients": []
+            }),
+            "Configuration Error for Send Email Action \"My Action\": Missing recipient"
+        ),
+        empty_subject: (
+            json!({
+                "recipients": ["mail@admyral.dev"],
+                "subject": "",
+                "body": "hello",
+                "sender_name": "Hello Admyral"
+            }),
+            "Configuration Error for Send Email Action \"My Action\": Empty subject"
+        ),
+        missing_body: (
+            json!({
+                "recipients": ["mail@admyral.dev"],
+                "subject": "test 123",
+                "sender_name": "Hello Admyral"
+            }),
+            "Configuration Error for Send Email Action \"My Action\": Body not configured correctly"
+        ),
+        empty_sender: (
+            json!({
+                "recipients": ["mail@admyral.dev"],
+                "subject": "test 123",
+                "body": "hello",
+                "sender_name": ""
+            }),
+            "Configuration Error for Send Email Action \"My Action\": Empty sender name"
+        ),
     }
 }

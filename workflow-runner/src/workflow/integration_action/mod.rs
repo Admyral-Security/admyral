@@ -3,8 +3,9 @@ use super::{
     http_client::{HttpClient, ReqwestClient},
     ActionExecutor,
 };
-use anyhow::Result;
+use anyhow::{anyhow, Result};
 use serde::{Deserialize, Serialize};
+use serde_json::json;
 use std::collections::HashMap;
 
 mod alienvault_otx;
@@ -54,6 +55,60 @@ pub struct Integration {
     api: String,
     params: HashMap<String, serde_json::Value>,
     credential: Option<String>,
+}
+
+impl Integration {
+    fn from_json_impl(definition: serde_json::Value) -> Result<Self> {
+        // Manual parsing to provide the user with better error messages
+
+        let integration_type = serde_json::from_value::<IntegrationType>(json!(definition
+            .get("integration_type")
+            .ok_or(anyhow!("Integration Type must be selected."))?
+            .as_str()
+            .ok_or(anyhow!("Integration Type must be selected."))?))?;
+
+        let api = definition
+            .get("api")
+            .ok_or(anyhow!("An API must be selected."))?
+            .as_str()
+            .ok_or(anyhow!("An API must be selected."))?
+            .to_string();
+
+        let params = definition
+            .get("params")
+            .ok_or(anyhow!("Missing Parameters"))?
+            .as_object()
+            .ok_or(anyhow!("Parameters must be a JSON object"))?
+            .clone()
+            .into_iter()
+            .collect::<HashMap<String, serde_json::Value>>();
+
+        let credential = match definition.get("credential") {
+            Some(credential) => Some(
+                credential
+                    .as_str()
+                    .ok_or(anyhow!("Credential must be a string"))?
+                    .to_string(),
+            ),
+            None => None,
+        };
+
+        Ok(Self {
+            integration_type,
+            api,
+            params,
+            credential,
+        })
+    }
+
+    pub fn from_json(action_name: &str, definition: serde_json::Value) -> Result<Self> {
+        match Self::from_json_impl(definition) {
+            Ok(integration) => Ok(integration),
+            Err(e) => Err(anyhow!(
+                "Configuration Error for Integration Action \"{action_name}\": {e}"
+            )),
+        }
+    }
 }
 
 impl ActionExecutor for Integration {

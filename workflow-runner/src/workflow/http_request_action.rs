@@ -1,7 +1,7 @@
 use super::context::Context;
 use super::reference_resolution::resolve_references;
 use super::ActionExecutor;
-use anyhow::Result;
+use anyhow::{anyhow, Result};
 use futures::future::join_all;
 use lazy_static::lazy_static;
 use reqwest::header::{HeaderMap, HeaderName, HeaderValue};
@@ -35,6 +35,72 @@ pub struct HttpRequest {
     content_type: String,
     headers: Vec<KeyValuePair>,
     payload: Option<String>,
+}
+
+impl HttpRequest {
+    fn from_json_impl(definition: serde_json::Value) -> Result<Self> {
+        // Manual parsing to provide the user with better error messages
+
+        let url = definition
+            .get("url")
+            .ok_or(anyhow!("Missing URL"))?
+            .as_str()
+            .ok_or(anyhow!("URL must be a string"))?
+            .to_string();
+        if url.is_empty() {
+            return Err(anyhow!("No URL provided"));
+        }
+
+        let method = serde_json::from_value::<HttpMethod>(
+            definition
+                .get("method")
+                .ok_or(anyhow!("Missing Http Method"))?
+                .clone(),
+        )
+        .map_err(|e| anyhow!("Http Method: {e}"))?;
+
+        let content_type = definition
+            .get("content_type")
+            .ok_or(anyhow!("Missing Content-Type"))?
+            .as_str()
+            .ok_or(anyhow!("Content Type must be a string"))?
+            .to_string();
+
+        let headers = serde_json::from_value::<Vec<KeyValuePair>>(
+            definition
+                .get("headers")
+                .ok_or(anyhow!("Missing Headers"))?
+                .clone(),
+        )
+        .map_err(|e| anyhow!("Headers: {e}"))?;
+
+        let payload = match definition.get("payload") {
+            Some(payload) => Some(
+                payload
+                    .as_str()
+                    .ok_or(anyhow!("Payload must be provided as a string"))?
+                    .to_string(),
+            ),
+            None => None,
+        };
+
+        Ok(Self {
+            url,
+            method,
+            content_type,
+            headers,
+            payload,
+        })
+    }
+
+    pub fn from_json(action_name: &str, definition: serde_json::Value) -> Result<Self> {
+        match Self::from_json_impl(definition) {
+            Ok(http_request) => Ok(http_request),
+            Err(e) => Err(anyhow!(
+                "Configuration Error for HTTP Request Action \"{action_name}\": {e}"
+            )),
+        }
+    }
 }
 
 impl ActionExecutor for HttpRequest {
@@ -113,5 +179,69 @@ impl ActionExecutor for HttpRequest {
             "headers": headers,
             "body": body
         }))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_from_json() {
+        let action_definition = json!({
+            "url": "https://api.some.com",
+            "method": "POST",
+            "content_type": "application/json",
+            "headers": [{"key": "Authorization", "value": "Bearer some-api-key"}],
+            "body": "{\"key\": \"value\"}"
+        });
+        let action = HttpRequest::from_json("My Action", action_definition);
+        assert!(action.is_ok());
+    }
+
+    macro_rules! from_json_error_tests {
+        ($($name:ident: $value:expr,)*) => {
+        $(
+            #[test]
+            fn $name() {
+                let (input, expected) = $value;
+                let result = HttpRequest::from_json("My Action", input);
+                assert!(result.is_err());
+                assert_eq!(expected, result.err().unwrap().to_string());
+            }
+        )*
+        }
+    }
+
+    from_json_error_tests! {
+        empty_url: (
+            json!({
+                "url": ""
+            }),
+            "Configuration Error for HTTP Request Action \"My Action\": No URL provided"
+        ),
+        invalid_http_method: (
+            json!({
+                "url": "https://api.some.com",
+                "method": "PUT"
+            }),
+            "Configuration Error for HTTP Request Action \"My Action\": Http Method: unknown variant `PUT`, expected `GET` or `POST`"
+        ),
+        missing_content_type: (
+            json!({
+                "url": "https://api.some.com",
+                "method": "GET",
+                "content_type": serde_json::Value::Null
+            }),
+            "Configuration Error for HTTP Request Action \"My Action\": Content Type must be a string"
+        ),
+        missing_headers: (
+            json!({
+                "url": "https://api.some.com",
+                "method": "GET",
+                "content_type": "application/json"
+            }),
+            "Configuration Error for HTTP Request Action \"My Action\": Missing Headers"
+        ),
     }
 }

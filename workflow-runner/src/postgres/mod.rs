@@ -111,6 +111,10 @@ pub trait Database: Send + Sync {
         Ok("93d08575-2bbe-4811-ac3e-75305fcd5fd5".to_string())
     }
 
+    async fn store_workflow_run_error(&self, _run_id: &str, _error: &str) -> Result<()> {
+        Ok(())
+    }
+
     async fn persist_action_run_state(
         &self,
         _run_id: &str,
@@ -256,6 +260,35 @@ impl Database for PostgresDatabase {
         tracing::info!("Finished initializing run state - workflow_id = {workflow_id}");
 
         Ok(run_state.run_id)
+    }
+
+    async fn store_workflow_run_error(&self, run_id: &str, error: &str) -> Result<()> {
+        tracing::info!("Storing workflow run error - run_id = {run_id}, error = {error}");
+
+        let run_uuid = str_to_uuid(run_id)?;
+
+        let rows_affected = sqlx::query!(
+            r#"
+            UPDATE admyral.workflow_run
+            SET error = $1
+            WHERE run_id = $2
+            "#,
+            error,
+            run_uuid
+        )
+        .execute(&self.pg_pool)
+        .await?
+        .rows_affected();
+
+        if rows_affected == 1 {
+            tracing::info!("Finished storing workflow run error - run_id = {run_id}");
+            Ok(())
+        } else {
+            // this should not happen!
+            let error_message = format!("Failed to store workflow run error - run_id {run_id}");
+            tracing::error!(error_message);
+            Err(anyhow!(error_message))
+        }
     }
 
     async fn persist_action_run_state(
