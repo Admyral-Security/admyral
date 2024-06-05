@@ -5,218 +5,209 @@ import { Callout } from "nextra/components";
 Retrieve the comments for an IP address.
 
 <Callout type="info">
-	For VirusTotal's documentation, see [Get IP Comments](https://docs.virustotal.com/reference/ip-comments-get).
+	For VirusTotal's documentation, see [Get IP
+	Comments](https://docs.virustotal.com/reference/ip-comments-get).
 </Callout>
 
 ## Parameters:
 
-| Field       | Description                                                                                 | Required |
-| ----------- | ------------------------------------------------------------------------------------------- | :------: |
-| **IP**      | The IP address for which comments will be retrieved.                                        |   Yes    |
-
+| Field  | Description                                          | Required |
+| ------ | ---------------------------------------------------- | :------: |
+| **IP** | The IP address for which comments will be retrieved. |   Yes    |
 
 ## Example Output:
 
 ```json
 {
-    "data": [
-        {
-            "id": "i-8.8.8.8-d490d714",
-            "type": "comment",
-            "links": {
-                "self": "https://www.virustotal.com/api/v3/comments/i-8.8.8.8-d490d714"
-            },
-            "attributes": {
-                "date": 1717274006,
-                "html": "This indicator was mentioned in a report.<br /><br />🔎 Title: New “Goldoon” Botnet Targeting D-Link Devices<br />📑 Reference: https://www.fortinet.com/blog/threat-research/new-goldoon-botnet-targeting-d-link-devices<br />📆 Report Publish Date: 2024-05-01<br />🏷️ Reference ID: #2caa7f9a9 (https://www.virustotal.com/gui/search/2caa7f9a9/comments for report&amp;#x27;s related indicators)<br />",
-                "tags": [
-                    "2caa7f9a9"
-                ],
-                "text": "This indicator was mentioned in a report.\n\n🔎 Title: New “Goldoon” Botnet Targeting D-Link Devices\n📑 Reference: https://www.fortinet.com/blog/threat-research/new-goldoon-botnet-targeting-d-link-devices\n📆 Report Publish Date: 2024-05-01\n🏷️ Reference ID: #2caa7f9a9 (https://www.virustotal.com/gui/search/2caa7f9a9/comments for report's related indicators)\n",
-                "votes": {
-                    "abuse": 0,
-                    "negative": 0,
-                    "positive": 0
-                }
-            }
-        },
-        {
-            "id": "i-8.8.8.8-c21ca489",
-            "type": "comment",
-            "links": {
-                "self": "https://www.virustotal.com/api/v3/comments/i-8.8.8.8-c21ca489"
-            },
-            "attributes": {
-                "date": 1717196269,
-                "html": "This indicator was mentioned in a report.<br /><br />🔎 Title: Analysis of Nightingale Stealer<br />📑 Reference: https://medium.com/@a.kh/analysis-of-nightingale-stealer-47bbdee4da39<br />📆 Report Publish Date: 2024-02-09<br />🏷️ Reference ID: #e83630009 (https://www.virustotal.com/gui/search/e83630009/comments for report&amp;#x27;s related indicators)<br />",
-                "tags": [
-                    "e83630009"
-                ],
-                "text": "This indicator was mentioned in a report.\n\n🔎 Title: Analysis of Nightingale Stealer\n📑 Reference: https://medium.com/@a.kh/analysis-of-nightingale-stealer-47bbdee4da39\n📆 Report Publish Date: 2024-02-09\n🏷️ Reference ID: #e83630009 (https://www.virustotal.com/gui/search/e83630009/comments for report's related indicators)\n",
-                "votes": {
-                    "abuse": 0,
-                    "negative": 0,
-                    "positive": 0
-                }
-            }
-        },
-        {
-            "id": "i-8.8.8.8-8f8a7d13",
-            "type": "comment",
-            "links": {
-                "self": "https://www.virustotal.com/api/v3/comments/i-8.8.8.8-8f8a7d13"
-            },
-            "attributes": {
-                "date": 1715011261,
-                "html": "test",
-                "tags": [],
-                "text": "test",
-                "votes": {
-                    "abuse": 0,
-                    "negative": 0,
-                    "positive": 0
-                }
-            }
-        },
-        {
-            "id": "i-8.8.8.8-6ab77bfd",
-            "type": "comment",
-            "links": {
-                "self": "https://www.virustotal.com/api/v3/comments/i-8.8.8.8-6ab77bfd"
-            },
-            "attributes": {
-                "date": 1714513402,
-                "html": "This indicator was mentioned in a report.<br /><br />🔎 Title: Hiding in Plain Sight: Part 2<br />📑 Reference: https://www.huntress.com/blog/hiding-in-plain-sight-part-2<br />📆 Report Publish Date: 2024-04-12<br />🏷️ Reference ID: #42f9018f0 (https://www.virustotal.com/gui/search/42f9018f0/comments for report&amp;#x27;s related indicators)<br />",
-                "tags": [
-                    "42f9018f0"
-                ],
-                "text": "This indicator was mentioned in a report.\n\n🔎 Title: Hiding in Plain Sight: Part 2\n📑 Reference: https://www.huntress.com/blog/hiding-in-plain-sight-part-2\n📆 Report Publish Date: 2024-04-12\n🏷️ Reference ID: #42f9018f0 (https://www.virustotal.com/gui/search/42f9018f0/comments for report's related indicators)\n",
-                "votes": {
-                    "abuse": 0,
-                    "negative": 0,
-                    "positive": 0
-                }
-            }
-        },
-        {
-            "id": "i-8.8.8.8-72cda583",
-            "type": "comment",
-            "links": {
-                "self": "https://www.virustotal.com/api/v3/comments/i-8.8.8.8-72cda583"
-            },
-            "attributes": {
-                "date": 1706382951,
-                "html": "This indicator was mentioned in a report.<br /><br />🔎 Title: Turkish espionage campaigns in the Netherlands<br />📑 Reference: https://www.huntandhackett.com/blog/turkish-espionage-campaigns<br />📆 Report Publish Date: 2024-01-08<br />🏷️ Reference ID: #b96b74a83 (https://www.virustotal.com/gui/search/b96b74a83/comments for report&amp;#x27;s related indicators)<br />",
-                "tags": [
-                    "b96b74a83"
-                ],
-                "text": "This indicator was mentioned in a report.\n\n🔎 Title: Turkish espionage campaigns in the Netherlands\n📑 Reference: https://www.huntandhackett.com/blog/turkish-espionage-campaigns\n📆 Report Publish Date: 2024-01-08\n🏷️ Reference ID: #b96b74a83 (https://www.virustotal.com/gui/search/b96b74a83/comments for report's related indicators)\n",
-                "votes": {
-                    "abuse": 0,
-                    "negative": 0,
-                    "positive": 0
-                }
-            }
-        },
-        {
-            "id": "i-8.8.8.8-348c1b38",
-            "type": "comment",
-            "links": {
-                "self": "https://www.virustotal.com/api/v3/comments/i-8.8.8.8-348c1b38"
-            },
-            "attributes": {
-                "date": 1702716469,
-                "html": "This is a comment!!!",
-                "tags": [],
-                "text": "This is a comment!!!",
-                "votes": {
-                    "abuse": 0,
-                    "negative": 0,
-                    "positive": 0
-                }
-            }
-        },
-        {
-            "id": "i-8.8.8.8-018621bc",
-            "type": "comment",
-            "links": {
-                "self": "https://www.virustotal.com/api/v3/comments/i-8.8.8.8-018621bc"
-            },
-            "attributes": {
-                "date": 1702387302,
-                "html": "Lorem ipsum sit &#8230;",
-                "tags": [],
-                "text": "Lorem ipsum sit ...",
-                "votes": {
-                    "abuse": 0,
-                    "negative": 0,
-                    "positive": 0
-                }
-            }
-        },
-        {
-            "id": "i-8.8.8.8-22cd44ec",
-            "type": "comment",
-            "links": {
-                "self": "https://www.virustotal.com/api/v3/comments/i-8.8.8.8-22cd44ec"
-            },
-            "attributes": {
-                "date": 1702386916,
-                "html": "Lorem ipsum dolor sit &#8230;",
-                "tags": [],
-                "text": "Lorem ipsum dolor sit ...",
-                "votes": {
-                    "abuse": 0,
-                    "negative": 0,
-                    "positive": 0
-                }
-            }
-        },
-        {
-            "id": "i-8.8.8.8-1fd7c169",
-            "type": "comment",
-            "links": {
-                "self": "https://www.virustotal.com/api/v3/comments/i-8.8.8.8-1fd7c169"
-            },
-            "attributes": {
-                "date": 1700170889,
-                "html": "Takes you to &amp;quot;dns.google.&amp;quot;",
-                "tags": [],
-                "text": "Takes you to \"dns.google.\"",
-                "votes": {
-                    "abuse": 0,
-                    "negative": 0,
-                    "positive": 0
-                }
-            }
-        },
-        {
-            "id": "i-8.8.8.8-10fe763a",
-            "type": "comment",
-            "links": {
-                "self": "https://www.virustotal.com/api/v3/comments/i-8.8.8.8-10fe763a"
-            },
-            "attributes": {
-                "date": 1697571008,
-                "html": "This indicator was mentioned in a report.<br /><br />🔎 Title: Blocking Dedicated Attacking Hosts Is Not Enough: In-Depth Analysis of a Worldwide Linux XorDDoS Campaign<br />📑 Reference: https://unit42.paloaltonetworks.com/new-linux-xorddos-trojan-campaign-delivers-malware/<br />📆 Report Publish Date: 2023-10-16<br />🏷️ Reference ID: #da4629950 (https://www.virustotal.com/gui/search/da4629950/comments for report&amp;#x27;s related indicators)<br />",
-                "tags": [
-                    "da4629950"
-                ],
-                "text": "This indicator was mentioned in a report.\n\n🔎 Title: Blocking Dedicated Attacking Hosts Is Not Enough: In-Depth Analysis of a Worldwide Linux XorDDoS Campaign\n📑 Reference: https://unit42.paloaltonetworks.com/new-linux-xorddos-trojan-campaign-delivers-malware/\n📆 Report Publish Date: 2023-10-16\n🏷️ Reference ID: #da4629950 (https://www.virustotal.com/gui/search/da4629950/comments for report's related indicators)\n",
-                "votes": {
-                    "abuse": 0,
-                    "negative": 0,
-                    "positive": 0
-                }
-            }
-        }
-    ],
-    "meta": {
-        "count": 82,
-        "cursor": "CmEKEQoEZGF0ZRIJCO-jsufo_YEDEkhqEXN-dmlydXN0b3RhbGNsb3VkcjMLEglJcEFkZHJlc3MiBzguOC44LjgMCxIHQ29tbWVudCIQOC44LjguOC0xMGZlNzYzYQwYACAB"
-    },
-    "links": {
-        "next": "https://www.virustotal.com/api/v3/ip_addresses/8.8.8.8/comments?limit=10&cursor=CmEKEQoEZGF0ZRIJCO-jsufo_YEDEkhqEXN-dmlydXN0b3RhbGNsb3VkcjMLEglJcEFkZHJlc3MiBzguOC44LjgMCxIHQ29tbWVudCIQOC44LjguOC0xMGZlNzYzYQwYACAB",
-        "self": "https://www.virustotal.com/api/v3/ip_addresses/8.8.8.8/comments?limit=10"
-    }
+	"data": [
+		{
+			"id": "i-8.8.8.8-d490d714",
+			"type": "comment",
+			"links": {
+				"self": "https://www.virustotal.com/api/v3/comments/i-8.8.8.8-d490d714"
+			},
+			"attributes": {
+				"date": 1717274006,
+				"html": "This indicator was mentioned in a report.<br /><br />🔎 Title: New “Goldoon” Botnet Targeting D-Link Devices<br />📑 Reference: https://www.fortinet.com/blog/threat-research/new-goldoon-botnet-targeting-d-link-devices<br />📆 Report Publish Date: 2024-05-01<br />🏷️ Reference ID: #2caa7f9a9 (https://www.virustotal.com/gui/search/2caa7f9a9/comments for report&amp;#x27;s related indicators)<br />",
+				"tags": ["2caa7f9a9"],
+				"text": "This indicator was mentioned in a report.\n\n🔎 Title: New “Goldoon” Botnet Targeting D-Link Devices\n📑 Reference: https://www.fortinet.com/blog/threat-research/new-goldoon-botnet-targeting-d-link-devices\n📆 Report Publish Date: 2024-05-01\n🏷️ Reference ID: #2caa7f9a9 (https://www.virustotal.com/gui/search/2caa7f9a9/comments for report's related indicators)\n",
+				"votes": {
+					"abuse": 0,
+					"negative": 0,
+					"positive": 0
+				}
+			}
+		},
+		{
+			"id": "i-8.8.8.8-c21ca489",
+			"type": "comment",
+			"links": {
+				"self": "https://www.virustotal.com/api/v3/comments/i-8.8.8.8-c21ca489"
+			},
+			"attributes": {
+				"date": 1717196269,
+				"html": "This indicator was mentioned in a report.<br /><br />🔎 Title: Analysis of Nightingale Stealer<br />📑 Reference: https://medium.com/@a.kh/analysis-of-nightingale-stealer-47bbdee4da39<br />📆 Report Publish Date: 2024-02-09<br />🏷️ Reference ID: #e83630009 (https://www.virustotal.com/gui/search/e83630009/comments for report&amp;#x27;s related indicators)<br />",
+				"tags": ["e83630009"],
+				"text": "This indicator was mentioned in a report.\n\n🔎 Title: Analysis of Nightingale Stealer\n📑 Reference: https://medium.com/@a.kh/analysis-of-nightingale-stealer-47bbdee4da39\n📆 Report Publish Date: 2024-02-09\n🏷️ Reference ID: #e83630009 (https://www.virustotal.com/gui/search/e83630009/comments for report's related indicators)\n",
+				"votes": {
+					"abuse": 0,
+					"negative": 0,
+					"positive": 0
+				}
+			}
+		},
+		{
+			"id": "i-8.8.8.8-8f8a7d13",
+			"type": "comment",
+			"links": {
+				"self": "https://www.virustotal.com/api/v3/comments/i-8.8.8.8-8f8a7d13"
+			},
+			"attributes": {
+				"date": 1715011261,
+				"html": "test",
+				"tags": [],
+				"text": "test",
+				"votes": {
+					"abuse": 0,
+					"negative": 0,
+					"positive": 0
+				}
+			}
+		},
+		{
+			"id": "i-8.8.8.8-6ab77bfd",
+			"type": "comment",
+			"links": {
+				"self": "https://www.virustotal.com/api/v3/comments/i-8.8.8.8-6ab77bfd"
+			},
+			"attributes": {
+				"date": 1714513402,
+				"html": "This indicator was mentioned in a report.<br /><br />🔎 Title: Hiding in Plain Sight: Part 2<br />📑 Reference: https://www.huntress.com/blog/hiding-in-plain-sight-part-2<br />📆 Report Publish Date: 2024-04-12<br />🏷️ Reference ID: #42f9018f0 (https://www.virustotal.com/gui/search/42f9018f0/comments for report&amp;#x27;s related indicators)<br />",
+				"tags": ["42f9018f0"],
+				"text": "This indicator was mentioned in a report.\n\n🔎 Title: Hiding in Plain Sight: Part 2\n📑 Reference: https://www.huntress.com/blog/hiding-in-plain-sight-part-2\n📆 Report Publish Date: 2024-04-12\n🏷️ Reference ID: #42f9018f0 (https://www.virustotal.com/gui/search/42f9018f0/comments for report's related indicators)\n",
+				"votes": {
+					"abuse": 0,
+					"negative": 0,
+					"positive": 0
+				}
+			}
+		},
+		{
+			"id": "i-8.8.8.8-72cda583",
+			"type": "comment",
+			"links": {
+				"self": "https://www.virustotal.com/api/v3/comments/i-8.8.8.8-72cda583"
+			},
+			"attributes": {
+				"date": 1706382951,
+				"html": "This indicator was mentioned in a report.<br /><br />🔎 Title: Turkish espionage campaigns in the Netherlands<br />📑 Reference: https://www.huntandhackett.com/blog/turkish-espionage-campaigns<br />📆 Report Publish Date: 2024-01-08<br />🏷️ Reference ID: #b96b74a83 (https://www.virustotal.com/gui/search/b96b74a83/comments for report&amp;#x27;s related indicators)<br />",
+				"tags": ["b96b74a83"],
+				"text": "This indicator was mentioned in a report.\n\n🔎 Title: Turkish espionage campaigns in the Netherlands\n📑 Reference: https://www.huntandhackett.com/blog/turkish-espionage-campaigns\n📆 Report Publish Date: 2024-01-08\n🏷️ Reference ID: #b96b74a83 (https://www.virustotal.com/gui/search/b96b74a83/comments for report's related indicators)\n",
+				"votes": {
+					"abuse": 0,
+					"negative": 0,
+					"positive": 0
+				}
+			}
+		},
+		{
+			"id": "i-8.8.8.8-348c1b38",
+			"type": "comment",
+			"links": {
+				"self": "https://www.virustotal.com/api/v3/comments/i-8.8.8.8-348c1b38"
+			},
+			"attributes": {
+				"date": 1702716469,
+				"html": "This is a comment!!!",
+				"tags": [],
+				"text": "This is a comment!!!",
+				"votes": {
+					"abuse": 0,
+					"negative": 0,
+					"positive": 0
+				}
+			}
+		},
+		{
+			"id": "i-8.8.8.8-018621bc",
+			"type": "comment",
+			"links": {
+				"self": "https://www.virustotal.com/api/v3/comments/i-8.8.8.8-018621bc"
+			},
+			"attributes": {
+				"date": 1702387302,
+				"html": "Lorem ipsum sit &#8230;",
+				"tags": [],
+				"text": "Lorem ipsum sit ...",
+				"votes": {
+					"abuse": 0,
+					"negative": 0,
+					"positive": 0
+				}
+			}
+		},
+		{
+			"id": "i-8.8.8.8-22cd44ec",
+			"type": "comment",
+			"links": {
+				"self": "https://www.virustotal.com/api/v3/comments/i-8.8.8.8-22cd44ec"
+			},
+			"attributes": {
+				"date": 1702386916,
+				"html": "Lorem ipsum dolor sit &#8230;",
+				"tags": [],
+				"text": "Lorem ipsum dolor sit ...",
+				"votes": {
+					"abuse": 0,
+					"negative": 0,
+					"positive": 0
+				}
+			}
+		},
+		{
+			"id": "i-8.8.8.8-1fd7c169",
+			"type": "comment",
+			"links": {
+				"self": "https://www.virustotal.com/api/v3/comments/i-8.8.8.8-1fd7c169"
+			},
+			"attributes": {
+				"date": 1700170889,
+				"html": "Takes you to &amp;quot;dns.google.&amp;quot;",
+				"tags": [],
+				"text": "Takes you to \"dns.google.\"",
+				"votes": {
+					"abuse": 0,
+					"negative": 0,
+					"positive": 0
+				}
+			}
+		},
+		{
+			"id": "i-8.8.8.8-10fe763a",
+			"type": "comment",
+			"links": {
+				"self": "https://www.virustotal.com/api/v3/comments/i-8.8.8.8-10fe763a"
+			},
+			"attributes": {
+				"date": 1697571008,
+				"html": "This indicator was mentioned in a report.<br /><br />🔎 Title: Blocking Dedicated Attacking Hosts Is Not Enough: In-Depth Analysis of a Worldwide Linux XorDDoS Campaign<br />📑 Reference: https://unit42.paloaltonetworks.com/new-linux-xorddos-trojan-campaign-delivers-malware/<br />📆 Report Publish Date: 2023-10-16<br />🏷️ Reference ID: #da4629950 (https://www.virustotal.com/gui/search/da4629950/comments for report&amp;#x27;s related indicators)<br />",
+				"tags": ["da4629950"],
+				"text": "This indicator was mentioned in a report.\n\n🔎 Title: Blocking Dedicated Attacking Hosts Is Not Enough: In-Depth Analysis of a Worldwide Linux XorDDoS Campaign\n📑 Reference: https://unit42.paloaltonetworks.com/new-linux-xorddos-trojan-campaign-delivers-malware/\n📆 Report Publish Date: 2023-10-16\n🏷️ Reference ID: #da4629950 (https://www.virustotal.com/gui/search/da4629950/comments for report's related indicators)\n",
+				"votes": {
+					"abuse": 0,
+					"negative": 0,
+					"positive": 0
+				}
+			}
+		}
+	],
+	"meta": {
+		"count": 82,
+		"cursor": "CmEKEQoEZGF0ZRIJCO-jsufo_YEDEkhqEXN-dmlydXN0b3RhbGNsb3VkcjMLEglJcEFkZHJlc3MiBzguOC44LjgMCxIHQ29tbWVudCIQOC44LjguOC0xMGZlNzYzYQwYACAB"
+	},
+	"links": {
+		"next": "https://www.virustotal.com/api/v3/ip_addresses/8.8.8.8/comments?limit=10&cursor=CmEKEQoEZGF0ZRIJCO-jsufo_YEDEkhqEXN-dmlydXN0b3RhbGNsb3VkcjMLEglJcEFkZHJlc3MiBzguOC44LjgMCxIHQ29tbWVudCIQOC44LjguOC0xMGZlNzYzYQwYACAB",
+		"self": "https://www.virustotal.com/api/v3/ip_addresses/8.8.8.8/comments?limit=10"
+	}
 }
+```

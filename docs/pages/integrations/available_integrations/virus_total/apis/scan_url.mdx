@@ -5,24 +5,26 @@ import { Callout } from "nextra/components";
 Scan a URL for potential threats.
 
 <Callout type="info">
-	For VirusTotal's documentation, see [Scan URL](https://docs.virustotal.com/reference/scan-url).
+	For VirusTotal's documentation, see [Scan
+	URL](https://docs.virustotal.com/reference/scan-url).
 </Callout>
 
 ## Parameters:
 
-| Field       | Description                                                                                 | Required |
-| ----------- | ------------------------------------------------------------------------------------------- | :------: |
-| **URL**     | The URL to be scanned.                                                                      |   Yes    |
+| Field   | Description            | Required |
+| ------- | ---------------------- | :------: |
+| **URL** | The URL to be scanned. |   Yes    |
 
 ## Example Output:
 
 ```json
 {
-    "data": {
-        "id": "u-1db0ad7dbcec0676710ea0eaacd35d5e471d3e11944d53bcbd31f0cbd11bce31-1717327563",
-        "type": "analysis",
-        "links": {
-            "self": "https://www.virustotal.com/api/v3/analyses/u-1db0ad7dbcec0676710ea0eaacd35d5e471d3e11944d53bcbd31f0cbd11bce31-1717327563"
-        }
-    }
+	"data": {
+		"id": "u-1db0ad7dbcec0676710ea0eaacd35d5e471d3e11944d53bcbd31f0cbd11bce31-1717327563",
+		"type": "analysis",
+		"links": {
+			"self": "https://www.virustotal.com/api/v3/analyses/u-1db0ad7dbcec0676710ea0eaacd35d5e471d3e11944d53bcbd31f0cbd11bce31-1717327563"
+		}
+	}
 }
+```

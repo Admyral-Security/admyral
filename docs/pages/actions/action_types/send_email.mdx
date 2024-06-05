@@ -1,64 +1,57 @@
 # Send Email Action
 
-The Send Email action is used to configure and automate the process of sending emails. This action can be leveraged for notifications, alerts, or any 
+The Send Email action is used to configure and automate the process of sending emails. This action can be leveraged for notifications, alerts, or any
 communication that should be sent as a response to triggers within the workflow.
 
-Adding a Send Email action to your workflow automates the process of sending out predefined emails, which can be critical in a security context for 
+Adding a Send Email action to your workflow automates the process of sending out predefined emails, which can be critical in a security context for
 timely alerts or updates.
-
 
 ## Configurable Fields for Send Email
 
-| Field              | Description                                                                 | Configurable |
-|--------------------|-----------------------------------------------------------------------------|:------------:|
-| **Name**           | The identifier for the email action, typically describing its purpose.       |      Yes     |
-| **Reference Handle** | A unique handle used to reference the email action in scripts or integrations. |      -     |
-| **Description**    | An explanation detailing what the email action is intended for.             |      Yes     |
-| **Recipients**     | The email addresses of the intended recipients. Multiple recipients can be added. |      Yes     |
-| **Sender Name**    | The display name that will appear as the sender of the email.               |      Yes     |
-| **Subject**        | The subject line of the email to be sent.                                   |      Yes     |
-| **Body**           | The main content of the email message.                                      |      Yes     |
-
+| Field                | Description                                                                       | Configurable |
+| -------------------- | --------------------------------------------------------------------------------- | :----------: |
+| **Name**             | The identifier for the email action, typically describing its purpose.            |     Yes      |
+| **Reference Handle** | A unique handle used to reference the email action in scripts or integrations.    |      -       |
+| **Description**      | An explanation detailing what the email action is intended for.                   |     Yes      |
+| **Recipients**       | The email addresses of the intended recipients. Multiple recipients can be added. |     Yes      |
+| **Sender Name**      | The display name that will appear as the sender of the email.                     |     Yes      |
+| **Subject**          | The subject line of the email to be sent.                                         |     Yes      |
+| **Body**             | The main content of the email message.                                            |     Yes      |
 
 <div align="center">
-    <br/>
-    ![Send Email Action](../../../../img/send_email.png)
+	<br />
+	![Send Email Action](../../../../img/send_email.png)
 </div>
 _Send Email Configuration_
-
 
 ## Send Email Examples
 
 ### Example 1: Alert Notification Email
 
-* **Name**: `Security Breach Alert`
-* **Description**: `Sends an alert notification to the security team regarding a potential breach.`
-* **Recipients**: `security-team@example.com`
-* **Sender Name**: `Security Alert System`
-* **Subject**: `Urgent: Security Breach Detected`
-* **Body**: `A security breach has been detected in the system. Immediate action is required. Please follow the incident response protocol.`
-
-
+-   **Name**: `Security Breach Alert`
+-   **Description**: `Sends an alert notification to the security team regarding a potential breach.`
+-   **Recipients**: `security-team@example.com`
+-   **Sender Name**: `Security Alert System`
+-   **Subject**: `Urgent: Security Breach Detected`
+-   **Body**: `A security breach has been detected in the system. Immediate action is required. Please follow the incident response protocol.`
 
 ### Example 2: Weekly Security Report
-* **Name**: `Weekly Security Report`
-* **Description**: `Distributes the weekly security status report to relevant stakeholders.`
-* **Recipients**: `it-ops@example.com, executives@example.com`
-* **Sender Name**: `IT Security Department`
-* **Subject**: `Weekly Security Report`
-* **Body**: `Here is the security report for the past week. The report details all incidents, their status, and mitigation actions taken.`
 
+-   **Name**: `Weekly Security Report`
+-   **Description**: `Distributes the weekly security status report to relevant stakeholders.`
+-   **Recipients**: `it-ops@example.com, executives@example.com`
+-   **Sender Name**: `IT Security Department`
+-   **Subject**: `Weekly Security Report`
+-   **Body**: `Here is the security report for the past week. The report details all incidents, their status, and mitigation actions taken.`
 
 ### Example 3: System Update Confirmation
-* **Name**: `System Update Confirmation`
-* **Description**: `Confirms the successful update of the security system to all users.`
-* **Recipients**: `all-users@example.com`
-* **Sender Name**: `IT Support`
-* **Subject**: `Confirmation of Security System Update`
-* **Body**: `We have successfully updated our security systems to the latest version. If you encounter any issues, please contact IT support immediately.`
 
+-   **Name**: `System Update Confirmation`
+-   **Description**: `Confirms the successful update of the security system to all users.`
+-   **Recipients**: `all-users@example.com`
+-   **Sender Name**: `IT Support`
+-   **Subject**: `Confirmation of Security System Update`
+-   **Body**: `We have successfully updated our security systems to the latest version. If you encounter any issues, please contact IT support immediately.`
 
-In all uses of the Send Email action, ensure that the information sent out is accurate, the recipient list is up-to-date, and sensitive information is 
+In all uses of the Send Email action, ensure that the information sent out is accurate, the recipient list is up-to-date, and sensitive information is
 communicated securely.
-
-

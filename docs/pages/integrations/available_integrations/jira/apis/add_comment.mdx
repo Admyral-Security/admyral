@@ -5,15 +5,16 @@ import { Callout } from "nextra/components";
 Adds a comment to an issue.
 
 <Callout type="info">
-	For Jira's documentation, see [Add Comment](https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issue-comments/#api-rest-api-3-issue-issueidorkey-comment-post).
+	For Jira's documentation, see [Add
+	Comment](https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issue-comments/#api-rest-api-3-issue-issueidorkey-comment-post).
 </Callout>
 
 ## Parameters:
 
-| Field               | Description                                                                                                                   | Required |
-| ------------------- | ----------------------------------------------------------------------------------------------------------------------------- | :------: |
-| **issueIdOrKey**    | The ID or key of the issue.                                                                                                   |   Yes    |
-| **body**            | The comment text in Atlassian Document Format.                                                                                 |   Yes    |
+| Field            | Description                                    | Required |
+| ---------------- | ---------------------------------------------- | :------: |
+| **issueIdOrKey** | The ID or key of the issue.                    |   Yes    |
+| **body**         | The comment text in Atlassian Document Format. |   Yes    |
 
 ## Example Output:
 
@@ -45,3 +46,4 @@ Adds a comment to an issue.
 	"created": "2020-07-28T12:34:56.789+0000",
 	"updated": "2020-07-28T12:34:56.789+0000"
 }
+```

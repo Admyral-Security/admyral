@@ -5,260 +5,262 @@ import { Callout } from "nextra/components";
 Retrieve information from Pulsedive using the Explore API.
 
 <Callout type="info">
-  For Pulsedive's documentation, see [Explore API](https://pulsedive.com/api/explore).
+	For Pulsedive's documentation, see [Explore
+	API](https://pulsedive.com/api/explore).
 </Callout>
 
 ## Parameters:
 
-| Field          | Description                                                          | Required |
-| -------------- | -------------------------------------------------------------------- | :------: |
-| **Query**      | The query to search Pulsedive using the Explore query language.      |   Yes    |
-| **Limit**      | The number of records to return.                                     |    No    |
+| Field     | Description                                                     | Required |
+| --------- | --------------------------------------------------------------- | :------: |
+| **Query** | The query to search Pulsedive using the Explore query language. |   Yes    |
+| **Limit** | The number of records to return.                                |    No    |
 
 ## Example Output:
 
 ```json
 {
-  "results": [
-    {
-      "iid": 53929,
-      "indicator": "pulsedive.com",
-      "type": "domain",
-      "risk": "none",
-      "stamp_added": "2017-10-04 01:20:55",
-      "stamp_updated": "2024-06-03 16:00:16",
-      "stamp_seen": "2024-06-03 16:00:16",
-      "summary": {
-        "properties": {
-          "whois": {
-            "++privacy": "1"
-          },
-          "http": {
-            "++code": "200",
-            "++content-type": "text/html"
-          },
-          "geo": {
-            "city": "Toronto",
-            "country": "Canada",
-            "countrycode": "CA",
-            "region": "ON"
-          }
-        }
-      }
-    },
-    {
-      "iid": 8342625,
-      "indicator": "target-support.online",
-      "type": "domain",
-      "risk": "low",
-      "stamp_added": "2020-02-11 16:33:26",
-      "stamp_updated": "2024-01-30 14:23:29",
-      "stamp_seen": "2023-10-29 13:42:56",
-      "stamp_retired": "2024-01-30 14:23:29",
-      "summary": {
-        "properties": {
-          "http": {
-            "++code": "404",
-            "++content-type": "text/html"
-          },
-          "geo": {
-            "countrycode": "US",
-            "city": "San Mateo",
-            "country": "United States of America",
-            "region": "California"
-          }
-        }
-      }
-    },
-    {
-      "iid": 8430082,
-      "indicator": "web-analysis.live",
-      "type": "domain",
-      "risk": "medium",
-      "stamp_added": "2020-02-12 00:06:29",
-      "stamp_updated": "2022-07-04 05:31:46",
-      "stamp_seen": "2022-04-02 14:46:06",
-      "stamp_retired": "2022-07-04 05:31:46",
-      "summary": {
-        "properties": {
-          "http": {
-            "++content-type": "text/html",
-            "++code": "200"
-          },
-          "geo": {
-            "city": "LOS ANGELES",
-            "countrycode": "US",
-            "country": "United States of America",
-            "region": "CA"
-          }
-        }
-      }
-    },
-    {
-      "iid": 8963066,
-      "indicator": "renovatesystem.com",
-      "type": "domain",
-      "risk": "low",
-      "stamp_added": "2020-02-20 13:37:14",
-      "stamp_updated": "2022-06-28 04:32:48",
-      "stamp_seen": "2022-03-25 08:37:51",
-      "stamp_retired": "2022-06-28 04:32:48",
-      "summary": {
-        "properties": {
-          "geo": {
-            "countrycode": "US",
-            "country": "United States of America",
-            "city": "Drums",
-            "region": "PA"
-          },
-          "http": {
-            "++code": "200",
-            "++content-type": "text/html"
-          }
-        }
-      }
-    },
-    {
-      "iid": 10517362,
-      "indicator": "serviceboostnumberone.com",
-      "type": "domain",
-      "risk": "low",
-      "stamp_added": "2020-03-24 01:45:24",
-      "stamp_updated": "2022-03-23 07:10:22",
-      "stamp_seen": "2022-03-23 07:10:22",
-      "stamp_retired": "2022-01-18 01:06:26",
-      "summary": {
-        "properties": {
-          "http": {
-            "++content-type": "text/html",
-            "++code": "200"
-          },
-          "geo": {
-            "region": "PA",
-            "city": "Drums",
-            "countrycode": "US",
-            "country": "United States of America"
-          }
-        }
-      }
-    },
-    {
-      "iid": 10903232,
-      "indicator": "service-updater.com",
-      "type": "domain",
-      "risk": "medium",
-      "stamp_added": "2020-04-03 04:17:21",
-      "stamp_updated": "2022-06-28 04:32:48",
-      "stamp_seen": "2022-03-25 17:03:02",
-      "stamp_retired": "2022-06-28 04:32:48",
-      "summary": {
-        "properties": {
-          "http": {
-            "++content-type": "text/html",
-            "++code": "200"
-          },
-          "geo": {
-            "country": "Virgin Islands (British)",
-            "region": "British Virgin Islands",
-            "countrycode": "VG"
-          }
-        }
-      }
-    },
-    {
-      "iid": 10903235,
-      "indicator": "microsoftupdateswin.com",
-      "type": "domain",
-      "risk": "high",
-      "stamp_added": "2020-04-03 04:17:27",
-      "stamp_updated": "2024-03-19 10:36:07",
-      "stamp_seen": "2024-03-19 10:36:07",
-      "stamp_retired": "2022-06-16 02:23:46",
-      "summary": {
-        "properties": {
-          "geo": {
-            "city": "REDACTED FOR PRIVACY",
-            "countrycode": "NL",
-            "country": "Netherlands",
-            "region": "Zuid-Holland"
-          },
-          "whois": {
-            "++gdpr": "1",
-            "++privacy": "1"
-          }
-        }
-      }
-    },
-    {
-      "iid": 10910031,
-      "indicator": "updatemanagir.us",
-      "type": "domain",
-      "risk": "low",
-      "stamp_added": "2020-04-03 06:55:41",
-      "stamp_updated": "2022-03-26 00:58:52",
-      "stamp_seen": "2022-03-26 00:58:52",
-      "stamp_retired": "2022-02-03 17:25:52",
-      "summary": {
-        "properties": {
-          "http": {
-            "++code": "200"
-          }
-        }
-      }
-    },
-    {
-      "iid": 10910034,
-      "indicator": "topserviceupdater.com",
-      "type": "domain",
-      "risk": "medium",
-      "stamp_added": "2020-04-03 06:55:46",
-      "stamp_updated": "2022-06-19 02:59:21",
-      "stamp_seen": "2022-03-16 06:11:24",
-      "stamp_retired": "2022-06-19 02:59:21",
-      "summary": {
-        "properties": {
-          "http": {
-            "++content-type": "text/html",
-            "++code": "200"
-          },
-          "geo": {
-            "countrycode": "PA",
-            "country": "Panama",
-            "city": "Panama",
-            "region": "Panama"
-          },
-          "whois": {
-            "++privacy": "1"
-          }
-        }
-      }
-    },
-    {
-      "iid": 10910041,
-      "indicator": "topservicesecurity.net",
-      "type": "domain",
-      "risk": "medium",
-      "stamp_added": "2020-04-03 06:55:53",
-      "stamp_updated": "2024-03-19 11:00:36",
-      "stamp_seen": "2024-03-19 11:00:36",
-      "summary": {
-        "properties": {
-          "whois": {
-            "++privacy": "1"
-          },
-          "geo": {
-            "countrycode": "PA",
-            "region": "Panama",
-            "city": "Panama",
-            "country": "Panama"
-          },
-          "http": {
-            "++code": "200",
-            "++content-type": "text/html"
-          }
-        }
-      }
-    }
-  ],
-  "query": "ioc=pulsedive.com or threat=ryuk"
+	"results": [
+		{
+			"iid": 53929,
+			"indicator": "pulsedive.com",
+			"type": "domain",
+			"risk": "none",
+			"stamp_added": "2017-10-04 01:20:55",
+			"stamp_updated": "2024-06-03 16:00:16",
+			"stamp_seen": "2024-06-03 16:00:16",
+			"summary": {
+				"properties": {
+					"whois": {
+						"++privacy": "1"
+					},
+					"http": {
+						"++code": "200",
+						"++content-type": "text/html"
+					},
+					"geo": {
+						"city": "Toronto",
+						"country": "Canada",
+						"countrycode": "CA",
+						"region": "ON"
+					}
+				}
+			}
+		},
+		{
+			"iid": 8342625,
+			"indicator": "target-support.online",
+			"type": "domain",
+			"risk": "low",
+			"stamp_added": "2020-02-11 16:33:26",
+			"stamp_updated": "2024-01-30 14:23:29",
+			"stamp_seen": "2023-10-29 13:42:56",
+			"stamp_retired": "2024-01-30 14:23:29",
+			"summary": {
+				"properties": {
+					"http": {
+						"++code": "404",
+						"++content-type": "text/html"
+					},
+					"geo": {
+						"countrycode": "US",
+						"city": "San Mateo",
+						"country": "United States of America",
+						"region": "California"
+					}
+				}
+			}
+		},
+		{
+			"iid": 8430082,
+			"indicator": "web-analysis.live",
+			"type": "domain",
+			"risk": "medium",
+			"stamp_added": "2020-02-12 00:06:29",
+			"stamp_updated": "2022-07-04 05:31:46",
+			"stamp_seen": "2022-04-02 14:46:06",
+			"stamp_retired": "2022-07-04 05:31:46",
+			"summary": {
+				"properties": {
+					"http": {
+						"++content-type": "text/html",
+						"++code": "200"
+					},
+					"geo": {
+						"city": "LOS ANGELES",
+						"countrycode": "US",
+						"country": "United States of America",
+						"region": "CA"
+					}
+				}
+			}
+		},
+		{
+			"iid": 8963066,
+			"indicator": "renovatesystem.com",
+			"type": "domain",
+			"risk": "low",
+			"stamp_added": "2020-02-20 13:37:14",
+			"stamp_updated": "2022-06-28 04:32:48",
+			"stamp_seen": "2022-03-25 08:37:51",
+			"stamp_retired": "2022-06-28 04:32:48",
+			"summary": {
+				"properties": {
+					"geo": {
+						"countrycode": "US",
+						"country": "United States of America",
+						"city": "Drums",
+						"region": "PA"
+					},
+					"http": {
+						"++code": "200",
+						"++content-type": "text/html"
+					}
+				}
+			}
+		},
+		{
+			"iid": 10517362,
+			"indicator": "serviceboostnumberone.com",
+			"type": "domain",
+			"risk": "low",
+			"stamp_added": "2020-03-24 01:45:24",
+			"stamp_updated": "2022-03-23 07:10:22",
+			"stamp_seen": "2022-03-23 07:10:22",
+			"stamp_retired": "2022-01-18 01:06:26",
+			"summary": {
+				"properties": {
+					"http": {
+						"++content-type": "text/html",
+						"++code": "200"
+					},
+					"geo": {
+						"region": "PA",
+						"city": "Drums",
+						"countrycode": "US",
+						"country": "United States of America"
+					}
+				}
+			}
+		},
+		{
+			"iid": 10903232,
+			"indicator": "service-updater.com",
+			"type": "domain",
+			"risk": "medium",
+			"stamp_added": "2020-04-03 04:17:21",
+			"stamp_updated": "2022-06-28 04:32:48",
+			"stamp_seen": "2022-03-25 17:03:02",
+			"stamp_retired": "2022-06-28 04:32:48",
+			"summary": {
+				"properties": {
+					"http": {
+						"++content-type": "text/html",
+						"++code": "200"
+					},
+					"geo": {
+						"country": "Virgin Islands (British)",
+						"region": "British Virgin Islands",
+						"countrycode": "VG"
+					}
+				}
+			}
+		},
+		{
+			"iid": 10903235,
+			"indicator": "microsoftupdateswin.com",
+			"type": "domain",
+			"risk": "high",
+			"stamp_added": "2020-04-03 04:17:27",
+			"stamp_updated": "2024-03-19 10:36:07",
+			"stamp_seen": "2024-03-19 10:36:07",
+			"stamp_retired": "2022-06-16 02:23:46",
+			"summary": {
+				"properties": {
+					"geo": {
+						"city": "REDACTED FOR PRIVACY",
+						"countrycode": "NL",
+						"country": "Netherlands",
+						"region": "Zuid-Holland"
+					},
+					"whois": {
+						"++gdpr": "1",
+						"++privacy": "1"
+					}
+				}
+			}
+		},
+		{
+			"iid": 10910031,
+			"indicator": "updatemanagir.us",
+			"type": "domain",
+			"risk": "low",
+			"stamp_added": "2020-04-03 06:55:41",
+			"stamp_updated": "2022-03-26 00:58:52",
+			"stamp_seen": "2022-03-26 00:58:52",
+			"stamp_retired": "2022-02-03 17:25:52",
+			"summary": {
+				"properties": {
+					"http": {
+						"++code": "200"
+					}
+				}
+			}
+		},
+		{
+			"iid": 10910034,
+			"indicator": "topserviceupdater.com",
+			"type": "domain",
+			"risk": "medium",
+			"stamp_added": "2020-04-03 06:55:46",
+			"stamp_updated": "2022-06-19 02:59:21",
+			"stamp_seen": "2022-03-16 06:11:24",
+			"stamp_retired": "2022-06-19 02:59:21",
+			"summary": {
+				"properties": {
+					"http": {
+						"++content-type": "text/html",
+						"++code": "200"
+					},
+					"geo": {
+						"countrycode": "PA",
+						"country": "Panama",
+						"city": "Panama",
+						"region": "Panama"
+					},
+					"whois": {
+						"++privacy": "1"
+					}
+				}
+			}
+		},
+		{
+			"iid": 10910041,
+			"indicator": "topservicesecurity.net",
+			"type": "domain",
+			"risk": "medium",
+			"stamp_added": "2020-04-03 06:55:53",
+			"stamp_updated": "2024-03-19 11:00:36",
+			"stamp_seen": "2024-03-19 11:00:36",
+			"summary": {
+				"properties": {
+					"whois": {
+						"++privacy": "1"
+					},
+					"geo": {
+						"countrycode": "PA",
+						"region": "Panama",
+						"city": "Panama",
+						"country": "Panama"
+					},
+					"http": {
+						"++code": "200",
+						"++content-type": "text/html"
+					}
+				}
+			}
+		}
+	],
+	"query": "ioc=pulsedive.com or threat=ryuk"
 }
+```

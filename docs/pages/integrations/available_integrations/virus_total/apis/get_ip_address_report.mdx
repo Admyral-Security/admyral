@@ -5,15 +5,15 @@ import { Callout } from "nextra/components";
 Retrieve detailed information about a specific IP address.
 
 <Callout type="info">
-	For VirusTotal's documentation, see [Get IP Address Report](https://developers.virustotal.com/reference/ip-addresses).
+	For VirusTotal's documentation, see [Get IP Address
+	Report](https://developers.virustotal.com/reference/ip-addresses).
 </Callout>
 
 ## Parameters:
 
-| Field       | Description                                                                       | Required |
-| ----------- | --------------------------------------------------------------------------------- | :------: |
-| **IP**      | The IP address to retrieve the report for.                                        |   Yes    |
-
+| Field  | Description                                | Required |
+| ------ | ------------------------------------------ | :------: |
+| **IP** | The IP address to retrieve the report for. |   Yes    |
 
 ## Example Output:
 
@@ -21,57 +21,55 @@ Typical successful response:
 
 ```json
 {
-  "data": {
-    "attributes": {
-      "as_owner": "Some AS Owner",
-      "asn": 12345,
-      "continent": "EU",
-      "country": "ES",
-      "last_analysis_stats": {
-        "harmless": 72,
-        "malicious": 4,
-        "suspicious": 0,
-        "undetected": 8,
-        "timeout": 0
-      },
-      "last_analysis_results": {
-        "Some Antivirus": {
-          "category": "harmless",
-          "result": "clean",
-          "method": "blacklist",
-          "engine_name": "Some Antivirus"
-        },
-        "Another Antivirus": {
-          "category": "malicious",
-          "result": "malware",
-          "method": "blacklist",
-          "engine_name": "Another Antivirus"
-        }
-      },
-      "network": "1.2.3.0/24",
-      "regional_internet_registry": "RIPE NCC",
-      "reputation": -10,
-      "tags": [
-        "malicious",
-        "spam"
-      ],
-      "whois": "Whois data"
-    },
-    "type": "ip_address",
-    "id": "1.2.3.4",
-    "links": {
-      "self": "https://www.virustotal.com/api/v3/ip_addresses/1.2.3.4"
-    }
-  }
+	"data": {
+		"attributes": {
+			"as_owner": "Some AS Owner",
+			"asn": 12345,
+			"continent": "EU",
+			"country": "ES",
+			"last_analysis_stats": {
+				"harmless": 72,
+				"malicious": 4,
+				"suspicious": 0,
+				"undetected": 8,
+				"timeout": 0
+			},
+			"last_analysis_results": {
+				"Some Antivirus": {
+					"category": "harmless",
+					"result": "clean",
+					"method": "blacklist",
+					"engine_name": "Some Antivirus"
+				},
+				"Another Antivirus": {
+					"category": "malicious",
+					"result": "malware",
+					"method": "blacklist",
+					"engine_name": "Another Antivirus"
+				}
+			},
+			"network": "1.2.3.0/24",
+			"regional_internet_registry": "RIPE NCC",
+			"reputation": -10,
+			"tags": ["malicious", "spam"],
+			"whois": "Whois data"
+		},
+		"type": "ip_address",
+		"id": "1.2.3.4",
+		"links": {
+			"self": "https://www.virustotal.com/api/v3/ip_addresses/1.2.3.4"
+		}
+	}
 }
 ```
 
 Typical error response:
+
 ```json
 {
-  "error": {
-    "code": "NotFoundError",
-    "message": "IP address not found"
-  }
+	"error": {
+		"code": "NotFoundError",
+		"message": "IP address not found"
+	}
 }
 ```

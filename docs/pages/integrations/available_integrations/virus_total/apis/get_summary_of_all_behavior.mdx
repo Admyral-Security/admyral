@@ -5,15 +5,15 @@ import { Callout } from "nextra/components";
 Retrieves a summary of all the behaviours collected for a given file.
 
 <Callout type="info">
-	For VirusTotal's documentation, see [File Behaviours Summary](https://docs.virustotal.com/reference/file-all-behaviours-summary).
+	For VirusTotal's documentation, see [File Behaviours
+	Summary](https://docs.virustotal.com/reference/file-all-behaviours-summary).
 </Callout>
 
 ## Parameters:
 
-| Field             | Description                                                                                          | Required |
-| ----------------- | ---------------------------------------------------------------------------------------------------- | :------: |
-| **File Hash**     | The hash of the file for which you want to retrieve behaviour summary.                               |   Yes    |
-
+| Field         | Description                                                            | Required |
+| ------------- | ---------------------------------------------------------------------- | :------: |
+| **File Hash** | The hash of the file for which you want to retrieve behaviour summary. |   Yes    |
 
 ## Example Output:
 
@@ -21,41 +21,42 @@ Typical successful response:
 
 ```json
 {
-    "data": {
-        "attributes": {
-            "behaviours": [
-                {
-                    "name": "Process Creation",
-                    "description": "The file created a new process.",
-                    "count": 3
-                },
-                {
-                    "name": "Network Activity",
-                    "description": "The file made network connections.",
-                    "count": 5
-                },
-                {
-                    "name": "File Operations",
-                    "description": "The file performed file operations.",
-                    "count": 2
-                }
-            ]
-        },
-        "id": "d6f6b1f4d2bfeb2e3aefd6f4bf6b2c9e",
-        "type": "behaviours_summary"
-    },
-    "meta": {
-        "request_id": "0123456789abcdef"
-    }
+	"data": {
+		"attributes": {
+			"behaviours": [
+				{
+					"name": "Process Creation",
+					"description": "The file created a new process.",
+					"count": 3
+				},
+				{
+					"name": "Network Activity",
+					"description": "The file made network connections.",
+					"count": 5
+				},
+				{
+					"name": "File Operations",
+					"description": "The file performed file operations.",
+					"count": 2
+				}
+			]
+		},
+		"id": "d6f6b1f4d2bfeb2e3aefd6f4bf6b2c9e",
+		"type": "behaviours_summary"
+	},
+	"meta": {
+		"request_id": "0123456789abcdef"
+	}
 }
 ```
 
 Typical error response:
-```json 
+
+```json
 {
-    "error": {
-        "code": "Unauthorized",
-        "message": "Invalid API key."
-    }
+	"error": {
+		"code": "Unauthorized",
+		"message": "Invalid API key."
+	}
 }
 ```

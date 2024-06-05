@@ -2,7 +2,6 @@
 <img src="../img/banner.svg" alt="admyral" />
 </p>
 
-
 # Admyral Docs
 
 Docs are based on [Nextra](https://nextra.site/).

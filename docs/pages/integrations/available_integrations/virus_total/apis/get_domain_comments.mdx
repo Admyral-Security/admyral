@@ -5,225 +5,209 @@ import { Callout } from "nextra/components";
 Retrieve the comments for a domain.
 
 <Callout type="info">
-	For VirusTotal's documentation, see [Get Domain Comments](https://docs.virustotal.com/reference/domains-comments-get).
+	For VirusTotal's documentation, see [Get Domain
+	Comments](https://docs.virustotal.com/reference/domains-comments-get).
 </Callout>
 
 ## Parameters:
 
-| Field       | Description                                                                                 | Required |
-| ----------- | ------------------------------------------------------------------------------------------- | :------: |
-| **Domain**  | The domain for which comments will be retrieved.                                            |   Yes    |
-
+| Field      | Description                                      | Required |
+| ---------- | ------------------------------------------------ | :------: |
+| **Domain** | The domain for which comments will be retrieved. |   Yes    |
 
 ## Example Output:
 
 ```json
 {
-    "data": [
-        {
-            "id": "d-google.com-46398398",
-            "type": "comment",
-            "links": {
-                "self": "https://www.virustotal.com/api/v3/comments/d-google.com-46398398"
-            },
-            "attributes": {
-                "date": 1717272918,
-                "html": "This indicator was mentioned in a report.<br /><br />🔎 Title: A Cunning Operator: Muddling Meerkat and China’s Great Firewall<br />📑 Reference: https://blogs.infoblox.com/threat-intelligence/a-cunning-operator-muddling-meerkat-and-chinas-great-firewall/<br />📆 Report Publish Date: 2024-04-29<br />🏷️ Reference ID: #73d7090a9 (https://www.virustotal.com/gui/search/73d7090a9/comments for report&amp;#x27;s related indicators)<br />",
-                "tags": [
-                    "73d7090a9"
-                ],
-                "text": "This indicator was mentioned in a report.\n\n🔎 Title: A Cunning Operator: Muddling Meerkat and China’s Great Firewall\n📑 Reference: https://blogs.infoblox.com/threat-intelligence/a-cunning-operator-muddling-meerkat-and-chinas-great-firewall/\n📆 Report Publish Date: 2024-04-29\n🏷️ Reference ID: #73d7090a9 (https://www.virustotal.com/gui/search/73d7090a9/comments for report's related indicators)\n",
-                "votes": {
-                    "abuse": 0,
-                    "negative": 0,
-                    "positive": 0
-                }
-            }
-        },
-        {
-            "id": "d-google.com-10ea3b64",
-            "type": "comment",
-            "links": {
-                "self": "https://www.virustotal.com/api/v3/comments/d-google.com-10ea3b64"
-            },
-            "attributes": {
-                "date": 1717250791,
-                "html": "This indicator was mentioned in a report.<br /><br />🔎 Title: The GlorySprout or a Failed Clone of Taurus Stealer<br />📑 Reference: https://russianpanda95.github.io/2024/03/16/The-GlorySprout-Stealer-or-a-Failed-Clone-of-Taurus-Stealer/<br />📆 Report Publish Date: 2024-03-18<br />🏷️ Reference ID: #ef11a7e4f (https://www.virustotal.com/gui/search/ef11a7e4f/comments for report&amp;#x27;s related indicators)<br />",
-                "tags": [
-                    "ef11a7e4f"
-                ],
-                "text": "This indicator was mentioned in a report.\n\n🔎 Title: The GlorySprout or a Failed Clone of Taurus Stealer\n📑 Reference: https://russianpanda95.github.io/2024/03/16/The-GlorySprout-Stealer-or-a-Failed-Clone-of-Taurus-Stealer/\n📆 Report Publish Date: 2024-03-18\n🏷️ Reference ID: #ef11a7e4f (https://www.virustotal.com/gui/search/ef11a7e4f/comments for report's related indicators)\n",
-                "votes": {
-                    "abuse": 0,
-                    "negative": 0,
-                    "positive": 0
-                }
-            }
-        },
-        {
-            "id": "d-google.com-7b620347",
-            "type": "comment",
-            "links": {
-                "self": "https://www.virustotal.com/api/v3/comments/d-google.com-7b620347"
-            },
-            "attributes": {
-                "date": 1717195677,
-                "html": "This indicator was mentioned in a report.<br /><br />🔎 Title: APT-C-24 (SideWinder) new threat: Nim-based payload surfaced<br />📑 Reference: https://mp.weixin.qq.com/s?__biz=MzUyMjk4NzExMA%3D%3D&amp;mid=2247495234&amp;idx=1&amp;sn=357fbfbacb41b657c21a62a62609c5d6<br />📆 Report Publish Date: 2024-02-24<br />🏷️ Reference ID: #f9e4c0e37 (https://www.virustotal.com/gui/search/f9e4c0e37/comments for report&amp;#x27;s related indicators)<br />",
-                "tags": [
-                    "f9e4c0e37"
-                ],
-                "text": "This indicator was mentioned in a report.\n\n🔎 Title: APT-C-24 (SideWinder) new threat: Nim-based payload surfaced\n📑 Reference: https://mp.weixin.qq.com/s?__biz=MzUyMjk4NzExMA%3D%3D&mid=2247495234&idx=1&sn=357fbfbacb41b657c21a62a62609c5d6\n📆 Report Publish Date: 2024-02-24\n🏷️ Reference ID: #f9e4c0e37 (https://www.virustotal.com/gui/search/f9e4c0e37/comments for report's related indicators)\n",
-                "votes": {
-                    "abuse": 0,
-                    "negative": 0,
-                    "positive": 0
-                }
-            }
-        },
-        {
-            "id": "d-google.com-5d3ac10a",
-            "type": "comment",
-            "links": {
-                "self": "https://www.virustotal.com/api/v3/comments/d-google.com-5d3ac10a"
-            },
-            "attributes": {
-                "date": 1717195419,
-                "html": "This indicator was mentioned in a report.<br /><br />🔎 Title: Thousands of Hijacked Major-Brand Subdomains Found Bombarding Users With Millions…<br />📑 Reference: https://labs.guard.io/subdomailing-thousands-of-hijacked-major-brand-subdomains-found-bombarding-users-with-millions-a5e5fb892935<br />📆 Report Publish Date: 2024-02-26<br />🏷️ Reference ID: #161e97f06 (https://www.virustotal.com/gui/search/161e97f06/comments for report&amp;#x27;s related indicators)<br />",
-                "tags": [
-                    "161e97f06"
-                ],
-                "text": "This indicator was mentioned in a report.\n\n🔎 Title: Thousands of Hijacked Major-Brand Subdomains Found Bombarding Users With Millions…\n📑 Reference: https://labs.guard.io/subdomailing-thousands-of-hijacked-major-brand-subdomains-found-bombarding-users-with-millions-a5e5fb892935\n📆 Report Publish Date: 2024-02-26\n🏷️ Reference ID: #161e97f06 (https://www.virustotal.com/gui/search/161e97f06/comments for report's related indicators)\n",
-                "votes": {
-                    "abuse": 0,
-                    "negative": 0,
-                    "positive": 0
-                }
-            }
-        },
-        {
-            "id": "d-google.com-e12504a9",
-            "type": "comment",
-            "links": {
-                "self": "https://www.virustotal.com/api/v3/comments/d-google.com-e12504a9"
-            },
-            "attributes": {
-                "date": 1713716684,
-                "html": "Seems pretty clean",
-                "tags": [],
-                "text": "Seems pretty clean",
-                "votes": {
-                    "abuse": 0,
-                    "negative": 0,
-                    "positive": 0
-                }
-            }
-        },
-        {
-            "id": "d-google.com-2ee3a9c3",
-            "type": "comment",
-            "links": {
-                "self": "https://www.virustotal.com/api/v3/comments/d-google.com-2ee3a9c3"
-            },
-            "attributes": {
-                "date": 1705523994,
-                "html": "#internetspy",
-                "tags": [
-                    "internetspy"
-                ],
-                "text": "#internetspy",
-                "votes": {
-                    "abuse": 0,
-                    "negative": 0,
-                    "positive": 0
-                }
-            }
-        },
-        {
-            "id": "d-google.com-60591109",
-            "type": "comment",
-            "links": {
-                "self": "https://www.virustotal.com/api/v3/comments/d-google.com-60591109"
-            },
-            "attributes": {
-                "date": 1702647398,
-                "html": "This indicator was mentioned in a report.<br /><br />🔎 Title: BazarCall Attack: Using Google Forms With Call-Back Phishing<br />📑 Reference: https://abnormalsecurity.com/blog/bazarcall-attack-leverages-google-forms<br />📆 Report Publish Date: 2023-12-15<br />🏷️ Reference ID: #d604e452b (https://www.virustotal.com/gui/search/d604e452b/comments for report&amp;#x27;s related indicators)<br />",
-                "tags": [
-                    "d604e452b"
-                ],
-                "text": "This indicator was mentioned in a report.\n\n🔎 Title: BazarCall Attack: Using Google Forms With Call-Back Phishing\n📑 Reference: https://abnormalsecurity.com/blog/bazarcall-attack-leverages-google-forms\n📆 Report Publish Date: 2023-12-15\n🏷️ Reference ID: #d604e452b (https://www.virustotal.com/gui/search/d604e452b/comments for report's related indicators)\n",
-                "votes": {
-                    "abuse": 0,
-                    "negative": 0,
-                    "positive": 0
-                }
-            }
-        },
-        {
-            "id": "d-google.com-dc04678a",
-            "type": "comment",
-            "links": {
-                "self": "https://www.virustotal.com/api/v3/comments/d-google.com-dc04678a"
-            },
-            "attributes": {
-                "date": 1702259901,
-                "html": "Lorem ipsum dolor sit &#8230;",
-                "tags": [],
-                "text": "Lorem ipsum dolor sit ...",
-                "votes": {
-                    "abuse": 0,
-                    "negative": 0,
-                    "positive": 0
-                }
-            }
-        },
-        {
-            "id": "d-google.com-2d55d397",
-            "type": "comment",
-            "links": {
-                "self": "https://www.virustotal.com/api/v3/comments/d-google.com-2d55d397"
-            },
-            "attributes": {
-                "date": 1700830610,
-                "html": "This indicator was mentioned in a report.<br /><br />🔎 Title: Unveiling a New Threat The Millenium RAT<br />📑 Reference: https://www.cyfirma.com/outofband/unveiling-a-new-threat-the-millenium-rat/<br />📆 Report Publish Date: 2023-11-13<br />🏷️ Reference ID: #40f76fbe1 (https://www.virustotal.com/gui/search/40f76fbe1/comments for report&amp;#x27;s related indicators)<br />",
-                "tags": [
-                    "40f76fbe1"
-                ],
-                "text": "This indicator was mentioned in a report.\n\n🔎 Title: Unveiling a New Threat The Millenium RAT\n📑 Reference: https://www.cyfirma.com/outofband/unveiling-a-new-threat-the-millenium-rat/\n📆 Report Publish Date: 2023-11-13\n🏷️ Reference ID: #40f76fbe1 (https://www.virustotal.com/gui/search/40f76fbe1/comments for report's related indicators)\n",
-                "votes": {
-                    "abuse": 0,
-                    "negative": 0,
-                    "positive": 0
-                }
-            }
-        },
-        {
-            "id": "d-google.com-efd07d7d",
-            "type": "comment",
-            "links": {
-                "self": "https://www.virustotal.com/api/v3/comments/d-google.com-efd07d7d"
-            },
-            "attributes": {
-                "date": 1699711348,
-                "html": "This indicator was mentioned in a report.<br /><br />🔎 Title: Unveiling Socks5Systemz: The Rise of a New Proxy Service via PrivateLoader and Amadey | Bitsight<br />📑 Reference: https://www.bitsight.com/blog/unveiling-socks5systemz-rise-new-proxy-service-privateloader-and-amadey<br />📆 Report Publish Date: 2023-11-05<br />🏷️ Reference ID: #90bb75f3c (https://www.virustotal.com/gui/search/90bb75f3c/comments for report&amp;#x27;s related indicators)<br />",
-                "tags": [
-                    "90bb75f3c"
-                ],
-                "text": "This indicator was mentioned in a report.\n\n🔎 Title: Unveiling Socks5Systemz: The Rise of a New Proxy Service via PrivateLoader and Amadey | Bitsight\n📑 Reference: https://www.bitsight.com/blog/unveiling-socks5systemz-rise-new-proxy-service-privateloader-and-amadey\n📆 Report Publish Date: 2023-11-05\n🏷️ Reference ID: #90bb75f3c (https://www.virustotal.com/gui/search/90bb75f3c/comments for report's related indicators)\n",
-                "votes": {
-                    "abuse": 0,
-                    "negative": 0,
-                    "positive": 0
-                }
-            }
-        }
-    ],
-    "meta": {
-        "count": 180,
-        "cursor": "CmQKEQoEZGF0ZRIJCMet-piOvIIDEktqEXN-dmlydXN0b3RhbGNsb3VkcjYLEgZEb21haW4iCmdvb2dsZS5jb20MCxIHQ29tbWVudCITZ29vZ2xlLmNvbS1lZmQwN2Q3ZAwYACAB"
-    },
-    "links": {
-        "next": "https://www.virustotal.com/api/v3/domains/google.com/comments?limit=10&cursor=CmQKEQoEZGF0ZRIJCMet-piOvIIDEktqEXN-dmlydXN0b3RhbGNsb3VkcjYLEgZEb21haW4iCmdvb2dsZS5jb20MCxIHQ29tbWVudCITZ29vZ2xlLmNvbS1lZmQwN2Q3ZAwYACAB",
-        "self": "https://www.virustotal.com/api/v3/domains/google.com/comments?limit=10"
-    }
+	"data": [
+		{
+			"id": "d-google.com-46398398",
+			"type": "comment",
+			"links": {
+				"self": "https://www.virustotal.com/api/v3/comments/d-google.com-46398398"
+			},
+			"attributes": {
+				"date": 1717272918,
+				"html": "This indicator was mentioned in a report.<br /><br />🔎 Title: A Cunning Operator: Muddling Meerkat and China’s Great Firewall<br />📑 Reference: https://blogs.infoblox.com/threat-intelligence/a-cunning-operator-muddling-meerkat-and-chinas-great-firewall/<br />📆 Report Publish Date: 2024-04-29<br />🏷️ Reference ID: #73d7090a9 (https://www.virustotal.com/gui/search/73d7090a9/comments for report&amp;#x27;s related indicators)<br />",
+				"tags": ["73d7090a9"],
+				"text": "This indicator was mentioned in a report.\n\n🔎 Title: A Cunning Operator: Muddling Meerkat and China’s Great Firewall\n📑 Reference: https://blogs.infoblox.com/threat-intelligence/a-cunning-operator-muddling-meerkat-and-chinas-great-firewall/\n📆 Report Publish Date: 2024-04-29\n🏷️ Reference ID: #73d7090a9 (https://www.virustotal.com/gui/search/73d7090a9/comments for report's related indicators)\n",
+				"votes": {
+					"abuse": 0,
+					"negative": 0,
+					"positive": 0
+				}
+			}
+		},
+		{
+			"id": "d-google.com-10ea3b64",
+			"type": "comment",
+			"links": {
+				"self": "https://www.virustotal.com/api/v3/comments/d-google.com-10ea3b64"
+			},
+			"attributes": {
+				"date": 1717250791,
+				"html": "This indicator was mentioned in a report.<br /><br />🔎 Title: The GlorySprout or a Failed Clone of Taurus Stealer<br />📑 Reference: https://russianpanda95.github.io/2024/03/16/The-GlorySprout-Stealer-or-a-Failed-Clone-of-Taurus-Stealer/<br />📆 Report Publish Date: 2024-03-18<br />🏷️ Reference ID: #ef11a7e4f (https://www.virustotal.com/gui/search/ef11a7e4f/comments for report&amp;#x27;s related indicators)<br />",
+				"tags": ["ef11a7e4f"],
+				"text": "This indicator was mentioned in a report.\n\n🔎 Title: The GlorySprout or a Failed Clone of Taurus Stealer\n📑 Reference: https://russianpanda95.github.io/2024/03/16/The-GlorySprout-Stealer-or-a-Failed-Clone-of-Taurus-Stealer/\n📆 Report Publish Date: 2024-03-18\n🏷️ Reference ID: #ef11a7e4f (https://www.virustotal.com/gui/search/ef11a7e4f/comments for report's related indicators)\n",
+				"votes": {
+					"abuse": 0,
+					"negative": 0,
+					"positive": 0
+				}
+			}
+		},
+		{
+			"id": "d-google.com-7b620347",
+			"type": "comment",
+			"links": {
+				"self": "https://www.virustotal.com/api/v3/comments/d-google.com-7b620347"
+			},
+			"attributes": {
+				"date": 1717195677,
+				"html": "This indicator was mentioned in a report.<br /><br />🔎 Title: APT-C-24 (SideWinder) new threat: Nim-based payload surfaced<br />📑 Reference: https://mp.weixin.qq.com/s?__biz=MzUyMjk4NzExMA%3D%3D&amp;mid=2247495234&amp;idx=1&amp;sn=357fbfbacb41b657c21a62a62609c5d6<br />📆 Report Publish Date: 2024-02-24<br />🏷️ Reference ID: #f9e4c0e37 (https://www.virustotal.com/gui/search/f9e4c0e37/comments for report&amp;#x27;s related indicators)<br />",
+				"tags": ["f9e4c0e37"],
+				"text": "This indicator was mentioned in a report.\n\n🔎 Title: APT-C-24 (SideWinder) new threat: Nim-based payload surfaced\n📑 Reference: https://mp.weixin.qq.com/s?__biz=MzUyMjk4NzExMA%3D%3D&mid=2247495234&idx=1&sn=357fbfbacb41b657c21a62a62609c5d6\n📆 Report Publish Date: 2024-02-24\n🏷️ Reference ID: #f9e4c0e37 (https://www.virustotal.com/gui/search/f9e4c0e37/comments for report's related indicators)\n",
+				"votes": {
+					"abuse": 0,
+					"negative": 0,
+					"positive": 0
+				}
+			}
+		},
+		{
+			"id": "d-google.com-5d3ac10a",
+			"type": "comment",
+			"links": {
+				"self": "https://www.virustotal.com/api/v3/comments/d-google.com-5d3ac10a"
+			},
+			"attributes": {
+				"date": 1717195419,
+				"html": "This indicator was mentioned in a report.<br /><br />🔎 Title: Thousands of Hijacked Major-Brand Subdomains Found Bombarding Users With Millions…<br />📑 Reference: https://labs.guard.io/subdomailing-thousands-of-hijacked-major-brand-subdomains-found-bombarding-users-with-millions-a5e5fb892935<br />📆 Report Publish Date: 2024-02-26<br />🏷️ Reference ID: #161e97f06 (https://www.virustotal.com/gui/search/161e97f06/comments for report&amp;#x27;s related indicators)<br />",
+				"tags": ["161e97f06"],
+				"text": "This indicator was mentioned in a report.\n\n🔎 Title: Thousands of Hijacked Major-Brand Subdomains Found Bombarding Users With Millions…\n📑 Reference: https://labs.guard.io/subdomailing-thousands-of-hijacked-major-brand-subdomains-found-bombarding-users-with-millions-a5e5fb892935\n📆 Report Publish Date: 2024-02-26\n🏷️ Reference ID: #161e97f06 (https://www.virustotal.com/gui/search/161e97f06/comments for report's related indicators)\n",
+				"votes": {
+					"abuse": 0,
+					"negative": 0,
+					"positive": 0
+				}
+			}
+		},
+		{
+			"id": "d-google.com-e12504a9",
+			"type": "comment",
+			"links": {
+				"self": "https://www.virustotal.com/api/v3/comments/d-google.com-e12504a9"
+			},
+			"attributes": {
+				"date": 1713716684,
+				"html": "Seems pretty clean",
+				"tags": [],
+				"text": "Seems pretty clean",
+				"votes": {
+					"abuse": 0,
+					"negative": 0,
+					"positive": 0
+				}
+			}
+		},
+		{
+			"id": "d-google.com-2ee3a9c3",
+			"type": "comment",
+			"links": {
+				"self": "https://www.virustotal.com/api/v3/comments/d-google.com-2ee3a9c3"
+			},
+			"attributes": {
+				"date": 1705523994,
+				"html": "#internetspy",
+				"tags": ["internetspy"],
+				"text": "#internetspy",
+				"votes": {
+					"abuse": 0,
+					"negative": 0,
+					"positive": 0
+				}
+			}
+		},
+		{
+			"id": "d-google.com-60591109",
+			"type": "comment",
+			"links": {
+				"self": "https://www.virustotal.com/api/v3/comments/d-google.com-60591109"
+			},
+			"attributes": {
+				"date": 1702647398,
+				"html": "This indicator was mentioned in a report.<br /><br />🔎 Title: BazarCall Attack: Using Google Forms With Call-Back Phishing<br />📑 Reference: https://abnormalsecurity.com/blog/bazarcall-attack-leverages-google-forms<br />📆 Report Publish Date: 2023-12-15<br />🏷️ Reference ID: #d604e452b (https://www.virustotal.com/gui/search/d604e452b/comments for report&amp;#x27;s related indicators)<br />",
+				"tags": ["d604e452b"],
+				"text": "This indicator was mentioned in a report.\n\n🔎 Title: BazarCall Attack: Using Google Forms With Call-Back Phishing\n📑 Reference: https://abnormalsecurity.com/blog/bazarcall-attack-leverages-google-forms\n📆 Report Publish Date: 2023-12-15\n🏷️ Reference ID: #d604e452b (https://www.virustotal.com/gui/search/d604e452b/comments for report's related indicators)\n",
+				"votes": {
+					"abuse": 0,
+					"negative": 0,
+					"positive": 0
+				}
+			}
+		},
+		{
+			"id": "d-google.com-dc04678a",
+			"type": "comment",
+			"links": {
+				"self": "https://www.virustotal.com/api/v3/comments/d-google.com-dc04678a"
+			},
+			"attributes": {
+				"date": 1702259901,
+				"html": "Lorem ipsum dolor sit &#8230;",
+				"tags": [],
+				"text": "Lorem ipsum dolor sit ...",
+				"votes": {
+					"abuse": 0,
+					"negative": 0,
+					"positive": 0
+				}
+			}
+		},
+		{
+			"id": "d-google.com-2d55d397",
+			"type": "comment",
+			"links": {
+				"self": "https://www.virustotal.com/api/v3/comments/d-google.com-2d55d397"
+			},
+			"attributes": {
+				"date": 1700830610,
+				"html": "This indicator was mentioned in a report.<br /><br />🔎 Title: Unveiling a New Threat The Millenium RAT<br />📑 Reference: https://www.cyfirma.com/outofband/unveiling-a-new-threat-the-millenium-rat/<br />📆 Report Publish Date: 2023-11-13<br />🏷️ Reference ID: #40f76fbe1 (https://www.virustotal.com/gui/search/40f76fbe1/comments for report&amp;#x27;s related indicators)<br />",
+				"tags": ["40f76fbe1"],
+				"text": "This indicator was mentioned in a report.\n\n🔎 Title: Unveiling a New Threat The Millenium RAT\n📑 Reference: https://www.cyfirma.com/outofband/unveiling-a-new-threat-the-millenium-rat/\n📆 Report Publish Date: 2023-11-13\n🏷️ Reference ID: #40f76fbe1 (https://www.virustotal.com/gui/search/40f76fbe1/comments for report's related indicators)\n",
+				"votes": {
+					"abuse": 0,
+					"negative": 0,
+					"positive": 0
+				}
+			}
+		},
+		{
+			"id": "d-google.com-efd07d7d",
+			"type": "comment",
+			"links": {
+				"self": "https://www.virustotal.com/api/v3/comments/d-google.com-efd07d7d"
+			},
+			"attributes": {
+				"date": 1699711348,
+				"html": "This indicator was mentioned in a report.<br /><br />🔎 Title: Unveiling Socks5Systemz: The Rise of a New Proxy Service via PrivateLoader and Amadey | Bitsight<br />📑 Reference: https://www.bitsight.com/blog/unveiling-socks5systemz-rise-new-proxy-service-privateloader-and-amadey<br />📆 Report Publish Date: 2023-11-05<br />🏷️ Reference ID: #90bb75f3c (https://www.virustotal.com/gui/search/90bb75f3c/comments for report&amp;#x27;s related indicators)<br />",
+				"tags": ["90bb75f3c"],
+				"text": "This indicator was mentioned in a report.\n\n🔎 Title: Unveiling Socks5Systemz: The Rise of a New Proxy Service via PrivateLoader and Amadey | Bitsight\n📑 Reference: https://www.bitsight.com/blog/unveiling-socks5systemz-rise-new-proxy-service-privateloader-and-amadey\n📆 Report Publish Date: 2023-11-05\n🏷️ Reference ID: #90bb75f3c (https://www.virustotal.com/gui/search/90bb75f3c/comments for report's related indicators)\n",
+				"votes": {
+					"abuse": 0,
+					"negative": 0,
+					"positive": 0
+				}
+			}
+		}
+	],
+	"meta": {
+		"count": 180,
+		"cursor": "CmQKEQoEZGF0ZRIJCMet-piOvIIDEktqEXN-dmlydXN0b3RhbGNsb3VkcjYLEgZEb21haW4iCmdvb2dsZS5jb20MCxIHQ29tbWVudCITZ29vZ2xlLmNvbS1lZmQwN2Q3ZAwYACAB"
+	},
+	"links": {
+		"next": "https://www.virustotal.com/api/v3/domains/google.com/comments?limit=10&cursor=CmQKEQoEZGF0ZRIJCMet-piOvIIDEktqEXN-dmlydXN0b3RhbGNsb3VkcjYLEgZEb21haW4iCmdvb2dsZS5jb20MCxIHQ29tbWVudCITZ29vZ2xlLmNvbS1lZmQwN2Q3ZAwYACAB",
+		"self": "https://www.virustotal.com/api/v3/domains/google.com/comments?limit=10"
+	}
 }
-
+```

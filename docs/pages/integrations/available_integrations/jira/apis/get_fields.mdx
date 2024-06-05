@@ -5,7 +5,8 @@ import { Callout } from "nextra/components";
 Returns all fields for an issue.
 
 <Callout type="info">
-    For Jira's documentation, see [Get Fields](https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issue-fields/#api-rest-api-3-field-get).
+	For Jira's documentation, see [Get
+	Fields](https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issue-fields/#api-rest-api-3-field-get).
 </Callout>
 
 ## Parameters:
@@ -16,22 +17,20 @@ None
 
 ```json
 [
-    {
-        "id": "customfield_10000",
-        "key": "customfield_10000",
-        "name": "My Custom Field",
-        "custom": true,
-        "orderable": true,
-        "navigable": true,
-        "searchable": true,
-        "clauseNames": [
-            "cf[10000]",
-            "My Custom Field"
-        ],
-        "schema": {
-            "type": "string",
-            "custom": "com.atlassian.jira.plugin.system.customfieldtypes:textarea",
-            "customId": 10000
-        }
-    }
+	{
+		"id": "customfield_10000",
+		"key": "customfield_10000",
+		"name": "My Custom Field",
+		"custom": true,
+		"orderable": true,
+		"navigable": true,
+		"searchable": true,
+		"clauseNames": ["cf[10000]", "My Custom Field"],
+		"schema": {
+			"type": "string",
+			"custom": "com.atlassian.jira.plugin.system.customfieldtypes:textarea",
+			"customId": 10000
+		}
+	}
 ]
+```

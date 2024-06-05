@@ -5,147 +5,149 @@ import { Callout } from "nextra/components";
 Retrieve votes for a specific URL.
 
 <Callout type="info">
-	For VirusTotal's documentation, see [Get URL Votes](https://docs.virustotal.com/reference/urls-votes-get).
+	For VirusTotal's documentation, see [Get URL
+	Votes](https://docs.virustotal.com/reference/urls-votes-get).
 </Callout>
 
 ## Parameters:
 
-| Field             | Description                                                                                                                                                              | Required |
-| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | :------: |
-| **URL ID**        | The encoded URL you want to retrieve votes for. Note that the URL should be encoded in base64 format (e.g., `aHR0cDovL3d3dy5leGFtcGxlLmNvbQ==`).                          |   Yes    |
+| Field      | Description                                                                                                                                      | Required |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | :------: |
+| **URL ID** | The encoded URL you want to retrieve votes for. Note that the URL should be encoded in base64 format (e.g., `aHR0cDovL3d3dy5leGFtcGxlLmNvbQ==`). |   Yes    |
 
 ## Example Output:
 
 ```json
 {
-    "data": [
-        {
-            "id": "u-dd014af5ed6b38d9130e3f466f850e46d21b951199d53a18ef29ee9341614eaf-04f0b559",
-            "type": "vote",
-            "links": {
-                "self": "https://www.virustotal.com/api/v3/votes/u-dd014af5ed6b38d9130e3f466f850e46d21b951199d53a18ef29ee9341614eaf-04f0b559"
-            },
-            "attributes": {
-                "date": 1716747657,
-                "value": 1,
-                "verdict": "harmless"
-            }
-        },
-        {
-            "id": "u-dd014af5ed6b38d9130e3f466f850e46d21b951199d53a18ef29ee9341614eaf-2d72ae91",
-            "type": "vote",
-            "links": {
-                "self": "https://www.virustotal.com/api/v3/votes/u-dd014af5ed6b38d9130e3f466f850e46d21b951199d53a18ef29ee9341614eaf-2d72ae91"
-            },
-            "attributes": {
-                "date": 1710978045,
-                "value": -1,
-                "verdict": "malicious"
-            }
-        },
-        {
-            "id": "u-dd014af5ed6b38d9130e3f466f850e46d21b951199d53a18ef29ee9341614eaf-e2d07426",
-            "type": "vote",
-            "links": {
-                "self": "https://www.virustotal.com/api/v3/votes/u-dd014af5ed6b38d9130e3f466f850e46d21b951199d53a18ef29ee9341614eaf-e2d07426"
-            },
-            "attributes": {
-                "date": 1709432353,
-                "value": 1,
-                "verdict": "harmless"
-            }
-        },
-        {
-            "id": "u-dd014af5ed6b38d9130e3f466f850e46d21b951199d53a18ef29ee9341614eaf-915fbca8",
-            "type": "vote",
-            "links": {
-                "self": "https://www.virustotal.com/api/v3/votes/u-dd014af5ed6b38d9130e3f466f850e46d21b951199d53a18ef29ee9341614eaf-915fbca8"
-            },
-            "attributes": {
-                "date": 1708498527,
-                "value": 1,
-                "verdict": "harmless"
-            }
-        },
-        {
-            "id": "u-dd014af5ed6b38d9130e3f466f850e46d21b951199d53a18ef29ee9341614eaf-cb089838",
-            "type": "vote",
-            "links": {
-                "self": "https://www.virustotal.com/api/v3/votes/u-dd014af5ed6b38d9130e3f466f850e46d21b951199d53a18ef29ee9341614eaf-cb089838"
-            },
-            "attributes": {
-                "date": 1708296629,
-                "value": 1,
-                "verdict": "harmless"
-            }
-        },
-        {
-            "id": "u-dd014af5ed6b38d9130e3f466f850e46d21b951199d53a18ef29ee9341614eaf-6e5e3dbd",
-            "type": "vote",
-            "links": {
-                "self": "https://www.virustotal.com/api/v3/votes/u-dd014af5ed6b38d9130e3f466f850e46d21b951199d53a18ef29ee9341614eaf-6e5e3dbd"
-            },
-            "attributes": {
-                "date": 1706249782,
-                "value": 1,
-                "verdict": "harmless"
-            }
-        },
-        {
-            "id": "u-dd014af5ed6b38d9130e3f466f850e46d21b951199d53a18ef29ee9341614eaf-effd4525",
-            "type": "vote",
-            "links": {
-                "self": "https://www.virustotal.com/api/v3/votes/u-dd014af5ed6b38d9130e3f466f850e46d21b951199d53a18ef29ee9341614eaf-effd4525"
-            },
-            "attributes": {
-                "date": 1705241457,
-                "value": 1,
-                "verdict": "harmless"
-            }
-        },
-        {
-            "id": "u-dd014af5ed6b38d9130e3f466f850e46d21b951199d53a18ef29ee9341614eaf-c7e3c401",
-            "type": "vote",
-            "links": {
-                "self": "https://www.virustotal.com/api/v3/votes/u-dd014af5ed6b38d9130e3f466f850e46d21b951199d53a18ef29ee9341614eaf-c7e3c401"
-            },
-            "attributes": {
-                "date": 1705172323,
-                "value": 1,
-                "verdict": "harmless"
-            }
-        },
-        {
-            "id": "u-dd014af5ed6b38d9130e3f466f850e46d21b951199d53a18ef29ee9341614eaf-17a3ac6c",
-            "type": "vote",
-            "links": {
-                "self": "https://www.virustotal.com/api/v3/votes/u-dd014af5ed6b38d9130e3f466f850e46d21b951199d53a18ef29ee9341614eaf-17a3ac6c"
-            },
-            "attributes": {
-                "date": 1702571647,
-                "value": 1,
-                "verdict": "harmless"
-            }
-        },
-        {
-            "id": "u-dd014af5ed6b38d9130e3f466f850e46d21b951199d53a18ef29ee9341614eaf-18690561",
-            "type": "vote",
-            "links": {
-                "self": "https://www.virustotal.com/api/v3/votes/u-dd014af5ed6b38d9130e3f466f850e46d21b951199d53a18ef29ee9341614eaf-18690561"
-            },
-            "attributes": {
-                "date": 1702476945,
-                "value": 1,
-                "verdict": "harmless"
-            }
-        }
-    ],
-    "meta": {
-        "count": 200,
-        "cursor": "CswBChEKBGRhdGUSCQj1-drszIyDAxKyAWoRc352aXJ1c3RvdGFsY2xvdWRynAELEgNVUkwiQGRkMDE0YWY1ZWQ2YjM4ZDkxMzBlM2Y0NjZmODUwZTQ2ZDIxYjk1MTE5OWQ1M2ExOGVmMjllZTkzNDE2MTRlYWYMCxIEVm90ZSJJZGQwMTRhZjVlZDZiMzhkOTEzMGUzZjQ2NmY4NTBlNDZkMjFiOTUxMTk5ZDUzYTE4ZWYyOWVlOTM0MTYxNGVhZi0xODY5MDU2MQwYACAB"
-    },
-    "links": {
-        "next": "https://www.virustotal.com/api/v3/urls/dd014af5ed6b38d9130e3f466f850e46d21b951199d53a18ef29ee9341614eaf/votes?limit=10&cursor=CswBChEKBGRhdGUSCQj1-drszIyDAxKyAWoRc352aXJ1c3RvdGFsY2xvdWRynAELEgNVUkwiQGRkMDE0YWY1ZWQ2YjM4ZDkxMzBlM2Y0NjZmODUwZTQ2ZDIxYjk1MTE5OWQ1M2ExOGVmMjllZTkzNDE2MTRlYWYMCxIEVm90ZSJJZGQwMTRhZjVlZDZiMzhkOTEzMGUzZjQ2NmY4NTBlNDZkMjFiOTUxMTk5ZDUzYTE4ZWYyOWVlOTM0MTYxNGVhZi0xODY5MDU2MQwYACAB",
-        "self": "https://www.virustotal.com/api/v3/urls/dd014af5ed6b38d9130e3f466f850e46d21b951199d53a18ef29ee9341614eaf/votes?limit=10"
-    }
+	"data": [
+		{
+			"id": "u-dd014af5ed6b38d9130e3f466f850e46d21b951199d53a18ef29ee9341614eaf-04f0b559",
+			"type": "vote",
+			"links": {
+				"self": "https://www.virustotal.com/api/v3/votes/u-dd014af5ed6b38d9130e3f466f850e46d21b951199d53a18ef29ee9341614eaf-04f0b559"
+			},
+			"attributes": {
+				"date": 1716747657,
+				"value": 1,
+				"verdict": "harmless"
+			}
+		},
+		{
+			"id": "u-dd014af5ed6b38d9130e3f466f850e46d21b951199d53a18ef29ee9341614eaf-2d72ae91",
+			"type": "vote",
+			"links": {
+				"self": "https://www.virustotal.com/api/v3/votes/u-dd014af5ed6b38d9130e3f466f850e46d21b951199d53a18ef29ee9341614eaf-2d72ae91"
+			},
+			"attributes": {
+				"date": 1710978045,
+				"value": -1,
+				"verdict": "malicious"
+			}
+		},
+		{
+			"id": "u-dd014af5ed6b38d9130e3f466f850e46d21b951199d53a18ef29ee9341614eaf-e2d07426",
+			"type": "vote",
+			"links": {
+				"self": "https://www.virustotal.com/api/v3/votes/u-dd014af5ed6b38d9130e3f466f850e46d21b951199d53a18ef29ee9341614eaf-e2d07426"
+			},
+			"attributes": {
+				"date": 1709432353,
+				"value": 1,
+				"verdict": "harmless"
+			}
+		},
+		{
+			"id": "u-dd014af5ed6b38d9130e3f466f850e46d21b951199d53a18ef29ee9341614eaf-915fbca8",
+			"type": "vote",
+			"links": {
+				"self": "https://www.virustotal.com/api/v3/votes/u-dd014af5ed6b38d9130e3f466f850e46d21b951199d53a18ef29ee9341614eaf-915fbca8"
+			},
+			"attributes": {
+				"date": 1708498527,
+				"value": 1,
+				"verdict": "harmless"
+			}
+		},
+		{
+			"id": "u-dd014af5ed6b38d9130e3f466f850e46d21b951199d53a18ef29ee9341614eaf-cb089838",
+			"type": "vote",
+			"links": {
+				"self": "https://www.virustotal.com/api/v3/votes/u-dd014af5ed6b38d9130e3f466f850e46d21b951199d53a18ef29ee9341614eaf-cb089838"
+			},
+			"attributes": {
+				"date": 1708296629,
+				"value": 1,
+				"verdict": "harmless"
+			}
+		},
+		{
+			"id": "u-dd014af5ed6b38d9130e3f466f850e46d21b951199d53a18ef29ee9341614eaf-6e5e3dbd",
+			"type": "vote",
+			"links": {
+				"self": "https://www.virustotal.com/api/v3/votes/u-dd014af5ed6b38d9130e3f466f850e46d21b951199d53a18ef29ee9341614eaf-6e5e3dbd"
+			},
+			"attributes": {
+				"date": 1706249782,
+				"value": 1,
+				"verdict": "harmless"
+			}
+		},
+		{
+			"id": "u-dd014af5ed6b38d9130e3f466f850e46d21b951199d53a18ef29ee9341614eaf-effd4525",
+			"type": "vote",
+			"links": {
+				"self": "https://www.virustotal.com/api/v3/votes/u-dd014af5ed6b38d9130e3f466f850e46d21b951199d53a18ef29ee9341614eaf-effd4525"
+			},
+			"attributes": {
+				"date": 1705241457,
+				"value": 1,
+				"verdict": "harmless"
+			}
+		},
+		{
+			"id": "u-dd014af5ed6b38d9130e3f466f850e46d21b951199d53a18ef29ee9341614eaf-c7e3c401",
+			"type": "vote",
+			"links": {
+				"self": "https://www.virustotal.com/api/v3/votes/u-dd014af5ed6b38d9130e3f466f850e46d21b951199d53a18ef29ee9341614eaf-c7e3c401"
+			},
+			"attributes": {
+				"date": 1705172323,
+				"value": 1,
+				"verdict": "harmless"
+			}
+		},
+		{
+			"id": "u-dd014af5ed6b38d9130e3f466f850e46d21b951199d53a18ef29ee9341614eaf-17a3ac6c",
+			"type": "vote",
+			"links": {
+				"self": "https://www.virustotal.com/api/v3/votes/u-dd014af5ed6b38d9130e3f466f850e46d21b951199d53a18ef29ee9341614eaf-17a3ac6c"
+			},
+			"attributes": {
+				"date": 1702571647,
+				"value": 1,
+				"verdict": "harmless"
+			}
+		},
+		{
+			"id": "u-dd014af5ed6b38d9130e3f466f850e46d21b951199d53a18ef29ee9341614eaf-18690561",
+			"type": "vote",
+			"links": {
+				"self": "https://www.virustotal.com/api/v3/votes/u-dd014af5ed6b38d9130e3f466f850e46d21b951199d53a18ef29ee9341614eaf-18690561"
+			},
+			"attributes": {
+				"date": 1702476945,
+				"value": 1,
+				"verdict": "harmless"
+			}
+		}
+	],
+	"meta": {
+		"count": 200,
+		"cursor": "CswBChEKBGRhdGUSCQj1-drszIyDAxKyAWoRc352aXJ1c3RvdGFsY2xvdWRynAELEgNVUkwiQGRkMDE0YWY1ZWQ2YjM4ZDkxMzBlM2Y0NjZmODUwZTQ2ZDIxYjk1MTE5OWQ1M2ExOGVmMjllZTkzNDE2MTRlYWYMCxIEVm90ZSJJZGQwMTRhZjVlZDZiMzhkOTEzMGUzZjQ2NmY4NTBlNDZkMjFiOTUxMTk5ZDUzYTE4ZWYyOWVlOTM0MTYxNGVhZi0xODY5MDU2MQwYACAB"
+	},
+	"links": {
+		"next": "https://www.virustotal.com/api/v3/urls/dd014af5ed6b38d9130e3f466f850e46d21b951199d53a18ef29ee9341614eaf/votes?limit=10&cursor=CswBChEKBGRhdGUSCQj1-drszIyDAxKyAWoRc352aXJ1c3RvdGFsY2xvdWRynAELEgNVUkwiQGRkMDE0YWY1ZWQ2YjM4ZDkxMzBlM2Y0NjZmODUwZTQ2ZDIxYjk1MTE5OWQ1M2ExOGVmMjllZTkzNDE2MTRlYWYMCxIEVm90ZSJJZGQwMTRhZjVlZDZiMzhkOTEzMGUzZjQ2NmY4NTBlNDZkMjFiOTUxMTk5ZDUzYTE4ZWYyOWVlOTM0MTYxNGVhZi0xODY5MDU2MQwYACAB",
+		"self": "https://www.virustotal.com/api/v3/urls/dd014af5ed6b38d9130e3f466f850e46d21b951199d53a18ef29ee9341614eaf/votes?limit=10"
+	}
 }
+```

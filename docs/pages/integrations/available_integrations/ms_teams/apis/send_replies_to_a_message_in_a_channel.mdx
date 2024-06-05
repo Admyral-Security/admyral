@@ -5,17 +5,18 @@ import { Callout } from "nextra/components";
 Creates a new reply to a chatMessage in a specified channel.
 
 <Callout type="info">
-	For Microsoft's documentation, see [Send Replies to a Message in a Channel](https://learn.microsoft.com/en-us/graph/api/chatmessage-post-replies?view=graph-rest-1.0&tabs=http).
+	For Microsoft's documentation, see [Send Replies to a Message in a
+	Channel](https://learn.microsoft.com/en-us/graph/api/chatmessage-post-replies?view=graph-rest-1.0&tabs=http).
 </Callout>
 
 ## Parameters:
 
-| Field                | Description                                                                                                                                                          | Required |
-| -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------: |
-| **Team ID**           | The ID of the Team. To find the ID, go to your Microsoft Teams app and get the sharing link for your team. The value after `groupId=` unitl the next `&` is your team ID.                                                                                                                                                   |   Yes    |
-| **Channel ID**        | The ID of the channel.                                                                                                                                                |   Yes    |
-| **Message ID**        | The ID of the message to reply to.                                                                                                                                    |   Yes    |
-| **Message**          | The reply message content.                                                                                                                                           |   Yes    |
+| Field          | Description                                                                                                                                                               | Required |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------: |
+| **Team ID**    | The ID of the Team. To find the ID, go to your Microsoft Teams app and get the sharing link for your team. The value after `groupId=` unitl the next `&` is your team ID. |   Yes    |
+| **Channel ID** | The ID of the channel.                                                                                                                                                    |   Yes    |
+| **Message ID** | The ID of the message to reply to.                                                                                                                                        |   Yes    |
+| **Message**    | The reply message content.                                                                                                                                                |   Yes    |
 
 ## Example Output:
 
@@ -65,3 +66,4 @@ Content-type: application/json
     "reactions": [],
     "messageHistory": []
 }
+```
