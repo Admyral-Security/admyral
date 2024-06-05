@@ -2,7 +2,7 @@ use super::IntegrationExecutor;
 use crate::workflow::{
     context,
     http_client::HttpClient,
-    utils::{get_bool_parameter, get_number_parameter, get_string_parameter, ParameterType},
+    utils::{get_number_parameter, get_string_parameter, ParameterType},
 };
 use anyhow::{anyhow, Result};
 use maplit::hashmap;
@@ -194,12 +194,19 @@ async fn ip_similarity_lookup(
     .await?;
 
     let mut api_url = format!("https://api.greynoise.io/v3/similarity/ips/{ip_address}");
+
+    let mut query_params = Vec::new();
     if let Some(l) = limit {
-        api_url.push_str(&format!("?limit={}", l));
+        query_params.push(format!("limit={}", l));
     }
     if let Some(ms) = minimum_score {
-        api_url.push_str(&format!("&minimum_score={}", ms));
+        query_params.push(format!("minimum_score={}", ms));
     }
+
+    if !query_params.is_empty() {
+        api_url.push_str(&format!("?{}", query_params.join("&")));
+    }
+
     greynoise_get_request(client, api_key, &api_url).await
 }
 
@@ -248,6 +255,7 @@ async fn ip_timeline_daily_summary(
     .await?;
 
     let mut api_url = format!("https://api.greynoise.io/v3/noise/ips/{ip_address}/daily-summary");
+
     let mut query_params = Vec::new();
     if let Some(d) = days {
         query_params.push(format!("days={}", d));
@@ -258,6 +266,7 @@ async fn ip_timeline_daily_summary(
     if let Some(l) = limit {
         query_params.push(format!("limit={}", l));
     }
+
     if !query_params.is_empty() {
         api_url.push_str(&format!("?{}", query_params.join("&")));
     }
@@ -313,6 +322,7 @@ async fn ip_timeline_hourly_summary(
     .await?;
 
     let mut api_url = format!("https://api.greynoise.io/v3/noise/ips/{ip_address}/hourly-summary");
+
     let mut query_params = Vec::new();
     if let Some(d) = days {
         query_params.push(format!("days={}", d));

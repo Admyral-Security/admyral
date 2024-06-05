@@ -5,21 +5,23 @@ import { Callout } from "nextra/components";
 Check whether a given IP address is “Internet background noise”, or has been observed scanning or attacking devices across the Internet.
 
 <Callout type="info">
-	For GreyNoise's documentation, see [GreyNoise IP Quick Check via Enterprise API](https://docs.greynoise.io/reference/quickcheck-1).
+	For GreyNoise's documentation, see [GreyNoise IP Quick Check via Enterprise
+	API](https://docs.greynoise.io/reference/quickcheck-1).
 </Callout>
 
 ## Parameters
 
-| Field       | Description            | Required |
-|-------------|------------------------|----------|
-| IP Address  | The IP address to check| Yes      |
+| Field      | Description             | Required |
+| ---------- | ----------------------- | -------- |
+| IP Address | The IP address to check | Yes      |
 
 ## Example Output
 
 ```json
 {
-  "code": "0x09",
-  "ip": "8.8.8.8",
-  "noise": false,
-  "riot": true
+	"code": "0x09",
+	"ip": "8.8.8.8",
+	"noise": false,
+	"riot": true
 }
+```
