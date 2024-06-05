@@ -1805,6 +1805,163 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 					},
 				],
 			},
+			{
+                id: "IP_QUICK_CHECK",
+                name: "IP Quick Check",
+                description: "Quickly check information about an IP address.",
+                documentationUrl:
+                    "https://docs.greynoise.io/reference/quickcheck-1",
+                requiresAuthentication: true,
+                parameters: [
+                    {
+                        id: "IP_ADDRESS",
+                        displayName: "IP Address",
+                        description: "The IP address to check.",
+                        required: true,
+                        dataType: ApiParameterDatatype.TEXT,
+                    },
+                ],
+            },
+			{
+                id: "IP_CONTEXT",
+                name: "IP Context",
+                description: "Get more information about a given IP address.",
+                documentationUrl:
+                    "https://docs.greynoise.io/reference/noisecontextip-1",
+                requiresAuthentication: true,
+                parameters: [
+                    {
+                        id: "IP_ADDRESS",
+                        displayName: "IP Address",
+                        description: "The IP address to query.",
+                        required: true,
+                        dataType: ApiParameterDatatype.TEXT,
+                    },
+                ],
+            },
+			{
+                id: "RIOT_IP_LOOKUP",
+                name: "RIOT IP Lookup",
+                description: "RIOT identifies IPs from known benign services and organizations.",
+                documentationUrl:
+                    "https://docs.greynoise.io/reference/riotip",
+                requiresAuthentication: true,
+                parameters: [
+                    {
+                        id: "IP_ADDRESS",
+                        displayName: "IP Address",
+                        description: "The IP address to query.",
+                        required: true,
+                        dataType: ApiParameterDatatype.TEXT,
+                    },
+                ],
+            },
+			{
+                id: "IP_SIMILARITY_LOOKUP",
+                name: "IP Similarity Lookup",
+                description: "Find similar IPs based on GreyNoise inference.",
+                documentationUrl:
+                    "https://docs.greynoise.io/reference/get_v3-similarity-ips-ip",
+                requiresAuthentication: true,
+                parameters: [
+                    {
+                        id: "IP_ADDRESS",
+                        displayName: "IP Address",
+                        description: "The IP address to query.",
+                        required: true,
+                        dataType: ApiParameterDatatype.TEXT,
+                    },
+                    {
+                        id: "LIMIT",
+                        displayName: "Limit",
+                        description: "Limit the number of similar IPs.",
+                        required: false,
+                        dataType: ApiParameterDatatype.NUMBER,
+                    },
+                    {
+                        id: "MINIMUM_SCORE",
+                        displayName: "Minimum Score",
+                        description: "The minimum score threshold to find similar IPs. The value must be between 0.75 and 1.0.",
+                        required: false,
+                        dataType: ApiParameterDatatype.NUMBER,
+                    },
+                ],
+            },
+			{
+				id: "IP_TIMELINE_DAILY_SUMMARY",
+				name: "IP Timeline Daily Summary",
+				description: "Retrieve an IP address' daily summary of noise activity.",
+				documentationUrl:
+					"https://docs.greynoise.io/reference/get_v3-noise-ips-ip-daily-summary",
+				requiresAuthentication: true,
+				parameters: [
+					{
+						id: "IP_ADDRESS",
+						displayName: "IP Address",
+						description: "The IP address to query.",
+						required: true,
+						dataType: ApiParameterDatatype.TEXT,
+					},
+					{
+						id: "DAYS",
+						displayName: "Days",
+						description: "The number of lookback days to include events for.",
+						required: false,
+						dataType: ApiParameterDatatype.NUMBER,
+					},
+					{
+						id: "CURSOR",
+						displayName: "Cursor",
+						description: "The cursor is a pointer from which to start returning results up to the limit.",
+						required: false,
+						dataType: ApiParameterDatatype.TEXT,
+					},
+					{
+						id: "LIMIT",
+						displayName: "Limit",
+						description: "The total number of events to return in the response.",
+						required: false,
+						dataType: ApiParameterDatatype.NUMBER,
+					},
+				],
+			},
+			{
+				id: "IP_TIMELINE_HOURLY_SUMMARY",
+				name: "IP Timeline Hourly Summary",
+				description: "Retrieve an IP address' hourly summary of noise activity.",
+				documentationUrl: "https://docs.greynoise.io/reference/get_v3-noise-ips-ip-hourly-summary",
+				requiresAuthentication: true,
+				parameters: [
+					{
+						id: "IP_ADDRESS",
+						displayName: "IP Address",
+						description: "The IP address to query.",
+						required: true,
+						dataType: ApiParameterDatatype.TEXT,
+					},
+					{
+						id: "DAYS",
+						displayName: "Days",
+						description: "The number of lookback days to include events for.",
+						required: false,
+						dataType: ApiParameterDatatype.NUMBER,
+					},
+					{
+						id: "CURSOR",
+						displayName: "Cursor",
+						description: "The cursor is a pointer from which to start returning results up to the limit.",
+						required: false,
+						dataType: ApiParameterDatatype.TEXT,
+					},
+					{
+						id: "LIMIT",
+						displayName: "Limit",
+						description: "The total number of events to return in the response.",
+						required: false,
+						dataType: ApiParameterDatatype.NUMBER,
+					},
+				],
+			},			
 		],
 	},
 	// ...

@@ -1,0 +1,31 @@
+import { Callout } from "nextra/components";
+
+# RIOT IP Lookup
+
+RIOT identifies IPs from known benign services and organizations that commonly cause false positives in network security and threat intelligence products. The collection of IPs in RIOT is continually curated and verified to provide accurate results.
+
+<Callout type="info">
+	For GreyNoise's documentation, see [GreyNoise RIOT IP Lookup via Enterprise API](https://docs.greynoise.io/reference/riotip).
+</Callout>
+
+## Parameters:
+
+| Field             | Description                                                                                                                                                 | Required |
+| ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | :------: |
+| **IP Address**    | The IP address to query                                                                                                                                     |   Yes    |
+
+
+
+## Example Output
+```json
+{
+    "ip": "104.97.7.252",
+    "riot": true,
+    "category": "cdn",
+    "name": "Akamai Technologies",
+    "description": "Akamai is a global content delivery network (CDN), cybersecurity, and cloud service company, providing web and Internet security services.",
+    "explanation": "CDNs are geographically distributed servers that quickly deliver web content to users. You may see your network communicating with IP addresses belonging to Akamai Technologies on ports 80/TCP and 443/TCP.",
+    "last_updated": "2024-06-05T09:11:06Z",
+    "reference": "https://www.akamai.com/",
+    "trust_level": "2"
+}

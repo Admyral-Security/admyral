@@ -1,0 +1,102 @@
+import { Callout } from "nextra/components";
+
+# IP Timeline Hourly Summary
+
+Retrieve an IP address' hourly summary of noise activity.
+
+<Callout type="info">
+	For GreyNoise's documentation, see [GreyNoise IP Timeline Hourly Summary via Enterprise API](https://docs.greynoise.io/reference/get_v3-noise-ips-ip-hourly-summary).
+</Callout>
+
+## Parameters:
+
+| Field             | Description                                                                                                         | Required |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------- | :------: |
+| **IP Address**    | The IP address to query                                                                                             |   Yes    |
+| **Days**          | The number of lookback days to include events for.                                                                  |    No    |
+| **Cursor**        | The cursor is a pointer from which to start returning results up to the limit.                                      |    No    |
+| **Limit**         | The total number of events to return in the response.                                                               |    No    |
+
+## Example Output
+```json
+{
+    "activity": [
+        {
+            "asn": "AS8560",
+            "tor": false,
+            "vpn": false,
+            "city": "Logroño",
+            "rdns": "",
+            "tags": [],
+            "region": "La Rioja",
+            "country": "Spain",
+            "category": "hosting",
+            "protocols": [
+                {
+                    "port": 443,
+                    "transport_protocol": "TCP"
+                }
+            ],
+            "spoofable": true,
+            "timestamp": "2024-06-04T09:00:00Z",
+            "http_paths": [],
+            "vpn_service": "",
+            "country_code": "ES",
+            "destinations": [
+                {
+                    "country": "Turkey",
+                    "country_code": "TR"
+                }
+            ],
+            "organization": "IONOS SE",
+            "classification": "unknown",
+            "http_user_agents": [],
+            "ja3_fingerprints": [
+                "d3e1de2ca313c6c0a639f69cc3e924a4"
+            ],
+            "hassh_fingerprints": []
+        },
+        {
+            "asn": "AS8560",
+            "tor": false,
+            "vpn": false,
+            "city": "Logroño",
+            "rdns": "",
+            "tags": [],
+            "region": "La Rioja",
+            "country": "Spain",
+            "category": "hosting",
+            "protocols": [
+                {
+                    "port": 443,
+                    "transport_protocol": "TCP"
+                }
+            ],
+            "spoofable": true,
+            "timestamp": "2024-06-04T08:00:00Z",
+            "http_paths": [],
+            "vpn_service": "",
+            "country_code": "ES",
+            "destinations": [
+                {
+                    "country": "Turkey",
+                    "country_code": "TR"
+                }
+            ],
+            "organization": "IONOS SE",
+            "classification": "unknown",
+            "http_user_agents": [],
+            "ja3_fingerprints": [
+                "d3e1de2ca313c6c0a639f69cc3e924a4"
+            ],
+            "hassh_fingerprints": []
+        }
+    ],
+    "metadata": {
+        "ip": "217.76.155.236",
+        "limit": 50,
+        "end_time": "2024-06-05T10:37:07.705446059Z",
+        "start_time": "2024-06-04T00:00:00Z",
+        "next_cursor": ""
+    }
+}
