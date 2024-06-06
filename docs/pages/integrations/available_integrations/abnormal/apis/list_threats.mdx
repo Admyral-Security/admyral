@@ -1,0 +1,31 @@
+import { Callout } from "nextra/components";
+
+# List Threats
+
+Get a list of threats.
+
+<Callout type="info">
+    For Abnormal's documentation, see [Abnormal List Threats API](https://app.swaggerhub.com/apis/abnormal-security/abx/1.4.3#/Threats/get_threats).
+</Callout>
+
+## Parameters:
+
+| Field          | Description                                                                 | Required |
+| -------------- | --------------------------------------------------------------------------- | :------: |
+| **Attack Type**| Filters threats based on the type of attack. Options: Internal-to-Internal Attacks (Email Account Takeover), Spam, Reconnaissance, Scam, Social Engineering (BEC), Phishing: Credential, Invoice/Payment Fraud (BEC), Malware, Extortion, Phishing: Sensitive Data, Other |   No     |
+| **Recipient**  | Filters threats based on the name or email address of the recipient.        |    No    |
+| **Sender**     | Filters threats based on the name or email address of the sender.           |    No    |
+| **Subject**    | Filters threats based on the email subject.                                 |    No    |
+
+## Example Output
+
+```json
+{
+  "threats": [
+    {
+      "threatId": "184712ab-6d8b-47b3-89d3-a314efef79e2"
+    }
+  ],
+  "pageNumber": 1,
+  "nextPageNumber": 2
+}

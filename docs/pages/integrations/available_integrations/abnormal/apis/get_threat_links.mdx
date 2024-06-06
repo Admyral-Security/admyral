@@ -1,0 +1,31 @@
+import { Callout } from "nextra/components";
+
+# Get Threat Links
+
+Get information of links in a threat campaign.
+
+<Callout type="info">
+	For Abnormal's documentation, see [Abnormal Get Threat Links API](https://docs.blinkops.com/docs/integrations/abnormal/actions/get-threat-links).
+</Callout>
+
+## Parameters:
+
+| Field            | Description                 | Required |
+| ---------------- | --------------------------- | :------: |
+| **Threat ID**    | The Threat ID to query      |   Yes    |
+
+## Example Output
+
+```json
+{
+    "threats": [
+        {
+            "abxMessageId": 4551618356913732000,
+            "domainLink": "lamronba.com",
+            "linkType": "html href",
+            "source": "body",
+            "displayText": "This is not a spoof!",
+            "linkUrl": "http://spoof.lamronba.com"
+        }
+    ]
+}
