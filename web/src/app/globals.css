@@ -26,3 +26,60 @@ https://stackoverflow.com/questions/74607419/react-markdown-don%C2%B4t-render-ma
 	all: revert;
 	width: 100%;
 }
+
+.Toastify__toast.Toastify__toast-theme--colored.Toastify__toast--info.Toastify__toast--close-on-click {
+	z-index: 9999;
+
+	color: #1c2024;
+	border-radius: var(--Radius-4, 8px);
+	border: 1px solid var(--Neutral-color-Neutral-Alpha-3, rgba(0, 0, 59, 0.05));
+	background: var(--Accent-color-Accent-Alpha-3, #f0f4ff);
+
+	box-shadow:
+		0px 16px 36px -20px var(--Neutral-color-Neutral-Alpha-7, rgba(1, 6, 47, 0.17)),
+		0px 16px 64px 0px
+			var(--Neutral-color-Neutral-Alpha-2, rgba(5, 5, 88, 0.02)),
+		0px 12px 60px 0px var(--Overlays-Black-Alpha-3, rgba(0, 0, 0, 0.05));
+
+	width: 300px;
+
+	padding: 6px;
+}
+
+.Toastify__toast.Toastify__toast-theme--colored.Toastify__toast--success.Toastify__toast--close-on-click {
+	z-index: 9999;
+
+	color: #18794e;
+	border-radius: var(--Radius-4, 8px);
+	border: 1px solid var(--Neutral-color-Neutral-Alpha-3, rgba(0, 0, 59, 0.05));
+	background: var(--Semantic-colors-Success-3, #e9f9ee) !important;
+
+	box-shadow:
+		0px 16px 36px -20px var(--Neutral-color-Neutral-Alpha-7, rgba(1, 6, 47, 0.17)),
+		0px 16px 64px 0px
+			var(--Neutral-color-Neutral-Alpha-2, rgba(5, 5, 88, 0.02)),
+		0px 12px 60px 0px var(--Overlays-Black-Alpha-3, rgba(0, 0, 0, 0.05));
+
+	width: 300px;
+
+	padding: 6px;
+}
+
+.Toastify__toast.Toastify__toast-theme--colored.Toastify__toast--error.Toastify__toast--close-on-click {
+	z-index: 9999;
+
+	color: #bb0007d5;
+	border-radius: var(--Radius-4, 8px);
+	border: 1px solid var(--Neutral-color-Neutral-Alpha-3, rgba(0, 0, 59, 0.05));
+	background: var(--Semantic-colors-Error-Alpha-3, #ffefef);
+
+	box-shadow:
+		0px 16px 36px -20px var(--Neutral-color-Neutral-Alpha-7, rgba(1, 6, 47, 0.17)),
+		0px 16px 64px 0px
+			var(--Neutral-color-Neutral-Alpha-2, rgba(5, 5, 88, 0.02)),
+		0px 12px 60px 0px var(--Overlays-Black-Alpha-3, rgba(0, 0, 0, 0.05));
+
+	width: 300px;
+
+	padding: 6px;
+}

@@ -2,9 +2,7 @@ import Nav from "@/components/nav";
 import { Box, Grid } from "@radix-ui/themes";
 import { ReactNode } from "react";
 import PostHogIdentifierProvider from "../providers";
-import { Bounce, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import "./layout.css";
+import { Slide, ToastContainer } from "react-toastify";
 
 export default function Layout({ children }: { children: ReactNode }) {
 	return (
@@ -17,13 +15,13 @@ export default function Layout({ children }: { children: ReactNode }) {
 			</Grid>
 			<ToastContainer
 				position="bottom-center"
-				autoClose={5000}
+				autoClose={50000}
 				hideProgressBar={true}
 				stacked={false}
 				closeOnClick={true}
 				closeButton={false}
 				theme="colored"
-				transition={Bounce}
+				transition={Slide}
 				icon={false}
 			/>
 		</PostHogIdentifierProvider>
