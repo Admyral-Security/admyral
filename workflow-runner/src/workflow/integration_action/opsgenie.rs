@@ -177,7 +177,10 @@ mod tests {
             _workflow_id: &str,
             _credential_name: &str,
         ) -> Result<Option<Credential>> {
-            Ok(Some(Credential { secret: "{\"API_KEY\": \"some-api-key\", \"INSTANCE\": \"EU\"}".to_string(), credential_type: Some("OPSGENIE".to_string()) }))
+            Ok(Some(Credential {
+                secret: "{\"API_KEY\": \"some-api-key\", \"INSTANCE\": \"EU\"}".to_string(),
+                credential_type: Some("OPSGENIE".to_string()),
+            }))
         }
     }
 
@@ -189,7 +192,10 @@ mod tests {
             _workflow_id: &str,
             _credential_name: &str,
         ) -> Result<Option<Credential>> {
-            Ok(Some(Credential { secret: "{\"API_KEY\": \"some-api-key\"}".to_string(), credential_type: Some("OPSGENIE".to_string()) }))
+            Ok(Some(Credential {
+                secret: "{\"API_KEY\": \"some-api-key\"}".to_string(),
+                credential_type: Some("OPSGENIE".to_string()),
+            }))
         }
     }
 
@@ -257,5 +263,4 @@ mod tests {
         let value = result.unwrap();
         assert_eq!(value, json!({"ok": true}));
     }
-
 }

@@ -32,6 +32,16 @@ pub trait HttpClient: Send + Sync {
         Ok(serde_json::json!({}))
     }
 
+    async fn delete(
+        &self,
+        url: &str,
+        headers: HashMap<String, String>,
+        expected_response_status: u16,
+        error_message: String,
+    ) -> Result<serde_json::Value> {
+        Ok(serde_json::json!({}))
+    }
+
     async fn post(
         &self,
         url: &str,
@@ -55,6 +65,18 @@ pub trait HttpClient: Send + Sync {
     }
 
     async fn get_with_oauth_refresh(
+        &self,
+        context: &Context,
+        url: &str,
+        oauth_token_name: &str,
+        headers: HashMap<String, String>,
+        expected_response_status: u16,
+        error_message: String,
+    ) -> Result<serde_json::Value> {
+        Ok(serde_json::json!({}))
+    }
+
+    async fn delete_with_oauth_refresh(
         &self,
         context: &Context,
         url: &str,
@@ -166,6 +188,24 @@ async fn make_get_request(
         .map_err(|e| anyhow!(e))
 }
 
+async fn make_delete_request(
+    client: &reqwest::Client,
+    url: &str,
+    header_parameters: &HashMap<String, String>,
+) -> Result<Response> {
+    let mut headers = HeaderMap::new();
+    for (key, value) in header_parameters.iter() {
+        headers.insert(HeaderName::from_str(key)?, HeaderValue::from_str(value)?);
+    }
+
+    client
+        .delete(url)
+        .headers(headers)
+        .send()
+        .await
+        .map_err(|e| anyhow!(e))
+}
+
 async fn make_post_request(
     client: &reqwest::Client,
     url: &str,
@@ -248,6 +288,7 @@ async fn make_put_request(
 
 enum Operation {
     Get,
+    Delete,
     Post { body: RequestBodyType },
     Put { body: RequestBodyType },
 }
@@ -279,6 +320,7 @@ impl ReqwestClient {
 
         let response = match &operation {
             Operation::Get => make_get_request(&self.client, url, &headers).await?,
+            Operation::Delete => make_delete_request(&self.client, url, &headers).await?,
             Operation::Post { body } => {
                 make_post_request(&self.client, url, &headers, body).await?
             }
@@ -310,6 +352,7 @@ impl ReqwestClient {
 
         let response = match &operation {
             Operation::Get => make_get_request(&self.client, url, &headers).await?,
+            Operation::Delete => make_delete_request(&self.client, url, &headers).await?,
             Operation::Post { body } => {
                 make_post_request(&self.client, url, &headers, body).await?
             }
@@ -330,6 +373,17 @@ impl HttpClient for ReqwestClient {
         error_message: String,
     ) -> Result<serde_json::Value> {
         let response = make_get_request(&self.client, url, &header_parameters).await?;
+        decode_response(response, expected_response_status, error_message).await
+    }
+
+    async fn delete(
+        &self,
+        url: &str,
+        header_parameters: HashMap<String, String>,
+        expected_response_status: u16,
+        error_message: String,
+    ) -> Result<serde_json::Value> {
+        let response = make_delete_request(&self.client, url, &header_parameters).await?;
         decode_response(response, expected_response_status, error_message).await
     }
 
@@ -374,6 +428,27 @@ impl HttpClient for ReqwestClient {
             expected_response_status,
             error_message,
             Operation::Get,
+        )
+        .await
+    }
+
+    async fn delete_with_oauth_refresh(
+        &self,
+        context: &Context,
+        url: &str,
+        oauth_token_name: &str,
+        headers: HashMap<String, String>,
+        expected_response_status: u16,
+        error_message: String,
+    ) -> Result<serde_json::Value> {
+        self.with_oauth_refresh(
+            context,
+            url,
+            oauth_token_name,
+            headers,
+            expected_response_status,
+            error_message,
+            Operation::Delete,
         )
         .await
     }
