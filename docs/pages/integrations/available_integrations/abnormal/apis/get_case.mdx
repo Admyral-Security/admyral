@@ -5,25 +5,24 @@ import { Callout } from "nextra/components";
 Provides the analysis and timeline details of a case.
 
 <Callout type="info">
-	For Abnormal's documentation, see [Abnormal Get Case API](https://app.swaggerhub.com/apis/abnormal-security/abx/1.4.3#/Cases/get_cases__caseId_).
+	For Abnormal's documentation, see [Abnormal Get Case
+	API](https://app.swaggerhub.com/apis/abnormal-security/abx/1.4.3#/Cases/get_cases__caseId_).
 </Callout>
 
 ## Parameters:
 
-| Field          | Description             | Required |
-| -------------- | ----------------------- | :------: |
-| **Case ID**    | The Case ID to query    |   Yes    |
+| Field       | Description          | Required |
+| ----------- | -------------------- | :------: |
+| **Case ID** | The Case ID to query |   Yes    |
 
 ## Example Output
 
 ```json
 {
-  "caseId": "1234",
-  "severity": "Potential Account Takeover",
-  "affectedEmployee": "FirstName LastName",
-  "firstObserved": "2020-06-09T17:42:59Z",
-  "threatIds": [
-    "184712ab-6d8b-47b3-89d3-a314efef79e2"
-  ]
+	"caseId": "1234",
+	"severity": "Potential Account Takeover",
+	"affectedEmployee": "FirstName LastName",
+	"firstObserved": "2020-06-09T17:42:59Z",
+	"threatIds": ["184712ab-6d8b-47b3-89d3-a314efef79e2"]
 }
 ```

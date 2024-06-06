@@ -1978,29 +1978,30 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 	},
 	// Abnormal
 	[IntegrationType.ABNORMAL]: {
-        name: "Abnormal",
-        icon: {
-            src: "/abnormal_logo.svg",
-            isSquareIcon: true,
-        },
-        credential: {
-            authType: AuthType.SECRET,
-            parameters: [
-                {
-                    id: "API_KEY",
-                    displayName: "API Key",
-                },
-                {
-                    id: "DOMAIN",
-                    displayName: "Domain",
-                },
-            ],
-        },
-        apis: [
+		name: "Abnormal",
+		icon: {
+			src: "/abnormal_logo.svg",
+			isSquareIcon: true,
+		},
+		credential: {
+			authType: AuthType.SECRET,
+			parameters: [
+				{
+					id: "API_KEY",
+					displayName: "API Key",
+				},
+				{
+					id: "DOMAIN",
+					displayName: "Domain",
+				},
+			],
+		},
+		apis: [
 			{
 				id: "GET_CASE_ANALYSIS",
 				name: "Get Case Analysis",
-				description: "Provides the analysis and timeline details of a case.",
+				description:
+					"Provides the analysis and timeline details of a case.",
 				documentationUrl:
 					"https://app.swaggerhub.com/apis/abnormal-security/abx/1.4.3#/Cases/get_cases__caseId__analysis",
 				requiresAuthentication: true,
@@ -2085,7 +2086,8 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 			{
 				id: "LIST_CASES",
 				name: "List Cases",
-				description: "Get a list of Abnormal cases identified by Abnormal Security.",
+				description:
+					"Get a list of Abnormal cases identified by Abnormal Security.",
 				documentationUrl:
 					"https://app.swaggerhub.com/apis/abnormal-security/abx/1.4.3#/Cases/get_cases",
 				requiresAuthentication: true,
@@ -2093,7 +2095,8 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 					{
 						id: "FILTER",
 						displayName: "Filter",
-						description: "Value must be of the format filter={FILTER KEY} gte YYYY-MM-DDTHH:MM:SSZ lte YYYY-MM-DDTHH:MM:SSZ.",
+						description:
+							"Value must be of the format filter={FILTER KEY} gte YYYY-MM-DDTHH:MM:SSZ lte YYYY-MM-DDTHH:MM:SSZ.",
 						required: false,
 						dataType: ApiParameterDatatype.TEXT,
 					},
@@ -2110,34 +2113,38 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 					{
 						id: "ATTACK_TYPE",
 						displayName: "Attack Type",
-						description: "Filters threats based on the type of attack. Options: Internal-to-Internal Attacks (Email Account Takeover), Spam, Reconnaissance, Scam, Social Engineering (BEC), Phishing: Credential, Invoice/Payment Fraud (BEC), Malware, Extortion, Phishing: Sensitive Data, Other",
+						description:
+							"Filters threats based on the type of attack. Options: Internal-to-Internal Attacks (Email Account Takeover), Spam, Reconnaissance, Scam, Social Engineering (BEC), Phishing: Credential, Invoice/Payment Fraud (BEC), Malware, Extortion, Phishing: Sensitive Data, Other",
 						required: false,
 						dataType: ApiParameterDatatype.TEXT,
 					},
 					{
 						id: "RECIPIENT",
 						displayName: "Recipient",
-						description: "Filters threats based on the name or email address of the recipient.",
+						description:
+							"Filters threats based on the name or email address of the recipient.",
 						required: false,
 						dataType: ApiParameterDatatype.TEXT,
 					},
 					{
 						id: "SENDER",
 						displayName: "Sender",
-						description: "Filters threats based on the name or email address of the sender.",
+						description:
+							"Filters threats based on the name or email address of the sender.",
 						required: false,
 						dataType: ApiParameterDatatype.TEXT,
 					},
 					{
 						id: "SUBJECT",
 						displayName: "Subject",
-						description: "Filters threats based on the email subject.",
+						description:
+							"Filters threats based on the email subject.",
 						required: false,
 						dataType: ApiParameterDatatype.TEXT,
 					},
 				],
-			}
+			},
 		],
-	}
+	},
 	// ...
 };
