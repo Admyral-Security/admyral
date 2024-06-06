@@ -5,7 +5,9 @@ use crate::workflow::{
     utils::{get_bool_parameter, get_number_parameter, get_string_parameter, ParameterType},
 };
 use anyhow::{anyhow, Result};
+use maplit::hashmap;
 use serde::{Deserialize, Serialize};
+use serde_json::json;
 use std::collections::HashMap;
 
 const INTEGRATION: &str = "Microsoft Defender";
@@ -29,21 +31,21 @@ impl IntegrationExecutor for MsDefenderExecutor {
         match api {
             "LIST_ALERTS_V2" => list_alerts_v2(client, context, credential_name, parameters).await,
             "GET_ALERT" => get_alert(client, context, credential_name, parameters).await,
-            "UPDATE_ALERT_STATUS" => {
-                update_alert(client, context, credential_name, parameters).await
-            }
+            "UPDATE_ALERT" => update_alert(client, context, credential_name, parameters).await,
             "CREATE_COMMENT_FOR_ALERT" => {
                 create_comment_for_alert(client, context, credential_name, parameters).await
             }
             "LIST_INCIDENTS" => list_incidents(client, context, credential_name, parameters).await,
             "GET_INCIDENT" => get_incident(client, context, credential_name, parameters).await,
-            /** "UPDATE_INCIDENT" => {
+            "UPDATE_INCIDENT" => {
                 update_incident(client, context, credential_name, parameters).await
-            } */
+            }
             "CREATE_COMMENT_FOR_INCIDENT" => {
                 create_comment_for_incident(client, context, credential_name, parameters).await
             }
-            // "RUN_HUNTING_QUERY" => run_hunting_query(client, context, credential_name, parameters).await,
+            "RUN_HUNTING_QUERY" => {
+                run_hunting_query(client, context, credential_name, parameters).await
+            }
             _ => return Err(anyhow!("API {api} not implemented for {INTEGRATION}.")),
         }
     }
@@ -120,16 +122,39 @@ async fn list_alerts_v2(
         api_url = format!("{api_url}?{}", query_params.join("&"));
     }
 
-    client
-        .get_with_oauth_refresh(
-            context,
-            &api_url,
-            credential_name,
-            HashMap::new(),
-            200,
-            format!("Error: Failed to call {INTEGRATION} List Alerts API"),
-        )
-        .await
+    let mut values = Vec::new();
+    // Handle pagination
+    loop {
+        let result = client
+            .get_with_oauth_refresh(
+                context,
+                &api_url,
+                credential_name,
+                HashMap::new(),
+                200,
+                format!("Error: Failed to call {INTEGRATION} List Alerts API"),
+            )
+            .await?;
+
+        values.extend(
+            result
+                .get("value")
+                .expect("value parameter must exist")
+                .as_array()
+                .expect("must be an array")
+                .clone()
+                .into_iter(),
+        );
+
+        match result.get("@odata.nextLink") {
+            Some(value) => {
+                api_url = value.as_str().unwrap().to_string();
+            }
+            None => break,
+        }
+    }
+
+    Ok(json!({"value": values}))
 }
 
 // https://learn.microsoft.com/en-us/graph/api/security-alert-get?view=graph-rest-1.0&tabs=http
@@ -150,10 +175,7 @@ async fn get_alert(
     .await?
     .expect("ALERT_ID is required");
 
-    let api_url = format!(
-        "https://graph.microsoft.com/v1.0/security/alerts_v2/{}",
-        alert_id
-    );
+    let api_url = format!("https://graph.microsoft.com/v1.0/security/alerts_v2/{alert_id}");
 
     client
         .get_with_oauth_refresh(
@@ -177,7 +199,7 @@ async fn update_alert(
     let alert_id = get_string_parameter(
         "ALERT_ID",
         INTEGRATION,
-        "UPDATE_ALERT_STATUS",
+        "UPDATE_ALERT",
         parameters,
         context,
         ParameterType::Required,
@@ -185,40 +207,40 @@ async fn update_alert(
     .await?
     .expect("ALERT_ID is required");
 
-    let status = get_string_parameter(
+    let status_opt = get_string_parameter(
         "STATUS",
         INTEGRATION,
-        "UPDATE_ALERT_STATUS",
+        "UPDATE_ALERT",
         parameters,
         context,
         ParameterType::Optional,
     )
     .await?;
 
-    let classification = get_string_parameter(
+    let classification_opt = get_string_parameter(
         "CLASSIFICATION",
         INTEGRATION,
-        "UPDATE_ALERT_STATUS",
+        "UPDATE_ALERT",
         parameters,
         context,
         ParameterType::Optional,
     )
     .await?;
 
-    let determination = get_string_parameter(
+    let determination_opt = get_string_parameter(
         "DETERMINATION",
         INTEGRATION,
-        "UPDATE_ALERT_STATUS",
+        "UPDATE_ALERT",
         parameters,
         context,
         ParameterType::Optional,
     )
     .await?;
 
-    let assigned_to = get_string_parameter(
+    let assigned_to_opt = get_string_parameter(
         "ASSIGNED_TO",
         INTEGRATION,
-        "UPDATE_ALERT_STATUS",
+        "UPDATE_ALERT",
         parameters,
         context,
         ParameterType::Optional,
@@ -226,30 +248,30 @@ async fn update_alert(
     .await?;
 
     let mut body = HashMap::new();
-    if let Some(status) = status {
-        body.insert("status", serde_json::Value::String(status));
+    if let Some(status) = status_opt {
+        body.insert("status", json!(status));
     }
-    if let Some(classification) = classification {
-        body.insert("classification", serde_json::Value::String(classification));
+    if let Some(classification) = classification_opt {
+        body.insert("classification", json!(classification));
     }
-    if let Some(determination) = determination {
-        body.insert("determination", serde_json::Value::String(determination));
+    if let Some(determination) = determination_opt {
+        body.insert("determination", json!(determination));
     }
-    if let Some(assigned_to) = assigned_to {
-        body.insert("assignedTo", serde_json::Value::String(assigned_to));
-    }
+    let assigned_to = match assigned_to_opt {
+        Some(assigned_to_opt) => json!(assigned_to_opt),
+        None => serde_json::Value::Null,
+    };
+    body.insert("assignedTo", assigned_to);
 
-    let api_url = format!(
-        "https://graph.microsoft.com/v1.0/security/alerts_v2/{}",
-        alert_id
-    );
+    let api_url = format!("https://graph.microsoft.com/v1.0/security/alerts_v2/{alert_id}");
 
     client
-        .get_with_oauth_refresh(
+        .patch_with_oauth_refresh(
             context,
             &api_url,
             credential_name,
             HashMap::new(),
+            RequestBodyType::Json { body: json!(body) },
             200,
             format!("Error: Failed to call {INTEGRATION} API"),
         )
@@ -288,7 +310,7 @@ async fn create_comment_for_alert(
     let api_url =
         format!("https://graph.microsoft.com/v1.0/security/alerts_v2/{alert_id}/comments");
 
-    let body = serde_json::json!({
+    let body = json!({
         "@odata.type": "#microsoft.graph.security.alertComment",
         "comment": comment
     });
@@ -377,16 +399,39 @@ async fn list_incidents(
         api_url = format!("{api_url}?{}", query_params.join("&"));
     }
 
-    client
-        .get_with_oauth_refresh(
-            context,
-            &api_url,
-            credential_name,
-            HashMap::new(),
-            200,
-            format!("Error: Failed to call {INTEGRATION} List Incidents API"),
-        )
-        .await
+    let mut values = Vec::new();
+    // Handle pagination
+    loop {
+        let result = client
+            .get_with_oauth_refresh(
+                context,
+                &api_url,
+                credential_name,
+                HashMap::new(),
+                200,
+                format!("Error: Failed to call {INTEGRATION} List Incidents API"),
+            )
+            .await?;
+
+        values.extend(
+            result
+                .get("value")
+                .expect("value parameter must exist")
+                .as_array()
+                .expect("must be an array")
+                .clone()
+                .into_iter(),
+        );
+
+        match result.get("@odata.nextLink") {
+            Some(value) => {
+                api_url = value.as_str().unwrap().to_string();
+            }
+            None => break,
+        }
+    }
+
+    Ok(json!({"value": values}))
 }
 
 // https://learn.microsoft.com/en-us/graph/api/security-incident-get?view=graph-rest-1.0&tabs=http
@@ -407,10 +452,7 @@ async fn get_incident(
     .await?
     .expect("INCIDENT_ID is required");
 
-    let api_url = format!(
-        "https://graph.microsoft.com/v1.0/security/incidents/{}",
-        incident_id
-    );
+    let api_url = format!("https://graph.microsoft.com/v1.0/security/incidents/{incident_id}",);
 
     client
         .get_with_oauth_refresh(
@@ -424,9 +466,6 @@ async fn get_incident(
         .await
 }
 
-// TODO: Implement patch_with_oauth_refresh()
-// TODO: Handle ARRAY input
-/**
 // https://learn.microsoft.com/en-us/graph/api/security-incident-update?view=graph-rest-1.0&tabs=http
 async fn update_incident(
     client: &dyn HttpClient,
@@ -497,19 +536,20 @@ async fn update_incident(
 
     let mut body = HashMap::new();
     if let Some(assigned_to) = assigned_to {
-        body.insert("assignedTo", serde_json::Value::String(assigned_to));
+        body.insert("assignedTo", json!(assigned_to));
     }
     if let Some(classification) = classification {
-        body.insert("classification", serde_json::Value::String(classification));
+        body.insert("classification", json!(classification));
     }
     if let Some(determination) = determination {
-        body.insert("determination", serde_json::Value::String(determination));
+        body.insert("determination", json!(determination));
     }
     if let Some(status) = status {
-        body.insert("status", serde_json::Value::String(status));
+        body.insert("status", json!(status));
     }
     if let Some(custom_tags) = custom_tags {
-        body.insert("customTags", serde_json::Value::String(custom_tags));
+        let custom_tags = serde_json::from_str::<Vec<String>>(&custom_tags)?;
+        body.insert("customTags", json!(custom_tags));
     }
 
     let api_url = format!(
@@ -522,12 +562,13 @@ async fn update_incident(
             context,
             &api_url,
             credential_name,
-            body,
+            HashMap::new(),
+            RequestBodyType::Json { body: json!(body) },
             200,
             format!("Error: Failed to call {INTEGRATION} Update Incident API"),
         )
         .await
-}*/
+}
 
 // https://learn.microsoft.com/en-us/graph/api/security-incident-post-comments?view=graph-rest-1.0&tabs=http
 async fn create_comment_for_incident(
@@ -579,8 +620,6 @@ async fn create_comment_for_incident(
         .await
 }
 
-// TODO: fix post_with_oauth_refresh parameters
-/*
 // https://learn.microsoft.com/en-us/graph/api/security-security-runhuntingquery?view=graph-rest-1.0&tabs=http
 async fn run_hunting_query(
     client: &dyn HttpClient,
@@ -609,11 +648,12 @@ async fn run_hunting_query(
     )
     .await?;
 
-    let mut body = serde_json::Map::new();
-    body.insert("Query".to_string(), serde_json::Value::String(query));
+    let mut body = hashmap! {
+        "Query".to_string() => json!(query)
+    };
 
     if let Some(timespan) = timespan {
-        body.insert("Timespan".to_string(), serde_json::Value::String(timespan));
+        body.insert("Timespan".to_string(), json!(timespan));
     }
 
     let api_url = "https://graph.microsoft.com/v1.0/security/runHuntingQuery";
@@ -624,13 +664,12 @@ async fn run_hunting_query(
             api_url,
             credential_name,
             HashMap::new(),
-            RequestBodyType::Json(serde_json::Value::Object(body)),
+            RequestBodyType::Json { body: json!(body) },
             200,
             format!("Error: Failed to call {INTEGRATION} Run Hunting Query API"),
         )
         .await
 }
-*/
 
 #[cfg(test)]
 mod tests {
@@ -639,7 +678,9 @@ mod tests {
     use async_trait::async_trait;
     use maplit::hashmap;
     use serde_json::json;
-    use std::sync::Arc;
+    use std::borrow::BorrowMut;
+    use std::cell::RefCell;
+    use std::sync::{Arc, Mutex};
 
     struct MockHttpClient;
     #[async_trait]
@@ -667,6 +708,82 @@ mod tests {
                 }))
             }
         }
+
+        async fn post_with_oauth_refresh(
+            &self,
+            context: &Context,
+            url: &str,
+            oauth_token_name: &str,
+            headers: HashMap<String, String>,
+            body: RequestBodyType,
+            expected_response_status: u16,
+            error_message: String,
+        ) -> Result<serde_json::Value> {
+            match body {
+                RequestBodyType::Json { body } => Ok(json!({"url": url, "body": body })),
+                RequestBodyType::Form { params } => Ok(json!({"url": url, "body": params})),
+            }
+        }
+
+        async fn patch_with_oauth_refresh(
+            &self,
+            context: &Context,
+            url: &str,
+            oauth_token_name: &str,
+            headers: HashMap<String, String>,
+            body: RequestBodyType,
+            expected_response_status: u16,
+            error_message: String,
+        ) -> Result<serde_json::Value> {
+            match body {
+                RequestBodyType::Json { body } => Ok(json!({"url": url, "body": body })),
+                RequestBodyType::Form { params } => Ok(json!({"url": url, "body": params})),
+            }
+        }
+    }
+
+    #[derive(Default)]
+    struct MockHttpClientPagination {
+        lock: Mutex<RefCell<i32>>,
+    }
+
+    #[async_trait]
+    impl HttpClient for MockHttpClientPagination {
+        async fn get_with_oauth_refresh(
+            &self,
+            context: &Context,
+            url: &str,
+            oauth_token_name: &str,
+            headers: HashMap<String, String>,
+            expected_response_status: u16,
+            error_message: String,
+        ) -> Result<serde_json::Value> {
+            let lock_guard = self.lock.lock().unwrap();
+
+            let state = *lock_guard.borrow();
+
+            if state == 0 {
+                lock_guard.replace(1);
+                let next_link = format!("{url}?page=2");
+                return Ok(json!({
+                    "value": [url],
+                    "@odata.nextLink": next_link
+                }));
+            }
+
+            if state == 1 {
+                lock_guard.replace(2);
+                let next_link = url.replace("page=2", "page=3");
+                return Ok(json!({
+                    "value": [url],
+                    "@odata.nextLink": next_link
+                }));
+            }
+
+            Ok(json!({
+                "value": [url]
+            }))
+        }
     }
 
     struct MockDb;
@@ -675,6 +792,19 @@ mod tests {
 
     async fn setup() -> (Arc<MockHttpClient>, Context) {
         let client = Arc::new(MockHttpClient);
+        let context = Context::init(
+            "ddd54f25-0537-4e40-ab96-c93beee543de".to_string(),
+            None,
+            Arc::new(MockDb),
+            client.clone(),
+        )
+        .await
+        .unwrap();
+        (client, context)
+    }
+
+    async fn setup_pagination() -> (Arc<MockHttpClientPagination>, Context) {
+        let client = Arc::new(MockHttpClientPagination::default());
         let context = Context::init(
             "ddd54f25-0537-4e40-ab96-c93beee543de".to_string(),
             None,
@@ -732,6 +862,30 @@ mod tests {
                 json!({"value": ["https://graph.microsoft.com/v1.0/security/alerts_v2/$count?$filter=createdDateTime gt 2024-05-01T00:00:00Z&$top=10&$skip=5"]})
             );
         }
+
+        {
+            let (client, context) = setup_pagination().await;
+            let parameters = HashMap::new();
+            let result = MsDefenderExecutor
+                .execute(
+                    &*client,
+                    &context,
+                    "LIST_ALERTS_V2",
+                    &Some("credentials".to_string()),
+                    &parameters,
+                )
+                .await;
+            assert!(result.is_ok());
+            let value = result.unwrap();
+            assert_eq!(
+                value,
+                json!({"value": [
+                    "https://graph.microsoft.com/v1.0/security/alerts_v2",
+                    "https://graph.microsoft.com/v1.0/security/alerts_v2?page=2",
+                    "https://graph.microsoft.com/v1.0/security/alerts_v2?page=3",
+                ]})
+            )
+        }
     }
 
     #[tokio::test]
@@ -775,7 +929,7 @@ mod tests {
             .execute(
                 &*client,
                 &context,
-                "UPDATE_ALERT_STATUS",
+                "UPDATE_ALERT",
                 &Some("credentials".to_string()),
                 &parameters,
             )
@@ -785,7 +939,14 @@ mod tests {
         let value = result.unwrap();
         assert_eq!(
             value,
-            json!({"value": ["https://graph.microsoft.com/v1.0/security/alerts_v2/12345"]})
+            json!({"url": "https://graph.microsoft.com/v1.0/security/alerts_v2/12345",
+                "body": {
+                    "status": "inProgress",
+                    "classification": "falsePositive",
+                    "determination": "phishing",
+                    "assignedTo": "anotheruser@example.com"
+                }
+            })
         );
     }
 
@@ -813,7 +974,7 @@ mod tests {
         assert_eq!(
             value,
             json!({
-                "value": ["https://graph.microsoft.com/v1.0/security/alerts_v2/alert-123/comments"],
+                "url": "https://graph.microsoft.com/v1.0/security/alerts_v2/alert-123/comments",
                 "body": {
                     "@odata.type": "#microsoft.graph.security.alertComment",
                     "comment": "This is a test comment"
@@ -821,6 +982,7 @@ mod tests {
             })
         );
     }
+
     #[tokio::test]
     async fn test_list_incidents() {
         {
@@ -867,6 +1029,30 @@ mod tests {
                 json!({"value": ["https://graph.microsoft.com/v1.0/security/incidents/$count?$filter=createdDateTime gt 2024-05-01T00:00:00Z&$top=10&$skip=5"]})
             );
         }
+
+        {
+            let (client, context) = setup_pagination().await;
+            let parameters = HashMap::new();
+            let result = MsDefenderExecutor
+                .execute(
+                    &*client,
+                    &context,
+                    "LIST_INCIDENTS",
+                    &Some("credentials".to_string()),
+                    &parameters,
+                )
+                .await;
+            assert!(result.is_ok());
+            let value = result.unwrap();
+            assert_eq!(
+                value,
+                json!({"value": [
+                    "https://graph.microsoft.com/v1.0/security/incidents",
+                    "https://graph.microsoft.com/v1.0/security/incidents?page=2",
+                    "https://graph.microsoft.com/v1.0/security/incidents?page=3",
+                ]})
+            )
+        }
     }
 
     #[tokio::test]
@@ -905,7 +1091,7 @@ mod tests {
             "CLASSIFICATION".to_string() => json!("truePositive"),
             "DETERMINATION".to_string() => json!("malware"),
             "STATUS".to_string() => json!("active"),
-            "CUSTOM_TAGS".to_string() => json!(["tag1", "tag2"])
+            "CUSTOM_TAGS".to_string() => json!("[\"tag1\", \"tag2\"]")
         };
 
         let result = MsDefenderExecutor
@@ -923,7 +1109,7 @@ mod tests {
         assert_eq!(
             value,
             json!({
-                "value": ["https://graph.microsoft.com/v1.0/security/incidents/incident-123"],
+                "url": "https://graph.microsoft.com/v1.0/security/incidents/incident-123",
                 "body": {
                     "assignedTo": "user@example.com",
                     "classification": "truePositive",
@@ -959,7 +1145,7 @@ mod tests {
         assert_eq!(
             value,
             json!({
-                "value": ["https://graph.microsoft.com/v1.0/security/incidents/incident-123/comments"],
+                "url": "https://graph.microsoft.com/v1.0/security/incidents/incident-123/comments",
                 "body": {
                     "@odata.type": "#microsoft.graph.security.alertComment",
                     "comment": "This is a test comment"
@@ -992,7 +1178,7 @@ mod tests {
         assert_eq!(
             value,
             json!({
-                "value": ["https://graph.microsoft.com/v1.0/security/runHuntingQuery"],
+                "url": "https://graph.microsoft.com/v1.0/security/runHuntingQuery",
                 "body": {
                     "Query": "DeviceNetworkEvents | where Timestamp > ago(1d) | where RemoteIP == '192.168.1.1'",
                     "Timespan": "P7D"

@@ -1775,7 +1775,8 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 				id: "GET_ALERT",
 				name: "Get Alert",
 				description: "Get an alert.",
-				documentationUrl: "https://learn.microsoft.com/en-us/graph/api/security-alert-get?view=graph-rest-1.0&tabs=http",
+				documentationUrl:
+					"https://learn.microsoft.com/en-us/graph/api/security-alert-get?view=graph-rest-1.0&tabs=http",
 				requiresAuthentication: true,
 				parameters: [
 					{
@@ -1788,10 +1789,12 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 				],
 			},
 			{
-				id: "UPDATE_ALERT_STATUS",
-				name: "Update Alert Status",
-				description: "Update the status, classification, determination, and assignedTo of an alert.",
-				documentationUrl: "https://learn.microsoft.com/en-us/graph/api/security-alert-update?view=graph-rest-1.0&tabs=http",
+				id: "UPDATE_ALERT",
+				name: "Update Alert",
+				description:
+					"Update the status, classification, determination, and assigned to fields of an alert.",
+				documentationUrl:
+					"https://learn.microsoft.com/en-us/graph/api/security-alert-update?view=graph-rest-1.0&tabs=http",
 				requiresAuthentication: true,
 				parameters: [
 					{
@@ -1804,28 +1807,31 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 					{
 						id: "STATUS",
 						displayName: "Status",
-						description: "The status of the alert. Possible values: new, inProgress, resolved, unknownFutureValue.",
+						description:
+							"The status of the alert. Possible values: new, inProgress, resolved, unknownFutureValue.",
 						required: false,
 						dataType: ApiParameterDatatype.TEXT,
 					},
 					{
 						id: "CLASSIFICATION",
 						displayName: "Classification",
-						description: "The classification of the alert. Possible values: unknown, falsePositive, truePositive, informationalExpectedActivity, unknownFutureValue.",
+						description:
+							"The classification of the alert. Possible values: unknown, falsePositive, truePositive, informationalExpectedActivity, unknownFutureValue.",
 						required: false,
 						dataType: ApiParameterDatatype.TEXT,
 					},
 					{
 						id: "DETERMINATION",
 						displayName: "Determination",
-						description: "The determination of the alert. Possible values: unknown, apt, malware, securityPersonnel, securityTesting, unwantedSoftware, other, multiStagedAttack, compromisedUser, phishing, maliciousUserActivity, clean, insufficientData, confirmedUserActivity, lineOfBusinessApplication, unknownFutureValue.",
+						description:
+							"The determination of the alert. Possible values: unknown, apt, malware, securityPersonnel, securityTesting, unwantedSoftware, other, multiStagedAttack, compromisedUser, phishing, maliciousUserActivity, clean, insufficientData, confirmedUserActivity, lineOfBusinessApplication, unknownFutureValue.",
 						required: false,
 						dataType: ApiParameterDatatype.TEXT,
 					},
 					{
 						id: "ASSIGNED_TO",
 						displayName: "Assigned To",
-						description: "Owner of the incident, or null if no owner is assigned.",
+						description: "Owner of the incident.",
 						required: false,
 						dataType: ApiParameterDatatype.TEXT,
 					},
@@ -1875,7 +1881,8 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 					{
 						id: "LIMIT",
 						displayName: "Limit",
-						description: "The maximum number of incidents to return.",
+						description:
+							"The maximum number of incidents to return.",
 						required: false,
 						dataType: ApiParameterDatatype.NUMBER,
 					},
@@ -1901,7 +1908,8 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 				id: "GET_INCIDENT",
 				name: "Get Incident",
 				description: "Get an incident.",
-				documentationUrl: "https://learn.microsoft.com/en-us/graph/api/security-incident-get?view=graph-rest-1.0&tabs=http",
+				documentationUrl:
+					"https://learn.microsoft.com/en-us/graph/api/security-incident-get?view=graph-rest-1.0&tabs=http",
 				requiresAuthentication: true,
 				parameters: [
 					{
@@ -1917,7 +1925,8 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 				id: "UPDATE_INCIDENT",
 				name: "Update Incident",
 				description: "Update the specified properties of an incident.",
-				documentationUrl: "https://learn.microsoft.com/en-us/graph/api/security-incident-update?view=graph-rest-1.0&tabs=http",
+				documentationUrl:
+					"https://learn.microsoft.com/en-us/graph/api/security-incident-update?view=graph-rest-1.0&tabs=http",
 				requiresAuthentication: true,
 				parameters: [
 					{
@@ -1930,47 +1939,51 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 					{
 						id: "ASSIGNED_TO",
 						displayName: "Assigned To",
-						description: "Owner of the incident, or null if no owner is assigned.",
+						description:
+							"Owner of the incident, or null if no owner is assigned.",
 						required: false,
 						dataType: ApiParameterDatatype.TEXT,
 					},
 					{
 						id: "CLASSIFICATION",
 						displayName: "Classification",
-						description: "The classification of the incident. Possible values: unknown, falsePositive, truePositive, informationalExpectedActivity, unknownFutureValue.",
+						description:
+							"The classification of the incident. Possible values: unknown, falsePositive, truePositive, informationalExpectedActivity, unknownFutureValue.",
 						required: false,
 						dataType: ApiParameterDatatype.TEXT,
 					},
 					{
 						id: "DETERMINATION",
 						displayName: "Determination",
-						description: "The determination of the incident. Possible values: unknown, apt, malware, securityPersonnel, securityTesting, unwantedSoftware, other, multiStagedAttack, compromisedUser, phishing, maliciousUserActivity, notEnoughDataToValidate, confirmedUserActivity, lineOfBusinessApplication, unknownFutureValue.",
+						description:
+							"The determination of the incident. Possible values: unknown, apt, malware, securityPersonnel, securityTesting, unwantedSoftware, other, multiStagedAttack, compromisedUser, phishing, maliciousUserActivity, notEnoughDataToValidate, confirmedUserActivity, lineOfBusinessApplication, unknownFutureValue.",
 						required: false,
 						dataType: ApiParameterDatatype.TEXT,
 					},
 					{
 						id: "STATUS",
 						displayName: "Status",
-						description: "The status of the incident. Possible values: active, resolved, redirected, unknownFutureValue.",
+						description:
+							"The status of the incident. Possible values: active, resolved, redirected, unknownFutureValue.",
 						required: false,
 						dataType: ApiParameterDatatype.TEXT,
 					},
-					/**
 					{
 						id: "CUSTOM_TAGS",
 						displayName: "Custom Tags",
-						description: "Array of custom tags associated with an incident.",
+						description:
+							'Array of custom tags associated with an incident. Example: ["tag1", "tag2"]',
 						required: false,
-						dataType: ApiParameterDatatype.ARRAY,
+						dataType: ApiParameterDatatype.TEXT,
 					},
-					 */
 				],
 			},
 			{
 				id: "CREATE_COMMENT_FOR_INCIDENT",
 				name: "Create Comment for Incident",
 				description: "Create a comment for an incident.",
-				documentationUrl: "https://learn.microsoft.com/en-us/graph/api/security-incident-post-comments?view=graph-rest-1.0&tabs=http",
+				documentationUrl:
+					"https://learn.microsoft.com/en-us/graph/api/security-incident-post-comments?view=graph-rest-1.0&tabs=http",
 				requiresAuthentication: true,
 				parameters: [
 					{
@@ -2001,19 +2014,21 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 					{
 						id: "QUERY",
 						displayName: "Query",
-						description: "The hunting query in Kusto Query Language (KQL).",
+						description:
+							"The hunting query in Kusto Query Language (KQL).",
 						required: true,
-						dataType: ApiParameterDatatype.TEXT,
+						dataType: ApiParameterDatatype.TEXTAREA,
 					},
 					{
 						id: "TIMESPAN",
 						displayName: "Timespan",
-						description: "The interval of time over which to query data, in ISO 8601 format. Optional.",
+						description:
+							"The interval of time over which to query data, in ISO 8601 format. Optional.",
 						required: false,
 						dataType: ApiParameterDatatype.TEXT,
 					},
 				],
-			},			
+			},
 		],
 	},
 	// GreyNoise

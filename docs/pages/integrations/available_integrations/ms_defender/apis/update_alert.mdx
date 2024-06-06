@@ -2,56 +2,57 @@ import { Callout } from "nextra/components";
 
 # Update Alert
 
-Update the status, classification, determination, and assignedTo fields of a specific alert.
+Update the status, classification, determination, and assigned to fields of a specific alert.
 
 <Callout type="info">
-  For Microsoft's documentation, see [Microsoft Defender Update Alert API](https://learn.microsoft.com/en-us/graph/api/security-alert-update?view=graph-rest-1.0&tabs=http).
+	For Microsoft's documentation, see [Update
+	Alert](https://learn.microsoft.com/en-us/graph/api/security-alert-update?view=graph-rest-1.0&tabs=http).
 </Callout>
 
 ## Parameters:
 
-| Field            | Description                                                                                           | Required |
-|------------------|-------------------------------------------------------------------------------------------------------|:--------:|
-| **Alert ID**     | The ID of the alert to update.                                                                        |   Yes    |
-| **Status**       | The status of the alert. Possible values: new, inProgress, resolved, unknownFutureValue.              |   No     |
-| **Classification** | The classification of the alert. Possible values: unknown, falsePositive, truePositive, informationalExpectedActivity, unknownFutureValue. |   No     |
-| **Determination** | The determination of the alert. Possible values: unknown, apt, malware, securityPersonnel, securityTesting, unwantedSoftware, other, multiStagedAttack, compromisedUser, phishing, maliciousUserActivity, clean, insufficientData, confirmedUserActivity, lineOfBusinessApplication, unknownFutureValue. |   No     |
-| **Assigned To**  | Owner of the incident, or null if no owner is assigned.                                               |   No     |
+| Field              | Description                                                                                                                                                                                                                                                                                                                              | Required |
+| ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------: |
+| **Alert ID**       | The ID of the alert to update. Example: `/subscriptions/a303ce4e-302e-471a-8188-4dab418ce9ea/resourceGroups/Sample-RG/providers/Microsoft.Security/locations/centralus/alerts/2517131398922676665_f81f517a-b61e-4c7b-9fc5-82ec0d385de1`                                                                                                  |   Yes    |
+| **Status**         | The status of the alert. Possible values: `new`, `inProgress`, `resolved`, `unknownFutureValue`.                                                                                                                                                                                                                                         |    -     |
+| **Classification** | The classification of the alert. Possible values: `unknown`, `falsePositive`, `truePositive`, `informationalExpectedActivity`, `unknownFutureValue`.                                                                                                                                                                                     |    -     |
+| **Determination**  | The determination of the alert. Possible values: `unknown`, `apt`, `malware`, `securityPersonnel`, `securityTesting`, `unwantedSoftware`, `other`, `multiStagedAttack`, `compromisedUser`, `phishing`, `maliciousUserActivity`, `clean`, `insufficientData`, `confirmedUserActivity`, `lineOfBusinessApplication`, `unknownFutureValue`. |    -     |
+| **Assigned To**    | Owner of the incident.                                                                                                                                                                                                                                                                                                                   |    -     |
 
 ## Example Output
+
 ```json
 {
-    "@odata.type": "#microsoft.graph.security.alert",
-    "id": "da637551227677560813_-961444813",
-    "providerAlertId": "da637551227677560813_-961444813",
-    "incidentId": "28282",
-    "status": "inProgress",
-    "severity": "low",
-    "classification": "truePositive",
-    "determination": "malware",
-    "serviceSource": "microsoftDefenderForEndpoint",
-    "detectionSource": "antivirus",
-    "detectorId": "e0da400f-affd-43ef-b1d5-afc2eb6f2756",
-    "tenantId": "b3c1b5fc-828c-45fa-a1e1-10d74f6d6e9c",
-    "title": "Suspicious execution of hidden file",
-    "description": "A hidden file has been launched. This activity could indicate a compromised host. Attackers often hide files associated with malicious tools to evade file system inspection and defenses.",
-    "recommendedActions": "Collect artifacts and determine scope\n�\tReview the machine timeline for suspicious activities that may have occurred before and after the time of the alert, and record additional related artifacts (files, IPs/URLs) \n�\tLook for the presence of relevant artifacts on other systems. Identify commonalities and differences between potentially compromised systems.\n�\tSubmit relevant files for deep analysis and review resulting detailed behavioral information.\n�\tSubmit undetected files to the MMPC malware portal\n\nInitiate containment & mitigation \n�\tContact the user to verify intent and initiate local remediation actions as needed.\n�\tUpdate AV signatures and run a full scan. The scan might reveal and remove previously-undetected malware components.\n�\tEnsure that the machine has the latest security updates. In particular, ensure that you have installed the latest software, web browser, and Operating System versions.\n�\tIf credential theft is suspected, reset all relevant users passwords.\n�\tBlock communication with relevant URLs or IPs at the organization�s perimeter.",
-    "category": "DefenseEvasion",
-    "assignedTo": "secAdmin@contoso.com",
-    "alertWebUrl": "https://security.microsoft.com/alerts/da637551227677560813_-961444813?tid=b3c1b5fc-828c-45fa-a1e1-10d74f6d6e9c",
-    "incidentWebUrl": "https://security.microsoft.com/incidents/28282?tid=b3c1b5fc-828c-45fa-a1e1-10d74f6d6e9c",
-    "actorDisplayName": null,
-    "threatDisplayName": null,
-    "threatFamilyName": null,
-    "mitreTechniques": [
-        "T1564.001"
-    ],
-    "createdDateTime": "2021-04-27T12:19:27.7211305Z",
-    "lastUpdateDateTime": "2021-05-02T14:19:01.3266667Z",
-    "resolvedDateTime": null,
-    "firstActivityDateTime": "2021-04-26T07:45:50.116Z",
-    "lastActivityDateTime": "2021-05-02T07:56:58.222Z",
-    "comments": [],
-    "evidence": [],
-    "systemTags" : []
+	"@odata.type": "#microsoft.graph.security.alert",
+	"id": "da637551227677560813_-961444813",
+	"providerAlertId": "da637551227677560813_-961444813",
+	"incidentId": "28282",
+	"status": "inProgress",
+	"severity": "low",
+	"classification": "truePositive",
+	"determination": "malware",
+	"serviceSource": "microsoftDefenderForEndpoint",
+	"detectionSource": "antivirus",
+	"detectorId": "e0da400f-affd-43ef-b1d5-afc2eb6f2756",
+	"tenantId": "b3c1b5fc-828c-45fa-a1e1-10d74f6d6e9c",
+	"title": "Suspicious execution of hidden file",
+	"description": "A hidden file has been launched. This activity could indicate a compromised host. Attackers often hide files associated with malicious tools to evade file system inspection and defenses.",
+	"recommendedActions": "Collect artifacts and determine scope\n�\tReview the machine timeline for suspicious activities that may have occurred before and after the time of the alert, and record additional related artifacts (files, IPs/URLs) \n�\tLook for the presence of relevant artifacts on other systems. Identify commonalities and differences between potentially compromised systems.\n�\tSubmit relevant files for deep analysis and review resulting detailed behavioral information.\n�\tSubmit undetected files to the MMPC malware portal\n\nInitiate containment & mitigation \n�\tContact the user to verify intent and initiate local remediation actions as needed.\n�\tUpdate AV signatures and run a full scan. The scan might reveal and remove previously-undetected malware components.\n�\tEnsure that the machine has the latest security updates. In particular, ensure that you have installed the latest software, web browser, and Operating System versions.\n�\tIf credential theft is suspected, reset all relevant users passwords.\n�\tBlock communication with relevant URLs or IPs at the organization�s perimeter.",
+	"category": "DefenseEvasion",
+	"assignedTo": "secAdmin@contoso.com",
+	"alertWebUrl": "https://security.microsoft.com/alerts/da637551227677560813_-961444813?tid=b3c1b5fc-828c-45fa-a1e1-10d74f6d6e9c",
+	"incidentWebUrl": "https://security.microsoft.com/incidents/28282?tid=b3c1b5fc-828c-45fa-a1e1-10d74f6d6e9c",
+	"actorDisplayName": null,
+	"threatDisplayName": null,
+	"threatFamilyName": null,
+	"mitreTechniques": ["T1564.001"],
+	"createdDateTime": "2021-04-27T12:19:27.7211305Z",
+	"lastUpdateDateTime": "2021-05-02T14:19:01.3266667Z",
+	"resolvedDateTime": null,
+	"firstActivityDateTime": "2021-04-26T07:45:50.116Z",
+	"lastActivityDateTime": "2021-05-02T07:56:58.222Z",
+	"comments": [],
+	"evidence": [],
+	"systemTags": []
 }
+```

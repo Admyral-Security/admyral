@@ -5,52 +5,47 @@ import { Callout } from "nextra/components";
 Update the specified properties of an incident.
 
 <Callout type="info">
-    For Microsoft's documentation, see [Microsoft Defender Update Incident API](https://learn.microsoft.com/en-us/graph/api/security-incident-update?view=graph-rest-1.0&tabs=http).
+	For Microsoft's documentation, see [Update
+	Incident](https://learn.microsoft.com/en-us/graph/api/security-incident-update?view=graph-rest-1.0&tabs=http).
 </Callout>
 
 ## Parameters
 
-| Field           | Description                                               | Required |
-| --------------- | --------------------------------------------------------- | :------: |
-| **Incident ID** | The ID of the incident to update.                         |   Yes    |
-| **Assigned To** | Owner of the incident, or null if no owner is assigned.   |   No     |
-| **Classification** | The classification of the incident. Possible values: unknown, falsePositive, truePositive, informationalExpectedActivity, unknownFutureValue. | No |
-| **Determination** | The determination of the incident. Possible values: unknown, apt, malware, securityPersonnel, securityTesting, unwantedSoftware, other, multiStagedAttack, compromisedUser, phishing, maliciousUserActivity, notEnoughDataToValidate, confirmedUserActivity, lineOfBusinessApplication, unknownFutureValue. | No |
-| **Status** | The status of the incident. Possible values: active, resolved, redirected, unknownFutureValue. | No |
-| **Custom Tags** | Array of custom tags associated with an incident.         |   No     |
+| Field              | Description                                                                                                                                                                                                                                                                                                                               | Required |
+| ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------: |
+| **Incident ID**    | The ID of the incident to update.                                                                                                                                                                                                                                                                                                         |   Yes    |
+| **Assigned To**    | Owner of the incident.                                                                                                                                                                                                                                                                                                                    |    -     |
+| **Classification** | The classification of the incident. Possible values: `unknown`, `falsePositive`, `truePositive`, `informationalExpectedActivity`, `unknownFutureValue`.                                                                                                                                                                                   |    -     |
+| **Determination**  | The determination of the incident. Possible values: `unknown`, `apt`, `malware`, `securityPersonnel`, `securityTesting`, `unwantedSoftware`, `other`, `multiStagedAttack`, `compromisedUser`, `phishing`, `maliciousUserActivity`, `notEnoughDataToValidate`, `confirmedUserActivity`, `lineOfBusinessApplication`, `unknownFutureValue`. |    -     |
+| **Status**         | The status of the incident. Possible values: `active`, `resolved`, `redirected`, `unknownFutureValue`.                                                                                                                                                                                                                                    |    -     |
+| **Custom Tags**    | Array of custom tags associated with an incident. <br/> Example: `["tag1", "tag2"]`                                                                                                                                                                                                                                                       |    -     |
 
 ## Example Output
 
 ```json
-HTTP/1.1 200 OK
-Content-Type: application/json
-
 {
-    "@odata.type": "#microsoft.graph.incident",
-    "id": "2972395",
-    "incidentWebUrl": "https://security.microsoft.com/incidents/2972395?tid=12f988bf-16f1-11af-11ab-1d7cd011db47",
-    "redirectIncidentId": null,
-    "displayName": "Multi-stage incident involving Initial access & Command and control on multiple endpoints reported by multiple sources",
-    "tenantId": "b3c1b5fc-828c-45fa-a1e1-10d74f6d6e9c",
-    "createdDateTime": "2021-08-13T08:43:35.5533333Z",
-    "lastUpdateDateTime": "2021-09-30T09:35:45.1133333Z",
-    "assignedTo": "KaiC@contoso.com",
-    "classification": "TruePositive",
-    "determination": "MultiStagedAttack",
-    "status": "Active",
-    "severity": "Medium",
-    "customTags": [
-      "Demo"
-    ],
-    "comments": [
-      {
-		"comment": "Demo incident",
-		"createdBy": "DavidS@contoso.com",
-		"createdTime": "2021-09-30T12:07:37.2756993Z"
-      }
-    ],
-    "systemTags" : [
-        "Defender Experts"
-    ],
-    "description" : "Microsoft observed Raspberry Robin worm activity spreading through infected USB on multiple devices in your environment. From available intel, these infections could be a potential precursor activity to ransomware deployment. ..."
+	"@odata.type": "#microsoft.graph.incident",
+	"id": "2972395",
+	"incidentWebUrl": "https://security.microsoft.com/incidents/2972395?tid=12f988bf-16f1-11af-11ab-1d7cd011db47",
+	"redirectIncidentId": null,
+	"displayName": "Multi-stage incident involving Initial access & Command and control on multiple endpoints reported by multiple sources",
+	"tenantId": "b3c1b5fc-828c-45fa-a1e1-10d74f6d6e9c",
+	"createdDateTime": "2021-08-13T08:43:35.5533333Z",
+	"lastUpdateDateTime": "2021-09-30T09:35:45.1133333Z",
+	"assignedTo": "KaiC@contoso.com",
+	"classification": "TruePositive",
+	"determination": "MultiStagedAttack",
+	"status": "Active",
+	"severity": "Medium",
+	"customTags": ["Demo"],
+	"comments": [
+		{
+			"comment": "Demo incident",
+			"createdBy": "DavidS@contoso.com",
+			"createdTime": "2021-09-30T12:07:37.2756993Z"
+		}
+	],
+	"systemTags": ["Defender Experts"],
+	"description": "Microsoft observed Raspberry Robin worm activity spreading through infected USB on multiple devices in your environment. From available intel, these infections could be a potential precursor activity to ransomware deployment. ..."
 }
+```

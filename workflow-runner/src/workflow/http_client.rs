@@ -64,6 +64,17 @@ pub trait HttpClient: Send + Sync {
         Ok(serde_json::json!({}))
     }
 
+    async fn patch(
+        &self,
+        url: &str,
+        headers: HashMap<String, String>,
+        body: RequestBodyType,
+        expected_response_status: u16,
+        error_message: String,
+    ) -> Result<serde_json::Value> {
+        Ok(serde_json::json!({}))
+    }
+
     async fn get_with_oauth_refresh(
         &self,
         context: &Context,
@@ -102,6 +113,19 @@ pub trait HttpClient: Send + Sync {
     }
 
     async fn put_with_oauth_refresh(
+        &self,
+        context: &Context,
+        url: &str,
+        oauth_token_name: &str,
+        headers: HashMap<String, String>,
+        body: RequestBodyType,
+        expected_response_status: u16,
+        error_message: String,
+    ) -> Result<serde_json::Value> {
+        Ok(serde_json::json!({}))
+    }
+
+    async fn patch_with_oauth_refresh(
         &self,
         context: &Context,
         url: &str,
@@ -286,11 +310,52 @@ async fn make_put_request(
     }
 }
 
+async fn make_patch_request(
+    client: &reqwest::Client,
+    url: &str,
+    header_parameters: &HashMap<String, String>,
+    body: &RequestBodyType,
+) -> Result<Response> {
+    let mut headers = HeaderMap::new();
+    for (key, value) in header_parameters.iter() {
+        headers.insert(HeaderName::from_str(key)?, HeaderValue::from_str(value)?);
+    }
+
+    match body {
+        RequestBodyType::Form { params } => {
+            // TODO: Remove content type
+            headers.insert(
+                "content-type",
+                HeaderValue::from_str("application/x-www-form-urlencoded")?,
+            );
+            client
+                .patch(url)
+                .headers(headers)
+                .form(&params)
+                .send()
+                .await
+                .map_err(|e| anyhow!(e))
+        }
+        RequestBodyType::Json { body } => {
+            // TODO: Remove content type
+            headers.insert("content-type", HeaderValue::from_str("application/json")?);
+            client
+                .patch(url)
+                .headers(headers)
+                .json(&body)
+                .send()
+                .await
+                .map_err(|e| anyhow!(e))
+        }
+    }
+}
+
 enum Operation {
     Get,
     Delete,
     Post { body: RequestBodyType },
     Put { body: RequestBodyType },
+    Patch { body: RequestBodyType },
 }
 
 impl ReqwestClient {
@@ -325,6 +390,9 @@ impl ReqwestClient {
                 make_post_request(&self.client, url, &headers, body).await?
             }
             Operation::Put { body } => make_put_request(&self.client, url, &headers, body).await?,
+            Operation::Patch { body } => {
+                make_patch_request(&self.client, url, &headers, body).await?
+            }
         };
 
         let response_status = response.status().as_u16();
@@ -357,6 +425,9 @@ impl ReqwestClient {
                 make_post_request(&self.client, url, &headers, body).await?
             }
             Operation::Put { body } => make_put_request(&self.client, url, &headers, body).await?,
+            Operation::Patch { body } => {
+                make_patch_request(&self.client, url, &headers, body).await?
+            }
         };
 
         decode_response(response, expected_response_status, error_message).await
@@ -408,6 +479,18 @@ impl HttpClient for ReqwestClient {
         error_message: String,
     ) -> Result<serde_json::Value, Error> {
         let response = make_put_request(&self.client, url, &headers, &body).await?;
+        decode_response(response, expected_response_status, error_message).await
+    }
+
+    async fn patch(
+        &self,
+        url: &str,
+        headers: HashMap<String, String>,
+        body: RequestBodyType,
+        expected_response_status: u16,
+        error_message: String,
+    ) -> Result<serde_json::Value, Error> {
+        let response = make_patch_request(&self.client, url, &headers, &body).await?;
         decode_response(response, expected_response_status, error_message).await
     }
 
@@ -493,6 +576,28 @@ impl HttpClient for ReqwestClient {
             expected_response_status,
             error_message,
             Operation::Put { body },
+        )
+        .await
+    }
+
+    async fn patch_with_oauth_refresh(
+        &self,
+        context: &Context,
+        url: &str,
+        oauth_token_name: &str,
+        headers: HashMap<String, String>,
+        body: RequestBodyType,
+        expected_response_status: u16,
+        error_message: String,
+    ) -> Result<serde_json::Value> {
+        self.with_oauth_refresh(
+            context,
+            url,
+            oauth_token_name,
+            headers,
+            expected_response_status,
+            error_message,
+            Operation::Patch { body },
         )
         .await
     }
