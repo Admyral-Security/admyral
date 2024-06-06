@@ -10,5 +10,6 @@
 	"slack": "Slack",
 	"threatpost": "Threatpost",
 	"yaraify": "YARAify",
-	"virus_total": "VirusTotal"
+	"virus_total": "VirusTotal",
+	"opsgenie": "Opsgenie"
 }

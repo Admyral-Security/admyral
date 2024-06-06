@@ -11,6 +11,7 @@ export enum IntegrationType {
 	PULSEDIVE = "PULSEDIVE",
 	MS_DEFENDER = "MS_DEFENDER",
 	GREY_NOISE = "GREY_NOISE",
+	OPSGENIE = "OPSGENIE",
 }
 
 export enum ApiParameterDatatype {
@@ -1970,6 +1971,143 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 							"The total number of events to return in the response.",
 						required: false,
 						dataType: ApiParameterDatatype.INTEGER,
+					},
+				],
+			},
+		],
+	},
+	// Opsgenie
+	[IntegrationType.OPSGENIE]: {
+		name: "Opsgenie",
+		icon: {
+			src: "/opsgenie_logo.svg",
+			isSquareIcon: true,
+		},
+		credential: {
+			authType: AuthType.SECRET,
+			parameters: [
+				{
+					id: "API_KEY",
+					displayName: "API Key",
+				},
+				{
+					id: "INSTANCE",
+					displayName:
+						"If you are using an EU instance of Opsgenie, please input EU here. Otherwise, leave this field empty.",
+				},
+			],
+		},
+		apis: [
+			{
+				id: "CREATE_ALERT",
+				name: "Create Alert",
+				description: "Create an alert in Opsgenie.",
+				documentationUrl:
+					"https://docs.opsgenie.com/docs/alert-api#section-create-alert",
+				requiresAuthentication: true,
+				parameters: [
+					{
+						id: "MESSAGE",
+						displayName: "Message",
+						description:
+							"The message of the alert. Limited to 130 characters.",
+						required: true,
+						dataType: ApiParameterDatatype.TEXT,
+					},
+					{
+						id: "ALIAS",
+						displayName: "Alias",
+						description:
+							"Client-defined identifier of the alert, that is also the key element of Alert De-Duplication.",
+						required: false,
+						dataType: ApiParameterDatatype.TEXT,
+					},
+					{
+						id: "DESCRIPTION",
+						displayName: "Description",
+						description:
+							"Description field of the alert that is generally used to provide a detailed information about the alert.",
+						required: false,
+						dataType: ApiParameterDatatype.TEXTAREA,
+					},
+					{
+						id: "RESPONDERS",
+						displayName: "Responders",
+						description:
+							"A JSON array of teams, users, escalations, and schedules that the alert will be routed to send notifications. ",
+						required: false,
+						dataType: ApiParameterDatatype.TEXTAREA,
+					},
+					{
+						id: "VISIBLE_TO",
+						displayName: "Visible To",
+						description:
+							'A JSON array of teams and users that the alert will be visible to without sending any notification. Note that the alert will be visible to the teams that are specified within "Responders" field by default, so there is no need to respecify them within the "Visible To" field',
+						required: false,
+						dataType: ApiParameterDatatype.TEXTAREA,
+					},
+					{
+						id: "ACTIONS",
+						displayName: "Actions",
+						description:
+							"A JSON array of custom actions that that will be available for the alert.",
+						required: false,
+						dataType: ApiParameterDatatype.TEXTAREA,
+					},
+					{
+						id: "TAGS",
+						displayName: "Tags",
+						description:
+							'A JSON array of tags attached to the alert. Example: ["tag1", "tag2"]',
+						required: false,
+						dataType: ApiParameterDatatype.TEXTAREA,
+					},
+					{
+						id: "DETAILS",
+						displayName: "Details",
+						description:
+							'Map of key-value pairs to use as custom properties of the alert. Example: {"key1":"value1","key2":"value2"}',
+						required: false,
+						dataType: ApiParameterDatatype.TEXTAREA,
+					},
+					{
+						id: "ENTITY",
+						displayName: "Entity",
+						description:
+							"Entity field of the alert that is generally used to specify which domain alert is related to.",
+						required: false,
+						dataType: ApiParameterDatatype.TEXT,
+					},
+					{
+						id: "SOURCE",
+						displayName: "Source",
+						description:
+							"Source field of the alert. Default value is IP address of the incoming request.",
+						required: false,
+						dataType: ApiParameterDatatype.TEXT,
+					},
+					{
+						id: "PRIORITY",
+						displayName: "Priority",
+						description:
+							"Priority level of the alert. Possible values: P1, P2, P3, P4, P5. Default value is P3.",
+						required: false,
+						dataType: ApiParameterDatatype.TEXT,
+					},
+					{
+						id: "USER",
+						displayName: "User",
+						description: "Display name of the request owner.",
+						required: false,
+						dataType: ApiParameterDatatype.TEXT,
+					},
+					{
+						id: "NOTE",
+						displayName: "Note",
+						description:
+							"Additional note that will be added to the alert.",
+						required: false,
+						dataType: ApiParameterDatatype.TEXTAREA,
 					},
 				],
 			},
