@@ -1884,7 +1884,7 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 						description:
 							"The maximum number of incidents to return.",
 						required: false,
-						dataType: ApiParameterDatatype.NUMBER,
+						dataType: ApiParameterDatatype.INTEGER,
 					},
 					{
 						id: "SKIP",
@@ -1892,7 +1892,7 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 						description:
 							"The number of incidents to skip before returning the results.",
 						required: false,
-						dataType: ApiParameterDatatype.NUMBER,
+						dataType: ApiParameterDatatype.INTEGER,
 					},
 					{
 						id: "COUNT",
