@@ -7,7 +7,7 @@ import { Cross1Icon } from "@radix-ui/react-icons";
 import { generateWorkflowGraph } from "@/lib/workflow-generation";
 import useWorkflowStore from "@/lib/workflow-store";
 import useWorkflowAssistantStore from "@/lib/workflow-assistant-store";
-import { errorToast } from "@/lib/toast";
+import { errorToast, successToast } from "@/lib/toast";
 
 const WORKLFOW_ASSISTANT_PLACEHOLDER = `Describe the workflow you want to generate. Make sure to specify which tools you want to use.
 
@@ -57,6 +57,8 @@ export default function WorkflowAssistant() {
 			deleteWorkflow();
 			setNodes(newNodes);
 			setEdges(newEdges);
+
+			successToast("Workflow generated successfully.");
 
 			closeAssistant();
 		} catch (error: any) {

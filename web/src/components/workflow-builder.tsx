@@ -33,7 +33,7 @@ import RunWorkflow from "./run-workflow";
 import BackIcon from "./icons/back-icon";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { errorToast } from "@/lib/toast";
+import { errorToast, successToast } from "@/lib/toast";
 
 function buildInitialWorkflowGraph(
 	actionData: ActionData[],
@@ -248,6 +248,8 @@ export default function WorkflowBuilder({ workflowId }: WorkflowBuilderProps) {
 				workflowDescription: update.workflowDescription,
 				isLive: update.isLive,
 			});
+
+			successToast("Workflow saved.");
 		} catch (error) {
 			errorToast("Failed to save workflow. Please try again.");
 		} finally {

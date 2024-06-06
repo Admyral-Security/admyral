@@ -15,7 +15,7 @@ export default function Layout({ children }: { children: ReactNode }) {
 			</Grid>
 			<ToastContainer
 				position="bottom-center"
-				autoClose={50000}
+				autoClose={4000}
 				hideProgressBar={true}
 				stacked={false}
 				closeOnClick={true}

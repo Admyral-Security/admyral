@@ -1,4 +1,5 @@
 import { publishWorkflow } from "@/lib/api";
+import { infoToast } from "@/lib/toast";
 import { Flex, Switch, Text } from "@radix-ui/themes";
 import { useState } from "react";
 
@@ -26,6 +27,11 @@ export default function PublishWorkflowToggle({
 				beforeUpdate();
 			}
 			await publishWorkflow(workflowId, newIsLive);
+			infoToast(
+				newIsLive
+					? "Workflow is activated."
+					: "Workflow is deactivated.",
+			);
 			onSuccess();
 		} catch (error) {
 			onError();
