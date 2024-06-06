@@ -47,9 +47,18 @@ pub async fn get_string_parameter(
         },
         Some(result) => match result.clone() {
             serde_json::Value::String(value) => Ok(Some(value)),
+            serde_json::Value::Null => match parameter_type {
+                ParameterType::Optional => Ok(None),
+                ParameterType::Required => {
+                    let error_message = format!("Invalid \"{parameter_name}\" parameter for {integration_name} {api_name} API because must be not null");
+                    tracing::error!(error_message);
+                    Err(anyhow!(error_message))
+                }
+            },
             _ => {
-                tracing::error!("Invalid \"{parameter_name}\" parameter for {integration_name} {api_name} API because not a string: {:?}", result);
-                return Err(anyhow!("Invalid \"{parameter_name}\" parameter for {integration_name} {api_name} API because not a string."));
+                let error_message = format!("Invalid \"{parameter_name}\" parameter for {integration_name} {api_name} API because not a string");
+                tracing::error!("{error_message}: {:?}", result);
+                Err(anyhow!(error_message))
             }
         },
     }
@@ -79,9 +88,18 @@ pub async fn get_bool_parameter(
         },
         Some(result) => match result.clone() {
             serde_json::Value::Bool(value) => Ok(Some(value)),
+            serde_json::Value::Null => match parameter_type {
+                ParameterType::Optional => Ok(None),
+                ParameterType::Required => {
+                    let error_message = format!("Invalid \"{parameter_name}\" parameter for {integration_name} {api_name} API because must be not null");
+                    tracing::error!(error_message);
+                    Err(anyhow!(error_message))
+                }
+            },
             _ => {
-                tracing::error!("Invalid \"{parameter_name}\" parameter for {integration_name} {api_name} API because not a bool: {:?}", result);
-                return Err(anyhow!("Invalid \"{parameter_name}\" parameter for {integration_name} {api_name} API because not a bool."));
+                let error_message = format!("Invalid \"{parameter_name}\" parameter for {integration_name} {api_name} API because not a bool");
+                tracing::error!("{error_message}: {:?}", result);
+                Err(anyhow!(error_message))
             }
         },
     }
@@ -111,9 +129,18 @@ pub async fn get_number_parameter(
         },
         Some(result) => match result.clone() {
             serde_json::Value::Number(value) => Ok(Some(value)),
+            serde_json::Value::Null => match parameter_type {
+                ParameterType::Optional => Ok(None),
+                ParameterType::Required => {
+                    let error_message = format!("Invalid \"{parameter_name}\" parameter for {integration_name} {api_name} API because must be not null");
+                    tracing::error!(error_message);
+                    Err(anyhow!(error_message))
+                }
+            },
             _ => {
-                tracing::error!("Invalid \"{parameter_name}\" parameter for {integration_name} {api_name} API because not a number: {:?}", result);
-                return Err(anyhow!("Invalid \"{parameter_name}\" parameter for {integration_name} {api_name} API because not a number."));
+                let error_message = format!("Invalid \"{parameter_name}\" parameter for {integration_name} {api_name} API because not a number");
+                tracing::error!("{error_message}: {:?}", result);
+                Err(anyhow!(error_message))
             }
         },
     }

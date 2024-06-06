@@ -1,0 +1,37 @@
+import { Callout } from "nextra/components";
+
+# Start a Takedown
+
+Start the takedown of a URL you've identified as malicious. Phish Report will complete all available automatic takedown steps, and return a list of recommended manual actions.
+
+<Callout type="info">
+	For Phish Reports's documentation, see [Start a Takedown
+	API](https://phish.report/api/v0#tag/Takedown/paths/~1api~1v0~1cases/post).
+</Callout>
+
+## Parameters:
+
+| Field                 | Description                                                                                            | Required |
+| --------------------- | ------------------------------------------------------------------------------------------------------ | :------: |
+| **Phishing URL**      | The phishing URL to take down. You should have high confidence that this URL is malicious.             |   Yes    |
+| **Ignore Duplicates** | By default, trying to create a duplicate case will fail. Setting this to true will allow duplictes.    |    No    |
+
+## Example Output:
+```json
+{
+  "created": "string",
+  "id": "string",
+  "pending_actions": [
+    {
+      "description": "string",
+      "params": {},
+      "report_uri": "string"
+    }
+  ],
+  "resolved": true,
+  "tags": [
+    "string"
+  ],
+  "url": "string"
+}
+```

@@ -1,0 +1,35 @@
+import { Callout } from "nextra/components";
+
+# List Takedowns
+
+API endpoints relating to takedown of phishing sites.
+
+<Callout type="info">
+	For Phish Reports's documentation, see [List Takedowns
+	API](https://phish.report/api/v0#tag/Takedown/paths/~1api~1v0~1cases/get).
+</Callout>
+
+## Parameters:
+No Parameters.
+
+## Example Output:
+```json
+[
+  {
+    "created": "string",
+    "id": "string",
+    "pending_actions": [
+      {
+        "description": "string",
+        "params": {},
+        "report_uri": "string"
+      }
+    ],
+    "resolved": true,
+    "tags": [
+      "string"
+    ],
+    "url": "string"
+  }
+]
+```

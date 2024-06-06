@@ -1,0 +1,36 @@
+import { Callout } from "nextra/components";
+
+# Get a Takedown
+
+Retrieve the takedown information for a URL you've previously reported.
+
+<Callout type="info">
+	For Phish Reports's documentation, see [Get a Takedown
+	API](https://phish.report/api/v0#tag/Takedown/paths/~1api~1v0~1cases~1%7Bid%7D/get).
+</Callout>
+
+## Parameters:
+
+| Field                 | Description                                                                                            | Required |
+| --------------------- | ------------------------------------------------------------------------------------------------------ | :------: |
+| **Case ID**           | The ID of the takedown request.                                                                        |   Yes    |
+
+## Example Output:
+```json
+{
+  "created": "string",
+  "id": "string",
+  "pending_actions": [
+    {
+      "description": "string",
+      "params": {},
+      "report_uri": "string"
+    }
+  ],
+  "resolved": true,
+  "tags": [
+    "string"
+  ],
+  "url": "string"
+}
+```

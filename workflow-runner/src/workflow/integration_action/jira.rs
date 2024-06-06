@@ -11,7 +11,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::json;
 use std::collections::HashMap;
 
-const JIRA: &str = "Jira";
+const INTEGRATION: &str = "Jira";
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
@@ -35,7 +35,7 @@ impl IntegrationExecutor for JiraExecutor {
     ) -> Result<serde_json::Value> {
         let credential_name = match credential_name {
             Some(credential) => credential.as_str(),
-            None => return Err(anyhow!("Error: Missing credential for {JIRA}")),
+            None => return Err(anyhow!("Error: Missing credential for {INTEGRATION}")),
         };
         let credential = context
             .secrets_manager
@@ -59,7 +59,7 @@ impl IntegrationExecutor for JiraExecutor {
                 get_issue_transitions(client, context, &credential, parameters).await
             }
             "TRANSITION_ISSUE" => transition_issue(client, context, &credential, parameters).await,
-            _ => return Err(anyhow!("API {api} not implemented for {JIRA}.")),
+            _ => return Err(anyhow!("API {api} not implemented for {INTEGRATION}.")),
         }
     }
 }
@@ -83,7 +83,7 @@ async fn jira_get_request(
             api_url,
             headers,
             200,
-            format!("Error: Failed to call {JIRA} API"),
+            format!("Error: Failed to call {INTEGRATION} API"),
         )
         .await
 }
@@ -110,7 +110,7 @@ async fn jira_post_request(
             headers,
             RequestBodyType::Json { body },
             expected_response_status,
-            format!("Error: Failed to call {JIRA} API"),
+            format!("Error: Failed to call {INTEGRATION} API"),
         )
         .await
 }
@@ -137,7 +137,7 @@ async fn jira_put_request(
             headers,
             RequestBodyType::Json { body },
             expected_http_status,
-            format!("Error: Failed to call {JIRA} API"),
+            format!("Error: Failed to call {INTEGRATION} API"),
         )
         .await
 }
@@ -156,7 +156,7 @@ async fn create_issue(
 
     let summary = get_string_parameter(
         "SUMMARY",
-        JIRA,
+        INTEGRATION,
         "CREATE_ISSUE",
         parameters,
         context,
@@ -167,7 +167,7 @@ async fn create_issue(
 
     let project_id = get_string_parameter(
         "PROJECT_ID",
-        JIRA,
+        INTEGRATION,
         "CREATE_ISSUE",
         parameters,
         context,
@@ -178,7 +178,7 @@ async fn create_issue(
 
     let issue_type = get_string_parameter(
         "ISSUE_TYPE",
-        JIRA,
+        INTEGRATION,
         "CREATE_ISSUE",
         parameters,
         context,
@@ -195,7 +195,7 @@ async fn create_issue(
 
     if let Some(description) = get_string_parameter(
         "DESCRIPTION",
-        JIRA,
+        INTEGRATION,
         "CREATE_ISSUE",
         parameters,
         context,
@@ -227,7 +227,7 @@ async fn create_issue(
 
     if let Some(assignee) = get_string_parameter(
         "ASSIGNEE",
-        JIRA,
+        INTEGRATION,
         "CREATE_ISSUE",
         parameters,
         context,
@@ -242,7 +242,7 @@ async fn create_issue(
 
     if let Some(labels) = get_string_parameter(
         "LABELS",
-        JIRA,
+        INTEGRATION,
         "CREATE_ISSUE",
         parameters,
         context,
@@ -261,7 +261,7 @@ async fn create_issue(
 
     if let Some(priority) = get_string_parameter(
         "PRIORITY",
-        JIRA,
+        INTEGRATION,
         "CREATE_ISSUE",
         parameters,
         context,
@@ -276,7 +276,7 @@ async fn create_issue(
 
     if let Some(custom_fields) = get_string_parameter(
         "CUSTOM_FIELDS",
-        JIRA,
+        INTEGRATION,
         "CREATE_ISSUE",
         parameters,
         context,
@@ -302,7 +302,7 @@ async fn create_issue(
 
     if let Some(components) = get_string_parameter(
         "COMPONENTS",
-        JIRA,
+        INTEGRATION,
         "CREATE_ISSUE",
         parameters,
         context,
@@ -328,7 +328,7 @@ async fn assign_issue(
 ) -> Result<serde_json::Value> {
     let issue_id_or_key = get_string_parameter(
         "ISSUE_ID_OR_KEY",
-        JIRA,
+        INTEGRATION,
         "ASSIGN_ISSUE",
         parameters,
         context,
@@ -339,7 +339,7 @@ async fn assign_issue(
 
     let account_id = get_string_parameter(
         "ACCOUNT_ID",
-        JIRA,
+        INTEGRATION,
         "ASSIGN_ISSUE",
         parameters,
         context,
@@ -374,7 +374,7 @@ async fn edit_issue(
 
     let issue_id_or_key = get_string_parameter(
         "ISSUE_ID_OR_KEY",
-        JIRA,
+        INTEGRATION,
         "EDIT_ISSUE",
         parameters,
         context,
@@ -385,7 +385,7 @@ async fn edit_issue(
 
     if let Some(fields) = get_string_parameter(
         "FIELDS",
-        JIRA,
+        INTEGRATION,
         "EDIT_ISSUE",
         parameters,
         context,
@@ -407,7 +407,7 @@ async fn edit_issue(
 
     if let Some(update) = get_string_parameter(
         "UPDATE",
-        JIRA,
+        INTEGRATION,
         "EDIT_ISSUE",
         parameters,
         context,
@@ -429,7 +429,7 @@ async fn edit_issue(
 
     let notify_users_opt = get_bool_parameter(
         "NOTIFY_USERS",
-        JIRA,
+        INTEGRATION,
         "EDIT_ISSUE",
         parameters,
         context,
@@ -456,7 +456,7 @@ async fn get_issue(
 
     let issue_id_or_key = get_string_parameter(
         "ISSUE_ID_OR_KEY",
-        JIRA,
+        INTEGRATION,
         "GET_ISSUE",
         parameters,
         context,
@@ -467,7 +467,7 @@ async fn get_issue(
 
     if let Some(fields) = get_string_parameter(
         "FIELDS",
-        JIRA,
+        INTEGRATION,
         "GET_ISSUE",
         parameters,
         context,
@@ -482,7 +482,7 @@ async fn get_issue(
 
     if let Some(fields_by_keys) = get_bool_parameter(
         "FIELDS_BY_KEYS",
-        JIRA,
+        INTEGRATION,
         "GET_ISSUE",
         parameters,
         context,
@@ -495,7 +495,7 @@ async fn get_issue(
 
     if let Some(expand) = get_string_parameter(
         "EXPAND",
-        JIRA,
+        INTEGRATION,
         "GET_ISSUE",
         parameters,
         context,
@@ -510,7 +510,7 @@ async fn get_issue(
 
     if let Some(properties) = get_string_parameter(
         "PROPERTIES",
-        JIRA,
+        INTEGRATION,
         "GET_ISSUE",
         parameters,
         context,
@@ -554,7 +554,7 @@ async fn find_users(
     ] {
         if let Some(param) = get_string_parameter(
             param_id,
-            JIRA,
+            INTEGRATION,
             "FIND_USERS",
             parameters,
             context,
@@ -571,7 +571,7 @@ async fn find_users(
     for (param_id, value_name) in [("START_AT", "startAt"), ("MAX_RESULTS", "maxResults")] {
         if let Some(param) = get_number_parameter(
             param_id,
-            JIRA,
+            INTEGRATION,
             "FIND_USERS",
             parameters,
             context,
@@ -603,7 +603,7 @@ async fn get_issue_comments(
 
     let issue_id_or_key = get_string_parameter(
         "ISSUE_ID_OR_KEY",
-        JIRA,
+        INTEGRATION,
         "GET_ISSUE_COMMENTS",
         parameters,
         context,
@@ -614,7 +614,7 @@ async fn get_issue_comments(
 
     if let Some(start_at) = get_number_parameter(
         "START_AT",
-        JIRA,
+        INTEGRATION,
         "GET_ISSUE_COMMENTS",
         parameters,
         context,
@@ -627,7 +627,7 @@ async fn get_issue_comments(
 
     if let Some(max_results) = get_number_parameter(
         "MAX_RESULTS",
-        JIRA,
+        INTEGRATION,
         "GET_ISSUE_COMMENTS",
         parameters,
         context,
@@ -640,7 +640,7 @@ async fn get_issue_comments(
 
     if let Some(order_by) = get_string_parameter(
         "ORDER_BY",
-        JIRA,
+        INTEGRATION,
         "GET_ISSUE_COMMENTS",
         parameters,
         context,
@@ -655,7 +655,7 @@ async fn get_issue_comments(
 
     if let Some(expand) = get_string_parameter(
         "EXPAND",
-        JIRA,
+        INTEGRATION,
         "GET_ISSUE_COMMENTS",
         parameters,
         context,
@@ -691,7 +691,7 @@ async fn add_comment(
 ) -> Result<serde_json::Value> {
     let issue_id_or_key = get_string_parameter(
         "ISSUE_ID_OR_KEY",
-        JIRA,
+        INTEGRATION,
         "ADD_COMMENT",
         parameters,
         context,
@@ -702,7 +702,7 @@ async fn add_comment(
 
     let body = get_string_parameter(
         "BODY",
-        JIRA,
+        INTEGRATION,
         "ADD_COMMENT",
         parameters,
         context,
@@ -749,7 +749,7 @@ async fn update_custom_field(
 ) -> Result<serde_json::Value> {
     let field_id = get_string_parameter(
         "FIELD_ID",
-        JIRA,
+        INTEGRATION,
         "UPDATE_CUSTOM_FIELD",
         parameters,
         context,
@@ -760,7 +760,7 @@ async fn update_custom_field(
 
     let name = get_string_parameter(
         "NAME",
-        JIRA,
+        INTEGRATION,
         "UPDATE_CUSTOM_FIELD",
         parameters,
         context,
@@ -775,7 +775,7 @@ async fn update_custom_field(
 
     if let Some(description) = get_string_parameter(
         "DESCRIPTION",
-        JIRA,
+        INTEGRATION,
         "UPDATE_CUSTOM_FIELD",
         parameters,
         context,
@@ -788,7 +788,7 @@ async fn update_custom_field(
 
     if let Some(searcher_key) = get_string_parameter(
         "SEARCHER_KEY",
-        JIRA,
+        INTEGRATION,
         "UPDATE_CUSTOM_FIELD",
         parameters,
         context,
@@ -818,7 +818,7 @@ async fn get_issue_transitions(
 
     let issue_id_or_key = get_string_parameter(
         "ISSUE_ID_OR_KEY",
-        JIRA,
+        INTEGRATION,
         "GET_ISSUE_TRANSITIONS",
         parameters,
         context,
@@ -829,7 +829,7 @@ async fn get_issue_transitions(
 
     if let Some(expand) = get_string_parameter(
         "EXPAND",
-        JIRA,
+        INTEGRATION,
         "GET_ISSUE_TRANSITIONS",
         parameters,
         context,
@@ -844,7 +844,7 @@ async fn get_issue_transitions(
 
     if let Some(transition_id) = get_string_parameter(
         "TRANSITION_ID",
-        JIRA,
+        INTEGRATION,
         "GET_ISSUE_TRANSITIONS",
         parameters,
         context,
@@ -880,7 +880,7 @@ async fn transition_issue(
 ) -> Result<serde_json::Value> {
     let issue_id_or_key = get_string_parameter(
         "ISSUE_ID_OR_KEY",
-        JIRA,
+        INTEGRATION,
         "TRANSITION_ISSUE",
         parameters,
         context,
@@ -891,7 +891,7 @@ async fn transition_issue(
 
     let transition = get_string_parameter(
         "TRANSITION",
-        JIRA,
+        INTEGRATION,
         "TRANSITION_ISSUE",
         parameters,
         context,
@@ -906,7 +906,7 @@ async fn transition_issue(
 
     if let Some(fields) = get_string_parameter(
         "FIELDS",
-        JIRA,
+        INTEGRATION,
         "TRANSITION_ISSUE",
         parameters,
         context,

@@ -11,6 +11,7 @@ export enum IntegrationType {
 	PULSEDIVE = "PULSEDIVE",
 	MS_DEFENDER = "MS_DEFENDER",
 	GREY_NOISE = "GREY_NOISE",
+	OPSGENIE = "OPSGENIE",
 	ABNORMAL = "ABNORMAL",
 }
 
@@ -1771,6 +1772,264 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 					},
 				],
 			},
+			{
+				id: "GET_ALERT",
+				name: "Get Alert",
+				description: "Get an alert.",
+				documentationUrl:
+					"https://learn.microsoft.com/en-us/graph/api/security-alert-get?view=graph-rest-1.0&tabs=http",
+				requiresAuthentication: true,
+				parameters: [
+					{
+						id: "ALERT_ID",
+						displayName: "Alert ID",
+						description: "The ID of the alert.",
+						required: true,
+						dataType: ApiParameterDatatype.TEXT,
+					},
+				],
+			},
+			{
+				id: "UPDATE_ALERT",
+				name: "Update Alert",
+				description:
+					"Update the status, classification, determination, and assigned to fields of an alert.",
+				documentationUrl:
+					"https://learn.microsoft.com/en-us/graph/api/security-alert-update?view=graph-rest-1.0&tabs=http",
+				requiresAuthentication: true,
+				parameters: [
+					{
+						id: "ALERT_ID",
+						displayName: "Alert ID",
+						description: "The ID of the alert to update.",
+						required: true,
+						dataType: ApiParameterDatatype.TEXT,
+					},
+					{
+						id: "STATUS",
+						displayName: "Status",
+						description:
+							"The status of the alert. Possible values: new, inProgress, resolved, unknownFutureValue.",
+						required: false,
+						dataType: ApiParameterDatatype.TEXT,
+					},
+					{
+						id: "CLASSIFICATION",
+						displayName: "Classification",
+						description:
+							"The classification of the alert. Possible values: unknown, falsePositive, truePositive, informationalExpectedActivity, unknownFutureValue.",
+						required: false,
+						dataType: ApiParameterDatatype.TEXT,
+					},
+					{
+						id: "DETERMINATION",
+						displayName: "Determination",
+						description:
+							"The determination of the alert. Possible values: unknown, apt, malware, securityPersonnel, securityTesting, unwantedSoftware, other, multiStagedAttack, compromisedUser, phishing, maliciousUserActivity, clean, insufficientData, confirmedUserActivity, lineOfBusinessApplication, unknownFutureValue.",
+						required: false,
+						dataType: ApiParameterDatatype.TEXT,
+					},
+					{
+						id: "ASSIGNED_TO",
+						displayName: "Assigned To",
+						description: "Owner of the incident.",
+						required: false,
+						dataType: ApiParameterDatatype.TEXT,
+					},
+				],
+			},
+			{
+				id: "CREATE_COMMENT_FOR_ALERT",
+				name: "Create Comment for Alert",
+				description: "Create a comment for an alert.",
+				documentationUrl:
+					"https://learn.microsoft.com/en-us/graph/api/security-alert-post-comments?view=graph-rest-1.0&tabs=http",
+				requiresAuthentication: true,
+				parameters: [
+					{
+						id: "ALERT_ID",
+						displayName: "Alert ID",
+						description: "The ID of the alert.",
+						required: true,
+						dataType: ApiParameterDatatype.TEXT,
+					},
+					{
+						id: "COMMENT",
+						displayName: "Comment",
+						description: "The comment to be added to the alert.",
+						required: true,
+						dataType: ApiParameterDatatype.TEXT,
+					},
+				],
+			},
+			{
+				id: "LIST_INCIDENTS",
+				name: "List Incidents",
+				description:
+					"Get a list of incident resources created to track suspicious activities in an organization.",
+				documentationUrl:
+					"https://learn.microsoft.com/en-us/graph/api/security-list-incidents?view=graph-rest-1.0&tabs=http",
+				requiresAuthentication: true,
+				parameters: [
+					{
+						id: "FILTER",
+						displayName: "OData Filter",
+						description:
+							"An OData filter to apply to the incident list. The following properties support filter: assignedTo, classification, createdDateTime, determination, lastUpdateDateTime, severity, and status.",
+						required: false,
+						dataType: ApiParameterDatatype.TEXT,
+					},
+					{
+						id: "LIMIT",
+						displayName: "Limit",
+						description:
+							"The maximum number of incidents to return.",
+						required: false,
+						dataType: ApiParameterDatatype.INTEGER,
+					},
+					{
+						id: "SKIP",
+						displayName: "Skip",
+						description:
+							"The number of incidents to skip before returning the results.",
+						required: false,
+						dataType: ApiParameterDatatype.INTEGER,
+					},
+					{
+						id: "COUNT",
+						displayName: "Count Incidents",
+						description:
+							"Instead of returning all the results, the count parameter returns the number of items in the result set. Default: false",
+						required: false,
+						dataType: ApiParameterDatatype.BOOLEAN,
+					},
+				],
+			},
+			{
+				id: "GET_INCIDENT",
+				name: "Get Incident",
+				description: "Get an incident.",
+				documentationUrl:
+					"https://learn.microsoft.com/en-us/graph/api/security-incident-get?view=graph-rest-1.0&tabs=http",
+				requiresAuthentication: true,
+				parameters: [
+					{
+						id: "INCIDENT_ID",
+						displayName: "Incident ID",
+						description: "The ID of the incident.",
+						required: true,
+						dataType: ApiParameterDatatype.TEXT,
+					},
+				],
+			},
+			{
+				id: "UPDATE_INCIDENT",
+				name: "Update Incident",
+				description: "Update the specified properties of an incident.",
+				documentationUrl:
+					"https://learn.microsoft.com/en-us/graph/api/security-incident-update?view=graph-rest-1.0&tabs=http",
+				requiresAuthentication: true,
+				parameters: [
+					{
+						id: "INCIDENT_ID",
+						displayName: "Incident ID",
+						description: "The ID of the incident to update.",
+						required: true,
+						dataType: ApiParameterDatatype.TEXT,
+					},
+					{
+						id: "ASSIGNED_TO",
+						displayName: "Assigned To",
+						description:
+							"Owner of the incident, or null if no owner is assigned.",
+						required: false,
+						dataType: ApiParameterDatatype.TEXT,
+					},
+					{
+						id: "CLASSIFICATION",
+						displayName: "Classification",
+						description:
+							"The classification of the incident. Possible values: unknown, falsePositive, truePositive, informationalExpectedActivity, unknownFutureValue.",
+						required: false,
+						dataType: ApiParameterDatatype.TEXT,
+					},
+					{
+						id: "DETERMINATION",
+						displayName: "Determination",
+						description:
+							"The determination of the incident. Possible values: unknown, apt, malware, securityPersonnel, securityTesting, unwantedSoftware, other, multiStagedAttack, compromisedUser, phishing, maliciousUserActivity, notEnoughDataToValidate, confirmedUserActivity, lineOfBusinessApplication, unknownFutureValue.",
+						required: false,
+						dataType: ApiParameterDatatype.TEXT,
+					},
+					{
+						id: "STATUS",
+						displayName: "Status",
+						description:
+							"The status of the incident. Possible values: active, resolved, redirected, unknownFutureValue.",
+						required: false,
+						dataType: ApiParameterDatatype.TEXT,
+					},
+					{
+						id: "CUSTOM_TAGS",
+						displayName: "Custom Tags",
+						description:
+							'Array of custom tags associated with an incident. Example: ["tag1", "tag2"]',
+						required: false,
+						dataType: ApiParameterDatatype.TEXT,
+					},
+				],
+			},
+			{
+				id: "CREATE_COMMENT_FOR_INCIDENT",
+				name: "Create Comment for Incident",
+				description: "Create a comment for an incident.",
+				documentationUrl:
+					"https://learn.microsoft.com/en-us/graph/api/security-incident-post-comments?view=graph-rest-1.0&tabs=http",
+				requiresAuthentication: true,
+				parameters: [
+					{
+						id: "INCIDENT_ID",
+						displayName: "Incident ID",
+						description: "The ID of the incident.",
+						required: true,
+						dataType: ApiParameterDatatype.TEXT,
+					},
+					{
+						id: "COMMENT",
+						displayName: "Comment",
+						description: "The comment to be added to the incident.",
+						required: true,
+						dataType: ApiParameterDatatype.TEXT,
+					},
+				],
+			},
+			{
+				id: "RUN_HUNTING_QUERY",
+				name: "Run Hunting Query",
+				description:
+					"Run a Kusto Query Language (KQL) query against Microsoft 365 Defender data.",
+				documentationUrl:
+					"https://learn.microsoft.com/en-us/graph/api/security-security-runhuntingquery?view=graph-rest-1.0&tabs=http",
+				requiresAuthentication: true,
+				parameters: [
+					{
+						id: "QUERY",
+						displayName: "Query",
+						description:
+							"The hunting query in Kusto Query Language (KQL).",
+						required: true,
+						dataType: ApiParameterDatatype.TEXTAREA,
+					},
+					{
+						id: "TIMESPAN",
+						displayName: "Timespan",
+						description:
+							"The interval of time over which to query data, in ISO 8601 format. Optional.",
+						required: false,
+						dataType: ApiParameterDatatype.TEXT,
+					},
+				],
+			},
 		],
 	},
 	// GreyNoise
@@ -1971,6 +2230,143 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 							"The total number of events to return in the response.",
 						required: false,
 						dataType: ApiParameterDatatype.INTEGER,
+					},
+				],
+			},
+		],
+	},
+	// Opsgenie
+	[IntegrationType.OPSGENIE]: {
+		name: "Opsgenie",
+		icon: {
+			src: "/opsgenie_logo.svg",
+			isSquareIcon: true,
+		},
+		credential: {
+			authType: AuthType.SECRET,
+			parameters: [
+				{
+					id: "API_KEY",
+					displayName: "API Key",
+				},
+				{
+					id: "INSTANCE",
+					displayName:
+						"If you are using an EU instance of Opsgenie, please input EU here. Otherwise, leave this field empty.",
+				},
+			],
+		},
+		apis: [
+			{
+				id: "CREATE_ALERT",
+				name: "Create Alert",
+				description: "Create an alert in Opsgenie.",
+				documentationUrl:
+					"https://docs.opsgenie.com/docs/alert-api#section-create-alert",
+				requiresAuthentication: true,
+				parameters: [
+					{
+						id: "MESSAGE",
+						displayName: "Message",
+						description:
+							"The message of the alert. Limited to 130 characters.",
+						required: true,
+						dataType: ApiParameterDatatype.TEXT,
+					},
+					{
+						id: "ALIAS",
+						displayName: "Alias",
+						description:
+							"Client-defined identifier of the alert, that is also the key element of Alert De-Duplication.",
+						required: false,
+						dataType: ApiParameterDatatype.TEXT,
+					},
+					{
+						id: "DESCRIPTION",
+						displayName: "Description",
+						description:
+							"Description field of the alert that is generally used to provide a detailed information about the alert.",
+						required: false,
+						dataType: ApiParameterDatatype.TEXTAREA,
+					},
+					{
+						id: "RESPONDERS",
+						displayName: "Responders",
+						description:
+							"A JSON array of teams, users, escalations, and schedules that the alert will be routed to send notifications. ",
+						required: false,
+						dataType: ApiParameterDatatype.TEXTAREA,
+					},
+					{
+						id: "VISIBLE_TO",
+						displayName: "Visible To",
+						description:
+							'A JSON array of teams and users that the alert will be visible to without sending any notification. Note that the alert will be visible to the teams that are specified within "Responders" field by default, so there is no need to respecify them within the "Visible To" field',
+						required: false,
+						dataType: ApiParameterDatatype.TEXTAREA,
+					},
+					{
+						id: "ACTIONS",
+						displayName: "Actions",
+						description:
+							"A JSON array of custom actions that that will be available for the alert.",
+						required: false,
+						dataType: ApiParameterDatatype.TEXTAREA,
+					},
+					{
+						id: "TAGS",
+						displayName: "Tags",
+						description:
+							'A JSON array of tags attached to the alert. Example: ["tag1", "tag2"]',
+						required: false,
+						dataType: ApiParameterDatatype.TEXTAREA,
+					},
+					{
+						id: "DETAILS",
+						displayName: "Details",
+						description:
+							'Map of key-value pairs to use as custom properties of the alert. Example: {"key1":"value1","key2":"value2"}',
+						required: false,
+						dataType: ApiParameterDatatype.TEXTAREA,
+					},
+					{
+						id: "ENTITY",
+						displayName: "Entity",
+						description:
+							"Entity field of the alert that is generally used to specify which domain alert is related to.",
+						required: false,
+						dataType: ApiParameterDatatype.TEXT,
+					},
+					{
+						id: "SOURCE",
+						displayName: "Source",
+						description:
+							"Source field of the alert. Default value is IP address of the incoming request.",
+						required: false,
+						dataType: ApiParameterDatatype.TEXT,
+					},
+					{
+						id: "PRIORITY",
+						displayName: "Priority",
+						description:
+							"Priority level of the alert. Possible values: P1, P2, P3, P4, P5. Default value is P3.",
+						required: false,
+						dataType: ApiParameterDatatype.TEXT,
+					},
+					{
+						id: "USER",
+						displayName: "User",
+						description: "Display name of the request owner.",
+						required: false,
+						dataType: ApiParameterDatatype.TEXT,
+					},
+					{
+						id: "NOTE",
+						displayName: "Note",
+						description:
+							"Additional note that will be added to the alert.",
+						required: false,
+						dataType: ApiParameterDatatype.TEXTAREA,
 					},
 				],
 			},

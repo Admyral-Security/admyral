@@ -15,6 +15,7 @@ mod jira;
 mod ms_defender;
 mod ms_defender_for_cloud;
 mod ms_teams;
+mod opsgenie;
 mod phish_report;
 mod pulsedive;
 mod slack;
@@ -48,6 +49,7 @@ pub enum IntegrationType {
     Pulsedive,
     MsDefender,
     GreyNoise,
+    Opsgenie,
     Abnormal,
 }
 
@@ -175,6 +177,11 @@ impl ActionExecutor for Integration {
             }
             IntegrationType::GreyNoise => {
                 grey_noise::GreyNoiseExecutor
+                    .execute(&client, context, &self.api, &self.credential, &self.params)
+                    .await
+            }
+            IntegrationType::Opsgenie => {
+                opsgenie::OpsgenieExecutor
                     .execute(&client, context, &self.api, &self.credential, &self.params)
                     .await
             }

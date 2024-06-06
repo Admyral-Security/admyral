@@ -1,0 +1,82 @@
+import { Callout } from "nextra/components";
+
+# List Incidents
+
+Get a list of incident resources created to track attacks in an organization.
+
+<Callout type="info">
+	For Microsoft's documentation, see [List
+	Incidents](https://learn.microsoft.com/en-us/graph/api/security-list-incidents?view=graph-rest-1.0&tabs=http).
+</Callout>
+
+## Parameters
+
+| Field               | Description                                                                                                                                                                                                                                                                           | Required |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------: |
+| **OData Filter**    | An OData filter to apply to the incident list. The following properties support filter: `assignedTo`, `classification`, `createdDateTime`, `determination`, `lastUpdateDateTime`, `severity`, and `status`. Example: `severity eq 'high' and createdDateTime gt 2021-01-01T00:00:00Z` |    No    |
+| **Limit**           | The maximum number of incidents to return.                                                                                                                                                                                                                                            |    No    |
+| **Skip**            | The number of incidents to skip before returning the results.                                                                                                                                                                                                                         |    No    |
+| **Count Incidents** | Instead of returning all the results, the count parameter returns the number of items in the result set. Default: false                                                                                                                                                               |    No    |
+
+### Filter Query
+
+The following operators are supported for the `filter` query parameter:
+
+| Operator Type             | Operator                                                                                                                    |
+| ------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| **Equality operators**    | - Equals (`eq`) <br/> - Not Equals (`ne`) <br/> - Logical negation (`not`) <br/> - In (`in`) <br/> - Has (`has`)            |
+| **Relational operators**  | - Less than (`lt`) <br/> - Greater than (`gt`) <br/> - Less than or equal to (`le`) <br/> - Greater than or equal to (`ge`) |
+| **Lambda operators**      | - Any (`any`) <br/> - All (`all`)                                                                                           |
+| **Conditional operators** | - And (`and`) <br/> - Or (`or`)                                                                                             |
+| **Functions**             | - Starts with (`startswith`) <br/> - Ends with (`endswith`) <br/> - Contains (`contains`)                                   |
+
+The API supports the following properties for the `filter` query parameter:
+
+-   `assignedTo`
+-   `classification`
+-   `determination`
+-   `createdDateTime`
+-   `lastUpdateDateTime`
+-   `severity`
+-   `serviceSource`
+-   `status`
+
+See [here](https://learn.microsoft.com/en-us/graph/filter-query-parameter?tabs=http) for more information on filter queries.
+
+### Example Filter Queries
+
+-   `createdDateTime gt 2024-05-01T00:00:00Z`
+
+## Example Output
+
+```json
+{
+	"value": [
+		{
+			"@odata.type": "#microsoft.graph.security.incident",
+			"id": "2972395",
+			"incidentWebUrl": "https://security.microsoft.com/incidents/2972395?tid=12f988bf-16f1-11af-11ab-1d7cd011db47",
+			"redirectIncidentId": null,
+			"tenantId": "b3c1b5fc-828c-45fa-a1e1-10d74f6d6e9c",
+			"displayName": "Multi-stage incident involving Initial access & Command and control on multiple endpoints reported by multiple sources",
+			"createdDateTime": "2021-08-13T08:43:35.5533333Z",
+			"lastUpdateDateTime": "2021-09-30T09:35:45.1133333Z",
+			"assignedTo": "KaiC@contoso.com",
+			"classification": "TruePositive",
+			"determination": "MultiStagedAttack",
+			"status": "Active",
+			"severity": "Medium",
+			"customTags": ["Demo"],
+			"comments": [
+				{
+					"comment": "Demo incident",
+					"createdBy": "DavidS@contoso.com",
+					"createdTime": "2021-09-30T12:07:37.2756993Z"
+				}
+			],
+			"systemTags": ["Defender Experts"],
+			"description": "Microsoft observed Raspberry Robin worm activity spreading through infected USB on multiple devices in your environment. From available intel, these infections could be a potential precursor activity to ransomware deployment. ..."
+		}
+	]
+}
+```
