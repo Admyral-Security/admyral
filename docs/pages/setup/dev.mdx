@@ -1,3 +1,5 @@
+import { Callout } from "nextra/components";
+
 # Development Setup
 
 ## Prerequisites
@@ -12,81 +14,71 @@
 
 ### Supabase
 
-Inside the project directory, run `supabase start` to spin up the Postgres database and Supabase. To stop the services, simply run `supabase stop`.
+Inside the project directory, run `supabase start` to spin up the Postgres database and Supabase.
+
+```bash
+supabase start
+```
+
+To stop the services, simply run `supabase stop`.
+```bash
+supabase stop
+```
 
 ### Backend
 
-1. Go to the `backend` directory and create an env file:
+```bash
+# 1. Go to the `backend` directory and create an env file:
+cd backend
+cp .env.example .env
 
-    ```bash
-    cd backend
-    cp .env.example .env
-    ```
+# 2. Inside `backend`, run the initial setup (dependency installation, database migration, database seeding):
+./initial_setup.sh
 
-    - In order to make the Workflow Assistant work, you need to provide an OpenAI API Key in the `.env` file.
+# 3. Start the server by executing the following script inside `backend`:
+./start_server.sh
+```
+<Callout type="info">
+	In order to make the Workflow Assistant work, you need to provide an OpenAI API Key in the `.env` file.
+</Callout>
 
-2. Inside `backend`, run the initial setup (dependency installation, database migration, database seeding):
-
-    ```bash
-    ./initial_setup.sh
-    ```
-
-3. Start the server by executing the following script inside `backend`:
-
-    ```bash
-    ./start_server.sh
-    ```
 
 ### Workflow Runner
 
-1. Go to the `workflow-runner` directory and create an env file:
+```bash
+# 1. Go to the `workflow-runner` directory and create an env file:
+cd workflow-runner
+cp .env.example .env
 
-    ```bash
-    cd workflow-runner
-    cp .env.example .env
-    ```
-
+# 2. Inside `workflow-runner`, build and run the service:
+cargo run
+```
+<Callout type="info">
     - To enable AI actions, you need to provide an OpenAI API Key in the `.env` file.
     - To enable the Send Email action, you need to provide a Resend API Key in the `.env` file.
-
-2. Inside `workflow-runner`, build and run the service:
-
-    ```bash
-    cargo run
-    ```
+</Callout>
 
 ### Web
 
-1. Go to the `web` directory and install the dependencies:
+```bash
+# 1. Go to the `web` directory and install the dependencies:
+cd web
+npm install
 
-    ```bash
-    cd web
-    npm install
-    ```
+# 2. Create an env file:
+cp .env.example .env
 
-2. Create an env file:
-
-    ```bash
-    cp .env.example .env
-    ```
-
-3. Start the development server:
-
-    ```bash
-    npm run dev
-    ```
+# 3. Start the development server:
+npm run dev
+```
 
 ### Documentation
 
-1. Go to the `docs` directory and install the dependencies:
+```bash
+# 1. Go to the `docs` directory and install the dependencies:
+cd docs
+pnpm i
 
-    ```bash
-    cd docs
-    pnpm i
-    ```
-
-2. Start the development server:
-
-    ```bash
-    pnpm dev
-    ```
+# 2. Start the development server:
+pnpm dev
+```
