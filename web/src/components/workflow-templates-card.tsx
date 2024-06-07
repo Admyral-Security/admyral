@@ -37,7 +37,6 @@ export default function WorkflowTemplateCard({
 	return (
 		<Card
 			style={{
-				width: "500px",
 				height: "130px",
 				cursor: "pointer",
 			}}
