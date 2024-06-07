@@ -2386,10 +2386,6 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 					id: "API_KEY",
 					displayName: "API Key",
 				},
-				{
-					id: "DOMAIN",
-					displayName: "Domain",
-				},
 			],
 		},
 		apis: [
@@ -2492,8 +2488,8 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 						id: "FILTER",
 						displayName: "Filter",
 						description:
-							"Value must be of the format filter={FILTER KEY} gte YYYY-MM-DDTHH:MM:SSZ lte YYYY-MM-DDTHH:MM:SSZ.",
-						required: false,
+							"Value must be of the following format: {FILTER KEY} gte YYYY-MM-DDTHH:MM:SSZ lte YYYY-MM-DDTHH:MM:SSZ. At least 1 of gte or lte must be specified. Currently, the only supported FILTER KEY for this API is lastModifiedTime. Example: lastModifiedTime gte 2022-01-01T00:00:00Z lte 2022-01-31T23:59:59Z",
+						required: true,
 						dataType: ApiParameterDatatype.TEXT,
 					},
 				],
@@ -2506,6 +2502,14 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 					"https://app.swaggerhub.com/apis/abnormal-security/abx/1.4.3#/Threats/get_threats",
 				requiresAuthentication: true,
 				parameters: [
+					{
+						id: "FILTER",
+						displayName: "Filter",
+						description:
+							"Value must be of the following format: {FILTER KEY} gte YYYY-MM-DDTHH:MM:SSZ lte YYYY-MM-DDTHH:MM:SSZ. At least 1 of gte or lte must be specified. Currently, the only supported FILTER KEY for this API is receivedTime. Example: lastModifiedTime gte 2022-01-01T00:00:00Z lte 2022-01-31T23:59:59Z",
+						required: true,
+						dataType: ApiParameterDatatype.TEXT,
+					},
 					{
 						id: "ATTACK_TYPE",
 						displayName: "Attack Type",

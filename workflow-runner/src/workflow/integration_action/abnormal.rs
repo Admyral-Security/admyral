@@ -7,9 +7,11 @@ use crate::workflow::{
 use anyhow::{anyhow, Result};
 use maplit::hashmap;
 use serde::{Deserialize, Serialize};
+use serde_json::json;
 use std::collections::HashMap;
 
 const INTEGRATION: &str = "Abnormal";
+const API_BASE_URL: &str = "https://api.abnormalplatform.com/v1";
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
@@ -74,6 +76,7 @@ async fn abnormal_get_request(
     Ok(response)
 }
 
+// https://app.swaggerhub.com/apis/abnormal-security/abx/1.4.3#/Cases/get_cases__caseId__analysis
 async fn get_case_analysis(
     client: &dyn HttpClient,
     api_key: &str,
@@ -90,10 +93,11 @@ async fn get_case_analysis(
     )
     .await?
     .expect("CASE_ID is required");
-    let api_url = format!("https://api.abnormalplatform.com/v1/cases/{case_id}/analysis");
+    let api_url = format!("{API_BASE_URL}/cases/{case_id}/analysis");
     abnormal_get_request(client, api_key, &api_url).await
 }
 
+// https://app.swaggerhub.com/apis/abnormal-security/abx/1.4.3#/Cases/get_cases__caseId_
 async fn get_case(
     client: &dyn HttpClient,
     api_key: &str,
@@ -110,10 +114,11 @@ async fn get_case(
     )
     .await?
     .expect("CASE_ID is required");
-    let api_url = format!("https://api.abnormalplatform.com/v1/cases/{case_id}");
+    let api_url = format!("{API_BASE_URL}/cases/{case_id}");
     abnormal_get_request(client, api_key, &api_url).await
 }
 
+// https://app.swaggerhub.com/apis/abnormal-security/abx/1.4.3#/Threats/get_threats__threatId__attachments
 async fn get_threat_attachments(
     client: &dyn HttpClient,
     api_key: &str,
@@ -130,10 +135,11 @@ async fn get_threat_attachments(
     )
     .await?
     .expect("THREAT_ID is required");
-    let api_url = format!("https://api.abnormalplatform.com/v1/threats/{threat_id}/attachments");
+    let api_url = format!("{API_BASE_URL}/threats/{threat_id}/attachments");
     abnormal_get_request(client, api_key, &api_url).await
 }
 
+// https://app.swaggerhub.com/apis/abnormal-security/abx/1.4.3#/Threats/get_threats__threatId__links
 async fn get_threat_links(
     client: &dyn HttpClient,
     api_key: &str,
@@ -150,10 +156,11 @@ async fn get_threat_links(
     )
     .await?
     .expect("THREAT_ID is required");
-    let api_url = format!("https://api.abnormalplatform.com/v1/threats/{threat_id}/links");
+    let api_url = format!("{API_BASE_URL}/threats/{threat_id}/links");
     abnormal_get_request(client, api_key, &api_url).await
 }
 
+// https://app.swaggerhub.com/apis/abnormal-security/abx/1.4.3#/Threats/get_threats__threatId_
 async fn get_threat(
     client: &dyn HttpClient,
     api_key: &str,
@@ -170,10 +177,60 @@ async fn get_threat(
     )
     .await?
     .expect("THREAT_ID is required");
-    let api_url = format!("https://api.abnormalplatform.com/v1/threats/{threat_id}");
-    abnormal_get_request(client, api_key, &api_url).await
+
+    let page_size_opt = get_number_parameter(
+        "PAGE_SIZE",
+        INTEGRATION,
+        "GET_THREAT",
+        parameters,
+        context,
+        ParameterType::Optional,
+    )
+    .await?;
+
+    let query = match page_size_opt {
+        Some(page_size) => format!("?pageSize={page_size}"),
+        None => "".to_string(),
+    };
+    let api_url_base = format!("{API_BASE_URL}/threats/{threat_id}{query}");
+
+    // Handle pagination
+    let mut api_url = api_url_base.clone();
+    let mut messages = Vec::new();
+    loop {
+        let result = abnormal_get_request(client, api_key, &api_url).await?;
+
+        let returned_messages = result
+            .get("messages")
+            .expect("must contain messages")
+            .as_array()
+            .expect("must be array")
+            .clone();
+        messages.extend(returned_messages.into_iter());
+
+        match result.get("nextPageNumber") {
+            Some(next_page_number) => {
+                let next_page_number = next_page_number.as_u64().unwrap();
+                if query.is_empty() {
+                    api_url =
+                        format!("{API_BASE_URL}/threats/{threat_id}?pageNumber={next_page_number}");
+                } else {
+                    api_url = format!(
+                        "{API_BASE_URL}/threats/{threat_id}{query}&pageNumber={next_page_number}"
+                    );
+                }
+            }
+            None => break,
+        };
+    }
+
+    Ok(json!({
+        "threatId": threat_id,
+        "messages": messages
+    }))
 }
 
+// https://app.swaggerhub.com/apis/abnormal-security/abx/1.4.3#/Cases/get_cases
 async fn list_cases(
     client: &dyn HttpClient,
     api_key: &str,
@@ -186,23 +243,59 @@ async fn list_cases(
         "LIST_CASES",
         parameters,
         context,
-        ParameterType::Optional,
+        ParameterType::Required,
     )
     .await?
     .expect("FILTER is required");
-    let api_url = format!(
-        "https://api.abnormalplatform.com/v1/cases?filter={}",
-        filter
-    );
-    abnormal_get_request(client, api_key, &api_url).await
+
+    let api_base_url = format!("{API_BASE_URL}/cases?filter={}", filter);
+
+    // Handle pagination
+    let mut api_url = api_base_url.clone();
+    let mut cases = Vec::new();
+    loop {
+        let result = abnormal_get_request(client, api_key, &api_url).await?;
+
+        let returned_cases = result
+            .get("cases")
+            .expect("must contain cases")
+            .as_array()
+            .expect("must be array")
+            .clone();
+        cases.extend(returned_cases.into_iter());
+
+        match result.get("nextPageNumber") {
+            Some(next_page_number) => {
+                let next_page_number = next_page_number.as_u64().unwrap();
+                api_url = format!("{api_base_url}&pageNumber={next_page_number}");
+            }
+            None => break,
+        };
+    }
+
+    Ok(json!({
+        "cases": cases
+    }))
 }
 
+// https://app.swaggerhub.com/apis/abnormal-security/abx/1.4.3#/Threats/get_threats
 async fn list_threats(
     client: &dyn HttpClient,
     api_key: &str,
     context: &context::Context,
     parameters: &HashMap<String, serde_json::Value>,
 ) -> Result<serde_json::Value> {
+    let filter = get_string_parameter(
+        "FILTER",
+        INTEGRATION,
+        "LIST_THREATS",
+        parameters,
+        context,
+        ParameterType::Required,
+    )
+    .await?
+    .expect("FILTER is required");
+
     let attack_type = get_string_parameter(
         "ATTACK_TYPE",
         INTEGRATION,
@@ -212,6 +305,7 @@ async fn list_threats(
         ParameterType::Optional,
     )
     .await?;
+
     let recipient = get_string_parameter(
         "RECIPIENT",
         INTEGRATION,
@@ -221,6 +315,7 @@ async fn list_threats(
         ParameterType::Optional,
     )
     .await?;
+
     let sender = get_string_parameter(
         "SENDER",
         INTEGRATION,
@@ -230,6 +325,7 @@ async fn list_threats(
         ParameterType::Optional,
     )
     .await?;
+
     let subject = get_string_parameter(
         "SUBJECT",
         INTEGRATION,
@@ -240,27 +336,48 @@ async fn list_threats(
     )
     .await?;
 
-    let mut api_url = String::from("https://api.abnormalplatform.com/v1/threats?");
-
-    let mut query_params = Vec::new();
+    let mut query_params = vec![format!("filter={filter}")];
     if let Some(at) = attack_type {
-        query_params.push(format!("attackType={}", at));
+        query_params.push(format!("attackType={at}"));
     }
     if let Some(rc) = recipient {
-        query_params.push(format!("recipient={}", rc));
+        query_params.push(format!("recipient={rc}"));
     }
     if let Some(sd) = sender {
-        query_params.push(format!("sender={}", sd));
+        query_params.push(format!("sender={sd}"));
     }
     if let Some(sb) = subject {
-        query_params.push(format!("subject={}", sb));
+        query_params.push(format!("subject={sb}"));
     }
 
-    if !query_params.is_empty() {
-        api_url.push_str(&query_params.join("&"));
+    let api_base_url = format!("{API_BASE_URL}/threats?{}", query_params.join("&"));
+
+    // Handle pagination
+    let mut api_url = api_base_url.clone();
+    let mut threats = Vec::new();
+    loop {
+        let result = abnormal_get_request(client, api_key, &api_url).await?;
+
+        let returned_threats = result
+            .get("threats")
+            .expect("must contain threats")
+            .as_array()
+            .expect("must be array")
+            .clone();
+        threats.extend(returned_threats.into_iter());
+
+        match result.get("nextPageNumber") {
+            Some(next_page_number) => {
+                let next_page_number = next_page_number.as_u64().unwrap();
+                api_url = format!("{api_base_url}&pageNumber={next_page_number}");
+            }
+            None => break,
+        };
     }
 
-    abnormal_get_request(client, api_key, &api_url).await
+    Ok(json!({
+        "threats": threats
+    }))
 }
 
 #[cfg(test)]
@@ -269,25 +386,90 @@ mod tests {
     use crate::postgres::{Credential, Database};
     use async_trait::async_trait;
     use serde_json::json;
-    use std::sync::Arc;
+    use std::{
+        cell::RefCell,
+        sync::{Arc, Mutex},
+    };
 
     struct MockHttpClient;
     #[async_trait]
     impl HttpClient for MockHttpClient {
         async fn get(
             &self,
-            _url: &str,
+            url: &str,
             _headers: HashMap<String, String>,
             _expected_response_status: u16,
             _error_message: String,
         ) -> Result<serde_json::Value> {
             Ok(json!({
-                "case_id": "12345",
-                "analysis": "sample analysis data",
-                "details": "sample case details",
-                "links": ["link1", "link2"],
-                "threat_id": "abc123",
-                "cases": ["case1", "case2"]
+                "url": url
+            }))
+        }
+    }
+
+    #[derive(Default)]
+    struct MockHttpClientWithPagination {
+        state: Mutex<RefCell<i32>>,
+    }
+    #[async_trait]
+    impl HttpClient for MockHttpClientWithPagination {
+        async fn get(
+            &self,
+            url: &str,
+            _headers: HashMap<String, String>,
+            _expected_response_status: u16,
+            _error_message: String,
+        ) -> Result<serde_json::Value> {
+            let lock_guard = self.state.lock().unwrap();
+            let state = *lock_guard.borrow();
+
+            if url.contains("/threats/") {
+                // Get threat API
+                if state == 0 {
+                    lock_guard.replace(1);
+                    return Ok(json!({
+                        "messages": [url],
+                        "nextPageNumber": 2
+                    }));
+                }
+
+                return Ok(json!({
+                    "messages": [url]
+                }));
+            }
+
+            if url.contains("/cases") {
+                // List cases API
+                if state == 0 {
+                    lock_guard.replace(1);
+                    return Ok(json!({
+                        "cases": [url],
+                        "nextPageNumber": 2
+                    }));
+                }
+
+                return Ok(json!({
+                    "cases": [url]
+                }));
+            }
+
+            if url.contains("/threats") {
+                // List threats API
+                if state == 0 {
+                    lock_guard.replace(1);
+                    return Ok(json!({
+                        "threats": [url],
+                        "nextPageNumber": 2
+                    }));
+                }
+
+                return Ok(json!({
+                    "threats": [url]
+                }));
+            }
+
+            Ok(json!({
+                "url": url
             }))
         }
     }
@@ -332,6 +514,21 @@ mod tests {
         (client, context)
     }
 
+    async fn setup_pagination(
+        db: Arc<dyn Database>,
+    ) -> (Arc<MockHttpClientWithPagination>, context::Context) {
+        let client = Arc::new(MockHttpClientWithPagination::default());
+        let context = context::Context::init(
+            "ddd54f25-0537-4e40-ab96-c93beee543de".to_string(),
+            None,
+            db,
+            client.clone(),
+        )
+        .await
+        .unwrap();
+        (client, context)
+    }
+
     #[tokio::test]
     async fn test_get_case_analysis() {
         let (client, context) = setup(Arc::new(MockDb)).await;
@@ -350,8 +547,12 @@ mod tests {
         assert!(result.is_ok());
 
         let value = result.unwrap();
-        assert_eq!(value.as_object().unwrap().get("case_id").unwrap(), "12345");
-        assert!(value.as_object().unwrap().get("analysis").is_some());
+        assert_eq!(
+            json!({
+                "url": format!("{API_BASE_URL}/cases/12345/analysis")
+            }),
+            value
+        );
     }
 
     #[tokio::test]
@@ -369,7 +570,7 @@ mod tests {
         assert!(result.is_err());
         assert_eq!(
             result.err().unwrap().to_string(),
-            "Error: Missing credential for Abnormal"
+            "Missing credentials: \"credentials\""
         );
     }
 
@@ -391,8 +592,12 @@ mod tests {
         assert!(result.is_ok());
 
         let value = result.unwrap();
-        assert_eq!(value.as_object().unwrap().get("case_id").unwrap(), "12345");
-        assert!(value.as_object().unwrap().get("details").is_some());
+        assert_eq!(
+            json!({
+                "url": format!("{API_BASE_URL}/cases/12345")
+            }),
+            value
+        );
     }
 
     #[tokio::test]
@@ -414,8 +619,10 @@ mod tests {
 
         let value = result.unwrap();
         assert_eq!(
-            value.as_object().unwrap().get("threat_id").unwrap(),
-            "abc123"
+            json!({
+                "url": format!("{API_BASE_URL}/threats/abc123/attachments")
+            }),
+            value
         );
     }
 
@@ -438,15 +645,16 @@ mod tests {
 
         let value = result.unwrap();
         assert_eq!(
-            value.as_object().unwrap().get("threat_id").unwrap(),
-            "abc123"
+            json!({
+                "url": format!("{API_BASE_URL}/threats/abc123/links")
+            }),
+            value
         );
-        assert!(value.as_object().unwrap().get("links").is_some());
     }
 
     #[tokio::test]
     async fn test_get_threat() {
-        let (client, context) = setup(Arc::new(MockDb)).await;
+        let (client, context) = setup_pagination(Arc::new(MockDb)).await;
 
         let parameters = hashmap! { "THREAT_ID".to_string() => json!("abc123") };
 
@@ -463,15 +671,20 @@ mod tests {
 
         let value = result.unwrap();
         assert_eq!(
-            value.as_object().unwrap().get("threat_id").unwrap(),
-            "abc123"
+            json!({
+                "threatId": "abc123",
+                "messages": [
+                    format!("{API_BASE_URL}/threats/abc123"),
+                    format!("{API_BASE_URL}/threats/abc123?pageNumber=2"),
+                ]
+            }),
+            value
         );
-        assert!(value.as_object().unwrap().get("details").is_some());
     }
 
     #[tokio::test]
     async fn test_list_cases() {
-        let (client, context) = setup(Arc::new(MockDb)).await;
+        let (client, context) = setup_pagination(Arc::new(MockDb)).await;
 
         let parameters =
             hashmap! { "FILTER".to_string() => json!("receivedTime gte 2023-06-01T00:00:00Z") };
@@ -488,14 +701,23 @@ mod tests {
         assert!(result.is_ok());
 
         let value = result.unwrap();
-        assert!(value.as_object().unwrap().get("cases").is_some());
+        assert_eq!(
+            json!({
+                "cases": [
+                    format!("{API_BASE_URL}/cases?filter=receivedTime gte 2023-06-01T00:00:00Z"),
+                    format!("{API_BASE_URL}/cases?filter=receivedTime gte 2023-06-01T00:00:00Z&pageNumber=2"),
+                ]
+            }),
+            value
+        );
     }
 
     #[tokio::test]
     async fn test_list_threats() {
-        let (client, context) = setup(Arc::new(MockDb)).await;
+        let (client, context) = setup_pagination(Arc::new(MockDb)).await;
 
         let parameters = hashmap! {
+            "FILTER".to_string() => json!("receivedTime gte 2023-06-01T00:00:00Z"),
             "ATTACK_TYPE".to_string() => json!("Phishing"),
             "RECIPIENT".to_string() => json!("user@example.com"),
             "SENDER".to_string() => json!("attacker@example.com"),
@@ -514,6 +736,14 @@ mod tests {
         assert!(result.is_ok());
 
         let value = result.unwrap();
-        assert!(value.as_object().unwrap().get("threats").is_some());
+        assert_eq!(
+            json!({
+                "threats": [
+                    format!("{API_BASE_URL}/threats?filter=receivedTime gte 2023-06-01T00:00:00Z&attackType=Phishing&recipient=user@example.com&sender=attacker@example.com&subject=Important"),
+                    format!("{API_BASE_URL}/threats?filter=receivedTime gte 2023-06-01T00:00:00Z&attackType=Phishing&recipient=user@example.com&sender=attacker@example.com&subject=Important&pageNumber=2"),
+                ]
+            }),
+            value
+        );
     }
 }
