@@ -162,12 +162,25 @@ export async function loadUserQuota(): Promise<Quota> {
 	return transformObjectKeysToCamelCase(quota);
 }
 
-export async function updateUserProfile(
-	firstName: string,
-	lastName: string,
-	company: string,
-) {
+export interface UserProfileUpdate {
+	firstName?: string;
+	lastName?: string;
+	company?: string;
+	role?: string;
+	additionalInfo?: string;
+}
+
+export async function updateUserProfile(update: UserProfileUpdate) {
 	const [userId, accessToken] = await getUserIdAndAccessToken();
+
+	const body = JSON.stringify({
+		first_name: update.firstName || null,
+		last_name: update.lastName || null,
+		company: update.company || null,
+		email: null,
+		role: update.role || null,
+		additional_info: update.additionalInfo || null,
+	});
 
 	const result = await fetch(
 		`${process.env.BACKEND_API_URL}/api/v1/profile/${userId}/update`,
@@ -177,12 +190,7 @@ export async function updateUserProfile(
 				"Content-Type": "application/json",
 				Authorization: `Bearer ${accessToken}`,
 			},
-			body: JSON.stringify({
-				first_name: firstName,
-				last_name: lastName,
-				company,
-				email: null,
-			}),
+			body,
 		},
 	);
 	if (result.status !== 204) {

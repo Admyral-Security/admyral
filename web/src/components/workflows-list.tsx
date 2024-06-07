@@ -5,6 +5,7 @@ import {
 	Box,
 	Callout,
 	Card,
+	Dialog,
 	Flex,
 	IconButton,
 	Spinner,
@@ -15,7 +16,9 @@ import PublishWorkflowToggle from "./publish-workflow-toggle";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { listWorkflows } from "@/lib/api";
-import useGettingStartedStore from "@/lib/getting-started-store";
+import { useSearchParams } from "next/navigation";
+import useWelcomeDialog from "@/providers/welcome-dialog-provider";
+import useGettingStartedDialog from "@/providers/getting-started-provider";
 
 function NoWorkflowExists() {
 	return (
@@ -28,10 +31,6 @@ function NoWorkflowExists() {
 					No workflow has been created yet.
 				</Callout.Text>
 			</Callout.Root>
-
-			{/* <Box pt="4">
-				<CreateNewWorkflowButton size="4" />
-			</Box> */}
 		</Card>
 	);
 }
@@ -93,17 +92,30 @@ export default function WorkflowsList() {
 	const [loading, setLoading] = useState(true);
 	const [workflows, setWorkflows] = useState<WorkflowListEntry[]>([]);
 	const [error, setError] = useState<string | null>();
-	const { showGettingStarted } = useGettingStartedStore((state) => ({
-		showGettingStarted: () => state.setShowGettingStarted(true),
-	}));
+
+	const searchParams = useSearchParams();
+	const isFirstLogin = searchParams.get("isFirstLogin") === "true";
+
+	const { openWelcomeDialog } = useWelcomeDialog();
+	const { openGettingStartedDialog } = useGettingStartedDialog();
 
 	useEffect(() => {
 		setError(null);
 		listWorkflows()
 			.then((workflows) => {
 				setWorkflows(workflows);
-				if (workflows.length < 2) {
-					showGettingStarted();
+
+				if (isFirstLogin) {
+					// TODO: handle case when welcome dialog is disabled
+					openWelcomeDialog();
+					// if (
+					// 	process.env.NEXT_PUBLIC_DISABLE_WELCOME_DIALOG ===
+					// 	"true"
+					// ) {
+					// 	openWelcomeDialog();
+					// } else {
+					// 	showGettingStarted();
+					// }
 				}
 			})
 			.catch((err) =>

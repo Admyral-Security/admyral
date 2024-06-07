@@ -1,6 +1,7 @@
 from sqlmodel import SQLModel, Field, Relationship
 from typing import Any, Optional
-from sqlalchemy.dialects.postgresql import UUID, TIMESTAMP, TEXT, JSONB, ENUM
+from sqlalchemy.dialects.postgresql import UUID, TIMESTAMP, TEXT, JSONB, ENUM, ARRAY
+from sqlalchemy.sql.sqltypes import String
 from datetime import datetime
 from sqlalchemy.sql.expression import func
 from sqlalchemy import Column, ForeignKey
@@ -28,6 +29,8 @@ class UserProfile(Base, table=True):
     company: str = Field(sa_type=TEXT(), default="")
     first_name: str = Field(sa_type=TEXT(), default="")
     last_name: str = Field(sa_type=TEXT(), default="")
+    role: str = Field(sa_type=TEXT(), default="")
+    additional_info: list[str] = Field(sa_type=ARRAY(String), default=[])
 
     workflows: list["Workflow"] = Relationship(back_populates="user", sa_relationship_kwargs=dict(cascade="all, delete"))
     credentials: list["Credential"] = Relationship(back_populates="user", sa_relationship_kwargs=dict(cascade="all, delete"))
