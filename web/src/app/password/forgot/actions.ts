@@ -4,11 +4,9 @@ import { createClient } from "@/utils/supabase/server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
-export async function resetPassowrd(formData: FormData) {
+export async function resetPassowrd(email: string) {
 	const supabase = createClient();
-	const { error } = await supabase.auth.resetPasswordForEmail(
-		formData.get("email") as string,
-	);
+	const { error } = await supabase.auth.resetPasswordForEmail(email);
 	if (error) {
 		redirect(`/password/forgot?error=${error.message}`);
 	}
