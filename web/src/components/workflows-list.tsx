@@ -106,16 +106,13 @@ export default function WorkflowsList() {
 				setWorkflows(workflows);
 
 				if (isFirstLogin) {
-					// TODO: handle case when welcome dialog is disabled
-					openWelcomeDialog();
-					// if (
-					// 	process.env.NEXT_PUBLIC_DISABLE_WELCOME_DIALOG ===
-					// 	"true"
-					// ) {
-					// 	openWelcomeDialog();
-					// } else {
-					// 	showGettingStarted();
-					// }
+					if (
+						process.env.NEXT_PUBLIC_ENABLE_WELCOME_DIALOG === "true"
+					) {
+						openWelcomeDialog();
+					} else {
+						openGettingStartedDialog();
+					}
 				}
 			})
 			.catch((err) =>

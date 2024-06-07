@@ -131,7 +131,10 @@ export default function WelcomeDialogModal({
 									}
 								>
 									{checkboxes.map((checkbox) => (
-										<CheckboxGroup.Item value={checkbox}>
+										<CheckboxGroup.Item
+											key={checkbox}
+											value={checkbox}
+										>
 											{checkbox}
 										</CheckboxGroup.Item>
 									))}
