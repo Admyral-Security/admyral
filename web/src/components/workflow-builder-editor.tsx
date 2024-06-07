@@ -36,6 +36,7 @@ import StartWorkflow from "./action-editing/start-workflow";
 import IntegrationNode from "./workflow-graph/integration-node";
 import IntegrationSelection from "./action-editing/integration-selection";
 import Integration from "./action-editing/integration";
+import WorkflowHints from "./workflow-hints";
 
 interface IntegrationDetailsProps {
 	id: string;
@@ -193,6 +194,8 @@ function WorkflowBuilderEditor({
 				/>
 				<Controls />
 			</ReactFlow>
+
+			{nodes.length === 0 && <WorkflowHints />}
 
 			<EditorSideBar />
 
