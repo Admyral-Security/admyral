@@ -11,26 +11,25 @@ Retrieve the takedown information for a URL you've previously reported.
 
 ## Parameters:
 
-| Field                 | Description                                                                                            | Required |
-| --------------------- | ------------------------------------------------------------------------------------------------------ | :------: |
-| **Case ID**           | The ID of the takedown request.                                                                        |   Yes    |
+| Field       | Description                     | Required |
+| ----------- | ------------------------------- | :------: |
+| **Case ID** | The ID of the takedown request. |   Yes    |
 
 ## Example Output:
+
 ```json
 {
-  "created": "string",
-  "id": "string",
-  "pending_actions": [
-    {
-      "description": "string",
-      "params": {},
-      "report_uri": "string"
-    }
-  ],
-  "resolved": true,
-  "tags": [
-    "string"
-  ],
-  "url": "string"
+	"created": "string",
+	"id": "string",
+	"pending_actions": [
+		{
+			"description": "string",
+			"params": {},
+			"report_uri": "string"
+		}
+	],
+	"resolved": true,
+	"tags": ["string"],
+	"url": "string"
 }
 ```

@@ -12,6 +12,7 @@ export enum IntegrationType {
 	MS_DEFENDER = "MS_DEFENDER",
 	GREY_NOISE = "GREY_NOISE",
 	OPSGENIE = "OPSGENIE",
+	ABNORMAL = "ABNORMAL",
 }
 
 export enum ApiParameterDatatype {
@@ -2366,6 +2367,180 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 							"Additional note that will be added to the alert.",
 						required: false,
 						dataType: ApiParameterDatatype.TEXTAREA,
+					},
+				],
+			},
+		],
+	},
+	// Abnormal
+	[IntegrationType.ABNORMAL]: {
+		name: "Abnormal",
+		icon: {
+			src: "/abnormal_logo.svg",
+			isSquareIcon: true,
+		},
+		credential: {
+			authType: AuthType.SECRET,
+			parameters: [
+				{
+					id: "API_KEY",
+					displayName: "API Key",
+				},
+			],
+		},
+		apis: [
+			{
+				id: "GET_CASE_ANALYSIS",
+				name: "Get Case Analysis",
+				description:
+					"Provides the analysis and timeline details of a case.",
+				documentationUrl:
+					"https://app.swaggerhub.com/apis/abnormal-security/abx/1.4.3#/Cases/get_cases__caseId__analysis",
+				requiresAuthentication: true,
+				parameters: [
+					{
+						id: "CASE_ID",
+						displayName: "Case ID",
+						description: "The Case ID to query.",
+						required: true,
+						dataType: ApiParameterDatatype.TEXT,
+					},
+				],
+			},
+			{
+				id: "GET_CASE",
+				name: "Get Case",
+				description: "Retrieve details of a case.",
+				documentationUrl:
+					"https://app.swaggerhub.com/apis/abnormal-security/abx/1.4.3#/Cases/get_cases__caseId_",
+				requiresAuthentication: true,
+				parameters: [
+					{
+						id: "CASE_ID",
+						displayName: "Case ID",
+						description: "The Case ID to query.",
+						required: true,
+						dataType: ApiParameterDatatype.TEXT,
+					},
+				],
+			},
+			{
+				id: "GET_THREAT_ATTACHMENTS",
+				name: "Get Threat Attachments",
+				description: "Get attachment details of a threat campaign.",
+				documentationUrl:
+					"https://app.swaggerhub.com/apis/abnormal-security/abx/1.4.3#/Threats/get_threats__threatId__attachments",
+				requiresAuthentication: true,
+				parameters: [
+					{
+						id: "THREAT_ID",
+						displayName: "Threat ID",
+						description: "A UUID representing the threat.",
+						required: true,
+						dataType: ApiParameterDatatype.TEXT,
+					},
+				],
+			},
+			{
+				id: "GET_THREAT_LINKS",
+				name: "Get Threat Links",
+				description: "Get information of links in a threat campaign.",
+				documentationUrl:
+					"https://app.swaggerhub.com/apis/abnormal-security/abx/1.4.3#/Threats/get_threats__threatId__links",
+				requiresAuthentication: true,
+				parameters: [
+					{
+						id: "THREAT_ID",
+						displayName: "Threat ID",
+						description: "A UUID representing the threat.",
+						required: true,
+						dataType: ApiParameterDatatype.TEXT,
+					},
+				],
+			},
+			{
+				id: "GET_THREAT",
+				name: "Get Threat",
+				description: "Get details of a threat.",
+				documentationUrl:
+					"https://app.swaggerhub.com/apis/abnormal-security/abx/1.4.3#/Threats/get_threats__threatId_",
+				requiresAuthentication: true,
+				parameters: [
+					{
+						id: "THREAT_ID",
+						displayName: "Threat ID",
+						description: "A UUID representing the threat.",
+						required: true,
+						dataType: ApiParameterDatatype.TEXT,
+					},
+				],
+			},
+			{
+				id: "LIST_CASES",
+				name: "List Cases",
+				description:
+					"Get a list of Abnormal cases identified by Abnormal Security.",
+				documentationUrl:
+					"https://app.swaggerhub.com/apis/abnormal-security/abx/1.4.3#/Cases/get_cases",
+				requiresAuthentication: true,
+				parameters: [
+					{
+						id: "FILTER",
+						displayName: "Filter",
+						description:
+							"Value must be of the following format: {FILTER KEY} gte YYYY-MM-DDTHH:MM:SSZ lte YYYY-MM-DDTHH:MM:SSZ. At least 1 of gte or lte must be specified. Currently, the only supported FILTER KEY for this API is lastModifiedTime. Example: lastModifiedTime gte 2022-01-01T00:00:00Z lte 2022-01-31T23:59:59Z",
+						required: true,
+						dataType: ApiParameterDatatype.TEXT,
+					},
+				],
+			},
+			{
+				id: "LIST_THREATS",
+				name: "List Threats",
+				description: "Get a list of threats.",
+				documentationUrl:
+					"https://app.swaggerhub.com/apis/abnormal-security/abx/1.4.3#/Threats/get_threats",
+				requiresAuthentication: true,
+				parameters: [
+					{
+						id: "FILTER",
+						displayName: "Filter",
+						description:
+							"Value must be of the following format: {FILTER KEY} gte YYYY-MM-DDTHH:MM:SSZ lte YYYY-MM-DDTHH:MM:SSZ. At least 1 of gte or lte must be specified. Currently, the only supported FILTER KEY for this API is receivedTime. Example: lastModifiedTime gte 2022-01-01T00:00:00Z lte 2022-01-31T23:59:59Z",
+						required: true,
+						dataType: ApiParameterDatatype.TEXT,
+					},
+					{
+						id: "ATTACK_TYPE",
+						displayName: "Attack Type",
+						description:
+							"Filters threats based on the type of attack. Options: Internal-to-Internal Attacks (Email Account Takeover), Spam, Reconnaissance, Scam, Social Engineering (BEC), Phishing: Credential, Invoice/Payment Fraud (BEC), Malware, Extortion, Phishing: Sensitive Data, Other",
+						required: false,
+						dataType: ApiParameterDatatype.TEXT,
+					},
+					{
+						id: "RECIPIENT",
+						displayName: "Recipient",
+						description:
+							"Filters threats based on the name or email address of the recipient.",
+						required: false,
+						dataType: ApiParameterDatatype.TEXT,
+					},
+					{
+						id: "SENDER",
+						displayName: "Sender",
+						description:
+							"Filters threats based on the name or email address of the sender.",
+						required: false,
+						dataType: ApiParameterDatatype.TEXT,
+					},
+					{
+						id: "SUBJECT",
+						displayName: "Subject",
+						description:
+							"Filters threats based on the email subject.",
+						required: false,
+						dataType: ApiParameterDatatype.TEXT,
 					},
 				],
 			},

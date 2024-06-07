@@ -1,0 +1,33 @@
+import { Callout } from "nextra/components";
+
+# List Cases
+
+Get a list of Abnormal cases identified by Abnormal Security.
+
+<Callout type="info">
+	For Abnormal's documentation, see [Abnormal List Cases
+	API](https://app.swaggerhub.com/apis-docs/abnormal-security/abx/1.4.3#/Cases/get_cases).
+</Callout>
+
+## Parameters:
+
+| Field      | Description                                                                                                                                                                                                                                                                                                                    | Required |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | :------: |
+| **Filter** | Value must be of the format `filter={FILTER KEY} gte YYYY-MM-DDTHH:MM:SSZ lte YYYY-MM-DDTHH:MM:SSZ`. A `{FILTER KEY}` must be specified, and currently the only key that is supported for /threats is receivedTime. At least 1 of gte/lte must be specified, with a datetime string following the YYYY-MM-DDTHH:MM:SSZ format. |   Yes    |
+
+## Example Output
+
+A list of the top 100 cases identified in Abnormal Cases if no filter query parameter is specified, or a paginated list of cases if a filter query parameter is specified.
+
+```json
+{
+	"cases": [
+		{
+			"caseId": "1234",
+			"severity": "Potential Account Takeover"
+		}
+	],
+	"pageNumber": 1,
+	"nextPageNumber": 2
+}
+```

@@ -21,6 +21,7 @@ supabase start
 ```
 
 To stop the services, simply run `supabase stop`.
+
 ```bash
 supabase stop
 ```
@@ -38,10 +39,11 @@ cp .env.example .env
 # 3. Start the server by executing the following script inside `backend`:
 ./start_server.sh
 ```
-<Callout type="info">
-	In order to make the Workflow Assistant work, you need to provide an OpenAI API Key in the `.env` file.
-</Callout>
 
+<Callout type="info">
+	In order to make the Workflow Assistant work, you need to provide an OpenAI
+	API Key in the `.env` file.
+</Callout>
 
 ### Workflow Runner
 
@@ -53,9 +55,11 @@ cp .env.example .env
 # 2. Inside `workflow-runner`, build and run the service:
 cargo run
 ```
+
 <Callout type="info">
-    - To enable AI actions, you need to provide an OpenAI API Key in the `.env` file.
-    - To enable the Send Email action, you need to provide a Resend API Key in the `.env` file.
+	- To enable AI actions, you need to provide an OpenAI API Key in the `.env`
+	file. - To enable the Send Email action, you need to provide a Resend API
+	Key in the `.env` file.
 </Callout>
 
 ### Web

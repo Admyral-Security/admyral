@@ -1,0 +1,29 @@
+import { Callout } from "nextra/components";
+
+# Get Threat Attachments
+
+Get attachment details of a threat campaign.
+
+<Callout type="info">
+	For Abnormal's documentation, see [Abnormal Get Threat Attachments
+	API](https://app.swaggerhub.com/apis/abnormal-security/abx/1.4.3#/Threats/get_threats__threatId__attachments).
+</Callout>
+
+## Parameters:
+
+| Field         | Description            | Required |
+| ------------- | ---------------------- | :------: |
+| **Threat ID** | The Threat ID to query |   Yes    |
+
+## Example Output
+
+```json
+{
+	"threats": [
+		{
+			"abxMessageId": 4551618356913732000,
+			"attachmentName": "attachment1.jpg"
+		}
+	]
+}
+```

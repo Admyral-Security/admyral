@@ -8,6 +8,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::json;
 use std::collections::HashMap;
 
+mod abnormal;
 mod alienvault_otx;
 mod grey_noise;
 mod jira;
@@ -49,6 +50,7 @@ pub enum IntegrationType {
     MsDefender,
     GreyNoise,
     Opsgenie,
+    Abnormal,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -180,6 +182,11 @@ impl ActionExecutor for Integration {
             }
             IntegrationType::Opsgenie => {
                 opsgenie::OpsgenieExecutor
+                    .execute(&client, context, &self.api, &self.credential, &self.params)
+                    .await
+            }
+            IntegrationType::Abnormal => {
+                abnormal::AbnormalExecutor
                     .execute(&client, context, &self.api, &self.credential, &self.params)
                     .await
             }

@@ -5,29 +5,31 @@ import { Callout } from "nextra/components";
 Finds the best way to report a URL/IP to the relevant hosting providers and domain registrars.
 
 This works not only for domain names but also for:
-- Dynamic DNS providers
-- Shared hosting platforms
-- Cloud hosts
 
+-   Dynamic DNS providers
+-   Shared hosting platforms
+-   Cloud hosts
 
 <Callout type="info">
-	For Phish Reports's documentation, see [Get the hosting providers and abuse contact information for a URL/IP
+	For Phish Reports's documentation, see [Get the hosting providers and abuse
+	contact information for a URL/IP
 	API](https://phish.report/api/v0#tag/Analysis/paths/~1api~1v0~1hosting/get).
 </Callout>
 
 ## Parameters:
 
-| Field                 | Description                                                               | Required |
-| --------------------- | ------------------------------------------------------------------------- | :------: |
-| **URL**               | The URL, domain, or IP address to find abuse contact information for.     |   Yes    |
+| Field   | Description                                                           | Required |
+| ------- | --------------------------------------------------------------------- | :------: |
+| **URL** | The URL, domain, or IP address to find abuse contact information for. |   Yes    |
 
 ## Example Output:
+
 ```json
 [
-  {
-    "name": "string",
-    "report_uri": "string",
-    "role": "string"
-  }
+	{
+		"name": "string",
+		"report_uri": "string",
+		"role": "string"
+	}
 ]
 ```

@@ -11,27 +11,26 @@ Start the takedown of a URL you've identified as malicious. Phish Report will co
 
 ## Parameters:
 
-| Field                 | Description                                                                                            | Required |
-| --------------------- | ------------------------------------------------------------------------------------------------------ | :------: |
-| **Phishing URL**      | The phishing URL to take down. You should have high confidence that this URL is malicious.             |   Yes    |
-| **Ignore Duplicates** | By default, trying to create a duplicate case will fail. Setting this to true will allow duplictes.    |    No    |
+| Field                 | Description                                                                                         | Required |
+| --------------------- | --------------------------------------------------------------------------------------------------- | :------: |
+| **Phishing URL**      | The phishing URL to take down. You should have high confidence that this URL is malicious.          |   Yes    |
+| **Ignore Duplicates** | By default, trying to create a duplicate case will fail. Setting this to true will allow duplictes. |    No    |
 
 ## Example Output:
+
 ```json
 {
-  "created": "string",
-  "id": "string",
-  "pending_actions": [
-    {
-      "description": "string",
-      "params": {},
-      "report_uri": "string"
-    }
-  ],
-  "resolved": true,
-  "tags": [
-    "string"
-  ],
-  "url": "string"
+	"created": "string",
+	"id": "string",
+	"pending_actions": [
+		{
+			"description": "string",
+			"params": {},
+			"report_uri": "string"
+		}
+	],
+	"resolved": true,
+	"tags": ["string"],
+	"url": "string"
 }
 ```
