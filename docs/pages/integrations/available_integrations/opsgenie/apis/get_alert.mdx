@@ -1,0 +1,81 @@
+import { Callout } from "nextra/components";
+
+# Get Alert
+
+Retrieve an alert in Opsgenie.
+
+<Callout type="info">
+    For Opsgenie's documentation, see [Get Alert](https://docs.opsgenie.com/docs/alert-api#get-alert).
+</Callout>
+
+## Parameters:
+
+| Field            | Description                                                                                             | Required |
+| ---------------- | ------------------------------------------------------------------------------------------------------- | :------: |
+| **Identifier**   | Identifier of the alert.                                                                                |   Yes    |
+| **IdentifierType** | Type of the identifier that is provided as an in-line parameter. Possible values are id, tiny and alias. Default value is id. |    -     |
+
+## Example Request:
+
+```json
+{
+    "data": {
+        "id": "70413a06-38d6-4c85-92b8-5ebc900d42e2",
+        "tinyId": "1791",
+        "alias": "event_573",
+        "message": "Our servers are in danger",
+        "status": "closed",
+        "acknowledged": false,
+        "isSeen": true,
+        "tags": [
+            "OverwriteQuietHours",
+            "Critical"
+        ],
+        "snoozed": true,
+        "snoozedUntil": "2017-04-03T20:32:35.143Z",
+        "count": 79,
+        "lastOccurredAt": "2017-04-03T20:05:50.894Z",
+        "createdAt": "2017-03-21T20:32:52.353Z",
+        "updatedAt": "2017-04-03T20:32:57.301Z",
+        "source": "Isengard",
+        "owner": "morpheus@opsgenie.com",
+        "priority": "P5",
+        "responders":[
+          {
+              "id":"4513b7ea-3b91-438f-b7e4-e3e54af9147c",
+              "type":"team"
+          },
+          {
+              "id":"bb4d9938-c3c2-455d-aaab-727aa701c0d8",
+              "type":"user"
+          },
+          {
+              "id":"aee8a0de-c80f-4515-a232-501c0bc9d715",
+              "type":"escalation"
+          },
+          {
+              "id":"80564037-1984-4f38-b98e-8a1f662df552",
+              "type":"schedule"
+          }
+    		],
+        "integration": {
+            "id": "4513b7ea-3b91-438f-b7e4-e3e54af9147c",
+            "name": "Nebuchadnezzar",
+            "type": "API"
+        },
+        "report": {
+            "ackTime": 15702,
+            "closeTime": 60503,
+            "acknowledgedBy": "agent_smith@opsgenie.com",
+            "closedBy": "neo@opsgenie.com"
+        },
+        "actions": ["Restart", "Ping"],
+        "entity": "EC2",
+        "description": "Example description",
+        "details": {
+            "serverName": "Zion",
+            "region": "Oregon"
+        }
+    },
+    "requestId": "9ae63dd7-ed00-4c81-86f0-c4ffd33142c9"
+}

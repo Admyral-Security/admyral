@@ -1,0 +1,32 @@
+import { Callout } from "nextra/components";
+
+# Close Alert
+
+Close an alert in Opsgenie.
+
+<Callout type="info">
+    For Opsgenie's documentation, see [Close Alert](https://docs.opsgenie.com/docs/alert-api#close-alert).
+</Callout>
+
+## Parameters:
+
+| Field            | Description                                                                                             | Required |
+| ---------------- | ------------------------------------------------------------------------------------------------------- | :------: |
+| **Identifier**   | Identifier of the alert.                                                                                |   Yes    |
+| **IdentifierType** | Type of the identifier that is provided as an in-line parameter. Possible values are `id`, `tiny` and `alias`. Default value is `id`. |    -     |
+| **User**         | Display name of the request owner. Limit: 100 characters.                                               |    -     |
+| **Source**       | Display name of the request source. Limit: 100 characters.                                              |    -     |
+| **Note**         | Additional alert note to add. Limit: 25000 characters.                                                  |    -     |
+
+## Example Request:
+
+<Callout type="info">
+    Close alert requests are processed asynchronously, therefore valid requests are responded to with `HTTP status 202 - Accepted`.
+</Callout>
+
+```json
+{
+    "result": "Request will be processed",
+    "took": 0.107,
+    "requestId": "43a29c5c-3dbf-4fa4-9c26-f4f71023e120"
+}
