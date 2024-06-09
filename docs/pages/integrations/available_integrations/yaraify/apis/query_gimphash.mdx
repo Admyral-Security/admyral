@@ -1,0 +1,47 @@
+import { Callout } from "nextra/components";
+
+# Query gimphash
+
+You can get a list of recent files associated with a specific gimphash.
+
+<Callout type="info">
+	For YARAify's documentation, see [Query gimphash](https://yaraify.abuse.ch/api/#gimphash).
+</Callout>
+
+## Parameters:
+
+| Field    | Description                                 | Required |
+| -------- | ------------------------------------------- | :------: |
+| **gimphash** | The gimphash to query for.               |   Yes    |
+
+## Example Output:
+
+```json
+{
+    "query_status": "ok",
+    "query_info": {
+        "search_scope": "all time",
+        "result_count": 1,
+        "result_max": 25
+    },
+    "data": [
+        {
+            "sha256_hash": "631fc8da17bc3eb84718969a48b679237165887baede146faba6df842c80ab5c",
+            "file_size": 7053280,
+            "mime_type": "application\/x-dosexec",
+            "md5_hash": "132a961afc5b7846f72c5944798535f6",
+            "sha1_hash": "5ff9a26cba1baa65d34dd53cd9b7913b8e524570",
+            "sha3_384_hash": "9404fba96909631807b2821f17a21d6315ec5f068b0c146a5cb7c58b073d7462374f44080f4ba5e255d130e0de981a72",
+            "first_seen": "2022-07-02 09:24:03 UTC",
+            "last_seen": "2022-07-02 12:26:15 UTC",
+            "sightings": 2,
+            "imphash": "c7269d59926fa4252270f407e4dab043",
+            "ssdeep": "98304:lcjs3aEh2qJechqerH0KCYXidWPpTuEVtTZtWAI4AmnXTj+q+c6q1:28dqcp0KC8iMBLvTZkAI\/m\/+cF1",
+            "tlsh": "T12C668D43F89560E9C6EAD130CA75C2527B307888073027D36F65AABA6B73BD05FB9750",
+            "telfhash": null,
+            "gimphash": "a081e2fab5999d99ed6be718af55e93df171d14bc83c7ca5fdc0907edba0d338",
+            "dhash_icon": null
+        }
+    ]
+}
+```

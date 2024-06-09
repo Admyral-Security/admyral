@@ -1,0 +1,82 @@
+import { Callout } from "nextra/components";
+
+# Query tlsh
+
+You can get a list of recent files associated with a specific tlsh.
+
+<Callout type="info">
+	For YARAify's documentation, see [Query tlsh](https://yaraify.abuse.ch/api/#tlsh).
+</Callout>
+
+## Parameters:
+
+| Field    | Description                                 | Required |
+| -------- | ------------------------------------------- | :------: |
+| **tlsh** | The tlsh to query for.               |   Yes    |
+
+## Example Output:
+
+```json
+{
+    "query_status": "ok",
+    "query_info": {
+        "search_scope": "all time",
+        "result_count": 64,
+        "result_max": 250
+    },
+    "data": [
+        {
+            "sha256_hash": "0278236466b0915e5b5fb228033a46c7ed1d9f29ce07f5784b3746e8ea64fadb",
+            "file_size": 1750234,
+            "mime_type": "application\/x-dosexec",
+            "md5_hash": "77bfdf73e32b496bb9f111c304b8fb95",
+            "sha1_hash": "8a88235b7bc5a8e4cc233532e4011b2fae4ac257",
+            "sha3_384_hash": "f9826bdc674c19a3867a3b1d78c0ba1897303d70eb7ed5eaa6755bed3f368caaaea9543bd84ea66b086b653b1e23b2dd",
+            "first_seen": "2022-04-14 10:23:53 UTC",
+            "last_seen": null,
+            "sightings": 1,
+            "imphash": "680b9682922177224183342c299d809f",
+            "ssdeep": "24576:nKtpZm23yqec9S5hZqT5\/ZMoK3EHBCTFvfrr+E+OLzO9AO4k17vvoA+rXBxQHKbC:nC3LoqNG0HBi1X+5OmmPA7Hj+hb",
+            "tlsh": "T193859E62AE9D4876C076363C8C1F6259A8297E103D289C5E67E80D0DCF3A7917F2539F",
+            "telfhash": null,
+            "gimphash": null,
+            "dhash_icon": "399998ecd4d46c0e"
+        },
+        {
+            "sha256_hash": "72011546699b21166467da8d7bd37ff0d96717288519f3fad8c19750e39aca42",
+            "file_size": 1771258,
+            "mime_type": "application\/x-dosexec",
+            "md5_hash": "59f2c99f52c368a923c74621d8b4e6fd",
+            "sha1_hash": "fe5e0f5cf0ebd90e17034483eb9a902dd5cdd7bc",
+            "sha3_384_hash": "8038039ec77602fbfe8ac922a7e1509c42dcbf6f07713af294df84c780b438e9b85181eab199ed8bcc70bba259bb18be",
+            "first_seen": "2022-04-14 10:17:43 UTC",
+            "last_seen": null,
+            "sightings": 1,
+            "imphash": "680b9682922177224183342c299d809f",
+            "ssdeep": "24576:nKtpZm23yqec9S5hZqT5\/ZMoK3EHBCTFvfrr+E+OLzO9AO4k17vvoA+rXBxQHKbC:nC3LoqNG0HBi1X+5OmmPA7Hj+hb",
+            "tlsh": "T1AE859E62AE9D4876C076363C8C1F6259A8297E103D289C5E67E80D0DCF3A7917F2539F",
+            "telfhash": null,
+            "gimphash": null,
+            "dhash_icon": "399998ecd4d46c0e"
+        },
+        {
+            "sha256_hash": "cb36a871888de7f8de75a2e0204526e07429390e9a15a7031406c9d3c2ee2207",
+            "file_size": 1747228,
+            "mime_type": "application\/x-dosexec",
+            "md5_hash": "825b058531390b5c602b02353a5fa550",
+            "sha1_hash": "09b9844ff84985cba76060b8f982060287b77fde",
+            "sha3_384_hash": "7e376e7c47642c0729d87337696e3b1940c91b0cd410668d642f37a8a492e7502d0daeda56529a710fa0f81a09aecf38",
+            "first_seen": "2022-04-13 19:52:33 UTC",
+            "last_seen": null,
+            "sightings": 1,
+            "imphash": "680b9682922177224183342c299d809f",
+            "ssdeep": "24576:nKtpZm23yqec9S5hZqT5\/ZMoK3EHBCTFvfrr+E+OLzO9AO4k17vvoA+rXBxQHKbC:nC3LoqNG0HBi1X+5OmmPA7Hj+hb",
+            "tlsh": "T1F3859E62AE9D4876C076363C8C1F6259A8297E103D289C5E67E80D0DCF3A7917F2539F",
+            "telfhash": null,
+            "gimphash": null,
+            "dhash_icon": "399998ecd4d46c0e"
+        }
+        [...]
+    ]
+}
+```
