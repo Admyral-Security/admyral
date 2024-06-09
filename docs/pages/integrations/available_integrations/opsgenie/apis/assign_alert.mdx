@@ -1,0 +1,50 @@
+import { Callout } from "nextra/components";
+
+# Assign Alert
+
+Assign an alert in Opsgenie.
+
+<Callout type="info">
+    For Opsgenie's documentation, see [Assign Alert](https://docs.opsgenie.com/docs/alert-api#assign-alert).
+</Callout>
+
+## Parameters:
+
+| Field            | Description                                                                                             | Required |
+| ---------------- | ------------------------------------------------------------------------------------------------------- | :------: |
+| **Identifier**   | Identifier of the alert.                                                                                |   Yes    |
+| **IdentifierType** | Type of the identifier that is provided as an in-line parameter. Possible values are `id`, `tiny` and `alias`. Default value is `id`. |    -     |
+| **Owner**        | User that the alert will be assigned to. Either id or username of the user should be provided.           |   Yes    |
+| **User**         | Display name of the request owner. Limit: 100 characters.                                               |    -     |
+| **Source**       | Display name of the request source. Limit: 100 characters.                                              |    -     |
+| **Note**         | Additional alert note to add. Limit: 25000 characters.                                                  |    -     |
+
+`owner` field examples:
+```json
+{
+    "owner": {
+        "id":"4513b7ea-3b91-438f-b7e4-e3e54af9147c"
+    }
+}
+```
+
+```json
+{
+    "owner": {
+        "username":"trinity@opsgenie.com"
+    }
+}
+```
+
+## Example Request:
+
+<Callout type="info">
+    Acknowledge alert requests are processed asynchronously, therefore valid requests are responded to with `HTTP status 202 - Accepted`.
+</Callout>
+
+```json
+{
+    "result": "Request will be processed",
+    "took": 0.202,
+    "requestId": "43a29c5c-3dbf-4fa4-9c26-f4f71023e120"
+}

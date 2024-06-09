@@ -1,0 +1,44 @@
+## List Alert Recipients
+
+List the recipients of an existing alert in Opsgenie.
+
+<Callout type="info">
+    For Opsgenie's documentation, see [List Alert Recipients](https://docs.opsgenie.com/docs/alert-api#list-alert-recipients).
+</Callout>
+
+### Parameters:
+
+| Field             | Description                                                                                                                   | Required |
+|-------------------|-------------------------------------------------------------------------------------------------------------------------------|:--------:|
+| **Identifier**    | Identifier of the alert.                                                                                                      |   Yes    |
+| **Identifier Type** | Type of the identifier that is provided as an in-line parameter. Possible values are `id`, `tiny` and `alias`. Default value is `id`. |    No    |
+
+**Example Response:**
+
+```json
+{
+    "data": [
+        {
+            "user": {
+                "id": "2503a523-8ba5-4158-a4bd-7850074b5cca",
+                "username": "neo@opsgenie.com"
+            },
+            "state": "action",
+            "method": "Acknowledge",
+            "createdAt": "2017-04-12T12:27:28.52Z",
+            "updatedAt": "2017-04-12T12:27:52.86Z"
+        },
+        {
+            "user": {
+                "id": "0966cfd8-fc9a-4f5c-a013-7d1f9318aef8",
+                "username": "trinity@opsgenie.com"
+            },
+            "state": "notactive",
+            "method": "",
+            "createdAt": "2017-04-12T12:27:28.571Z",
+            "updatedAt": "2017-04-12T12:27:28.589Z"
+        }
+    ],
+    "took": 0.306,
+    "requestId": "d90a7fb5-f5b6-4e1a-a1d1-0a37bded6a32"
+}

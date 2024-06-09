@@ -1,0 +1,28 @@
+import { Callout } from "nextra/components";
+
+# Delete Alert
+
+Delete an alert in Opsgenie.
+
+<Callout type="info">
+    For Opsgenie's documentation, see [Delete Alert](https://docs.opsgenie.com/docs/alert-api#delete-alert).
+</Callout>
+
+## Parameters:
+
+| Field            | Description                                                                                             | Required |
+| ---------------- | ------------------------------------------------------------------------------------------------------- | :------: |
+| **Identifier**   | Identifier of the alert.                                                                                |   Yes    |
+| **IdentifierType** | Type of the identifier that is provided as an in-line parameter. Possible values are AlertID and tinyID. |    -     |
+| **User**         | Display name of the request owner. Limit: 100 characters.                                               |    -     |
+| **Source**       | Display name of the request source. Limit: 100 characters.                                              |    -     |
+
+## Example Output:
+
+```json
+{
+    "result": "Request will be processed",
+    "took": 0.204,
+    "requestId": "43a29c5c-3dbf-4fa4-9c26-f4f71023e120"
+}
+```
