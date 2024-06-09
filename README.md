@@ -65,10 +65,9 @@ Here is a sneek-peak into the workflow automation builder:
 
 ### Integrations
 
-Available Integrations: VirusTotal, AlienVault, Slack, ThreatPost, YARAify, Phish Report
+Available Integrations: VirusTotal, Jira, Slack, AlienVault, Phish Report, Jira, GreyNoise, MS Defender, Abnormal, and many more.
 
-Many more integrations are coming soon such as URLHaus, URLScan, GreyNoise, AbuseIPDB, Jira, MS Defender, SentinelOne, AWS Cloudtrail to name a few.
-What integrations are missing for you? Let us know on [Discord](https://discord.gg/GqbJZT9Hbf) or [chris@admyral.dev](mailto:chris@admyral.dev) about your use-case and we will build it within one week! 
+What integrations are missing for you? Let us know on [Discord](https://discord.gg/GqbJZT9Hbf) or [chris@admyral.dev](mailto:chris@admyral.dev) about your use-case and we will build it within less than one week!
 
 
 ### Hosting
