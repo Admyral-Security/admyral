@@ -5,18 +5,19 @@ import { Callout } from "nextra/components";
 You can get a list of recent files associated with a specific imphash.
 
 <Callout type="info">
-	For YARAify's documentation, see [Query imphash](https://yaraify.abuse.ch/api/#imphash).
+	For YARAify's documentation, see [Query
+	imphash](https://yaraify.abuse.ch/api/#imphash).
 </Callout>
 
 ## Parameters:
 
-| Field    | Description                                 | Required |
-| -------- | ------------------------------------------- | :------: |
-| **imphash** | The imphash to query for.       |   Yes    |
+| Field       | Description               | Required |
+| ----------- | ------------------------- | :------: |
+| **imphash** | The imphash to query for. |   Yes    |
 
 ## Example Output:
 
-```json
+````json
 {
     "query_status": "ok",
     "query_info": {
@@ -79,3 +80,4 @@ You can get a list of recent files associated with a specific imphash.
         [...]
     ]
 }```
+````
