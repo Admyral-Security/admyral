@@ -1,13 +1,6 @@
 "use client";
 
-import {
-	Button,
-	Flex,
-	Select,
-	Text,
-	TextArea,
-	TextField,
-} from "@radix-ui/themes";
+import { Flex, Select, Text, TextArea, TextField } from "@radix-ui/themes";
 import CopyText from "../copy-text";
 import { generateReferenceHandle } from "@/lib/workflow-node";
 import { cloneDeep } from "lodash";
@@ -22,12 +15,15 @@ import { useEffect, useState } from "react";
 import { listCredentials } from "@/lib/api";
 import { REFERENCE_HANDLE_EXPLANATION } from "@/lib/constants";
 import { errorToast } from "@/lib/toast";
+import FloatInput from "../float-input";
+import IntegerInput from "../integer-input";
 
 export interface IntegrationProps {
 	id: string;
 	saveWorkflowAndRedirect: (destintation: string) => void;
 }
 
+// TODO: use list credentials provider
 export default function Integration({
 	id,
 	saveWorkflowAndRedirect,
@@ -195,6 +191,7 @@ export default function Integration({
 				<Text weight="medium">Inputs</Text>
 			)}
 
+			{/* TODO: code duplicate with src/components/action-editing/ai-action.tsx */}
 			{requiresAuthentication && (
 				<Flex direction="column" gap="2">
 					<Text>Credential</Text>
@@ -268,46 +265,33 @@ export default function Integration({
 					<Flex direction="column" gap="0" width="100%">
 						{parameter.dataType ===
 							ApiParameterDatatype.INTEGER && (
-							<TextField.Root
-								variant="surface"
+							<IntegerInput
 								value={
 									(data as IntegrationData).actionDefinition
 										.params[parameter.id]
 								}
-								onChange={(event) => {
-									if (!/^-?\d*$/.test(event.target.value)) {
-										return;
-									}
-									const value = parseInt(event.target.value);
+								onValueChange={(value) => {
 									const clonedData = cloneDeep(data);
 									(
 										clonedData as IntegrationData
 									).actionDefinition.params[parameter.id] =
-										Number.isNaN(value) ? undefined : value;
-
+										value;
 									updateData(clonedData);
 								}}
 							/>
 						)}
 						{parameter.dataType === ApiParameterDatatype.FLOAT && (
-							<TextField.Root
-								variant="surface"
-								type="number"
-								step="any"
+							<FloatInput
 								value={
 									(data as IntegrationData).actionDefinition
 										.params[parameter.id]
 								}
-								onChange={(event) => {
-									const value = parseFloat(
-										event.target.value,
-									);
+								onValueChange={(value) => {
 									const clonedData = cloneDeep(data);
 									(
 										clonedData as IntegrationData
 									).actionDefinition.params[parameter.id] =
-										Number.isNaN(value) ? undefined : value;
-
+										value;
 									updateData(clonedData);
 								}}
 							/>

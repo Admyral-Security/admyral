@@ -244,7 +244,12 @@ function WorkflowBuilderEditor({
 
 						{(nodes[selectNodeIdx].type as ActionNode) ===
 							ActionNode.AI_ACTION && (
-							<AiAction id={nodes[selectNodeIdx].id} />
+							<AiAction
+								id={nodes[selectNodeIdx].id}
+								saveWorkflowAndRedirect={
+									saveWorkflowAndRedirect
+								}
+							/>
 						)}
 
 						{(nodes[selectNodeIdx].type as ActionNode) ===

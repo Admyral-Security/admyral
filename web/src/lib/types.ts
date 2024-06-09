@@ -1,21 +1,5 @@
 import { IntegrationType } from "./integrations";
 
-export enum LLM {
-	GPT4_TURBO = "gpt-4-turbo",
-	GPT3_5_TURBO = "gpt-3.5-turbo",
-}
-
-export function getLLMLabel(model: LLM) {
-	switch (model) {
-		case LLM.GPT4_TURBO:
-			return "GPT-4 Turbo";
-		case LLM.GPT3_5_TURBO:
-			return "GPT-3.5 Turbo";
-	}
-}
-
-export const LLM_MODELS = [LLM.GPT4_TURBO, LLM.GPT3_5_TURBO];
-
 export enum ActionNode {
 	MANUAL_START = "MANUAL_START",
 	WEBHOOK = "WEBHOOK",
@@ -131,7 +115,15 @@ export type ActionDataBase<T> = {
 	inputTemplates: InputTemplate[] | null;
 };
 
-export type AiActionData = ActionDataBase<{ model: LLM; prompt: string }>;
+export type AiActionData = ActionDataBase<{
+	provider: string;
+	model?: string;
+	credential?: string;
+	prompt: string;
+	topP?: number;
+	temperature?: number;
+	maxTokens?: number;
+}>;
 
 export type HttpRequestData = ActionDataBase<{
 	method: string;
