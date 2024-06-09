@@ -4,39 +4,36 @@ import { Flex, Select, Text, TextArea, TextField } from "@radix-ui/themes";
 import CopyText from "../copy-text";
 import { generateReferenceHandle } from "@/lib/workflow-node";
 import { cloneDeep } from "lodash";
-import { Credential, IntegrationData } from "@/lib/types";
+import { IntegrationData } from "@/lib/types";
 import { ApiParameterDatatype, IntegrationType } from "@/lib/integrations";
 import useWorkflowStore from "@/lib/workflow-store";
 import IntegrationLogoIconCard from "../integration-logo-icon-card";
 import { INTEGRATIONS } from "@/lib/integrations";
 import Link from "next/link";
 import ArrowRightUpIcon from "../icons/arrow-right-up";
-import { useEffect, useState } from "react";
-import { listCredentials } from "@/lib/api";
+import { Suspense, useEffect } from "react";
 import { REFERENCE_HANDLE_EXPLANATION } from "@/lib/constants";
 import { errorToast } from "@/lib/toast";
 import FloatInput from "../float-input";
 import IntegerInput from "../integer-input";
+import useListCredentials, {
+	ListCredentialsProvider,
+} from "@/providers/list-credentials-provider";
 
 export interface IntegrationProps {
 	id: string;
 	saveWorkflowAndRedirect: (destintation: string) => void;
 }
 
-// TODO: use list credentials provider
-export default function Integration({
-	id,
-	saveWorkflowAndRedirect,
-}: IntegrationProps) {
+function IntegrationChild({ id, saveWorkflowAndRedirect }: IntegrationProps) {
 	const { data, updateData } = useWorkflowStore((state) => ({
 		data: state.nodes.find((node) => node.id === id)
 			?.data as IntegrationData,
 		updateData: (updatedData: IntegrationData) =>
 			state.updateNodeData(id, updatedData),
 	}));
-	const [availableCredentials, setAvailableCredentials] = useState<string[]>(
-		[],
-	);
+
+	const { credentials, setIntegrationTypeFilter } = useListCredentials();
 
 	const integrationType = (data as IntegrationData).actionDefinition
 		.integrationType;
@@ -46,56 +43,33 @@ export default function Integration({
 	)?.requiresAuthentication;
 
 	useEffect(() => {
+		if (integrationType !== undefined) {
+			setIntegrationTypeFilter(integrationType);
+		}
+	}, [integrationType]);
+
+	useEffect(() => {
 		if (!requiresAuthentication) {
 			return;
 		}
 
-		// if the credential is already selected, then we already know that it exists
-		// and we add it directly to the available credentials so that it is immediately
-		// shown in the UI
-		const previouslySelectedCredential = (data as IntegrationData)
-			.actionDefinition.credential;
-		setAvailableCredentials(
-			previouslySelectedCredential ? [previouslySelectedCredential] : [],
-		);
-
-		listCredentials(
-			(data as IntegrationData).actionDefinition.integrationType,
-		)
-			.then((credentials: Credential[]) => {
-				if (
-					(data as IntegrationData).actionDefinition.credential &&
-					!credentials.find(
-						(c) =>
-							c.name ===
-							(data as IntegrationData).actionDefinition
-								.credential,
-					)
-				) {
-					// The credential does not exist anymore! Hence, we reset the selected the credential
-					const clonedData = cloneDeep(data);
-					(
-						clonedData as IntegrationData
-					).actionDefinition.credential = "";
-					updateData(clonedData);
-					// Note: the following alert is shown twice in development mode due to react strictmode which renders every component twice
-					errorToast(
-						`The previously selected credential for ${data.actionName} does not exist anymore. Please select a new one.`,
-					);
-				}
-
-				setAvailableCredentials(
-					credentials.map(
-						(credential: Credential) => credential.name,
-					),
-				);
-			})
-			.catch((error) => {
-				errorToast(
-					"Failed to fetch available credentials. Please unselect and select the integration node again.",
-				);
-			});
-	}, [id]);
+		// Check if the selected credential is still available.
+		// If not, reset it to undefined and notify the user.
+		if (
+			data.actionDefinition.credential !== undefined &&
+			credentials !== null &&
+			credentials.findIndex(
+				(credential) => credential === data.actionDefinition.credential,
+			) === -1
+		) {
+			errorToast(
+				`The previously selected credential for ${data.actionName} does not exist anymore. Please select a new one.`,
+			);
+			const clonedData = cloneDeep(data);
+			clonedData.actionDefinition.credential = undefined;
+			updateData(clonedData);
+		}
+	}, [id, credentials]);
 
 	const integration =
 		INTEGRATIONS[
@@ -215,16 +189,15 @@ export default function Integration({
 						>
 							<Select.Trigger placeholder="Select a credential" />
 							<Select.Content variant="soft">
-								{availableCredentials.map(
-									(credential: string) => (
+								{credentials !== null &&
+									credentials.map((credential: string) => (
 										<Select.Item
 											key={credential}
 											value={credential}
 										>
 											{credential}
 										</Select.Item>
-									),
-								)}
+									))}
 								{/* TODO: is there a better way to handle the onclick event than a reserved key/value? */}
 								<Select.Item
 									key="$$$save_and_redirect$$$"
@@ -379,5 +352,15 @@ export default function Integration({
 				</Flex>
 			))}
 		</Flex>
+	);
+}
+
+export default function Integration(props: IntegrationProps) {
+	return (
+		<Suspense fallback={null}>
+			<ListCredentialsProvider>
+				<IntegrationChild {...props} />
+			</ListCredentialsProvider>
+		</Suspense>
 	);
 }
