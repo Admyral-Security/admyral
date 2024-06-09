@@ -3,48 +3,52 @@
 Add a responder to an existing alert in Opsgenie.
 
 <Callout type="info">
-    For Opsgenie's documentation, see [Add Responder to Alert](https://docs.opsgenie.com/docs/alert-api#add-responder-to-alert).
+	For Opsgenie's documentation, see [Add Responder to
+	Alert](https://docs.opsgenie.com/docs/alert-api#add-responder-to-alert).
 </Callout>
 
 ### Parameters:
 
-| Field             | Description                                                                                                                   | Required |
-|-------------------|-------------------------------------------------------------------------------------------------------------------------------|:--------:|
-| **Identifier**    | Identifier of the alert.                                                                                                      |   Yes    |
+| Field               | Description                                                                                                                   | Required |
+| ------------------- | ----------------------------------------------------------------------------------------------------------------------------- | :------: |
+| **Identifier**      | Identifier of the alert.                                                                                                      |   Yes    |
 | **Identifier Type** | Type of the identifier that is provided as an in-line parameter. Possible values are id, tiny and alias. Default value is id. |    No    |
-| **Responder**     | Team or user that the alert will be routed to. Either id or name of the team/user should be provided.                         |   Yes    |
-| **User**          | Display name of the request owner.                                                                                            |    No    |
-| **Source**        | Display name of the request source.                                                                                           |    No    |
-| **Note**          | Additional alert note to add.                                                                                                |    No    |
+| **Responder**       | Team or user that the alert will be routed to. Either id or name of the team/user should be provided.                         |   Yes    |
+| **User**            | Display name of the request owner.                                                                                            |    No    |
+| **Source**          | Display name of the request source.                                                                                           |    No    |
+| **Note**            | Additional alert note to add.                                                                                                 |    No    |
 
 `responder` field examples:
+
 ```json
 {
-    "responder": {
-            "type":"team",
-            "id":"4513b7ea-3b91-438f-b7e4-e3e54af9147c"
-    }
+	"responder": {
+		"type": "team",
+		"id": "4513b7ea-3b91-438f-b7e4-e3e54af9147c"
+	}
 }
 ```
 
 ```json
 {
-    "responder": {
-            "username":"trinity@opsgenie.com",
-            "type":"user"
-    } 
+	"responder": {
+		"username": "trinity@opsgenie.com",
+		"type": "user"
+	}
 }
 ```
 
 **Example Response:**
 
 <Callout type="info">
-    Acknowledge alert requests are processed asynchronously, therefore valid requests are responded to with `HTTP status 202 - Accepted`.
+	Acknowledge alert requests are processed asynchronously, therefore valid
+	requests are responded to with `HTTP status 202 - Accepted`.
 </Callout>
 
 ```json
 {
-    "result": "Request will be processed",
-    "took": 0.333,
-    "requestId": "43a29c5c-3dbf-4fa4-9c26-f4f71023e120"
+	"result": "Request will be processed",
+	"took": 0.333,
+	"requestId": "43a29c5c-3dbf-4fa4-9c26-f4f71023e120"
 }
+```

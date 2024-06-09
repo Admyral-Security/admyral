@@ -2374,7 +2374,8 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 				id: "DELETE_ALERT",
 				name: "Delete Alert",
 				description: "Delete an alert in Opsgenie.",
-				documentationUrl: "https://docs.opsgenie.com/docs/alert-api#delete-alert",
+				documentationUrl:
+					"https://docs.opsgenie.com/docs/alert-api#delete-alert",
 				requiresAuthentication: true,
 				parameters: [
 					{
@@ -2387,7 +2388,8 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 					{
 						id: "IDENTIFIER_TYPE",
 						displayName: "Identifier Type",
-						description: "Type of the identifier that is provided as an in-line parameter. Possible values are AlertID and tinyID.",
+						description:
+							"Type of the identifier that is provided as an in-line parameter. Possible values are AlertID and tinyID.",
 						required: false,
 						dataType: ApiParameterDatatype.TEXT,
 					},
@@ -2411,7 +2413,8 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 				id: "GET_ALERT",
 				name: "Get Alert",
 				description: "Retrieve an alert in Opsgenie.",
-				documentationUrl: "https://docs.opsgenie.com/docs/alert-api#get-alert",
+				documentationUrl:
+					"https://docs.opsgenie.com/docs/alert-api#get-alert",
 				requiresAuthentication: true,
 				parameters: [
 					{
@@ -2424,7 +2427,8 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 					{
 						id: "IDENTIFIER_TYPE",
 						displayName: "Identifier Type",
-						description: "Type of the identifier that is provided as an in-line parameter. Possible values are id, tiny and alias. Default value is id.",
+						description:
+							"Type of the identifier that is provided as an in-line parameter. Possible values are id, tiny and alias. Default value is id.",
 						required: false,
 						dataType: ApiParameterDatatype.TEXT,
 					},
@@ -2434,55 +2438,63 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 				id: "LIST_ALERTS",
 				name: "List Alerts",
 				description: "List alerts in Opsgenie.",
-				documentationUrl: "https://docs.opsgenie.com/docs/alert-api#list-alerts",
+				documentationUrl:
+					"https://docs.opsgenie.com/docs/alert-api#list-alerts",
 				requiresAuthentication: true,
 				parameters: [
 					{
 						id: "QUERY",
 						displayName: "Query",
-						description: "Search query to apply while filtering the alerts.",
+						description:
+							"Search query to apply while filtering the alerts.",
 						required: false,
 						dataType: ApiParameterDatatype.TEXT,
 					},
 					{
 						id: "SEARCH_IDENTIFIER",
 						displayName: "Search Identifier",
-						description: "Identifier of the saved search query to apply while filtering the alerts.",
+						description:
+							"Identifier of the saved search query to apply while filtering the alerts.",
 						required: false,
 						dataType: ApiParameterDatatype.TEXT,
 					},
 					{
 						id: "SEARCH_IDENTIFIER_TYPE",
 						displayName: "Search Identifier Type",
-						description: "Identifier type of the saved search query. Possible values are id and name. Default value is id.",
+						description:
+							"Identifier type of the saved search query. Possible values are id and name. Default value is id.",
 						required: false,
 						dataType: ApiParameterDatatype.TEXT,
 					},
 					{
 						id: "OFFSET",
 						displayName: "Offset",
-						description: "Start index of the result set (to apply pagination). Minimum value is 0.",
+						description:
+							"Start index of the result set (to apply pagination). Minimum value is 0.",
 						required: false,
 						dataType: ApiParameterDatatype.INTEGER,
 					},
 					{
 						id: "LIMIT",
 						displayName: "Limit",
-						description: "Maximum number of items to provide in the result. Must be a positive integer value. Default value is 20 and maximum value is 100.",
+						description:
+							"Maximum number of items to provide in the result. Must be a positive integer value. Default value is 20 and maximum value is 100.",
 						required: false,
 						dataType: ApiParameterDatatype.INTEGER,
 					},
 					{
 						id: "SORT",
 						displayName: "Sort",
-						description: "Name of the field that result set will be sorted by. Default value is createdAt.",
+						description:
+							"Name of the field that result set will be sorted by. Default value is createdAt.",
 						required: false,
 						dataType: ApiParameterDatatype.TEXT,
 					},
 					{
 						id: "ORDER",
 						displayName: "Order",
-						description: "Sorting order of the result set. Possible values are desc and asc. Default value is desc.",
+						description:
+							"Sorting order of the result set. Possible values are desc and asc. Default value is desc.",
 						required: false,
 						dataType: ApiParameterDatatype.TEXT,
 					},
@@ -2492,7 +2504,8 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 				id: "CLOSE_ALERT",
 				name: "Close Alert",
 				description: "Close an alert in Opsgenie.",
-				documentationUrl: "https://docs.opsgenie.com/docs/alert-api#close-alert",
+				documentationUrl:
+					"https://docs.opsgenie.com/docs/alert-api#close-alert",
 				requiresAuthentication: true,
 				parameters: [
 					{
@@ -2505,7 +2518,8 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 					{
 						id: "IDENTIFIER_TYPE",
 						displayName: "Identifier Type",
-						description: "Type of the identifier that is provided as an in-line parameter. Possible values are id, tiny and alias. Default value is id.",
+						description:
+							"Type of the identifier that is provided as an in-line parameter. Possible values are id, tiny and alias. Default value is id.",
 						required: false,
 						dataType: ApiParameterDatatype.TEXT,
 					},
@@ -2536,7 +2550,8 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 				id: "ACKNOWLEDGE_ALERT",
 				name: "Acknowledge Alert",
 				description: "Acknowledge an alert in Opsgenie.",
-				documentationUrl: "https://docs.opsgenie.com/docs/alert-api#acknowledge-alert",
+				documentationUrl:
+					"https://docs.opsgenie.com/docs/alert-api#acknowledge-alert",
 				requiresAuthentication: true,
 				parameters: [
 					{
@@ -2549,7 +2564,8 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 					{
 						id: "IDENTIFIER_TYPE",
 						displayName: "Identifier Type",
-						description: "Type of the identifier that is provided as an in-line parameter. Possible values are id, tiny and alias. Default value is id.",
+						description:
+							"Type of the identifier that is provided as an in-line parameter. Possible values are id, tiny and alias. Default value is id.",
 						required: false,
 						dataType: ApiParameterDatatype.TEXT,
 					},
@@ -2580,7 +2596,8 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 				id: "UNACKNOWLEDGE_ALERT",
 				name: "Unacknowledge Alert",
 				description: "Unacknowledge an alert in Opsgenie.",
-				documentationUrl: "https://docs.opsgenie.com/docs/alert-api#unacknowledge-alert",
+				documentationUrl:
+					"https://docs.opsgenie.com/docs/alert-api#unacknowledge-alert",
 				requiresAuthentication: true,
 				parameters: [
 					{
@@ -2593,7 +2610,8 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 					{
 						id: "IDENTIFIER_TYPE",
 						displayName: "Identifier Type",
-						description: "Type of the identifier that is provided as an in-line parameter. Possible values are id, tiny and alias. Default value is id.",
+						description:
+							"Type of the identifier that is provided as an in-line parameter. Possible values are id, tiny and alias. Default value is id.",
 						required: false,
 						dataType: ApiParameterDatatype.TEXT,
 					},
@@ -2624,7 +2642,8 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 				id: "SNOOZE_ALERT",
 				name: "Snooze Alert",
 				description: "Snooze an alert in Opsgenie.",
-				documentationUrl: "https://docs.opsgenie.com/docs/alert-api#snooze-alert",
+				documentationUrl:
+					"https://docs.opsgenie.com/docs/alert-api#snooze-alert",
 				requiresAuthentication: true,
 				parameters: [
 					{
@@ -2637,14 +2656,16 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 					{
 						id: "IDENTIFIER_TYPE",
 						displayName: "Identifier Type",
-						description: "Type of the identifier that is provided as an in-line parameter. Possible values are id, tiny and alias. Default value is id.",
+						description:
+							"Type of the identifier that is provided as an in-line parameter. Possible values are id, tiny and alias. Default value is id.",
 						required: false,
 						dataType: ApiParameterDatatype.TEXT,
 					},
 					{
 						id: "END_TIME",
 						displayName: "End Time",
-						description: "Date and time that snooze will lose effect. Provided value should be in ISO 8601 format: `YYYY-MM-DDThh:mm:ssZ`, e.g. `2024-06-07T14:00:00Z`",
+						description:
+							"Date and time that snooze will lose effect. Provided value should be in ISO 8601 format: `YYYY-MM-DDThh:mm:ssZ`, e.g. `2024-06-07T14:00:00Z`",
 						required: true,
 						dataType: ApiParameterDatatype.TEXT,
 					},
@@ -2675,7 +2696,8 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 				id: "ADD_NOTE_TO_ALERT",
 				name: "Add Note to Alert",
 				description: "Add a note to an alert in Opsgenie.",
-				documentationUrl: "https://docs.opsgenie.com/docs/alert-api#add-note-to-alert",
+				documentationUrl:
+					"https://docs.opsgenie.com/docs/alert-api#add-note-to-alert",
 				requiresAuthentication: true,
 				parameters: [
 					{
@@ -2688,7 +2710,8 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 					{
 						id: "IDENTIFIER_TYPE",
 						displayName: "Identifier Type",
-						description: "Type of the identifier that is provided as an in-line parameter. Possible values are id, tiny and alias. Default value is id.",
+						description:
+							"Type of the identifier that is provided as an in-line parameter. Possible values are id, tiny and alias. Default value is id.",
 						required: false,
 						dataType: ApiParameterDatatype.TEXT,
 					},
@@ -2719,7 +2742,8 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 				id: "ESCALATE_ALERT_TO_NEXT",
 				name: "Escalate Alert to Next",
 				description: "Escalate an alert to the next step in Opsgenie.",
-				documentationUrl: "https://docs.opsgenie.com/docs/alert-api#escalate-alert-to-next",
+				documentationUrl:
+					"https://docs.opsgenie.com/docs/alert-api#escalate-alert-to-next",
 				requiresAuthentication: true,
 				parameters: [
 					{
@@ -2732,14 +2756,16 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 					{
 						id: "IDENTIFIER_TYPE",
 						displayName: "Identifier Type",
-						description: "Type of the identifier that is provided as an in-line parameter. Possible values are id, tiny and alias. Default value is id.",
+						description:
+							"Type of the identifier that is provided as an in-line parameter. Possible values are id, tiny and alias. Default value is id.",
 						required: false,
 						dataType: ApiParameterDatatype.TEXT,
 					},
 					{
 						id: "ESCALATION",
 						displayName: "Escalation",
-						description: "Escalation that the alert will be escalated. Either id or name of the escalation should be provided.",
+						description:
+							"Escalation that the alert will be escalated. Either id or name of the escalation should be provided.",
 						required: true,
 						dataType: ApiParameterDatatype.TEXT,
 					},
@@ -2770,7 +2796,8 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 				id: "ASSIGN_ALERT",
 				name: "Assign Alert",
 				description: "Assign an alert in Opsgenie.",
-				documentationUrl: "https://docs.opsgenie.com/docs/alert-api#assign-alert",
+				documentationUrl:
+					"https://docs.opsgenie.com/docs/alert-api#assign-alert",
 				requiresAuthentication: true,
 				parameters: [
 					{
@@ -2783,14 +2810,16 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 					{
 						id: "IDENTIFIER_TYPE",
 						displayName: "Identifier Type",
-						description: "Type of the identifier that is provided as an in-line parameter. Possible values are id, tiny and alias. Default value is id.",
+						description:
+							"Type of the identifier that is provided as an in-line parameter. Possible values are id, tiny and alias. Default value is id.",
 						required: false,
 						dataType: ApiParameterDatatype.TEXT,
 					},
 					{
 						id: "OWNER",
 						displayName: "Owner",
-						description: "User that the alert will be assigned to. Either id or username of the user should be provided.",
+						description:
+							"User that the alert will be assigned to. Either id or username of the user should be provided.",
 						required: true,
 						dataType: ApiParameterDatatype.TEXT,
 					},
@@ -2874,7 +2903,8 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 			{
 				id: "ADD_RESPONDER_TO_ALERT",
 				name: "Add Responder to Alert",
-				description: "Add a responder to an existing alert in Opsgenie.",
+				description:
+					"Add a responder to an existing alert in Opsgenie.",
 				documentationUrl:
 					"https://docs.opsgenie.com/docs/alert-api#add-responder-to-alert",
 				requiresAuthentication: true,
@@ -2952,7 +2982,7 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 						id: "TAGS",
 						displayName: "Tags",
 						description:
-							"List of tags to add to the alert. Example: [\"tag1\", \"tag2\"]",
+							'List of tags to add to the alert. Example: ["tag1", "tag2"]',
 						required: true,
 						dataType: ApiParameterDatatype.TEXTAREA,
 					},
@@ -2982,7 +3012,8 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 			{
 				id: "ADD_DETAILS_TO_ALERT",
 				name: "Add Details to Alert",
-				description: "Add custom properties (details) to an existing alert in Opsgenie.",
+				description:
+					"Add custom properties (details) to an existing alert in Opsgenie.",
 				documentationUrl:
 					"https://docs.opsgenie.com/docs/alert-api#add-details-custom-properties-to-alert",
 				requiresAuthentication: true,
@@ -3006,7 +3037,7 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 						id: "DETAILS",
 						displayName: "Details",
 						description:
-							"Key-value pairs to add as custom properties to the alert. Example: {\"key1\":\"value1\",\"key2\":\"value2\"}",
+							'Key-value pairs to add as custom properties to the alert. Example: {"key1":"value1","key2":"value2"}',
 						required: true,
 						dataType: ApiParameterDatatype.TEXTAREA,
 					},
@@ -3036,7 +3067,8 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 			{
 				id: "UPDATE_ALERT_PRIORITY",
 				name: "Update Alert Priority",
-				description: "Update the priority of an existing alert in Opsgenie.",
+				description:
+					"Update the priority of an existing alert in Opsgenie.",
 				documentationUrl:
 					"https://docs.opsgenie.com/docs/alert-api#update-alert-priority",
 				requiresAuthentication: true,
@@ -3069,7 +3101,8 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 			{
 				id: "LIST_ALERT_RECIPIENTS",
 				name: "List Alert Recipients",
-				description: "List the recipients of an existing alert in Opsgenie.",
+				description:
+					"List the recipients of an existing alert in Opsgenie.",
 				documentationUrl:
 					"https://docs.opsgenie.com/docs/alert-api#list-alert-recipients",
 				requiresAuthentication: true,
@@ -3094,7 +3127,8 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 			{
 				id: "UPDATE_ALERT_MESSAGE",
 				name: "Update Alert Message",
-				description: "Update the message of an existing alert in Opsgenie.",
+				description:
+					"Update the message of an existing alert in Opsgenie.",
 				documentationUrl:
 					"https://docs.opsgenie.com/docs/alert-api#update-alert-message",
 				requiresAuthentication: true,
