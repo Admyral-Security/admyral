@@ -2,7 +2,7 @@ use super::IntegrationExecutor;
 use crate::workflow::{
     context::Context,
     http_client::{HttpClient, RequestBodyType},
-    utils::{get_string_parameter, get_number_parameter, ParameterType},
+    utils::{get_number_parameter, get_string_parameter, ParameterType},
 };
 use anyhow::{anyhow, Result};
 use maplit::hashmap;
@@ -334,7 +334,7 @@ async fn delete_alert(
     .expect("identifier is a required parameter");
 
     let mut query_params = vec![];
-    
+
     if let Some(identifier_type) = get_string_parameter(
         "IDENTIFIER_TYPE",
         INTEGRATION,
@@ -343,7 +343,8 @@ async fn delete_alert(
         context,
         ParameterType::Optional,
     )
-    .await? {
+    .await?
+    {
         query_params.push(format!("identifierType={}", identifier_type));
     }
 
@@ -355,7 +356,8 @@ async fn delete_alert(
         context,
         ParameterType::Optional,
     )
-    .await? {
+    .await?
+    {
         query_params.push(format!("user={}", user));
     }
 
@@ -367,7 +369,8 @@ async fn delete_alert(
         context,
         ParameterType::Optional,
     )
-    .await? {
+    .await?
+    {
         query_params.push(format!("source={}", source));
     }
 
@@ -422,7 +425,8 @@ async fn get_alert(
         context,
         ParameterType::Optional,
     )
-    .await? {
+    .await?
+    {
         query_params.push(format!("identifierType={}", identifier_type));
     }
 
@@ -466,7 +470,8 @@ async fn list_alerts(
         context,
         ParameterType::Optional,
     )
-    .await? {
+    .await?
+    {
         query_params.push(format!("query={}", query));
     }
 
@@ -478,7 +483,8 @@ async fn list_alerts(
         context,
         ParameterType::Optional,
     )
-    .await? {
+    .await?
+    {
         query_params.push(format!("searchIdentifier={}", search_identifier));
     }
 
@@ -490,7 +496,8 @@ async fn list_alerts(
         context,
         ParameterType::Optional,
     )
-    .await? {
+    .await?
+    {
         query_params.push(format!("searchIdentifierType={}", search_identifier_type));
     }
 
@@ -502,7 +509,8 @@ async fn list_alerts(
         context,
         ParameterType::Optional,
     )
-    .await? {
+    .await?
+    {
         query_params.push(format!("offset={}", offset));
     }
 
@@ -514,7 +522,8 @@ async fn list_alerts(
         context,
         ParameterType::Optional,
     )
-    .await? {
+    .await?
+    {
         query_params.push(format!("limit={}", limit));
     }
 
@@ -526,7 +535,8 @@ async fn list_alerts(
         context,
         ParameterType::Optional,
     )
-    .await? {
+    .await?
+    {
         query_params.push(format!("sort={}", sort));
     }
 
@@ -538,7 +548,8 @@ async fn list_alerts(
         context,
         ParameterType::Optional,
     )
-    .await? {
+    .await?
+    {
         query_params.push(format!("order={}", order));
     }
 
@@ -593,7 +604,8 @@ async fn close_alert(
         context,
         ParameterType::Optional,
     )
-    .await? {
+    .await?
+    {
         query_params.push(format!("identifierType={}", identifier_type));
     }
 
@@ -603,7 +615,10 @@ async fn close_alert(
         format!("?{}", query_params.join("&"))
     };
 
-    let api_url = format!("{base_api_url}/v2/alerts/{}/close{}", identifier, query_string);
+    let api_url = format!(
+        "{base_api_url}/v2/alerts/{}/close{}",
+        identifier, query_string
+    );
 
     let mut body = HashMap::new();
 
@@ -616,7 +631,8 @@ async fn close_alert(
             context,
             ParameterType::Optional,
         )
-        .await? {
+        .await?
+        {
             body.insert(field_name.to_lowercase(), value);
         }
     }
@@ -665,7 +681,8 @@ async fn acknowledge_alert(
         context,
         ParameterType::Optional,
     )
-    .await? {
+    .await?
+    {
         query_params.push(format!("identifierType={}", identifier_type));
     }
 
@@ -675,7 +692,10 @@ async fn acknowledge_alert(
         format!("?{}", query_params.join("&"))
     };
 
-    let api_url = format!("{base_api_url}/v2/alerts/{}/acknowledge{}", identifier, query_string);
+    let api_url = format!(
+        "{base_api_url}/v2/alerts/{}/acknowledge{}",
+        identifier, query_string
+    );
 
     let mut body = HashMap::new();
 
@@ -688,7 +708,8 @@ async fn acknowledge_alert(
             context,
             ParameterType::Optional,
         )
-        .await? {
+        .await?
+        {
             body.insert(field_name.to_lowercase(), value);
         }
     }
@@ -737,7 +758,8 @@ async fn unacknowledge_alert(
         context,
         ParameterType::Optional,
     )
-    .await? {
+    .await?
+    {
         query_params.push(format!("identifierType={}", identifier_type));
     }
 
@@ -747,7 +769,10 @@ async fn unacknowledge_alert(
         format!("?{}", query_params.join("&"))
     };
 
-    let api_url = format!("{base_api_url}/v2/alerts/{}/unacknowledge{}", identifier, query_string);
+    let api_url = format!(
+        "{base_api_url}/v2/alerts/{}/unacknowledge{}",
+        identifier, query_string
+    );
 
     let mut body = HashMap::new();
 
@@ -760,7 +785,8 @@ async fn unacknowledge_alert(
             context,
             ParameterType::Optional,
         )
-        .await? {
+        .await?
+        {
             body.insert(field_name.to_lowercase(), value);
         }
     }
@@ -809,7 +835,8 @@ async fn snooze_alert(
         context,
         ParameterType::Optional,
     )
-    .await? {
+    .await?
+    {
         query_params.push(format!("identifierType={}", identifier_type));
     }
 
@@ -819,7 +846,10 @@ async fn snooze_alert(
         format!("?{}", query_params.join("&"))
     };
 
-    let api_url = format!("{base_api_url}/v2/alerts/{}/snooze{}", identifier, query_string);
+    let api_url = format!(
+        "{base_api_url}/v2/alerts/{}/snooze{}",
+        identifier, query_string
+    );
 
     let end_time = get_string_parameter(
         "END_TIME",
@@ -845,7 +875,8 @@ async fn snooze_alert(
             context,
             ParameterType::Optional,
         )
-        .await? {
+        .await?
+        {
             body.insert(field_name.to_lowercase(), value);
         }
     }
@@ -894,7 +925,8 @@ async fn add_note_to_alert(
         context,
         ParameterType::Optional,
     )
-    .await? {
+    .await?
+    {
         query_params.push(format!("identifierType={}", identifier_type));
     }
 
@@ -904,7 +936,10 @@ async fn add_note_to_alert(
         format!("?{}", query_params.join("&"))
     };
 
-    let api_url = format!("{base_api_url}/v2/alerts/{}/notes{}", identifier, query_string);
+    let api_url = format!(
+        "{base_api_url}/v2/alerts/{}/notes{}",
+        identifier, query_string
+    );
 
     let note = get_string_parameter(
         "NOTE",
@@ -930,7 +965,8 @@ async fn add_note_to_alert(
             context,
             ParameterType::Optional,
         )
-        .await? {
+        .await?
+        {
             body.insert(field_name.to_lowercase(), value);
         }
     }
@@ -979,7 +1015,8 @@ async fn escalate_alert_to_next(
         context,
         ParameterType::Optional,
     )
-    .await? {
+    .await?
+    {
         query_params.push(format!("identifierType={}", identifier_type));
     }
 
@@ -989,9 +1026,14 @@ async fn escalate_alert_to_next(
         format!("?{}", query_params.join("&"))
     };
 
-    let api_url = format!("{base_api_url}/v2/alerts/{}/escalate{}", identifier, query_string);
+    let api_url = format!(
+        "{base_api_url}/v2/alerts/{}/escalate{}",
+        identifier, query_string
+    );
 
-    let escalation = parameters.get("ESCALATION").ok_or_else(|| anyhow!("Missing required parameter: ESCALATION"))?;
+    let escalation = parameters
+        .get("ESCALATION")
+        .ok_or_else(|| anyhow!("Missing required parameter: ESCALATION"))?;
     let escalation = escalation.to_string();
 
     let mut body = hashmap! {
@@ -1007,7 +1049,8 @@ async fn escalate_alert_to_next(
             context,
             ParameterType::Optional,
         )
-        .await? {
+        .await?
+        {
             body.insert(field_name.to_lowercase(), json!(value));
         }
     }
@@ -1056,7 +1099,8 @@ async fn assign_alert(
         context,
         ParameterType::Optional,
     )
-    .await? {
+    .await?
+    {
         query_params.push(format!("identifierType={}", identifier_type));
     }
 
@@ -1066,9 +1110,14 @@ async fn assign_alert(
         format!("?{}", query_params.join("&"))
     };
 
-    let api_url = format!("{base_api_url}/v2/alerts/{}/assign{}", identifier, query_string);
+    let api_url = format!(
+        "{base_api_url}/v2/alerts/{}/assign{}",
+        identifier, query_string
+    );
 
-    let owner = parameters.get("OWNER").ok_or_else(|| anyhow!("Missing required parameter: OWNER"))?;
+    let owner = parameters
+        .get("OWNER")
+        .ok_or_else(|| anyhow!("Missing required parameter: OWNER"))?;
     let owner = owner.to_string();
 
     let mut body = hashmap! {
@@ -1084,7 +1133,8 @@ async fn assign_alert(
             context,
             ParameterType::Optional,
         )
-        .await? {
+        .await?
+        {
             body.insert(field_name.to_lowercase(), json!(value));
         }
     }
@@ -1133,7 +1183,8 @@ async fn add_team_to_alert(
         context,
         ParameterType::Optional,
     )
-    .await? {
+    .await?
+    {
         query_params.push(format!("identifierType={}", identifier_type));
     }
 
@@ -1143,9 +1194,14 @@ async fn add_team_to_alert(
         format!("?{}", query_params.join("&"))
     };
 
-    let api_url = format!("{base_api_url}/v2/alerts/{}/teams{}", identifier, query_string);
+    let api_url = format!(
+        "{base_api_url}/v2/alerts/{}/teams{}",
+        identifier, query_string
+    );
 
-    let team = parameters.get("TEAM").ok_or_else(|| anyhow!("Missing required parameter: TEAM"))?;
+    let team = parameters
+        .get("TEAM")
+        .ok_or_else(|| anyhow!("Missing required parameter: TEAM"))?;
     let team = team.to_string();
 
     let mut body = hashmap! {
@@ -1161,7 +1217,8 @@ async fn add_team_to_alert(
             context,
             ParameterType::Optional,
         )
-        .await? {
+        .await?
+        {
             body.insert(field_name.to_lowercase(), json!(value));
         }
     }
@@ -1568,7 +1625,7 @@ async fn update_alert_message(
             format!("Failed to call {INTEGRATION} - Update Alert Message API"),
         )
         .await
-} 
+}
 
 #[cfg(test)]
 mod tests {
