@@ -79,10 +79,6 @@ What integrations are missing for you? Let us know on [Discord](https://discord.
 
 -   [ ] Multi-tenancy for MSSPs
 
-### Admyral in <5 Minutes
-
-// A demo is coming at the end of May 2024
-
 ## 🚀 Get Started
 
 ### Admyral Cloud
