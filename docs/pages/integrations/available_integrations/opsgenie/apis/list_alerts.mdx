@@ -11,22 +11,17 @@ List alerts in Opsgenie.
 
 ## Parameters:
 
-| Field                      | Description                                                                                                                           | Required |
-| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- | :------: |
-| **Query**                  | Search query to apply while filtering the alerts.                                                                                     |    -     |
-| **Search Identifier**      | Identifier of the saved search query to apply while filtering the alerts.                                                             |    -     |
-| **Search Identifier Type** | Identifier type of the saved search query. Possible values are `id` and `name`. Default value is `id`.                                |    -     |
-| **Offset**                 | Start index of the result set (to apply pagination). Minimum value is `0`.                                                            |    -     |
-| **Limit**                  | Maximum number of items to provide in the result. Must be a positive integer value. Default value is `20` and maximum value is `100`. |    -     |
-| **Sort**                   | Name of the field that result set will be sorted by. Default value is `createdAt`.                                                    |    -     |
-| **Order**                  | Sorting order of the result set. Possible values are `desc` and `asc`. Default value is `desc`.                                       |    -     |
+| Field                      | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | Required |
+| -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------: |
+| **Query**                  | Search query to apply while filtering the alerts. You can use field:value combination with most alert fields. See [here](https://support.atlassian.com/opsgenie/docs/search-queries-for-alerts/) for more information about search queries for alerts.                                                                                                                                                                                                                                                                                                         |    -     |
+| **Search Identifier**      | Identifier of the saved search query to apply while filtering the alerts.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |    -     |
+| **Search Identifier Type** | Identifier type of the saved search query. Possible values are `id` and `name`. Default value is `id`.                                                                                                                                                                                                                                                                                                                                                                                                                                                         |    -     |
+| **Offset**                 | Start index of the result set (to apply pagination). Minimum value is `0`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |    -     |
+| **Limit**                  | Maximum number of items to provide in the result. Must be a positive integer value.                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |    -     |
+| **Sort**                   | Name of the field that the result set will be sorted by. Possible values: <br/> - `createdAt` <br/> - `updatedAt` <br/> - `tinyId` <br/> - `alias` <br/> - `message` <br/> - `status` <br/> - `acknowledged` <br/> - `isSeen` <br/> - `snoozed` <br/> - `snoozedUntil` <br/> - `count` <br/> - `lastOccurredAt` <br/> - `source` <br/> - `owner` <br/> - `integration.name` <br/> - `integration.type` <br/> - `report.ackTime` <br/> - `report.closeTime` <br/> - `report.acknowledgedBy` <br/> - `report.closedBy` <br/> <br/> Default value is `createdAt`. |    -     |
+| **Order**                  | Sorting order of the result set. Possible values are `desc` and `asc`. Default: `desc`                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |    -     |
 
 ## Example Request:
-
-<Callout type="info">
-	If `pageField` and `sort` parameters are different, URL of the next page is
-	be provided.
-</Callout>
 
 ```json
 {
@@ -103,13 +98,6 @@ List alerts in Opsgenie.
 				"type": "CloudWatch"
 			}
 		}
-	],
-	"paging": {
-		"next": "https://api.opsgenie.com/v2/alerts?query=status%3Aopen&offset=20&limit=10&sort=createdAt&order=desc",
-		"first": "https://api.opsgenie.com/v2/alerts?query=status%3Aopen&offset=0&limit=10&sort=createdAt&order=desc",
-		"last": "https://api.opsgenie.com/v2/alerts?query=status%3Aopen&offset=100&limit=10&sort=createdAt&order=desc"
-	},
-	"took": 0.605,
-	"requestId": "9ae63dd7-ed00-4c81-86f0-c4ffd33142c9"
+	]
 }
 ```

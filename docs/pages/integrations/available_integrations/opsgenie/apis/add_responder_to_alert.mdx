@@ -9,16 +9,16 @@ Add a responder to an existing alert in Opsgenie.
 
 ### Parameters:
 
-| Field               | Description                                                                                                                   | Required |
-| ------------------- | ----------------------------------------------------------------------------------------------------------------------------- | :------: |
-| **Identifier**      | Identifier of the alert.                                                                                                      |   Yes    |
-| **Identifier Type** | Type of the identifier that is provided as an in-line parameter. Possible values are id, tiny and alias. Default value is id. |    No    |
-| **Responder**       | Team or user that the alert will be routed to. Either id or name of the team/user should be provided.                         |   Yes    |
-| **User**            | Display name of the request owner.                                                                                            |    No    |
-| **Source**          | Display name of the request source.                                                                                           |    No    |
-| **Note**            | Additional alert note to add.                                                                                                 |    No    |
+| Field               | Description                                                                                                                                                                                                                                               | Required |
+| ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------: |
+| **Identifier**      | Identifier of the alert.                                                                                                                                                                                                                                  |   Yes    |
+| **Identifier Type** | Type of the identifier. Possible values are `id`, `tiny` and `alias`. Default value is `id`.                                                                                                                                                              |    -     |
+| **Responder**       | Team or user that the alert will be routed to. A JSON object with either type `team` or `user`. For type `team`, either the `id` or `name` of the team should be provided. For type `user`, either the `id` or `username` of the user should be provided. |   Yes    |
+| **User**            | Display name of the request owner.                                                                                                                                                                                                                        |    -     |
+| **Source**          | Display name of the request source.                                                                                                                                                                                                                       |    -     |
+| **Note**            | Additional alert note to add.                                                                                                                                                                                                                             |    -     |
 
-`responder` field examples:
+**Responder** examples:
 
 ```json
 {
@@ -32,7 +32,25 @@ Add a responder to an existing alert in Opsgenie.
 ```json
 {
 	"responder": {
+		"type": "team",
+		"name": "secops"
+	}
+}
+```
+
+```json
+{
+	"responder": {
 		"username": "trinity@opsgenie.com",
+		"type": "user"
+	}
+}
+```
+
+```json
+{
+	"responder": {
+		"id": "4513b7ea-3b91-438f-b7e4-e3e54af9147c",
 		"type": "user"
 	}
 }
@@ -40,15 +58,19 @@ Add a responder to an existing alert in Opsgenie.
 
 **Example Response:**
 
-<Callout type="info">
-	Acknowledge alert requests are processed asynchronously, therefore valid
-	requests are responded to with `HTTP status 202 - Accepted`.
-</Callout>
-
 ```json
 {
-	"result": "Request will be processed",
-	"took": 0.333,
-	"requestId": "43a29c5c-3dbf-4fa4-9c26-f4f71023e120"
+	"data": {
+		"alias": "1a044e16-9256-405b-8644-b219d22183a9-1718038965941",
+		"action": "Add Responder",
+		"status": "Added responder",
+		"alertId": "1a044e16-9256-405b-8644-b219d22183a9-1718038965941",
+		"success": true,
+		"isSuccess": true,
+		"processedAt": "2024-06-10T17:02:47.401Z",
+		"integrationId": "022d73c8-caba-4eaf-b0f7-4fc438f7274a"
+	},
+	"took": 0.003,
+	"requestId": "a41f9958-0ad0-46d1-a5c7-0ae9c9a2eb7f"
 }
 ```

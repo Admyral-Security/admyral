@@ -2395,7 +2395,7 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 						id: "IDENTIFIER_TYPE",
 						displayName: "Identifier Type",
 						description:
-							"Type of the identifier that is provided as an in-line parameter. Possible values are AlertID and tinyID.",
+							"Type of the identifier that is provided. Possible values: id, tiny, or alias. Default: id",
 						required: false,
 						dataType: ApiParameterDatatype.TEXT,
 					},
@@ -2434,7 +2434,7 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 						id: "IDENTIFIER_TYPE",
 						displayName: "Identifier Type",
 						description:
-							"Type of the identifier that is provided as an in-line parameter. Possible values are id, tiny and alias. Default value is id.",
+							"Type of the identifier that is provided. Possible values: id, tiny, or alias. Default: id",
 						required: false,
 						dataType: ApiParameterDatatype.TEXT,
 					},
@@ -2452,7 +2452,7 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 						id: "QUERY",
 						displayName: "Query",
 						description:
-							"Search query to apply while filtering the alerts.",
+							"Search query to apply while filtering the alerts. You can use field:value combination with most alert fields.",
 						required: false,
 						dataType: ApiParameterDatatype.TEXT,
 					},
@@ -2468,7 +2468,7 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 						id: "SEARCH_IDENTIFIER_TYPE",
 						displayName: "Search Identifier Type",
 						description:
-							"Identifier type of the saved search query. Possible values are id and name. Default value is id.",
+							"Identifier type of the saved search query. Possible values: id or name. Default: id",
 						required: false,
 						dataType: ApiParameterDatatype.TEXT,
 					},
@@ -2476,7 +2476,7 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 						id: "OFFSET",
 						displayName: "Offset",
 						description:
-							"Start index of the result set (to apply pagination). Minimum value is 0.",
+							"Start index of the result set. Minimum value is 0.",
 						required: false,
 						dataType: ApiParameterDatatype.INTEGER,
 					},
@@ -2484,7 +2484,7 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 						id: "LIMIT",
 						displayName: "Limit",
 						description:
-							"Maximum number of items to provide in the result. Must be a positive integer value. Default value is 20 and maximum value is 100.",
+							"Maximum number of items to provide in the result. Must be a positive integer value.",
 						required: false,
 						dataType: ApiParameterDatatype.INTEGER,
 					},
@@ -2492,7 +2492,7 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 						id: "SORT",
 						displayName: "Sort",
 						description:
-							"Name of the field that result set will be sorted by. Default value is createdAt.",
+							"Name of the field that the result set will be sorted by. Default: createdAt",
 						required: false,
 						dataType: ApiParameterDatatype.TEXT,
 					},
@@ -2500,7 +2500,7 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 						id: "ORDER",
 						displayName: "Order",
 						description:
-							"Sorting order of the result set. Possible values are desc and asc. Default value is desc.",
+							"Sorting order of the result set. Possible values: desc or asc. Default: desc",
 						required: false,
 						dataType: ApiParameterDatatype.TEXT,
 					},
@@ -2525,7 +2525,7 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 						id: "IDENTIFIER_TYPE",
 						displayName: "Identifier Type",
 						description:
-							"Type of the identifier that is provided as an in-line parameter. Possible values are id, tiny and alias. Default value is id.",
+							"Type of the identifier that is provided. Possible values: id, tiny, or alias. Default: id",
 						required: false,
 						dataType: ApiParameterDatatype.TEXT,
 					},
@@ -2571,7 +2571,7 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 						id: "IDENTIFIER_TYPE",
 						displayName: "Identifier Type",
 						description:
-							"Type of the identifier that is provided as an in-line parameter. Possible values are id, tiny and alias. Default value is id.",
+							"Type of the identifier that is provided. Possible values: id, tiny, or alias. Default: id",
 						required: false,
 						dataType: ApiParameterDatatype.TEXT,
 					},
@@ -2617,7 +2617,7 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 						id: "IDENTIFIER_TYPE",
 						displayName: "Identifier Type",
 						description:
-							"Type of the identifier that is provided as an in-line parameter. Possible values are id, tiny and alias. Default value is id.",
+							"Type of the identifier that is provided. Possible values: id, tiny, or alias. Default: id",
 						required: false,
 						dataType: ApiParameterDatatype.TEXT,
 					},
@@ -2663,7 +2663,7 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 						id: "IDENTIFIER_TYPE",
 						displayName: "Identifier Type",
 						description:
-							"Type of the identifier that is provided as an in-line parameter. Possible values are id, tiny and alias. Default value is id.",
+							"Type of the identifier that is provided. Possible values: id, tiny, or alias. Default: id",
 						required: false,
 						dataType: ApiParameterDatatype.TEXT,
 					},
@@ -2717,7 +2717,7 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 						id: "IDENTIFIER_TYPE",
 						displayName: "Identifier Type",
 						description:
-							"Type of the identifier that is provided as an in-line parameter. Possible values are id, tiny and alias. Default value is id.",
+							"Type of the identifier that is provided. Possible values: id, tiny, or alias. Default: id",
 						required: false,
 						dataType: ApiParameterDatatype.TEXT,
 					},
@@ -2763,7 +2763,7 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 						id: "IDENTIFIER_TYPE",
 						displayName: "Identifier Type",
 						description:
-							"Type of the identifier that is provided as an in-line parameter. Possible values are id, tiny and alias. Default value is id.",
+							"Type of the identifier that is provided. Possible values: id, tiny, or alias. Default: id",
 						required: false,
 						dataType: ApiParameterDatatype.TEXT,
 					},
@@ -2771,9 +2771,9 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 						id: "ESCALATION",
 						displayName: "Escalation",
 						description:
-							"Escalation that the alert will be escalated. Either id or name of the escalation should be provided.",
+							'Escalation that the alert will be escalated. A JSON object with either id or name of the escalation should be provided. Example: {"id":"4513b7ea-3b91-438f-b7e4-e3e54af9147c"} or {"name":"Operations_Escalation"}',
 						required: true,
-						dataType: ApiParameterDatatype.TEXT,
+						dataType: ApiParameterDatatype.TEXTAREA,
 					},
 					{
 						id: "USER",
@@ -2817,7 +2817,7 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 						id: "IDENTIFIER_TYPE",
 						displayName: "Identifier Type",
 						description:
-							"Type of the identifier that is provided as an in-line parameter. Possible values are id, tiny and alias. Default value is id.",
+							"Type of the identifier that is provided. Possible values: id, tiny, or alias. Default: id",
 						required: false,
 						dataType: ApiParameterDatatype.TEXT,
 					},
@@ -2825,9 +2825,9 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 						id: "OWNER",
 						displayName: "Owner",
 						description:
-							"User that the alert will be assigned to. Either id or username of the user should be provided.",
+							'User that the alert will be assigned to. A JSON object with either id or username of the user should be provided. Example 1: {"id": "4513b7ea-3b91-438f-b7e4-e3e54af9147c"}. Example 2: {"username": "username": "trinity@opsgenie.com"}',
 						required: true,
-						dataType: ApiParameterDatatype.TEXT,
+						dataType: ApiParameterDatatype.TEXTAREA,
 					},
 					{
 						id: "USER",
@@ -2871,7 +2871,7 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 						id: "IDENTIFIER_TYPE",
 						displayName: "Identifier Type",
 						description:
-							"Type of the identifier that is provided as an in-line parameter. Possible values are id, tiny and alias. Default value is id.",
+							"Type of the identifier that is provided. Possible values: id, tiny, or alias. Default: id",
 						required: false,
 						dataType: ApiParameterDatatype.TEXT,
 					},
@@ -2879,9 +2879,9 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 						id: "TEAM",
 						displayName: "Team",
 						description:
-							"Team to route the alert. Either id or name of the team should be provided.",
+							'Team to route the alert. A JSON object with either id or name of the team should be provided. Example 1: { "id": "4513b7ea-3b91-438f-b7e4-e3e54af9147c" } Example 2: { "name": "operations" }',
 						required: true,
-						dataType: ApiParameterDatatype.TEXT,
+						dataType: ApiParameterDatatype.TEXTAREA,
 					},
 					{
 						id: "USER",
@@ -2926,7 +2926,7 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 						id: "IDENTIFIER_TYPE",
 						displayName: "Identifier Type",
 						description:
-							"Type of the identifier that is provided as an in-line parameter. Possible values are id, tiny and alias. Default value is id.",
+							"Type of the identifier that is provided. Possible values: id, tiny, or alias. Default: id",
 						required: false,
 						dataType: ApiParameterDatatype.TEXT,
 					},
@@ -2934,9 +2934,9 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 						id: "RESPONDER",
 						displayName: "Responder",
 						description:
-							"Team or user that the alert will be routed to. Either id or name of the team/user should be provided.",
+							'Team or user that the alert will be routed to. A JSON object with either type team or user. For type team, either the id or name of the team should be provided. For type user, either the id or username of the user should be provided. Example: {"type": "team", "id": "some-id"}',
 						required: true,
-						dataType: ApiParameterDatatype.TEXT,
+						dataType: ApiParameterDatatype.TEXTAREA,
 					},
 					{
 						id: "USER",
@@ -2980,7 +2980,7 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 						id: "IDENTIFIER_TYPE",
 						displayName: "Identifier Type",
 						description:
-							"Type of the identifier that is provided as an in-line parameter. Possible values are id, tiny and alias. Default value is id.",
+							"Type of the identifier that is provided. Possible values: id, tiny, or alias. Default: id",
 						required: false,
 						dataType: ApiParameterDatatype.TEXT,
 					},
@@ -2990,7 +2990,7 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 						description:
 							'List of tags to add to the alert. Example: ["tag1", "tag2"]',
 						required: true,
-						dataType: ApiParameterDatatype.TEXTAREA,
+						dataType: ApiParameterDatatype.TEXT,
 					},
 					{
 						id: "USER",
@@ -3035,7 +3035,7 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 						id: "IDENTIFIER_TYPE",
 						displayName: "Identifier Type",
 						description:
-							"Type of the identifier that is provided as an in-line parameter. Possible values are id, tiny and alias. Default value is id.",
+							"Type of the identifier that is provided. Possible values: id, tiny, or alias. Default: id",
 						required: false,
 						dataType: ApiParameterDatatype.TEXT,
 					},
@@ -3043,7 +3043,7 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 						id: "DETAILS",
 						displayName: "Details",
 						description:
-							'Key-value pairs to add as custom properties to the alert. Example: {"key1":"value1","key2":"value2"}',
+							'Key-value pairs represented as a JSON object to add as custom properties to the alert. Example: {"key1":"value1","key2":"value2"}',
 						required: true,
 						dataType: ApiParameterDatatype.TEXTAREA,
 					},
@@ -3090,7 +3090,7 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 						id: "IDENTIFIER_TYPE",
 						displayName: "Identifier Type",
 						description:
-							"Type of the identifier that is provided as an in-line parameter. Possible values are id, tiny and alias. Default value is id.",
+							"Type of the identifier that is provided. Possible values: id, tiny, or alias. Default: id",
 						required: false,
 						dataType: ApiParameterDatatype.TEXT,
 					},
@@ -3098,7 +3098,7 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 						id: "PRIORITY",
 						displayName: "Priority",
 						description:
-							"Priority level of the alert. Possible values: P1, P2, P3, P4, P5.",
+							"Priority level of the alert. Possible values: P1, P2, P3, P4, P5",
 						required: true,
 						dataType: ApiParameterDatatype.TEXT,
 					},
@@ -3124,7 +3124,7 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 						id: "IDENTIFIER_TYPE",
 						displayName: "Identifier Type",
 						description:
-							"Type of the identifier that is provided as an in-line parameter. Possible values are id, tiny and alias. Default value is id.",
+							"Type of the identifier that is provided. Possible values: id, tiny, or alias. Default: id",
 						required: false,
 						dataType: ApiParameterDatatype.TEXT,
 					},
@@ -3150,7 +3150,7 @@ export const INTEGRATIONS: Record<string, IntegrationDefinition> = {
 						id: "IDENTIFIER_TYPE",
 						displayName: "Identifier Type",
 						description:
-							"Type of the identifier that is provided as an in-line parameter. Possible values are id, tiny and alias. Default value is id.",
+							"Type of the identifier that is provided. Possible values: id, tiny, or alias. Default: id",
 						required: false,
 						dataType: ApiParameterDatatype.TEXT,
 					},
