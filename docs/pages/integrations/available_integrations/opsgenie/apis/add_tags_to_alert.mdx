@@ -9,34 +9,30 @@ Add tags to an existing alert in Opsgenie.
 
 ### Parameters:
 
-| Field               | Description                                                                                                                   | Required |
-| ------------------- | ----------------------------------------------------------------------------------------------------------------------------- | :------: |
-| **Identifier**      | Identifier of the alert.                                                                                                      |   Yes    |
-| **Identifier Type** | Type of the identifier that is provided as an in-line parameter. Possible values are id, tiny and alias. Default value is id. |    No    |
-| **Tags**            | List of tags to add to the alert. Example: ["tag1", "tag2"].                                                                  |   Yes    |
-| **User**            | Display name of the request owner.                                                                                            |    No    |
-| **Source**          | Display name of the request source.                                                                                           |    No    |
-| **Note**            | Additional alert note to add.                                                                                                 |    No    |
-
-`tags` field examples:
-
-```json
-{
-	"tags": ["OverwriteQuietHours", "Critical"]
-}
-```
+| Field               | Description                                                                                  | Required |
+| ------------------- | -------------------------------------------------------------------------------------------- | :------: |
+| **Identifier**      | Identifier of the alert.                                                                     |   Yes    |
+| **Identifier Type** | Type of the identifier. Possible values are `id`, `tiny` and `alias`. Default value is `id`. |    -     |
+| **Tags**            | A JSON array of tags to add to the alert. Example: `["tag1", "tag2"]`                        |   Yes    |
+| **User**            | Display name of the request owner.                                                           |    -     |
+| **Source**          | Display name of the request source.                                                          |    -     |
+| **Note**            | Additional alert note to add.                                                                |    -     |
 
 **Example Response:**
 
-<Callout type="info">
-	Acknowledge alert requests are processed asynchronously, therefore valid
-	requests are responded to with `HTTP status 202 - Accepted`.
-</Callout>
-
 ```json
 {
-	"result": "Request will be processed",
-	"took": 0.206,
-	"requestId": "43a29c5c-3dbf-4fa4-9c26-f4f71023e120"
+	"data": {
+		"alias": "04545d9b-76a8-4462-924f-eeeb3032e339-1718039471194",
+		"action": "Add Tags",
+		"status": "Added tags",
+		"alertId": "04545d9b-76a8-4462-924f-eeeb3032e339-1718039471194",
+		"success": true,
+		"isSuccess": true,
+		"processedAt": "2024-06-10T17:11:12.526Z",
+		"integrationId": "022d73c8-caba-4eaf-b0f7-4fc438f7274a"
+	},
+	"took": 0.003,
+	"requestId": "c482178c-bc08-43e2-b2ab-8e70f6b994d9"
 }
 ```

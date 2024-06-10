@@ -2979,6 +2979,7 @@ dependencies = [
  "maplit",
  "moka",
  "quickxml_to_serde",
+ "rand",
  "regex",
  "reqwest",
  "serde",

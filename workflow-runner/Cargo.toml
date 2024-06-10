@@ -22,6 +22,7 @@ lazy_static = "1.4.0"
 maplit = "1.0.2"
 moka = { version = "0.12.7", features = ["future"] }
 quickxml_to_serde = { version = "0.6.0", features = ["json_types", "regex_path"] }
+rand = "0.8.5"
 regex = "1.10.4"
 reqwest = { version = "0.12.4", features = ["json"] }
 serde = { version = "1.0.197", features = ["derive"] }

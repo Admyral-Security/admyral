@@ -9,23 +9,27 @@ Update the priority of an existing alert in Opsgenie.
 
 ### Parameters:
 
-| Field               | Description                                                                                                                   | Required |
-| ------------------- | ----------------------------------------------------------------------------------------------------------------------------- | :------: |
-| **Identifier**      | Identifier of the alert.                                                                                                      |   Yes    |
-| **Identifier Type** | Type of the identifier that is provided as an in-line parameter. Possible values are id, tiny and alias. Default value is id. |    No    |
-| **Priority**        | Priority level of the alert. Possible values: P1, P2, P3, P4, P5.                                                             |   Yes    |
+| Field               | Description                                                                                  | Required |
+| ------------------- | -------------------------------------------------------------------------------------------- | :------: |
+| **Identifier**      | Identifier of the alert.                                                                     |   Yes    |
+| **Identifier Type** | Type of the identifier. Possible values are `id`, `tiny` and `alias`. Default value is `id`. |    -     |
+| **Priority**        | Priority level of the alert. Possible values: `P1`, `P2`, `P3`, `P4`, `P5`.                  |   Yes    |
 
 ## Example Request:
 
-<Callout type="info">
-	Acknowledge alert requests are processed asynchronously, therefore valid
-	requests are responded to with `HTTP status 202 - Accepted`.
-</Callout>
-
 ```json
 {
-	"result": "Request will be processed",
-	"took": 0.302,
-	"requestId": "43a29c5c-3dbf-4fa4-9c26-f4f71023e120"
+	"data": {
+		"alias": "36545f85-d0af-45bc-9e71-f26c435b9493-1718040282026",
+		"action": "Update Priority",
+		"status": "Updated alert priority",
+		"alertId": "36545f85-d0af-45bc-9e71-f26c435b9493-1718040282026",
+		"success": true,
+		"isSuccess": true,
+		"processedAt": "2024-06-10T17:24:44.073Z",
+		"integrationId": "022d73c8-caba-4eaf-b0f7-4fc438f7274a"
+	},
+	"took": 0.003,
+	"requestId": "fc22ab50-e9ce-498c-88d7-c6809115486a"
 }
 ```
