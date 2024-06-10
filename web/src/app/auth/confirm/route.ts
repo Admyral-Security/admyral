@@ -22,7 +22,10 @@ export async function GET(request: NextRequest) {
 			token_hash,
 		});
 		if (!error) {
+			// Successful verification!
 			redirectTo.searchParams.delete("next");
+			// Since this is route for email confirmation, we know for sure that this is the first login
+			redirectTo.searchParams.append("isFirstLogin", "true");
 			return NextResponse.redirect(redirectTo);
 		}
 		console.log(

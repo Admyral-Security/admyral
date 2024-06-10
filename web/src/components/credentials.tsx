@@ -34,6 +34,7 @@ import useSearchParameterError, {
 import useCsrfToken, {
 	CsrfTokenProvider,
 } from "@/providers/csrf-token-provider";
+import { LLMS } from "@/lib/llm";
 
 const IS_LOADING: boolean = true;
 const IS_NOT_LOADING: boolean = false;
@@ -124,14 +125,28 @@ function isIntegrationCredential(credentials: Credential): boolean {
 function generateEmptyValueCredentialParameter(
 	integration: IntegrationType,
 ): { id: string; value: string }[] {
-	return INTEGRATIONS[integration].credential.authType === AuthType.SECRET
-		? (
-				INTEGRATIONS[integration].credential as SecretAuthentication
-			).parameters.map((def: IntegrationCredentialFormParameter) => ({
-				id: def.id,
-				value: "",
-			}))
-		: [];
+	if (
+		LLMS[integration] === undefined &&
+		INTEGRATIONS[integration] === undefined
+	) {
+		return [];
+	}
+	if (INTEGRATIONS[integration] !== undefined) {
+		return INTEGRATIONS[integration].credential.authType === AuthType.SECRET
+			? (
+					INTEGRATIONS[integration].credential as SecretAuthentication
+				).parameters.map((def: IntegrationCredentialFormParameter) => ({
+					id: def.id,
+					value: "",
+				}))
+			: [];
+	}
+	return LLMS[integration].credentials!.map(
+		(def: IntegrationCredentialFormParameter) => ({
+			id: def.id,
+			value: "",
+		}),
+	);
 }
 
 function getMSTeamOAuthLoginUrl(csrfToken: string | null): string | null {
@@ -494,7 +509,6 @@ function CredentialsChild() {
 												}}
 												onClick={() => {
 													setIntegrationsCredentials([
-														...integrationsCredentials,
 														{
 															key: `integration_credentials_${Math.random()}`,
 															name: "",
@@ -507,6 +521,7 @@ function CredentialsChild() {
 															loading: false,
 															error: null,
 														},
+														...integrationsCredentials,
 													]);
 												}}
 											>
@@ -532,6 +547,53 @@ function CredentialsChild() {
 											</DropdownMenu.Item>
 										);
 									})}
+								{Object.keys(LLMS)
+									.filter(
+										(llmProvider) =>
+											LLMS[llmProvider].credentials !==
+											undefined,
+									)
+									.map((llmProvider: string) => (
+										<DropdownMenu.Item
+											key={`credentials_integrations_${llmProvider}`}
+											style={{
+												cursor: "pointer",
+											}}
+											onClick={() => {
+												setIntegrationsCredentials([
+													{
+														key: `integration_credentials_${Math.random()}`,
+														name: "",
+														integrationType:
+															llmProvider as IntegrationType,
+														values: generateEmptyValueCredentialParameter(
+															llmProvider as IntegrationType,
+														),
+														isPersisted: false,
+														loading: false,
+														error: null,
+													},
+													...integrationsCredentials,
+												]);
+											}}
+										>
+											<Grid
+												columns="20px 1fr"
+												gap="2"
+												justify="center"
+												align="center"
+											>
+												<IntegrationLogoIcon
+													integration={
+														llmProvider as IntegrationType
+													}
+												/>
+												<Text>
+													{LLMS[llmProvider].name}
+												</Text>
+											</Grid>
+										</DropdownMenu.Item>
+									))}
 								<DropdownMenu.Item
 									style={{
 										cursor: "pointer",
@@ -591,11 +653,14 @@ function CredentialsChild() {
 										integration={credential.integrationType}
 									/>
 									<Text weight="medium">
-										{
-											INTEGRATIONS[
-												credential.integrationType
-											].name
-										}
+										{INTEGRATIONS[
+											credential.integrationType
+										] !== undefined
+											? INTEGRATIONS[
+													credential.integrationType
+												].name
+											: LLMS[credential.integrationType]
+													.name}
 									</Text>
 								</Flex>
 
@@ -619,8 +684,65 @@ function CredentialsChild() {
 									/>
 								</Flex>
 
-								{INTEGRATIONS[credential.integrationType]
-									.credential.authType === AuthType.SECRET &&
+								{LLMS[credential.integrationType] !==
+									undefined &&
+									credential.values.map(
+										(
+											credentialParameter: any,
+											idx: number,
+										) => (
+											<Flex
+												key={`credentials_${credential.integrationType}_${integrationIdx}_${credentialParameter.id}`}
+												direction="column"
+												gap="2"
+											>
+												<Text>
+													{
+														LLMS[
+															credential
+																.integrationType
+														].credentials![idx]
+															.displayName
+													}
+												</Text>
+												<TextField.Root
+													variant="surface"
+													disabled={
+														credential.isPersisted
+													}
+													type={
+														credential.isPersisted
+															? "password"
+															: undefined
+													}
+													value={
+														credential.isPersisted
+															? "some-random-stuff"
+															: credentialParameter.value
+													}
+													onChange={(event) => {
+														const credentialsCopy =
+															[
+																...integrationsCredentials,
+															];
+														credentialsCopy[
+															integrationIdx
+														].values[idx].value =
+															event.target.value;
+														setIntegrationsCredentials(
+															credentialsCopy,
+														);
+													}}
+												/>
+											</Flex>
+										),
+									)}
+
+								{INTEGRATIONS[credential.integrationType] !==
+									undefined &&
+									INTEGRATIONS[credential.integrationType]
+										.credential.authType ===
+										AuthType.SECRET &&
 									credential.values.map(
 										(credentialParameter, idx) => (
 											<Flex

@@ -1,0 +1,40 @@
+import { Callout } from "nextra/components";
+
+# List recently deployed YARA rules
+
+Get a list of the most recent deployed YARA rules on YARAify as follow.
+
+<Callout type="info">
+	For YARAify's documentation, see [List recently deployed YARA
+	rules](https://yaraify.abuse.ch/api/#yara-recent).
+</Callout>
+
+## Parameters:
+
+None.
+
+## Example Output:
+
+```json
+{
+    "query_status": "ok",
+    "data": [
+        {
+            "time_stamp": "2022-05-01 08:10:52 UTC",
+            "yarahub_uuid": "1b95ce79-6034-4740-8e45-5f0840602d1a",
+            "rule_name": "win_danabot",
+            "author": "Johannes Bader",
+            "description": "detects DanaBot",
+            "date": "2022-04-19",
+            "yarahub_license": "CC BY-SA 4.0",
+            "yarahub_author_twitter": "@viql",
+            "yarahub_reference_link": "https:\/\/test.ch\/bla",
+            "yarahub_reference_md5": "8195d9c7b7193e9c63137d156df7b6f3",
+            "yarahub_rule_matching_tlp": "TLP:WHITE",
+            "yarahub_rule_sharing_tlp": "TLP:WHITE",
+            "malpedia_family": "win.danabot"
+        },
+        [...]
+    ]
+}
+```

@@ -2,7 +2,7 @@ import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { User } from "@supabase/supabase-js";
 import { NextResponse, type NextRequest } from "next/server";
 
-const PUBLIC_PATHS = ["/login", "/signup-success", "/passwrd/forgot*"];
+const PUBLIC_PATHS = ["/login", "/signup-success", "/password/forgot"];
 
 function isPublicPage(path: string): boolean {
 	return (

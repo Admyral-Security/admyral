@@ -1,0 +1,83 @@
+import { Callout } from "nextra/components";
+
+# Query ClamAV Signature
+
+You can get a list of recent files associated with a specific ClamAV signature.
+
+<Callout type="info">
+	For YARAify's documentation, see [Query ClamAV
+	Signature](https://yaraify.abuse.ch/api/#clamav).
+</Callout>
+
+## Parameters:
+
+| Field                | Description                        | Required |
+| -------------------- | ---------------------------------- | :------: |
+| **ClamAV Signature** | The ClamAV Signature to query for. |   Yes    |
+
+## Example Output:
+
+```json
+{
+    "query_status": "ok",
+    "query_info": {
+        "search_scope": "all time",
+        "result_count": 13,
+        "result_max": 500
+    },
+    "data": [
+        {
+            "sha256_hash": "5e3834ebbd42dbdbe6251efbf12869b3a70880f3535765ad8109b458543c8b2e",
+            "file_size": 792412,
+            "mime_type": "application\/x-dosexec",
+            "md5_hash": "37fe12185eceac065501e65ba3851463",
+            "sha1_hash": "d29f33a7d26b7d7253e07bc7517779076a5b021f",
+            "sha3_384_hash": "24f01256c2587cced649065378fd982298152ab5685d9f4c741c2cecd77a35ed3f878d69f65ef801640fb85aee071474",
+            "first_seen": "2022-04-15 08:24:20 UTC",
+            "last_seen": null,
+            "sightings": 1,
+            "imphash": "43fd39eb6df6bf3a9a3edd1f646cd16e",
+            "ssdeep": "12288:PGXqG\/H1k6hUvoNUrIE33T5zTTlL9O3ZO6epkflNaGD0u74tt+3hJLGgFqLM:PZwk6hUv\/sEnnL6zLaGD46LLGng",
+            "tlsh": "T138F423C1EB53E7E1C8EF4D38920FFB6546642102AE00095779E68E58BDFC3B2335568A",
+            "telfhash": null,
+            "gimphash": null,
+            "dhash_icon": null
+        },
+        {
+            "sha256_hash": "b9807ee941907647ce285fab2687e4796f7f3c76afc5c8c9c141ca3568fcf87a",
+            "file_size": 1576960,
+            "mime_type": "application\/x-dosexec",
+            "md5_hash": "9161ee3cf96fda13ca70d450705b9002",
+            "sha1_hash": "3f97d7d2fe39c0f0cddfa89a3f4066bf0d3bdb4b",
+            "sha3_384_hash": "3734b149a09675adcb26c8775083dcd5ca037797c6e6262d6c89d19de6eeff8f731e6e71e80b20e515b4af35f5f7c39e",
+            "first_seen": "2022-04-14 20:54:31 UTC",
+            "last_seen": "2022-04-14 20:54:31 UTC",
+            "sightings": 2,
+            "imphash": null,
+            "ssdeep": "24576:JB4gDb100oLvVt8LfdCIGCYNoMJcsfU4uat4fo\/lG4HfOvN8zOkik9eZ:TjnJMnU4u8lG42KzOkikw",
+            "tlsh": "T18B75AE23E54280FDD65820316CBB7F3ABDB497595A24CA83A7E8DE791F32251932730D",
+            "telfhash": null,
+            "gimphash": null,
+            "dhash_icon": "7171717169e8e8e8"
+        },
+        {
+            "sha256_hash": "1d580d9f99a387f0735bde436955d7595dfb4f7c41fc9968cc1aa78734fa4d2a",
+            "file_size": 1578496,
+            "mime_type": "application\/x-dosexec",
+            "md5_hash": "ea3f7b921ceca64d2100850cbef4aa55",
+            "sha1_hash": "9b09dc4da34863ab96cad9ed4cf53e0d7b87ffef",
+            "sha3_384_hash": "bcd24af5bd6a1b2602ca5916e0453f2f4a2f8543281051fd3bc3cd227d4cd8fb10b5c7cc1daa8cbd36162f7b13671bf2",
+            "first_seen": "2022-04-12 16:15:34 UTC",
+            "last_seen": null,
+            "sightings": 1,
+            "imphash": null,
+            "ssdeep": "24576:T4gDb100oLvVt8LfdCIGCYNoMJcsfU4uat4fo\/lG4HfOvN8QOkik9eZ:TjnJMnU4u8lG42KQOkikw",
+            "tlsh": "T1AE75AE23E54280FDD65820316CBB7F3ABDB497595A24CA83A7E8DE791F32251932730D",
+            "telfhash": null,
+            "gimphash": null,
+            "dhash_icon": "7171717169e8e8e8"
+        },
+        [...]
+    ]
+}
+```

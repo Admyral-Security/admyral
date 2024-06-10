@@ -13,17 +13,21 @@ import useSearchParameterError, {
 function ForgotPasswordPageChild() {
 	const [isLoading, setIsLoading] = useState<boolean>(false);
 	const { error, resetError } = useSearchParameterError();
+	const [internalError, setInternalError] = useState<string | null>(null);
 
-	const handleSubmit = async (event: any) => {
+	const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
+		const formData = new FormData(event.currentTarget);
 
 		setIsLoading(true);
 		resetError();
+		setInternalError(null);
 
 		try {
-			await resetPassowrd(new FormData(event.currentTarget));
+			const email = formData.get("email") as string;
+			await resetPassowrd(email);
 		} catch (error) {
-			console.error("Error during password reset: ", error);
+			setInternalError("Something went wrong. Please try again.");
 		} finally {
 			setIsLoading(false);
 		}
@@ -36,7 +40,7 @@ function ForgotPasswordPageChild() {
 			</div>
 
 			<div className="sm:mx-auto sm:w-full sm:max-w-sm">
-				<form className="space-y-4" action={handleSubmit}>
+				<form className="space-y-4" onSubmit={handleSubmit}>
 					<div>
 						<label htmlFor="email">Email</label>
 						<div className="mt-2">
@@ -50,13 +54,15 @@ function ForgotPasswordPageChild() {
 						</div>
 					</div>
 
-					{error !== null && (
+					{(error !== null || internalError) && (
 						<Callout.Root color="red">
 							<Flex align="center" gap="5">
 								<Callout.Icon>
 									<InfoCircledIcon width="20" height="20" />
 								</Callout.Icon>
-								<Callout.Text size="2">{error}</Callout.Text>
+								<Callout.Text size="2">
+									{error || internalError}
+								</Callout.Text>
 							</Flex>
 						</Callout.Root>
 					)}

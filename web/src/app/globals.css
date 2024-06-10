@@ -8,17 +8,6 @@
 	--indigo-track: var(--Accent-color-Accent-12, #101d46);
 }
 
-/* Hide scrollbar for Chrome, Safari and Opera */
-::-webkit-scrollbar {
-	display: none;
-}
-
-/* Hide scrollbar for IE, Edge and Firefox */
-.hide-scrollbar {
-	-ms-overflow-style: none; /* IE and Edge */
-	scrollbar-width: none; /* Firefox */
-}
-
 /* Tailwind takes out all default styles applied to html elements which causes problems for ReactMarkdown. 
 To fix this, we need to revert all styles applied to the markdown elements.
 https://stackoverflow.com/questions/74607419/react-markdown-don%C2%B4t-render-markdown */

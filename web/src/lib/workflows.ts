@@ -1,8 +1,9 @@
 "use server";
 
 import { createClient } from "@/utils/supabase/server";
-import { ActionNode, ActionData, LLM } from "./types";
+import { ActionNode, ActionData } from "./types";
 import { generateReferenceHandle, generateWebhook } from "./workflow-node";
+import { LLMS } from "./llm";
 
 export async function initActionData(
 	actionType: ActionNode,
@@ -68,8 +69,10 @@ export async function initActionData(
 			return {
 				...base,
 				actionDefinition: {
+					provider: "ADMYRAL",
 					prompt: "",
-					model: LLM.GPT4_TURBO,
+					model: LLMS["ADMYRAL"].models![0].id,
+					credential: undefined,
 				},
 			};
 

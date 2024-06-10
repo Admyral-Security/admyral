@@ -139,6 +139,8 @@ class UserProfileUpdateRequest(BaseModel):
     last_name: Optional[str]
     company: Optional[str]
     email: Optional[str]
+    role: Optional[str]
+    additional_info: Optional[list[str]]
 
 
 @router.post("/{user_id}/update", status_code=status.HTTP_204_NO_CONTENT)
@@ -164,7 +166,11 @@ async def update_user_profile(
         user_profile.company = request.company
     if request.email:
         user_profile.email = request.email
-    
+    if request.role:
+        user_profile.role = request.role
+    if request.additional_info:
+        user_profile.additional_info = request.additional_info
+
     db.add(user_profile)
     await db.commit()
 

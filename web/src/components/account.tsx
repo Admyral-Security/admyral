@@ -46,11 +46,11 @@ export default function Account() {
 		setError(null);
 
 		try {
-			await updateUserProfile(
-				userProfile.firstName,
-				userProfile.lastName,
-				userProfile.company,
-			);
+			await updateUserProfile({
+				firstName: userProfile.firstName,
+				lastName: userProfile.lastName,
+				company: userProfile.company,
+			});
 		} catch (error) {
 			setError(
 				`Failed to update user profile! If the problem persists, please contact us on Discord or via email ${process.env.NEXT_PUBLIC_SUPPORT_EMAIL}`,

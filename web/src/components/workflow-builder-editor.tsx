@@ -36,6 +36,7 @@ import StartWorkflow from "./action-editing/start-workflow";
 import IntegrationNode from "./workflow-graph/integration-node";
 import IntegrationSelection from "./action-editing/integration-selection";
 import Integration from "./action-editing/integration";
+import WorkflowHints from "./workflow-hints";
 
 interface IntegrationDetailsProps {
 	id: string;
@@ -194,6 +195,8 @@ function WorkflowBuilderEditor({
 				<Controls />
 			</ReactFlow>
 
+			{nodes.length === 0 && <WorkflowHints />}
+
 			<EditorSideBar />
 
 			{selectNodeIdx !== -1 &&
@@ -241,7 +244,12 @@ function WorkflowBuilderEditor({
 
 						{(nodes[selectNodeIdx].type as ActionNode) ===
 							ActionNode.AI_ACTION && (
-							<AiAction id={nodes[selectNodeIdx].id} />
+							<AiAction
+								id={nodes[selectNodeIdx].id}
+								saveWorkflowAndRedirect={
+									saveWorkflowAndRedirect
+								}
+							/>
 						)}
 
 						{(nodes[selectNodeIdx].type as ActionNode) ===
