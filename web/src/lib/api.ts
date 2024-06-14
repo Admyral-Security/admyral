@@ -70,7 +70,8 @@ export async function listWorkflows() {
 		},
 	);
 	if (result.status !== 200) {
-		// Error!
+		const error = await result.text();
+		console.log("Failed to list workflows. Received error: ", error);
 		throw new Error("Failed to load workflows!");
 	}
 
@@ -92,6 +93,8 @@ export async function createNewWorkflow() {
 	);
 
 	if (result.status !== 201) {
+		const error = await result.text();
+		console.log("Failed to create new workflow. Received error: ", error);
 		throw new Error("Failed to create new workflow!");
 	}
 
@@ -118,7 +121,9 @@ export async function publishWorkflow(workflowId: string, isLive: boolean) {
 	);
 
 	if (result.status !== 204) {
-		throw new Error("Failed to update workflow!");
+		const error = await result.text();
+		console.log("Failed to publish workflow. Received error: ", error);
+		throw new Error("Failed to publish workflow!");
 	}
 }
 
@@ -135,6 +140,8 @@ export async function loadUserProfile(): Promise<UserProfile> {
 		},
 	);
 	if (result.status !== 200) {
+		const error = await result.text();
+		console.log("Failed to load user profile. Received error: ", error);
 		throw new Error("Failed to load user profile!");
 	}
 
@@ -155,6 +162,8 @@ export async function loadUserQuota(): Promise<Quota> {
 		},
 	);
 	if (result.status !== 200) {
+		const error = await result.text();
+		console.log("Failed to load quota. Received error: ", error);
 		throw new Error("Failed to load quota!");
 	}
 
@@ -194,6 +203,8 @@ export async function updateUserProfile(update: UserProfileUpdate) {
 		},
 	);
 	if (result.status !== 204) {
+		const error = await result.text();
+		console.log("Failed to update user profile. Received error: ", error);
 		throw new Error("Failed to update user profile!");
 	}
 }
@@ -211,6 +222,8 @@ export async function deleteAccount() {
 		},
 	);
 	if (result.status !== 204) {
+		const error = await result.text();
+		console.log("Failed to list user profile. Received error: ", error);
 		throw new Error("Failed to delete user profile!");
 	}
 
@@ -239,6 +252,8 @@ export async function listCredentials(
 		},
 	);
 	if (result.status !== 200) {
+		const error = await result.text();
+		console.log("Failed to list credentials. Received error: ", error);
 		throw new Error("Failed to list credentials!");
 	}
 
@@ -273,6 +288,7 @@ export async function createCredential(
 	if (result.status !== 204) {
 		// TODO: return better error messages (e.g., we need to distinguish between duplicate credential names and other errors)
 		const error = await result.text();
+		console.log("Failed to create credential. Received error: ", error);
 		throw new Error("Failed to create credential! Error: " + error);
 	}
 }
@@ -294,6 +310,8 @@ export async function deleteCredential(credentialName: string) {
 		},
 	);
 	if (result.status !== 204) {
+		const error = await result.text();
+		console.log("Failed to delete credential. Received error: ", error);
 		throw new Error("Failed to delete credential!");
 	}
 }
@@ -311,6 +329,8 @@ export async function getWorkflow(workflowId: string): Promise<WorkflowData> {
 		},
 	);
 	if (result.status !== 200) {
+		const error = await result.text();
+		console.log("Failed to get workflow. Received error: ", error);
 		throw new Error("Failed to get workflow!");
 	}
 
@@ -343,6 +363,8 @@ export async function deleteWorkflow(workflowId: string) {
 		},
 	);
 	if (result.status !== 204) {
+		const error = await result.text();
+		console.log("Failed to delete workflow. Received error: ", error);
 		throw new Error("Failed to delete workflow!");
 	}
 	redirect("/");
@@ -374,6 +396,8 @@ export async function updateWorkflowAndCreateIfNotExists(
 		},
 	);
 	if (result.status !== 201) {
+		const error = await result.text();
+		console.log("Failed to update workflow. Received error: ", error);
 		throw new Error("Failed to update workflow!");
 	}
 
@@ -416,6 +440,7 @@ export async function triggerWorkflowFromAction(
 	);
 	if (result.status !== 202) {
 		const error = await result.text();
+		console.log("Failed to trigger workflow. Received error: ", error);
 		if (
 			result.status === 403 &&
 			error === "Workflow run quota limit exceeded"
@@ -439,6 +464,11 @@ export async function loadWorkflowTemplates(): Promise<WorkflowTemplate[]> {
 		},
 	);
 	if (result.status !== 200) {
+		const error = await result.text();
+		console.log(
+			"Failed to load workflow templates. Received error: ",
+			error,
+		);
 		throw new Error("Failed to load workflow templates!");
 	}
 
@@ -487,6 +517,8 @@ export async function loadWorkflowRuns(
 		},
 	);
 	if (result.status !== 200) {
+		const error = await result.text();
+		console.log("Failed to load workflow runs. Received error: ", error);
 		throw new Error("Failed to load workflow runs!");
 	}
 
@@ -510,6 +542,11 @@ export async function loadWorkflowRunEvents(
 		},
 	);
 	if (result.status !== 200) {
+		const error = await result.text();
+		console.log(
+			"Failed to load workflow run traces. Received error: ",
+			error,
+		);
 		throw new Error("Failed to load workflow run traces!");
 	}
 
@@ -537,6 +574,7 @@ export async function generateWorkflow(
 	);
 	if (result.status !== 200) {
 		const error = await result.json();
+		console.log("Failed to generate workflow. Received error: ", error);
 		if (result.status === 403 && error.detail === "Quota limit exceeded") {
 			throw new Error(
 				"Quota limit exceeded. You have reached the maximum number of workflow generations per day.",
@@ -573,6 +611,8 @@ export async function triggerWorkflowWebhook(
 		init as any,
 	);
 	if (result.status !== 201) {
+		const error = await result.json();
+		console.log("Failed to trigger webhook. Received error: ", error);
 		throw new Error("Failed to trigger webhook!");
 	}
 }
