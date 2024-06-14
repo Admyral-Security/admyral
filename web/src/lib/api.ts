@@ -610,7 +610,7 @@ export async function triggerWorkflowWebhook(
 		`${process.env.WORKFLOW_RUNNER_API_URL}/webhook/${webhookId}/${secret}`,
 		init as any,
 	);
-	if (result.status !== 201) {
+	if (result.status !== 200) {
 		const error = await result.json();
 		console.log("Failed to trigger webhook. Received error: ", error);
 		throw new Error("Failed to trigger webhook!");
