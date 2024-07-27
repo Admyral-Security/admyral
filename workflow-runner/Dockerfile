@@ -1,10 +1,13 @@
-FROM --platform=linux/arm64 amazonlinux:latest AS base
+FROM debian:bullseye-slim AS base
+# Install gcc and other build essentials
+RUN rm -rf /var/lib/apt/lists/* && apt-get update -o Acquire::CompressionTypes::Order::=gz && \
+    apt-get update && \
+    apt-get install -y --fix-missing gcc g++ make libssl-dev pkg-config curl && \
+    apt-get clean
 # Install Rust
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 ENV PATH="/root/.cargo/bin:${PATH}"
-# Install gcc and other build essentials
-RUN yum update -y && \
-    yum install -y gcc gcc-c++ make openssl-devel pkgconfig tar perl
+# Install sqlx
 RUN cargo install sqlx-cli
 
 FROM base AS chef
@@ -28,6 +31,6 @@ COPY . .
 RUN cargo build --release
 
 # Runtime stage
-FROM --platform=linux/arm64 amazonlinux:latest AS runtime 
+FROM debian:bullseye-slim AS runtime 
 COPY --from=builder /app/target/release/workflow-runner /usr/local/bin/workflow-runner
 CMD ["workflow-runner", "--ip", "0.0.0.0", "--port", "80"]
