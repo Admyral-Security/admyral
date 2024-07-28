@@ -32,5 +32,6 @@ RUN cargo build --release
 
 # Runtime stage
 FROM debian:bullseye-slim AS runtime 
+RUN apt-get update && apt-get install -y --fix-missing curl
 COPY --from=builder /app/target/release/workflow-runner /usr/local/bin/workflow-runner
 CMD ["workflow-runner", "--ip", "0.0.0.0", "--port", "80"]
