@@ -101,7 +101,7 @@ services:
                     "--no-verbose",
                     "--tries=1",
                     "--spider",
-                    "http://localhost:3000/health",
+                    "http://127.0.0.1:3000/health",
                 ]
             interval: 1m30s
             timeout: 30s
@@ -122,7 +122,7 @@ services:
                     "CMD",
                     "node",
                     "-e",
-                    "require('http').get('http://localhost:3000/api/profile', (r) => {if (r.statuscode !== 200) throw new error(r.statuscode)})",
+                    "require('http').get('http://' + process.env.HOSTNAME + ':3000/api/profile', (r) => {if (r.statuscode !== 200) throw new error(r.statuscode)})",
                 ]
             timeout: 5s
             interval: 5s
@@ -339,7 +339,7 @@ services:
                     "--no-verbose",
                     "--tries=1",
                     "--spider",
-                    "http://localhost:5000/status",
+                    "http://127.0.0.1:5000/status",
                 ]
             timeout: 5s
             interval: 5s

@@ -62,7 +62,8 @@
 		"action_type": "AI_ACTION",
 		"action_description": "We use GPT-4 to summarize the result from VirusTotal as a report.",
 		"action_definition": {
-			"model": "gpt-4-turbo",
+			"provider": "ADMYRAL",
+			"model": "gpt-4o",
 			"prompt": "As a security analyst, create a high-level and short summary of the subsequent findings regarding a file hash.\n\nHere are the findings for the file hash:\n\n<<search_hash_in_virustotal.body>>\n"
 		},
 		"created_at": "2024-04-26 09:43:27.973654",
@@ -129,7 +130,8 @@
 		"action_type": "AI_ACTION",
 		"action_description": "Use GPT4 to summarize the results from the HTTP action (the Threatpost feed)",
 		"action_definition": {
-			"model": "gpt-4-turbo",
+			"provider": "ADMYRAL",
+			"model": "gpt-4o",
 			"prompt": "Extract and summarize articles from the response containing multiple news items about cybersecurity. Focus on key details like event descriptions, the impact on affected entities, and relevant multimedia content. The summary should be concise and suitable for an email newsletter format. Only answer with the extraction/summary. Do not explain how you do it!\n\nDo it for the following feed:\n<<retrieve_threatpost_feed.body>>"
 		},
 		"created_at": "2024-04-26 18:26:45.786181",
@@ -144,7 +146,8 @@
 		"action_type": "AI_ACTION",
 		"action_description": "We use GPT-4 to summarize the result from YARAify as a report.",
 		"action_definition": {
-			"model": "gpt-4-turbo",
+			"provider": "ADMYRAL",
+			"model": "gpt-4o",
 			"prompt": "As a security analyst, create a high-level and short summary of the subsequent findings regarding a file hash.\n\nHere are the findings for the file hash:\n\n<<search_hash_in_yaraify.body>>\n"
 		},
 		"created_at": "2024-04-26 13:20:16.485067",
@@ -284,7 +287,8 @@
 		"action_type": "AI_ACTION",
 		"action_description": "We use GPT-4 to summarize the result as a report.",
 		"action_definition": {
-			"model": "gpt-4-turbo",
+			"provider": "ADMYRAL",
+			"model": "gpt-4o",
 			"prompt": "As a security analyst, create a high-level and short summary of the subsequent findings regarding an IP.\n\nHere are the findings for the IP from AbuseIPDB:\n<<look_up_ip_address_in_abuseipdb.body>>\n\nHere are the findings for the IP from VirusTotal:\n<<look_up_ip_address_in_virustotal.body>>\n\nHere are the findings for the IP from GreyNoise:\n<<look_up_ip_address_in_greynoise.body>>\n\nHere are the findings for the IP from PulseDive:\n<<look_up_ip_address_in_pulsedive.body>>\n\n"
 		},
 		"created_at": "2024-04-26 15:11:48.565596",
