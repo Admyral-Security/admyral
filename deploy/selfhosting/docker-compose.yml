@@ -124,7 +124,7 @@ services:
                     "-e",
                     "require('http').get('http://' + process.env.HOSTNAME + ':3000/api/profile', (r) => {if (r.statuscode !== 200) throw new error(r.statuscode)})",
                 ]
-            timeout: 5s
+            timeout: 20s
             interval: 5s
             retries: 3
         depends_on:
