@@ -122,7 +122,7 @@ services:
                     "CMD",
                     "node",
                     "-e",
-                    "require('http').get('http://' + process.env.HOSTNAME + ':3000/api/profile', (r) => {if (r.statuscode !== 200) throw new error(r.statuscode)})",
+                    '"require(''http'').get(''http://'' + process.env.HOSTNAME + '':3000/api/profile'', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})"',
                 ]
             timeout: 20s
             interval: 5s
@@ -141,6 +141,7 @@ services:
             SUPABASE_PUBLIC_URL: ${SUPABASE_URL}
             SUPABASE_ANON_KEY: ${ANON_KEY}
             SUPABASE_SERVICE_KEY: ${SERVICE_ROLE_KEY}
+            AUTH_JWT_SECRET: ${JWT_SECRET}
 
             LOGFLARE_API_KEY: ${LOGFLARE_API_KEY}
             LOGFLARE_URL: http://analytics:4000
@@ -316,6 +317,9 @@ services:
             ERL_AFLAGS: -proto_dist inet_tcp
             ENABLE_TAILSCALE: "false"
             DNS_NODES: "''"
+            RLIMIT_NOFILE: "10000"
+            APP_NAME: realtime
+            SEED_SELF_HOST: true
         command: >
             sh -c "/app/bin/migrate && /app/bin/realtime eval 'Realtime.Release.seeds(Realtime.Repo)' && /app/bin/server"
 
