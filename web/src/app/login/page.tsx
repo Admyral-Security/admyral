@@ -16,7 +16,7 @@ import GoogleIcon from "@/components/icons/google-icon";
 import GithubIcon from "@/components/icons/github-icon";
 import LogoWithName from "@/components/icons/logo-with-name";
 import Image from "next/image";
-import { InfoCircledIcon } from "@radix-ui/react-icons";
+import { DiscordLogoIcon, InfoCircledIcon } from "@radix-ui/react-icons";
 import useSearchParameterError, {
 	SearchParameterErrorProvider,
 } from "@/providers/search-paramater-error-provider";
@@ -98,7 +98,7 @@ function LoginPageChild() {
 					</Flex>
 				</div>
 
-				<div className="sm:mx-auto sm:w-full sm:max-w-sm">
+				{/* <div className="sm:mx-auto sm:w-full sm:max-w-sm">
 					<ul className="flex flex-wrap -mb-px text-sm font-medium text-center text-gray-500 dark:text-gray-400">
 						<li className="me-2">
 							<button
@@ -346,6 +346,29 @@ function LoginPageChild() {
 						</Link>
 						.
 					</Text>
+				</div> */}
+
+				<div className="sm:mx-auto sm:w-full sm:max-w-sm">
+					<Flex direction="column" gap="4">
+						<Text>
+							The public cloud version is currently offline. We
+							are working on a new version and will be back online
+							soon.
+						</Text>
+
+						<Text>Join our Discord for the latest updates.</Text>
+
+						<Link
+							href="https://discord.com/invite/GqbJZT9Hbf"
+							target="_blank"
+							style={{ width: "100%" }}
+						>
+							<Button style={{ width: "100%" }}>
+								<DiscordLogoIcon />
+								<Text>Join discord</Text>
+							</Button>
+						</Link>
+					</Flex>
 				</div>
 			</Flex>
 
