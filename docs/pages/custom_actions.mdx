@@ -1,1 +1,65 @@
+import { Tabs } from "nextra/components";
+import { Callout } from "nextra/components";
+
 # Custom Actions
+
+Admyral supports the creation of custom actions as well as the usage of third-party libraries within custom actions.
+
+<Callout type="info">
+	With Admyral's infrastructure, only the latest versions of packages are
+	being used. Due to this, you don't have to worry about maintenance of
+	packages anymore as this will be done automatically.
+</Callout>
+
+## Creation of Custom Actions
+
+Custom actions can be creating using Python within a workflow python file or in a separate workflow python file. Either way, the structure of the custom action is as follows:
+
+```python
+@action(
+    display_name="Send two Slack Messages",
+    display_namespace="Slack",
+    description="Send two Slack messages in a row to the same person",
+)
+def send_two_slack_messages(
+    user_id
+):
+    ...
+```
+
+After creating your custom action, push it to Admyral using the following CLI command to use it in other workflows or within the no-code editor:
+
+```bash
+admyral action <your_custom_action.py> push
+```
+
+## Usage of Custom Actions
+
+<Tabs items={['Code', 'No-Code']}>
+    <Tabs.Tab>
+        There are two options to use custom actions within your automations:
+        (1) Import your custom action into your python file to be able to use it
+    	```python
+        from admyral.actions import (<your_custom_action>)
+        ```
+
+        (2) Define your custom action in the same python file as your workflow automation.
+
+        ```
+    	@workflow(
+    		description="example_workflow",
+    		triggers=[Webhook()],
+    	)
+    	def slack_send_message(payload: dict[str, JsonValue]):
+    		send_slack_message(
+    			channel_id="C0000000000",
+    			text=f"This is how secrets are used within code.",
+    			secrets={"SLACK_SECRET": "slack_secret"},
+    		)
+    	```
+    </Tabs.Tab>
+    <Tabs.Tab>
+    	Within the No-Code Workflow Editor, custom actions appear in the given namespace (= grouping), e.g. Slack or Admyral. From there, you can simply drag-and-drop them to use them.
+    </Tabs.Tab>
+
+</Tabs>
