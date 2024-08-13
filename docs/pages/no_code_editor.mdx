@@ -1,0 +1,37 @@
+# No-Code Editor
+
+The No-Code Editor is the alternative to coding your workflows within Admyral. Every workflow is displayed in no-code as well as in code due to a bi-directional synchronization.
+
+## Why having a no-code editor when being code-first?
+
+-   Enable less technical users to make create workflows and make adjustments
+-   Easier to communicate with non-technical stakeholders (visualization vs. code)
+-   Quick to create simple automations
+
+## Overview
+
+The workflow builder is split up in three parts:
+
+1. On the left panel, you can drag-and-drop new pre-built and customer actions and integrations.
+2. In the middle, you can use the drag-and-drop functionality of the actions to build and adjust workflows.
+3. On the right panel, you can make changes to the workflow's meta information such as changing the name of the workflow or adding an description. The right panel appears upon clicking on the "_Settings_" button on the top right.
+   However, if you have selected an action on the canvas in the middle, this panel changes and you can configure the action.
+
+<div align="center">
+	<br />
+	![No-Code Editor](../../img/no_code_editor.png)
+</div>
+_No-Code Editor_
+
+## Executing Workflows
+
+import { Callout } from "nextra/components";
+
+<Callout type="info">
+	Make sure you have activated the workflow for it to be able to execute.
+</Callout>
+
+When you build workflows, they must start with the start node. As soon as this input action is triggered, e.g. by an external API call in the case of a webhook or a schedule,
+the workflow is executed automatically.
+
+You can always test workflows manually to ensuring they are set up properly by clicking on an action and selecting "_Run_".

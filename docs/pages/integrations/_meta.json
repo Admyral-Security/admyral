@@ -1,5 +1,17 @@
 {
 	"integrations": "Integrations",
-	"build_integrations": "Build Integrations",
-	"available_integrations": "Available Integrations"
+	"abnormal": "Abnormal",
+	"greynoise": "greynoise",
+	"jira": "Jira",
+	"ms_defender": "MS Defender for Endpoint",
+	"ms_defender_for_cloud": "MS Defender for Cloud",
+	"ms_teams": "Microsoft Teams",
+	"opsgenie": "OpsGenie",
+	"pulsedive": "Pulsedive",
+	"slack": "Slack",
+	"virus_total": "VirusTotal",
+	"yaraify": "YARAify",
+	"alienvault_otx": "AlienVault OTX",
+	"threatpost": "ThreatPost",
+	"phish_report": "Phish Report"
 }

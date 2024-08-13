@@ -1,54 +1,46 @@
-![Admyral Banner](../../img/banner.svg)
+import { Cards, Card } from "nextra/components";
 
-# Overview
+# Docs
 
-> Admyral is an open-source Cybersecurity Automation & Investigation Assistant. It combines workflow automations, case management, and the Admyral Assistant.
+> Admyral is an open-source code-first security automation platform. It combines workflow automations, case management, and the Admyral Assistant.
 
 ## Core Platform Features
 
-### Workflow builder
+### Code-first Automation Builder
+
+-   **Pre-built Actions**: Get started quickly with pre-built actions such as send_email, https requests,
+-   **Integrations**: Leverage Admyral's pre-built integrations for your automations
+-   **Custom Actions**: Create your own building blocks for your automations - incl. external library support
+
+### No-Code Workflow builder
 
 -   **Workflow Automations**: Intuitively drag and drop workflow actions to build an automation workflow
--   **AI Workflows**: Build AI-enhanced workflows using GPT4
--   **Run History**: Analyze your workflow run history
--   **Case Management Integration**: Case management specific actions such as "Open Case" or "Update Case" (_coming soon_)
--   **Integrations**: Leverage pre-built integrations to speed up your automation efforts
+-   **Bi-directional Sync**: Switch seamlessly between code and no-code. Everything is synced
+-   **Run History**: Analyze your workflow run history and review input for each action
 
-### Case Management
+### AI Workflows
 
-_Coming soon_
-
-### Admyral Assistant
-
--   **Natural Language to Workflow**: Quickly build workflows by describing them in a few words
-
-_more assistant features are going to be released soon_
+-   **AI Workflows**: Build AI-enhanced workflows using various LLMs for categorization, query generation, report generation, and so much more
 
 ## Getting Started
 
-### Admyral Cloud (free)
+<Cards>
+	<Card title="How Admyral works" href="/introduction" arrow image>
+		![How Admyral works (code)](../../img/cards/code.svg)
+	</Card>
+	<Card title="Quickstart tutorial" href="/quickstart" arrow image>
+		![Quickstart (rocket)](../../img/cards/rocket.svg)
+	</Card>
+</Cards>
 
-Create an account or simply sign-in via Github, Google, or Microsoft [here](https://admyral.dev/login).
+## Why Admyral?
 
-### Self-Hosting with Docker
-
-Follow these steps to start Admyral using Docker:
-
-```bash
-# Clone the repository
-git clone https://github.com/Admyral-Security/admyral.git
-
-# Change directory to docker self-hosting
-cd admyral/deploy/selfhosting
-
-# Copy the env vars
-cp .env.example .env
-
-# Start the services in detached mode
-docker compose up -d
-```
-
-Check out [Setup](https://docs.admyral.dev/setup/docker) for more details.
+-   Open-source
+-   Tailored for Security Engineers with a Code-first approach
+-   Usable by less technical team members through a intuitive No-Code Workflow Builder
+-   Automations are stored in code which reduces a vendor-lockin
+-   Leverage software-engineering best practices (testing, CI/CD, version control, etc.)
+-   Built with scalability in mind
 
 ## Getting in Touch & Updates
 

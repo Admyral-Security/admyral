@@ -1,0 +1,108 @@
+import { FileTree } from "nextra/components";
+
+# Automation-as-Code
+
+Automation-as-Code is a way to create automations using Python code. Benefits include:
+
+-   Being able to leverage Software Engineering best practices:
+    -   Reduction of errors through automated testing when deploying an automation
+    -   Version Control
+    -   Pull requests (propose changes for review, encourage collaboration and discussion among team members, ensure good documentation)
+-   Reduction in vendor lock-in as the automations are stored in plain Python code
+-   Enabling to create custom actions, custom integrations with the flexibility of code
+-   Easier reusability through a modularized setup of automations
+
+## Project Structure
+
+For compatability and increased reusability, the recommended project setup in Git should be as follows:
+
+<FileTree>
+	<FileTree.Folder name="admyral" defaultOpen>
+		<FileTree.File name="__init__.py" />
+		<FileTree.File name="access_review.py" />
+		<FileTree.File name="phishing_automation.py" />
+		<FileTree.Folder name="investigation_workflows" defaultOpen>
+			<FileTree.File name="workflow1.py" />
+			<FileTree.File name="workflow2.py" />
+			<FileTree.File name="workflow3.py" />
+		</FileTree.Folder>
+	</FileTree.Folder>
+</FileTree>
+
+-   stored in git
+-   Workflows, custom_actions, ...
+
+TODO
+
+## The Workflow Function
+
+The workflow function is a python function that is used to specify the control flow of the actions. Think of it like the receipt for the ingredients (pre-build actions, integrations, and custom actions).
+It is specified with the `@workflow` decorator:
+
+```bash
+@workflow
+def example_workflow():
+    # some actions / control flow of your automation
+```
+
+When referring from one action to another, it is suggested to store the output from the previous action in a variable.
+
+```bash
+workflow
+def example_workflow():
+    a = action1()
+    b = action2(a)
+```
+
+This creates a dependency which is visualized accordingly in the No-Code Editor. (Action1 then Action2)
+
+The workflow function is slightly restrictive as Admyral compiles it and maps it onto a no-code interface (TODO: Link). For example, as of now, for loops are not supported within the workflow function.
+You would define a custom action (TODO: Link) in which the for-loop is executed. The results can be used within the workflow function. This setup enables you to create a modular setup.
+
+### Custom actions within in the workflow function
+
+To facilitate a natural coding flow, Admyral supports custom actions within the workflow function. Each action has to be encapsulated by starting with `# {% custom %}` and `# {% endcustom %}`.
+
+```bash
+@workflow
+def example_workflow():
+    # some actions
+
+    # {% custom %}
+    # add custom python code here
+    users = [a, b, c]
+    for user in users:
+        # do something
+    # {% endcustom %}
+
+    # continue your workflow function
+```
+
+Within the No-Code Editor, the `custom_action` will be displayed as a separate node. Read more about custom actions here. (TODO)
+
+### If-Conditions
+
+Within the workflow function, it is allowed to use if-statements and nested if-statements. Admyral compiles these into an If-Condition node in the no-code editor.
+
+```bash
+@workflow
+def example_workflow():
+    # previous workflow logic with action A and B
+    if result_from_action_a == true and result_from_action_b:
+        # do something
+```
+
+## Executing an Automation
+
+Automation based on Admyral are written in Python. This allows you to run and test your automation locally.
+To execute an automation locally, write the following in your terminal:
+
+```bash
+py <your_script.py>
+```
+
+To execute an automation using Admyral's infrastructure, write the following into your terminal:
+
+```bash
+admyral TODO
+```

@@ -1,0 +1,85 @@
+# Admyral CLI
+
+Being code-first, Admyral has a Command Line Interface (CLI). Enter the following command to retrieve all commands:
+
+```bash
+admyral --help
+```
+
+## Start and Stop Admyral locally
+
+Starts the Admyral environment locally:
+
+```bash
+admyral up
+```
+
+Stops the Admyral environment running locally:
+
+```bash
+admyral down
+```
+
+## Push Custom Actions
+
+Push a Python action to Admyral:
+
+```bash
+admyral action <your_custom_action.py> push
+```
+
+## Secrets Management
+
+Manages secrets in Admyral. Secrets are secure values such as API keys or passwords.
+
+List all secret IDs stored in Admyral:
+
+```bash
+admyral secret list
+```
+
+Set a secret stored in Admyral:
+
+```bash
+admyral secret <your_secret> set
+```
+
+Delete a secret stored in Admyral:
+
+```bash
+admyral secret <your_secret> delete
+```
+
+## Show
+
+Displays information about the current state of Admyral:
+
+```bash
+admyral show
+```
+
+## Workflow Management
+
+Activates a specific workflow:
+
+```bash
+admyral workflow <your_workflow.py> --activate
+```
+
+Deactivates a specific workflow:
+
+```bash
+admyral workflow <your_workflow.py> --deactivate
+```
+
+Push a workflow to Admyral:
+
+```bash
+admyral workflow <your_workflow.py> --push
+```
+
+Trigger the execution of a workflow:
+
+```bash
+admyral workflow <your_workflow> --trigger
+```

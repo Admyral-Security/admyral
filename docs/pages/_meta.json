@@ -1,22 +1,31 @@
 {
-	"index": "Introduction",
+	"index": "Overview",
 	"quickstart": "Quickstart",
-	"setup": "Setup",
-	"-- Workflows": {
+	"docker": "Self-hosting",
+
+	"-- Automation Building": {
 		"type": "separator",
-		"title": "Workflow building"
+		"title": "Automation Building"
 	},
-	"workflows": "Workflows",
-	"actions": "Actions",
+	"introduction": "Introduction",
+	"automation_as_code": "Automation-as-Code",
+	"cli": "Admyral CLI",
+	"no_code_editor": "No-Code Editor",
+	"pre_defined_actions": "Pre-defined Actions",
+	"custom_actions": "Custom Actions",
 	"integrations": "Integrations",
-	"credentials": "Credential Management",
+	"secrets": "Secrets Management",
+	"run_history": "Run History",
 	"account_settings": "Account Settings",
+
 	"-- More": {
 		"type": "separator",
 		"title": "More"
 	},
-	"security": "Security",
 	"open-source": "Open-Source",
+	"dev": "Development Setup",
+	"build_integrations": "Build New Integrations",
+	"security": "Security and Privacy",
 	"contact": {
 		"title": "Contact Us ↗",
 		"type": "page",
