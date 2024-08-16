@@ -13,7 +13,14 @@ Admyral supports the creation of custom actions as well as the usage of third-pa
 
 ## Creation of Custom Actions
 
-Custom actions can be creating using Python within a workflow python file or in a separate workflow python file. Either way, the structure of the custom action is as follows:
+There are three ways to create custom actions:
+
+1. As a separate function:
+   a. Within the workflow Python file
+   b. Within a Python file dedicated for the specific custom action
+2. As a sub-part of the workflow function
+
+Using (1.a) or (1.b), the structure of the custom action is as follows:
 
 ```python
 @action(
@@ -33,17 +40,53 @@ After creating your custom action, push it to Admyral using the following CLI co
 admyral action <your_custom_action.py> push
 ```
 
+For way (2), defining custom actions within the workflow function, they have to be wrapped by two comments: `# {% custom %}` and `# {% endcustom %}`. In doing so, the custom action can be displayed in the no-code editor as a single node.
+
+it looks like the following:
+
+```python
+@workflow
+def workflow_function ():
+    # some workflow logic
+
+    # define the custom action enclosed by the following comments:
+
+    # {% custom %}
+
+    alert_messages = []
+    for alert in alerts:
+        alert_messages.append({
+        "channel": slack_channel_id,
+        "text": f"New alert: {alert['name']}",
+        "blocks": [
+            {
+            "type": "section",
+            "text": {
+                "type": "mrkdwn",
+                "text": f"*{alert['description']}*"
+                }
+            }
+        ]
+    })
+
+    # {% endcustom %}
+
+    # continue you workflow logic here
+
+```
+
+TODO: Does the custom action have to be pushed to Admyral using the CLI as well?
+
 ## Usage of Custom Actions
 
 <Tabs items={['Code', 'No-Code']}>
     <Tabs.Tab>
-        There are two options to use custom actions within your automations:
-        (1) Import your custom action into your python file to be able to use it
+        Import your custom action, e.g. `hello_world`, into your Python file to be able to use it
     	```python
-        from admyral.actions import (<your_custom_action>)
+        from admyral.actions import hello_world
         ```
 
-        (2) Define your custom action in the same python file as your workflow automation.
+        Use your imported custom action as a regular function:
 
         ```
     	@workflow(
@@ -51,9 +94,11 @@ admyral action <your_custom_action.py> push
     		triggers=[Webhook()],
     	)
     	def slack_send_message(payload: dict[str, JsonValue]):
-    		send_slack_message(
+    		text = hello_world()
+
+            send_slack_message(
     			channel_id="C0000000000",
-    			text=f"This is how secrets are used within code.",
+    			text=text,
     			secrets={"SLACK_SECRET": "slack_secret"},
     		)
     	```
