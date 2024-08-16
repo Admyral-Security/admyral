@@ -1,4 +1,5 @@
 import { Callout } from "nextra/components";
+import { Tabs } from "nextra/components";
 
 # Integrations
 
@@ -10,14 +11,67 @@ Admyral provides out-of-the-box integrations to enable you to get started quickl
 </Callout>
 
 <Callout type="info">
-	Any integration missing? Either build it yourself (read here TODO) or write
-	us in [Discord](https://discord.gg/GqbJZT9Hbf)!
+	Any integration missing? Either [build it yourself](/build_integrations) or
+	write us in [Discord](https://discord.gg/GqbJZT9Hbf)!
 </Callout>
 
-### Code
+## Using Integrations
 
-### No-Code
+<Tabs items={['Code', 'No-Code']}>
+    <Tabs.Tab>
+        Import the needed integration, e.g. `virus_total_analyze_ip` and `send_slack_message`, into your Python file to be able to use it.
+    	```python
+        from admyral.actions import virus_total_analyze_ip, send_slack_message
+        
+		@workflow(
+			description="Analyzes IP",
+			triggers=[
+				Webhook()
+			],
+		)
+		def enrich_workflow(payload: str):
+			result = virus_total_analyze_ip(
+				ip=payload,
+				secrets={"VIRUS_TOTAL_SECRET": "virus_total_api_key"},
+			)
+			send_slack_message(
+				channel_id="C0000000000",
+        		text=f"Result of analyzed ip: {result}",
+        		secrets={"SLACK_SECRET": "slack_secret"}
+			)
 
-### Credential Management
+    	```
+    </Tabs.Tab>
+    <Tabs.Tab>
+    	Within the No-Code Workflow Editor, simply drag and drop integrations onto the workflow canvas. You can then edit their properties on the right side panel.
+    </Tabs.Tab>
 
-Read more about it here. TODO
+</Tabs>
+
+### Secrets Management
+
+<Tabs items={['Code', 'No-Code']}>
+    <Tabs.Tab>
+        
+		When creating your automation, you add a secret placeholder to them. In the example below it is `slack_secret`.
+
+    	```python
+    	secrets={"SLACK_SECRET": "slack_secret"}
+    	```
+
+    	You then add your `slack_secret` to the secrets securely stored in Admyral using the CLI with `oasiofaj12839naofnaofa` being the API key:
+    	```
+    	admyral secret slack_secret oasiofaj12839naofnaofa set
+    	```
+
+
+    </Tabs.Tab>
+    <Tabs.Tab>
+    	In the No-Code Workflow Builder, you simply select the used integration and add the name of your stored secret on the action configuration panel on the right.
+
+    	You can find your secrets stored within your settings.
+    </Tabs.Tab>
+
+</Tabs>
+
+Read more about it [here](/secrets).
