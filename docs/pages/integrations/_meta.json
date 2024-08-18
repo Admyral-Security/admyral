@@ -9,6 +9,7 @@
 	"jira": "Jira",
 	"ms_defender": "MS Defender for Endpoint",
 	"ms_defender_for_cloud": "MS Defender for Cloud",
+	"ms_sentinel": "MS Sentinel",
 	"mistral": "Mistral AI",
 	"okta": "Okta",
 	"openai": "OpenAI",
