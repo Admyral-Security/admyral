@@ -1,7 +1,7 @@
 {
 	"integrations": "Integrations",
 	"abnormal": "Abnormal",
-	"alienvault_otx": "AlienVault OTX",
+	"alien_vault": "AlienVault OTX",
 	"anthropic": "Antropic",
 	"aws_inspector2": "AWS Inspector 2",
 	"azure_openai": "Azure OpenAI",
