@@ -1,0 +1,44 @@
+import { Callout } from "nextra/components";
+
+# Anthropic - Chat Completion
+
+Leverage advanced AI models from Anthropic to perform complex tasks such as categorization, analysis, summarization, or decision support.
+
+<Callout type="info">
+	For more information on Anthropic's API, see [Anthropic
+	Documentation](https://docs.anthropic.com).
+</Callout>
+
+## Parameters:
+
+| Field           | Description                                                                                                                                                                                             | Required |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------: |
+| **Model**       | The model to use for the chat completion (e.g., `claude-v2`).                                                                                                                                           |   Yes    |
+| **Prompt**      | The input prompt to use for generating the chat completion.                                                                                                                                             |   Yes    |
+| **Top P**       | Value between 0 and 1 for nucleus sampling. Only tokens with the top P probability mass are considered. Recommended to tweak this or temperature, but not both.                                         |    No    |
+| **Temperature** | Sampling temperature, between 0 and 2. Higher values (e.g., 0.8) increase randomness, while lower values (e.g., 0.2) make output more deterministic. Recommended to adjust this or Top P, but not both. |    No    |
+| **Max Tokens**  | The maximum number of tokens to generate for the completion.                                                                                                                                            |    No    |
+| **Stop Tokens** | A list of tokens to stop the completion upon encountering.                                                                                                                                              |    No    |
+
+## Example Output:
+
+```json
+{
+	"content": [
+		{
+			"text": "Hi! My name is Claude.",
+			"type": "text"
+		}
+	],
+	"id": "msg_013Zva2CMHLNnXjNJJKqJ2EF",
+	"model": "claude-3-5-sonnet-20240620",
+	"role": "assistant",
+	"stop_reason": "end_turn",
+	"stop_sequence": null,
+	"type": "message",
+	"usage": {
+		"input_tokens": 2095,
+		"output_tokens": 503
+	}
+}
+```

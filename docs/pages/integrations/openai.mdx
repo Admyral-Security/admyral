@@ -1,0 +1,48 @@
+import { Callout } from "nextra/components";
+
+# OpenAI - Chat Completion
+
+Leverage advanced AI models from OpenAI to perform complex tasks such as categorization, analysis, summarization, or decision support.
+
+<Callout type="info">
+	For more information on OpenAI's API, see [OpenAI
+	Documentation](https://platform.openai.com/docs/api-reference/chat/create).
+</Callout>
+
+## Parameters:
+
+| Field           | Description                                                                                                                                                                                             | Required |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------: |
+| **Model**       | The model to use for the chat completion (e.g., `gpt-4`).                                                                                                                                               |   Yes    |
+| **Prompt**      | The input prompt to use for generating the chat completion.                                                                                                                                             |   Yes    |
+| **Top P**       | Value between 0 and 1 for nucleus sampling. Only tokens with the top P probability mass are considered. Recommended to tweak this or temperature, but not both.                                         |    No    |
+| **Temperature** | Sampling temperature, between 0 and 2. Higher values (e.g., 0.8) increase randomness, while lower values (e.g., 0.2) make output more deterministic. Recommended to adjust this or Top P, but not both. |    No    |
+| **Stop Tokens** | A list of tokens to stop the completion upon encountering.                                                                                                                                              |    No    |
+
+## Example Output:
+
+```json
+{
+	"id": "chatcmpl-123",
+	"object": "chat.completion",
+	"created": 1677652288,
+	"model": "gpt-4o-mini",
+	"system_fingerprint": "fp_44709d6fcb",
+	"choices": [
+		{
+			"index": 0,
+			"message": {
+				"role": "assistant",
+				"content": "\n\nHello there, how may I assist you today?"
+			},
+			"logprobs": null,
+			"finish_reason": "stop"
+		}
+	],
+	"usage": {
+		"prompt_tokens": 9,
+		"completion_tokens": 12,
+		"total_tokens": 21
+	}
+}
+```

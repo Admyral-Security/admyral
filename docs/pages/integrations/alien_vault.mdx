@@ -1,0 +1,62 @@
+import { Callout } from "nextra/components";
+
+# Analyze Domain
+
+Analyze a domain using AlienVault OTX (Open Threat Exchange) to gather threat intelligence and general information associated with the specified domain.
+
+<Callout type="info">
+	For more information on the AlienVault OTX API, see [AlienVault OTX
+	Documentation](https://otx.alienvault.com/assets/static/external_api.html).
+</Callout>
+
+## Parameters:
+
+| Field      | Description                                  | Required |
+| ---------- | -------------------------------------------- | :------: |
+| **Domain** | The domain to analyze (e.g., `example.com`). |   Yes    |
+
+## Example Output:
+
+```json
+{
+	"indicator": "example.com",
+	"pulse_info": {
+		"count": 5,
+		"pulses": [
+			{
+				"id": "12345",
+				"name": "Malicious Domain Activity",
+				"created": "2024-01-15T12:34:56Z",
+				"tags": ["malware", "phishing"],
+				"references": [
+					"https://example.com/report",
+					"https://another-report.com"
+				]
+			}
+		]
+	},
+	"base_indicator": {
+		"country": "US",
+		"city": "San Francisco",
+		"latitude": 37.7749,
+		"longitude": -122.4194
+	},
+	"whois": {
+		"registrar": "GoDaddy",
+		"creation_date": "2010-04-01T12:00:00Z",
+		"expiration_date": "2025-04-01T12:00:00Z",
+		"contact_email": "admin@example.com"
+	},
+	"malware": {
+		"count": 3,
+		"results": [
+			{
+				"file": "suspicious.exe",
+				"hash": "abc123",
+				"first_seen": "2024-02-01T10:00:00Z",
+				"last_seen": "2024-03-01T10:00:00Z"
+			}
+		]
+	}
+}
+```

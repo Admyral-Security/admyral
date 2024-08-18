@@ -1,0 +1,59 @@
+import { Callout } from "nextra/components";
+
+# List Vulnerabilities (Snyk)
+
+Retrieve a list of vulnerabilities from Snyk within a specified time range. This API allows filtering based on organization ID, start and end times, and setting a limit on the number of results.
+
+<Callout type="info">
+	For more information on the Snyk API, see [Snyk API
+	Documentation](https://apidocs.snyk.io/?version=2024-06-21#get-/orgs/-org_id-/issues).
+</Callout>
+
+## Parameters:
+
+| Field               | Description                                                           | Required |
+| ------------------- | --------------------------------------------------------------------- | :------: |
+| **Organization ID** | The ID of the organization to list vulnerabilities for.               |   Yes    |
+| **Start Time**      | The start time of the vulnerabilities in ISO-8601 format (inclusive). |    No    |
+| **End Time**        | The end time of the vulnerabilities in ISO-8601 format (inclusive).   |    No    |
+| **Limit**           | The maximum number of vulnerabilities to return. The default is 1000. |    No    |
+
+## Example Output for a code issue:
+
+```json
+{
+	"data": [
+		{
+			"attributes": {
+				"created_at": "2022-09-27T20:09:05Z",
+				"effective_severity_level": "low",
+				"ignored": false,
+				"key": "24018479-6bb1-4196-a41b-e54c7c5dcc82:1c6ddc45.7f41fd64.a214ef38.72ad650e.f0ecbaa5.18c3080a.b570850e.89112ac5.1a6d2cd5.71413d6f.a924ef28.71cdd50e.d0e1bea5.52c3a80a.1a0c4319.a9127ac5:1",
+				"status": "resolved",
+				"title": "Insecure hash function used",
+				"type": "code",
+				"updated_at": "2022-09-27T20:09:05Z"
+			},
+			"id": "d5b640e5-d88c-4c17-9bf0-93597b7a1ce2",
+			"relationships": {
+				"organization": {
+					"data": {
+						"id": "a3952187-0d8e-45d8-9aa2-036642857b5b",
+						"type": "organization"
+					}
+				},
+				"scan_item": {
+					"data": {
+						"id": "a3952187-0d8e-45d8-9aa2-036642857b5c",
+						"type": "project"
+					}
+				}
+			},
+			"type": "issue"
+		}
+	],
+	"jsonapi": {
+		"version": "1.0"
+	}
+}
+```

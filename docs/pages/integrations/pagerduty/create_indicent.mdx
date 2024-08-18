@@ -1,0 +1,42 @@
+import { Callout } from "nextra/components";
+
+# Create PagerDuty Incident
+
+Create a new incident in PagerDuty using the provided incident details such as title, service ID, urgency, and optional assignees.
+
+<Callout type="info">
+	For more information on the PagerDuty API, see [PagerDuty Incident Creation
+	API](https://developer.pagerduty.com/docs/ZG9jOjExMDI5NTY0-incident-creation-api).
+</Callout>
+
+## Parameters:
+
+| Field           | Description                                                         | Required |
+| --------------- | ------------------------------------------------------------------- | :------: |
+| **Title**       | The title of the incident.                                          |   Yes    |
+| **Service ID**  | The ID of the service associated with the incident.                 |   Yes    |
+| **Urgency**     | The urgency level of the incident. Options are `"high"` or `"low"`. |   Yes    |
+| **Assign To**   | A list of user IDs to assign the incident to.                       |    No    |
+| **Description** | Additional details describing the incident.                         |    No    |
+
+## Example Output:
+
+```json
+{
+	"incident": {
+		"title": "Your desk is on fire!",
+		"service": {
+			"id": "PW7YESS",
+			"type": "service_reference"
+		},
+		"assignments": [
+			{
+				"assignee": {
+					"id": "PZUVZZZ",
+					"type": "user_reference"
+				}
+			}
+		]
+	}
+}
+```

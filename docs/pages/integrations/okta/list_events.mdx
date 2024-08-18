@@ -1,0 +1,19 @@
+import { Callout } from "nextra/components";
+
+# List Events (Okta)
+
+Retrieve a list of events from Okta within a specified time range. This API allows filtering events by user ID and supports pagination for large datasets.
+
+<Callout type="info">
+	For more information on setting up Okta API tokens, see [Okta
+	Documentation](https://developer.okta.com/docs/reference/api/system-log/#list-events).
+</Callout>
+
+## Parameters:
+
+| Field          | Description                                                                               | Required |
+| -------------- | ----------------------------------------------------------------------------------------- | :------: |
+| **User ID**    | The user ID to list events for. If not provided, events for all users will be returned.   |    No    |
+| **Start Time** | The start time for the events to list. Must be in ISO 8601 format (YYYY-MM-DDTHH:MM:SSZ). |    No    |
+| **End Time**   | The end time for the events to list. Must be in ISO 8601 format (YYYY-MM-DDTHH:MM:SSZ).   |    No    |
+| **Limit**      | The maximum number of events to retrieve. The default and maximum value is 1000.          |    No    |

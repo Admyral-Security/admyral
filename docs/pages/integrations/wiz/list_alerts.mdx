@@ -1,0 +1,67 @@
+import { Callout } from "nextra/components";
+
+# List Alerts (Wiz)
+
+List alerts from Wiz with filtering options for time range, status, severity, and type. If no time range is provided, the alerts from the last 24 hours will be listed.
+
+<Callout type="info">
+	For more information on the Wiz API, see [Wiz
+	Documentation](https://docs.wiz.io/docs).
+</Callout>
+
+## Parameters:
+
+| Field          | Description                                                                               | Required |
+| -------------- | ----------------------------------------------------------------------------------------- | :------: |
+| **Start Time** | The start time for the alerts to list. Must be in ISO 8601 format (YYYY-MM-DDTHH:MM:SSZ). |    No    |
+| **End Time**   | The end time for the alerts to list. Must be in ISO 8601 format (YYYY-MM-DDTHH:MM:SSZ).   |    No    |
+| **Limit**      | The maximum number of alerts to list.                                                     |    No    |
+
+## Example Output:
+
+```json
+[
+	{
+		"id": "abc123",
+		"control": {
+			"id": "control1",
+			"name": "Unencrypted S3 Bucket",
+			"description": "This control checks for unencrypted S3 buckets.",
+			"resolutionRecommendation": "Enable server-side encryption.",
+			"securitySubCategories": [
+				{
+					"title": "Encryption",
+					"category": {
+						"name": "Data Protection",
+						"framework": {
+							"name": "CIS"
+						}
+					}
+				}
+			]
+		},
+		"createdAt": "2024-08-01T12:34:56Z",
+		"updatedAt": "2024-08-01T13:00:00Z",
+		"status": "OPEN",
+		"severity": "HIGH",
+		"type": "CLOUD_CONFIGURATION",
+		"project": {
+			"id": "project1",
+			"name": "Critical Infrastructure",
+			"slug": "critical-infrastructure",
+			"businessUnit": "Operations",
+			"riskProfile": {
+				"businessImpact": "HIGH"
+			}
+		},
+		"entitySnapshot": {
+			"id": "resource123",
+			"type": "AWS::S3::Bucket",
+			"name": "my-unencrypted-bucket",
+			"cloudPlatform": "AWS",
+			"region": "us-east-1",
+			"tags": ["production", "sensitive-data"]
+		}
+	}
+]
+```
