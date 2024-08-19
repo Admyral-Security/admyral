@@ -19,12 +19,15 @@ jobs:
     with:
       os: ubuntu-latest
     secrets: inherit
-  # publish-python-package:
-  #   if: github.repository == 'Admyral-Security/admyral'
-  #   needs:
-  #     - setup-and-test
-  #   uses: ./.github/workflows/publish-to-pypi.yml
-  #   secrets: inherit
+  publish-python-package:
+    if: github.repository == 'Admyral-Security/admyral'
+    needs:
+      - setup-and-test
+    uses: ./.github/workflows/publish-to-pypi.yml
+    permissions:
+      id-token: write
+      contents: read
+    secrets: inherit
   publish-docker-images:
     if: github.repository == 'Admyral-Security/admyral'
     needs:
