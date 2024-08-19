@@ -16,16 +16,16 @@ jobs:
         runs-on: ${{ inputs.os }}
         steps:
             - name: Checkout code
-                uses: actions/checkout@v2
-                with:
-                    repository: ${{ github.repository }}
-                    ref: ${{ github.event.pull_request.head.sha }}
+              uses: actions/checkout@v2
+              with:
+                  repository: ${{ github.repository }}
+                  ref: ${{ github.event.pull_request.head.sha }}
             - name: Login to docker hub
-                uses: actions-hub/docker/login@master
-                env:
-                    DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-                    DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+              uses: actions-hub/docker/login@master
+              env:
+              		DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+                  DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
             - name: Use Docker CLI
-                uses: actions-hub/docker/cli@master
+              uses: actions-hub/docker/cli@master
             - name: Build and push Docker images
-                run: cd docker && ./release_images.sh
+							run: cd docker && ./release_images.sh
