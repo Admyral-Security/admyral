@@ -1,0 +1,201 @@
+name: admyral
+
+# TODO: nginx?
+# TODO: pgbouncer? https://github.com/edoburu/docker-pgbouncer/blob/master/examples/docker-compose/docker-compose.yml
+
+services:
+    postgresql:
+        container_name: postgresql
+        environment:
+            POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+            POSTGRES_USER: ${POSTGRES_USER}
+        image: postgres:${POSTGRES_VERSION}
+        healthcheck:
+            test: ["CMD-SHELL", "pg_isready", "-d", "temporal"]
+            interval: 30s
+            timeout: 60s
+            retries: 5
+            start_period: 80s
+        networks:
+            - admyral-network
+        expose:
+            - 5432
+        volumes:
+            - /var/lib/postgresql/data
+
+    admyral-api:
+        container_name: admyral-api
+        # build:
+        #     context: ../..
+        #     dockerfile: ./docker/Dockerfile.api
+        image: admyralai/api:latest
+        healthcheck:
+            test: ["CMD", "curl", "-f", "http://0.0.0.0:8000/health"]
+            timeout: 5s
+            interval: 5s
+            retries: 5
+        depends_on:
+            temporal:
+                condition: service_healthy
+            postgresql:
+                condition: service_healthy
+        networks:
+            - admyral-network
+        ports:
+            - 8000:8000
+        environment:
+            # DB
+            - ADMYRAL_DATABASE_TYPE=postgres
+            - ADMYRAL_DATABASE_URL=postgresql+asyncpg://postgres:${POSTGRES_PASSWORD}@postgresql:5432/admyral
+            - ADMYRAL_SECRETS_MANAGER_TYPE=sql
+            # App Secrets
+            - ADMYRAL_WEBHOOK_SIGNING_SECRET=${ADMYRAL_WEBHOOK_SIGNING_SECRET}
+            - ADMYRAL_SECRETS_ENCRYPTION_KEY=${ADMYRAL_SECRETS_ENCRYPTION_KEY}
+            # Temporal
+            - ADMYRAL_TEMPORAL_HOST=temporal:7233
+
+    web:
+        container_name: admyral-web
+        # build:
+        #     context: ../../web
+        #     dockerfile: ../docker/Dockerfile.web
+        image: admyralai/web:latest
+        depends_on:
+            admyral-api:
+                condition: service_healthy
+        networks:
+            - admyral-network
+        ports:
+            - 3000:3000
+        environment:
+            - ADMYRAL_API_BASE_URL=http://admyral-api:8000
+
+    worker:
+        container_name: admyral-worker
+        # build:
+        #     context: ../..
+        #     dockerfile: ./docker/Dockerfile.worker
+        image: admyralai/worker:latest
+        depends_on:
+            temporal:
+                condition: service_healthy
+            postgresql:
+                condition: service_healthy
+        networks:
+            - admyral-network
+        # https://stackoverflow.com/questions/39663096/docker-compose-creating-multiple-instances-for-the-same-image
+        deploy:
+            mode: replicated
+            replicas: ${ADMYRAL_WORKER_REPLICAS}
+        environment:
+            # Integrations
+            - OPENAI_API_KEY=${OPENAI_API_KEY}
+            - RESEND_API_KEY=${RESEND_API_KEY}
+            # DB
+            - ADMYRAL_DATABASE_TYPE=postgres
+            - ADMYRAL_DATABASE_URL=postgresql+asyncpg://postgres:${POSTGRES_PASSWORD}@postgresql:5432/admyral
+            - ADMYRAL_SECRETS_MANAGER_TYPE=sql
+            # App Secrets
+            - ADMYRAL_SECRETS_ENCRYPTION_KEY=${ADMYRAL_SECRETS_ENCRYPTION_KEY}
+            # Temporal
+            - ADMYRAL_TEMPORAL_HOST=temporal:7233
+
+    #############################################################################
+    # TEMPORAL.IO
+    #############################################################################
+
+    elasticsearch:
+        container_name: temporal-elasticsearch
+        environment:
+            - cluster.routing.allocation.disk.threshold_enabled=true
+            - cluster.routing.allocation.disk.watermark.low=512mb
+            - cluster.routing.allocation.disk.watermark.high=256mb
+            - cluster.routing.allocation.disk.watermark.flood_stage=128mb
+            - discovery.type=single-node
+            - ES_JAVA_OPTS=-Xms256m -Xmx256m
+            - xpack.security.enabled=false
+        image: elasticsearch:${ELASTICSEARCH_VERSION}
+        healthcheck:
+            test: curl -s http://localhost:9200 >/dev/null || exit 1
+            interval: 30s
+            timeout: 10s
+            retries: 50
+        networks:
+            - admyral-network
+        expose:
+            - 9200
+        volumes:
+            - /var/lib/elasticsearch/data
+
+    temporal:
+        container_name: temporal
+        environment:
+            - DB=postgres12
+            - DB_PORT=5432
+            - POSTGRES_USER=${POSTGRES_USER}
+            - POSTGRES_PWD=${POSTGRES_PASSWORD}
+            - POSTGRES_SEEDS=postgresql
+            - DYNAMIC_CONFIG_FILE_PATH=config/dynamicconfig/development-sql.yml
+            - ENABLE_ES=true
+            - ES_SEEDS=elasticsearch
+            - ES_VERSION=v7
+        image: temporalio/auto-setup:${TEMPORAL_VERSION}
+        healthcheck:
+            test:
+                [
+                    "CMD",
+                    "tctl",
+                    "--address",
+                    "temporal:7233",
+                    "workflow",
+                    "list",
+                ]
+            interval: 1s
+            timeout: 5s
+            retries: 30
+        depends_on:
+            postgresql:
+                condition: service_healthy
+            elasticsearch:
+                condition: service_healthy
+        networks:
+            - admyral-network
+        ports:
+            - 7233:7233
+        expose:
+            - 7233
+        volumes:
+            - ./dynamicconfig:/etc/temporal/config/dynamicconfig
+
+    temporal-admin-tools:
+        container_name: temporal-admin-tools
+        depends_on:
+            temporal:
+                condition: service_healthy
+        environment:
+            - TEMPORAL_ADDRESS=temporal:7233
+            - TEMPORAL_CLI_ADDRESS=temporal:7233
+        image: temporalio/admin-tools:${TEMPORAL_ADMINTOOLS_VERSION}
+        networks:
+            - admyral-network
+        stdin_open: true
+        tty: true
+
+    temporal-ui:
+        container_name: temporal-ui
+        depends_on:
+            temporal:
+                condition: service_healthy
+        environment:
+            - TEMPORAL_ADDRESS=temporal:7233
+            - TEMPORAL_CORS_ORIGINS=http://localhost:3000
+        image: temporalio/ui:${TEMPORAL_UI_VERSION}
+        networks:
+            - admyral-network
+        ports:
+            - 8080:8080
+
+networks:
+    admyral-network:
+        driver: bridge
+        name: admyral-network

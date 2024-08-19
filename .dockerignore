@@ -1,0 +1,11 @@
+.pytest_cache
+.venv
+.ruff_cache
+.admyral
+.vscode
+deploy
+docker
+docs
+examples
+img
+tests

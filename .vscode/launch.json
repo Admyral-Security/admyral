@@ -1,0 +1,26 @@
+{
+	// Use IntelliSense to learn about possible attributes.
+	// Hover to view descriptions of existing attributes.
+	// For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+	"version": "0.2.0",
+	"configurations": [
+		{
+			"name": "Worker",
+			"type": "debugpy",
+			"request": "launch",
+			"module": "admyral.main",
+			"args": ["worker"],
+			"justMyCode": false,
+			"env": {
+				"PYTHONPATH": "${cwd}/.venv/bin/python3.12"
+			}
+		},
+		{
+			"name": "API",
+			"type": "debugpy",
+			"request": "launch",
+			"module": "admyral.main",
+			"args": ["api"]
+		}
+	]
+}

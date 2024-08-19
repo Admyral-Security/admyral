@@ -1,6 +1,8 @@
-# ignore my personal notes
-NOTES*
-PERSONAL
+.venv
+__pycache__
+.pytest_cache
 
+.admyral
 .env
-.env.prod
+
+.ruff_cache

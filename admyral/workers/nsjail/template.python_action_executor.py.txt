@@ -1,0 +1,82 @@
+import asyncio
+import json
+import sys
+import os
+import inspect
+import logging
+import argparse
+
+from {ACTION_PATH} import {ACTION_TYPE}
+from admyral.logger import get_logger
+
+
+logger = get_logger(__name__)
+
+
+def get_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "-s", "--secret",
+        type=str,
+        action="append"
+    )
+    return parser.parse_args()
+
+
+def is_async(func):
+    return inspect.iscoroutinefunction(func)
+
+
+def main():
+    args = get_args()
+    if args.secret:
+        for secret in args.secret:
+            # decode key-value pair
+            secret = secret[1:-1] # remove the quotation marks: '
+            key_length_str = secret.split("|")[0]
+            key_length = int(key_length_str)
+            key_value = secret[len(key_length_str) + 1:]
+            key = key_value[:key_length]
+            value = key_value[key_length:]
+
+            os.environ[key] = value
+
+    job_dir = "{JOB_DIR}"
+    input_data_path = os.path.join(
+        job_dir,
+        "input.json"
+    )
+    output_data_path = os.path.join(
+        job_dir,
+        "output.json"
+    )
+
+    with open(input_data_path, "r") as f:
+        raw_input_data = f.read()
+    
+    if raw_input_data is None:
+        kwargs = {{}}
+    else:
+        kwargs = json.loads(raw_input_data)
+
+    try:
+        if is_async({ACTION_TYPE}):
+            result = asyncio.run({ACTION_TYPE}(**kwargs))
+        else:
+            result = {ACTION_TYPE}(**kwargs)
+
+        with open(output_data_path, "w") as f:
+            f.write(json.dumps(result))
+
+    except Exception as e:
+        logger.error(f"Failed to execute {ACTION_TYPE} due to error: {{str(e)}}")
+        error = {{
+            "error": str(e),
+        }}
+        with open(output_data_path, "w") as f:
+            f.write(json.dumps(error))
+        sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()
