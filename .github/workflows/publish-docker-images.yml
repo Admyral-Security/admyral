@@ -1,0 +1,24 @@
+# TODO: WIP
+name: Publish Docker Images
+on:
+    workflow_call:
+        inputs:
+            os:
+                description: OS
+                required: false
+                default: ubuntu-latest
+            git-ref:
+                description: Git branch or ref
+                required: false
+                default: ""
+jobs:
+    publish-to-docker-hub:
+        name: Unit Tests
+        runs-on: ${{ inputs.os }}
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v2
+              with:
+                  repository: ${{ github.repository }}
+                  ref: ${{ github.event.pull_request.head.sha }}
+            # TODO: docker build + docker push => execute release_images.sh

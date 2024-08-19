@@ -1,0 +1,39 @@
+name: Lint and Unit Tests
+on:
+    workflow_call:
+        inputs:
+            os:
+                description: OS
+                required: false
+                default: ubuntu-latest
+            git-ref:
+                description: Git branch or ref
+                required: false
+                default: ""
+jobs:
+    unit-test:
+        name: Unit Tests
+        runs-on: ${{ inputs.os }}
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v2
+              with:
+                  repository: ${{ github.repository }}
+                  ref: ${{ github.event.pull_request.head.sha }}
+            - name: Set up Python
+              uses: actions/setup-python@v2
+              with:
+                  python-version: 3.12
+            - name: Install Poetry
+              uses: snok/install-poetry@v1.3.4
+              with:
+                  virtualenvs-create: true
+                  virtualenvs-in-project: true
+            - name: Install dependencies
+              run: poetry install
+            - name: Run linter
+              run: poetry run ruff --check
+            - name: Run linter
+              run: poetry run ruff check
+            - name: Run unit tests
+              run: poetry run pytest tests/
