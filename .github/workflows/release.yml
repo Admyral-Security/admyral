@@ -5,32 +5,24 @@ on:
       - main
       # - release
 jobs:
-  test:
-    name: Test
-    runs-on: ubuntu-latest
-    permissions:
-      id-token: write
-      contents: read
-    steps:
-      - name: Hello World
-        run: echo "Hello World"
-  setup-and-test:
-    uses: ./.github/workflows/unit-test.yml
-    with:
-      os: ubuntu-latest
-    secrets: inherit
+  # setup-and-test:
+  #   uses: ./.github/workflows/unit-test.yml
+  #   with:
+  #     os: ubuntu-latest
+  #   secrets: inherit
   publish-python-package:
     if: github.repository == 'Admyral-Security/admyral'
-    needs:
-      - setup-and-test
+    # needs:
+    #   - setup-and-test
     uses: ./.github/workflows/publish-to-pypi.yml
+    # Set permissions for trusted publishing.
     permissions:
       id-token: write
       contents: read
     secrets: inherit
-  publish-docker-images:
-    if: github.repository == 'Admyral-Security/admyral'
-    needs:
-      - setup-and-test
-    uses: ./.github/workflows/publish-docker-hub.yml
-    secrets: inherit
+  # publish-docker-images:
+  #   if: github.repository == 'Admyral-Security/admyral'
+  #   needs:
+  #     - setup-and-test
+  #   uses: ./.github/workflows/publish-docker-hub.yml
+  #   secrets: inherit
