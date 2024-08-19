@@ -22,3 +22,6 @@ jobs:
       - setup-and-test
     uses: ./.github/workflows/publish-docker-hub.yml
     secrets: inherit
+    permissions:
+      id-token: write
+      contents: read
