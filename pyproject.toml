@@ -9,7 +9,17 @@ exclude = [
     "examples",
     "tests",
     "img",
-    "docs"
+    "docs",
+    "web",
+    "docker",
+    "scripts",
+    "deploy",
+]
+include = [
+    "admyral",
+    "*.txt",
+    "*.md",
+    "deploy/docker-compose"
 ]
 
 [tool.poetry.scripts]
@@ -45,6 +55,7 @@ ruff = "^0.5.5"
 multipledispatch = "^1.0.0"
 asyncpg = "^0.29.0"
 psycopg2-binary = "^2.9.9"
+setuptools-scm = "^8.1.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.2.2"
@@ -56,3 +67,6 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
+
+[tool.setuptools_scm]
+version_scheme = "guess-next-dev"

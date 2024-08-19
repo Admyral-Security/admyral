@@ -11,9 +11,6 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v4.1.1
-      # - name: Get the version from the github tag ref
-      #   id: get_version
-      #   run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
@@ -23,10 +20,8 @@ jobs:
         with:
           virtualenvs-create: true
           virtualenvs-in-project: true
-      # - name: Update version (kept at 0.0.0) in pyproject.toml and build
-      #   run: |
-      #     poetry version ${{ github.ref_name }}
-      #     poetry build
+      - name: Build package
+        run: poetry build
       - name: Build package
         run: poetry build
       - name: Publish the package with poetry
