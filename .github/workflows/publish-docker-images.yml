@@ -8,7 +8,7 @@ on:
 				default: ubuntu-latest
 				type: string
 			git-ref:
-				description: Git branch or ref
+				description: Git branch or git ref
 				required: false
 				default: ""
 				type: string
