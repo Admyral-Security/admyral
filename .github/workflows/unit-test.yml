@@ -6,10 +6,12 @@ on:
                 description: OS
                 required: false
                 default: ubuntu-latest
+                type: string
             git-ref:
                 description: Git branch or ref
                 required: false
                 default: ""
+                type: string
 jobs:
     unit-test:
         name: Unit Tests
