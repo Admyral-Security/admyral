@@ -64,5 +64,6 @@ jobs:
               run: cd web && pnpm prettier:check
             - name: Run build
               run: cd web && pnpm build
-            - name: Run unit tests
-              run: cd web && pnpm test
+            # TODO: activate when tests are available
+            # - name: Run unit tests
+            #   run: cd web && pnpm test

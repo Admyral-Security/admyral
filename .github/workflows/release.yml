@@ -17,10 +17,9 @@ jobs:
     #         - setup-and-test
     #     uses: ./.github/workflows/publish-to-pypi.yml
     #     secrets: inherit
-    # TODO: WIP
-    # publish-docker-images:
-    #     if: github.repository == 'Admyral-Security/admyral'
-    #     needs:
-    #         - setup-and-test
-    #     uses: ./.github/workflows/publish-docker-images.yml
-    #     secrets: inherit
+    publish-docker-images:
+        if: github.repository == 'Admyral-Security/admyral'
+        needs:
+            - setup-and-test
+        uses: ./.github/workflows/publish-docker-images.yml
+        secrets: inherit
