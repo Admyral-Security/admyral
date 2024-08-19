@@ -21,5 +21,5 @@ jobs:
     if: github.repository == 'Admyral-Security/admyral'
     needs:
       - setup-and-test
-    uses: ./.github/workflows/publish-docker-images.yml
+    uses: ./.github/workflows/publish-docker-hub.yml
     secrets: inherit
