@@ -111,7 +111,7 @@ export default function NewSecret({ idx }: { idx: number }) {
 
 			{secret.secret.map((keyValuePair, keyValuePairIdx) => (
 				<Flex
-					key={`new_secret_${keyValuePair.key}_${keyValuePairIdx}`}
+					key={`new_secret_${secret.secretId}_${keyValuePairIdx}`}
 					width="100%"
 					gap="4"
 				>

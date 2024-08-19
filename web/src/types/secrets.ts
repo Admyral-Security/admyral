@@ -11,7 +11,7 @@ export type TSecretMetadata = z.infer<typeof SecretMetadata>;
 
 const SecretMetadataCamelCase = z.object({
 	secretId: z.string(),
-	secret_schema: z.array(z.string()),
+	secretSchema: z.array(z.string()),
 });
 
 export function isSecretMetadata(obj: any): boolean {
