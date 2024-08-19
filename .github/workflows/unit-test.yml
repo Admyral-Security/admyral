@@ -13,8 +13,8 @@ on:
                 default: ""
                 type: string
 jobs:
-    unit-test:
-        name: Unit Tests
+    python-unit-test:
+        name: Python Unit Tests
         runs-on: ${{ inputs.os }}
         steps:
             - name: Checkout code
@@ -39,3 +39,28 @@ jobs:
               run: poetry run ruff check
             - name: Run unit tests
               run: poetry run pytest tests/
+    web-unit-test:
+        name: Web Unit Tests
+        runs-on: ${{ inputs.os }}
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v2
+              with:
+                  repository: ${{ github.repository }}
+                  ref: ${{ github.event.pull_request.head.sha }}
+            - name: Install Node.js
+              uses: actions/setup-node@v2
+              with:
+                  node-version: 18
+            - name: Setup pnpm
+              uses: pnpm/action-setup@v4.0.0
+            - name: Install dependencies
+              run: cd web && pnpm install
+            - name: Run linter
+              run: cd web && pnpm lint
+            - name: Run prettier check
+              run: cd web && pnpm prettier:check
+            - name: Run build
+              run: cd web && pnpm build
+            - name: Run unit tests
+              run: cd web && pnpm test
