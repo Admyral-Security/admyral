@@ -88,7 +88,7 @@ All of them can be found in [examples/playbooks/workflows](https://github.com/Ad
 
 ## 📃 License
 
-This repository is licensed under Apache License 2.0. See LICENSE for more details.
+This repository is licensed under Apache License 2.0. See [LICENSE](https://github.com/Admyral-Security/admyral/blob/main/LICENSE) for more details.
 
 ## Misc
 
@@ -96,6 +96,6 @@ This repository is licensed under Apache License 2.0. See LICENSE for more detai
 
 Admyral automatically collects telemetry data using PostHog with hosting in the EU. We want to emphasize that no personal data is sent to PostHog. The data helps us to understand how Admyral is used and improve our most relevant features as well as track the overall usage for internal and external reporting.
 
-None of data is shared with third parties and does not include any sensitive information. If you would like to opt-out of telemetry or have questions, please reach out to us via [chris@admyral.com](mailto:chris@admyral.dev) or contact us on Discord, as we want to be transparent and respect your privacy.
+None of data is shared with third parties and does not include any sensitive information. If you would like to opt-out of telemetry or have questions, please reach out to us via [chris@admyral.dev](mailto:chris@admyral.dev) or contact us on Discord, as we want to be transparent and respect your privacy.
 
 For self-hosting, you can opt-out by simply removing `NEXT_PUBLIC_POSTHOG_KEY` and `NEXT_PUBLIC_POSTHOG_HOST` from the environment variables.
