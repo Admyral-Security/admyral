@@ -8,15 +8,23 @@ else
 fi
 
 
-services=("api" "web" "worker")
+services=("api" "worker" "web")
+contexts=(".." ".." "../web")
 
-for service in "${services[@]}"; do
+for i in "${!services[@]}"; do
+    service=${services[$i]}
     docker rmi admyralai/$service:latest
 done
 
-/bin/bash -c "$COMPOSE_CMD -f build.yml build --no-cache"
 
+for service in "${!services[@]}"; do
+    service=${services[$i]}
+    context=${contexts[$i]}
 
-for service in "${services[@]}"; do
-    docker push admyralai/${service}:latest
+    docker buildx build \
+        --platform=linux/amd64,linux/arm64 \
+        --file=./Dockerfile.$service \
+        --tag=admyralai/$service:latest \
+        --push \
+        $context
 done
