@@ -34,7 +34,7 @@ jobs:
             - name: Install dependencies
               run: poetry install
             - name: Run linter
-              run: poetry run ruff --check
+              run: poetry run ruff format --check
             - name: Run linter
               run: poetry run ruff check
             - name: Run unit tests
