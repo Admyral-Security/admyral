@@ -50,14 +50,6 @@ $ admyral up
 
 Empower your workflows with AI! Admyral supports custom AI Actions using top-tier LLMs from OpenAI, Mistral, Anthropic, and more. You can use these AI Actions within your workflow to summarize findings, create a report, categorize alerts, and much more.
 
-Upcoming features to increase your LLMs performance and make LLMs more deterministic / usable within security automations:
-
--   LLM Monitoring
--   Self-hosted LLM Support
--   Prompt Optimization
--   LLM Finetuning
--   🤖 AI Agent Building 🤖
-
 ### No-Code Editor Sync -- Bi-directional 👈 👉
 
 While Admyral is code-first, there is no-code functionality as well. Visualize your coded workflows and edit them directly in the drag-and-drop workflow builder. All changes are synced back into your code.
@@ -73,18 +65,13 @@ While Admyral is code-first, there is no-code functionality as well. Visualize y
 Built on [Temporal](temporal.io) (used by Netflix, Retool, and co.), Admyral ensures reliable, scalable workflows -- incl. secrets management for integrations.
 Deploy in under 5 minutes without infrastructure or scalability worries.
 
-### Start Automating Any Workflow 🎬
+### Start Automating Any Workflow - SecOps or GRC 🎬
 
-Make your security operations more efficient, accomplish more with less resources, and standardize the quality of your SOPs.
+Make your *security operations* more efficient, accomplish more with less resources, and standardize the quality of your SOPs.
 
-Example workflows:
+When automating workflows in *GRC/Compliance*, reduce the effort for IT-dependent manual controls.
 
--   Okta Invalid Sign-in Attempts Notification via Slack and PagerDuty
--   Sentinel Alerts to Slack
--   Triage using LLMs
--   Send VirusTotal Hash Scan Result via Email
-
-All of them can be found in [examples/playbooks/workflows](https://github.com/Admyral-Security/admyral-v2/tree/main/examples/playbooks/workflows).
+Example workflows can be found in [examples/playbooks/workflows](https://github.com/Admyral-Security/admyral/tree/main/examples).
 
 ## 📃 License
 
