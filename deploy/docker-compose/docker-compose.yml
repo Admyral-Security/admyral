@@ -56,21 +56,21 @@ services:
       # Temporal
       - ADMYRAL_TEMPORAL_HOST=temporal:7233
 
-    web:
-      container_name: admyral-web
-      # build:
-      #     context: ../../web
-      #     dockerfile: ../docker/Dockerfile.web
-      image: admyralai/web:latest
-      depends_on:
-        admyral-api:
-          condition: service_healthy
-      networks:
-        - admyral-network
-      ports:
-        - 3000:3000
-      environment:
-        - ADMYRAL_API_BASE_URL=http://admyral-api:8000
+  web:
+    container_name: admyral-web
+    # build:
+    #     context: ../../web
+    #     dockerfile: ../docker/Dockerfile.web
+    image: admyralai/web:latest
+    depends_on:
+      admyral-api:
+        condition: service_healthy
+    networks:
+      - admyral-network
+    ports:
+      - 3000:3000
+    environment:
+      - ADMYRAL_API_BASE_URL=http://admyral-api:8000
 
   worker:
     container_name: admyral-worker
