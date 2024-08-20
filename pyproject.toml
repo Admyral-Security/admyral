@@ -13,7 +13,7 @@ exclude = [
     "web",
     "docker",
     "scripts",
-    "deploy",
+    "deploy/aws",
 ]
 include = [
     "admyral",

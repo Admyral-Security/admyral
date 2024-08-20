@@ -43,7 +43,9 @@ export default function SaveWorkflowButton() {
 		const workflow = getWorkflow();
 		// TODO(frontend): validate workflow name
 		if (workflow.workflowName.length === 0) {
-			errorToast("Workflow name must not be empty!");
+			errorToast(
+				"Workflow name must not be empty. Go to settings to set one.",
+			);
 			return;
 		}
 		saveWorkflow.mutate(workflow);

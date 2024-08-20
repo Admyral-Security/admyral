@@ -126,7 +126,7 @@ export type TReactFlowGraph = {
 
 const EditorWebhookTriggerSnakeCase = withSnakeCaseTransform(
 	z.object({
-		webhookUrl: z.string().nullable(),
+		webhookId: z.string().nullable(),
 		webhookSecret: z.string().nullable(),
 		defaultArgs: z.array(z.tuple([z.string(), z.string()])),
 	}),
