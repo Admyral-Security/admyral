@@ -53,6 +53,10 @@ def get_local_storage_path() -> str:
     )
 
 
+def get_local_postgres_volume() -> str:
+    return os.path.join(get_local_storage_path(), "postgres")
+
+
 # Constants for custom Python execution
 ADMYRAL_DISABLE_NSJAIL = (
     os.getenv(ENV_ADMYRAL_DISABLE_NSJAIL, "false").lower() == "true"

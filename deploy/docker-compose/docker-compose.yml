@@ -116,7 +116,7 @@ services:
       - discovery.type=single-node
       - ES_JAVA_OPTS=-Xms256m -Xmx256m
       - xpack.security.enabled=false
-    image: elasticsearch:${ELASTICSEARCH_VERSION:-latest}
+    image: elasticsearch:${ELASTICSEARCH_VERSION:-7.16.2}
     healthcheck:
       test: curl -s http://localhost:9200 >/dev/null || exit 1
       interval: 30s

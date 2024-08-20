@@ -8,7 +8,7 @@ from admyral.utils.docker_utils import (
     get_docker_compose_cmd,
     list_running_docker_containers,
 )
-from admyral.config.config import get_local_storage_path
+from admyral.config.config import get_local_postgres_volume
 
 
 WELCOME_MESSAGE = """
@@ -97,7 +97,7 @@ def up() -> None:
         env["RESEND_EMAIL"] = os.environ.get("RESEND_EMAIL")
 
     # Set persistance path
-    env["POSTGRES_VOLUME_PATH"] = os.path.join(get_local_storage_path(), "postgres")
+    env["POSTGRES_VOLUME_PATH"] = get_local_postgres_volume()
 
     click.echo("\nStarting Admyral...\n")
 
@@ -128,10 +128,14 @@ def down() -> None:
     command = get_docker_compose_cmd()
     command.append("down")
 
+    # Set persistance path
+    env = os.environ.copy()
+    env["POSTGRES_VOLUME_PATH"] = get_local_postgres_volume()
+
     click.echo("\nShutting Admyral down...\n")
 
     try:
-        subprocess.run(command, check=True, cwd=docker_compose_dir_path)
+        subprocess.run(command, check=True, cwd=docker_compose_dir_path, env=env)
     except subprocess.CalledProcessError as e:
         click.echo(f"Command failed with error: {e}")
         return
