@@ -37,7 +37,7 @@ jobs:
         id: get_pypi_version
         run: |
           package_name=$(grep '^name = ' pyproject.toml | sed -E 's/name = "(.*)"/\1/')
-          latest_version=$(python -m pip install -U pip && pip search "$package_name" | grep -Eo "$package_name \([0-9]*\.[0-9]*\.[0-9]*\)")
+          latest_version=$(curl -s https://pypi.org/pypi/$package_name/json | jq -r '.info.version')
           echo "Latest version on PyPI: $latest_version"
           echo "::set-output name=LATEST_VERSION::$latest_version"
 
