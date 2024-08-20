@@ -6,3 +6,5 @@ __pycache__
 .env
 
 .ruff_cache
+
+deploy/docker-compose/volumes

@@ -1,53 +1,116 @@
 import click
-import asyncio
+import os
+import subprocess
 
 from admyral.cli.cli import cli
-from admyral.services.admyral import (
-    launch_admyral_blocking,
-    launch_admyral_daemon,
-    destroy_admyral_daemon,
-    show_logs,
-    show_status,
+from admyral.utils.docker_utils import (
+    is_docker_running,
+    get_docker_compose_cmd,
+    list_running_docker_containers,
 )
+from admyral.config.config import get_local_storage_path
+
+
+WELCOME_MESSAGE = """
+
+ _       __     __                             __      
+| |     / /__  / /________  ____ ___  ___     / /_____ 
+| | /| / / _ \\/ / ___/ __ \\/ __ `__ \\/ _ \\   / __/ __ \\
+| |/ |/ /  __/ / /__/ /_/ / / / / / /  __/  / /_/ /_/ /
+|__/|__/\\___/_/\\___/\\____/_/ /_/ /_/\\___/  _\\__/\\____/ 
+   /   | ____/ /___ ___  __  ___________ _/ /          
+  / /| |/ __  / __ `__ \\/ / / / ___/ __ `/ /           
+ / ___ / /_/ / / / / / / /_/ / /  / /_/ / /            
+/_/  |_\\__,_/_/ /_/ /_/\\__, /_/   \\__,_/_/             
+                      /____/                           
+
+"""
+
+
+def _get_docker_compose_dir_path() -> str:
+    if os.path.exists(os.path.join(os.path.dirname(__file__), "docker_compose")):
+        docker_compose_dir_path = os.path.join(
+            os.path.dirname(__file__), "docker_compose"
+        )
+    else:
+        docker_compose_dir_path = os.path.join(
+            os.path.dirname(__file__), "..", "..", "deploy", "docker-compose"
+        )
+    assert os.path.exists(docker_compose_dir_path)
+    return docker_compose_dir_path
 
 
 @cli.command("up", help="Start Admyral locally.")
-@click.option(
-    "--docker",
-    "-d",
-    is_flag=True,
-    default=False,
-    type=click.BOOL,
-    help="Run dockerized Admyral instead of as a local process.",
-)
-@click.option(
-    "--blocking",
-    "-b",
-    is_flag=True,
-    default=False,
-    help="Run Admyral in blocking mode.",
-)
-def up(docker: bool, blocking: bool) -> None:
+def up() -> None:
     """
     Launches Admyral services locally.
-
-    Args:
-        docker: Run Admyral as docker containers.
-        blocking: Run Admyral in blocking mode.
     """
-    if docker:
-        # Run Admyral as docker containers
-        # TODO: add docker support
-        click.echo("Docker mode is not yet implemented.")
+    click.echo(WELCOME_MESSAGE)
+
+    if not is_docker_running():
+        click.echo(
+            "Docker daemon is not running. Please make sure that Docker is installed and running."
+        )
         return
 
-    if not blocking:
-        # Run Admyral as a daemon
-        launch_admyral_daemon()
+    # check if container is already running
+    running_containers = list_running_docker_containers()
+    if set(running_containers) & {
+        "admyral-web",
+        "admyral-worker",
+        "admyral-api",
+        "temporal-admin-tools",
+        "temporal-ui",
+        "temporal",
+        "postgresql",
+        "temporal-elasticsearch",
+    }:
+        click.echo("Admyral is already running.")
+        click.echo(
+            "You can access the Admyral UI at http://localhost:3000 or use the Admyral CLI.\n"
+        )
         return
 
-    # Run Admyral in blocking mode
-    asyncio.run(launch_admyral_blocking())
+    # figure out the path of the docker-compose directory
+    docker_compose_dir_path = _get_docker_compose_dir_path()
+
+    command = get_docker_compose_cmd()
+    command.append("up")
+    command.append("-d")
+
+    env = os.environ.copy()
+    if openai_api_key := os.environ.get("OPENAI_API_KEY"):
+        env["OPENAI_API_KEY"] = openai_api_key
+    else:
+        click.echo(
+            'Warning: OPENAI_API_KEY environment variable is not set. The "ai_action" action will not work!'
+        )
+    if (
+        os.environ.get("RESEND_API_KEY") is None
+        or os.environ.get("RESEND_EMAIL") is None
+    ):
+        click.echo(
+            'Warning: RESEND_API_KEY or RESEND_EMAIL environment variables are not set. The "send_email" action will not work!'
+        )
+    else:
+        env["RESEND_API_KEY"] = os.environ.get("RESEND_API_KEY")
+        env["RESEND_EMAIL"] = os.environ.get("RESEND_EMAIL")
+
+    # Set persistance path
+    env["POSTGRES_VOLUME_PATH"] = os.path.join(get_local_storage_path(), "postgres")
+
+    click.echo("\nStarting Admyral...\n")
+
+    try:
+        subprocess.run(command, check=True, cwd=docker_compose_dir_path, env=env)
+    except subprocess.CalledProcessError as e:
+        click.echo(f"Command failed with error: {e}")
+        return
+
+    click.echo("\nAdmyral is up and running.")
+    click.echo(
+        "You can access the Admyral UI at http://localhost:3000 or use the Admyral CLI.\n"
+    )
 
 
 @cli.command("down", help="Stop Admyral locally.")
@@ -55,33 +118,50 @@ def down() -> None:
     """
     Tears down Admyral services locally.
     """
-    # TODO: add docker support
-    destroy_admyral_daemon()
+    if not is_docker_running():
+        click.echo(
+            "Docker daemon is not running. Please make sure that Docker is installed and running."
+        )
+        return
+
+    docker_compose_dir_path = _get_docker_compose_dir_path()
+    command = get_docker_compose_cmd()
+    command.append("down")
+
+    click.echo("\nShutting Admyral down...\n")
+
+    try:
+        subprocess.run(command, check=True, cwd=docker_compose_dir_path)
+    except subprocess.CalledProcessError as e:
+        click.echo(f"Command failed with error: {e}")
+        return
+
+    click.echo("\nAdmyral is shut down.\n")
 
 
-@cli.command("show", help="Show information about Admyral.")
-def show() -> None:
-    """
-    Show information about Admyral.
-    """
-    show_status()
+# @cli.command("show", help="Show information about Admyral.")
+# def show() -> None:
+#     """
+#     Show information about Admyral.
+#     """
+#     show_status()
 
 
-@cli.command("logs", help="Display logs for Admyral.")
-@click.option("--follow", "-f", is_flag=True, help="Follow the logs.")
-@click.option(
-    "--tail",
-    "-t",
-    type=click.INT,
-    help="Number of lines to display from the end of the logs.",
-)
-def logs(follow: bool, tail: int) -> None:
-    """
-    Display logs for Admyral.
+# @cli.command("logs", help="Display logs for Admyral.")
+# @click.option("--follow", "-f", is_flag=True, help="Follow the logs.")
+# @click.option(
+#     "--tail",
+#     "-t",
+#     type=click.INT,
+#     help="Number of lines to display from the end of the logs.",
+# )
+# def logs(follow: bool, tail: int) -> None:
+#     """
+#     Display logs for Admyral.
 
-    Args:
-        follow: Follow the logs.
-        tail: Number of lines to display from the end of the logs.
-    """
-    for log in show_logs(follow, tail):
-        click.echo(log)
+#     Args:
+#         follow: Follow the logs.
+#         tail: Number of lines to display from the end of the logs.
+#     """
+#     for log in show_logs(follow, tail):
+#         click.echo(log)
