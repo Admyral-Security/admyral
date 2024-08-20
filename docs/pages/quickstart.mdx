@@ -203,10 +203,10 @@ Upon building our workflow, you can activate and execute your workflow. Again, y
 
         So similar to above, the command to use is:
         ```bash
-        admyral workflow virus_total_workflow.py --trigger
+        admyral workflow trigger virus_total_workflow --payload '{
+            "url": "www.example.org"
+        }'
         ```
-
-        TODO: How to add webhook data, e.g. the url?
 
     </Tabs.Tab>
     <Tabs.Tab>
@@ -231,8 +231,6 @@ Upon building our workflow, you can activate and execute your workflow. Again, y
         <Callout type="info">
             To see the details of the workflow execution, go to the [Run History](/run_history).
         </Callout>
-
-        activate workflow
     </Tabs.Tab>
 
 </Tabs>
