@@ -1,0 +1,11 @@
+name: Main CI Workflow
+on:
+  push:
+    branches:
+      - main
+jobs:
+  setup-and-test:
+    uses: ./.github/workflows/unit-test.yml
+    with:
+      os: ubuntu-latest
+    secrets: inherit

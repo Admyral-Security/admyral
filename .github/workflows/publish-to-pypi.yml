@@ -1,3 +1,4 @@
+# TODO: switch to a tag-based approach later
 name: Publish PyPI Package
 on:
   workflow_call:
@@ -5,25 +6,41 @@ jobs:
   publish_to_pypi:
     name: Publish Python package to PyPI
     runs-on: ubuntu-latest
-    # Set permissions for trusted publishing.
-    permissions:
-      id-token: write
-      contents: read
     steps:
       - uses: actions/checkout@v4.1.1
+
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
           python-version: 3.12
+
       - name: Install Poetry
         uses: snok/install-poetry@v1.4.1
         with:
           virtualenvs-create: true
           virtualenvs-in-project: true
+
       - name: Build package
         run: poetry build
+
       - name: Build package
         run: poetry build
-      - name: Publish the package with poetry
+
+      - name: Extract version from pyproject.toml
+        id: get_version
         run: |
-          poetry publish -u __token__ -p '${{ secrets.PYPI_API_TOKEN }}'
+          version=$(grep '^version = ' pyproject.toml | sed -E 's/version = "(.*)"/\1/')
+          echo "Package version: $version"
+          echo "::set-output name=VERSION::$version"
+
+      - name: Get the latest published version from PyPI
+        id: get_pypi_version
+        run: |
+          package_name=$(grep '^name = ' pyproject.toml | sed -E 's/name = "(.*)"/\1/')
+          latest_version=$(python -m pip install -U pip && pip search "$package_name" | grep -Eo "$package_name \([0-9]*\.[0-9]*\.[0-9]*\)")
+          echo "Latest version on PyPI: $latest_version"
+          echo "::set-output name=LATEST_VERSION::$latest_version"
+
+      - name: Publish the package with poetry if the version has changed
+        if: steps.get_version.outputs.VERSION != steps.get_pypi_version.outputs.LATEST_VERSION
+        run: poetry publish -u __token__ -p '${{ secrets.PYPI_API_TOKEN }}'

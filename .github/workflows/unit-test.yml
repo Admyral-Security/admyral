@@ -22,23 +22,30 @@ jobs:
         with:
           repository: ${{ github.repository }}
           ref: ${{ github.event.pull_request.head.sha }}
+
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
           python-version: 3.12
+
       - name: Install Poetry
         uses: snok/install-poetry@v1.4.1
         with:
           virtualenvs-create: true
           virtualenvs-in-project: true
+
       - name: Install dependencies
         run: poetry install
+
       - name: Run linter
         run: poetry run ruff format --check
+
       - name: Run linter
         run: poetry run ruff check
+
       - name: Run unit tests
         run: poetry run pytest tests/
+
   web-unit-test:
     name: Web Unit Tests
     runs-on: ${{ inputs.os }}
@@ -48,22 +55,29 @@ jobs:
         with:
           repository: ${{ github.repository }}
           ref: ${{ github.event.pull_request.head.sha }}
+
       - name: Install Node.js
         uses: actions/setup-node@v2
         with:
           node-version: 18
+
       - name: Setup pnpm
         uses: pnpm/action-setup@v4.0.0
         with:
           version: 9
+
       - name: Install dependencies
         run: cd web && pnpm install
+
       - name: Run linter
         run: cd web && pnpm lint
+
       - name: Run prettier check
         run: cd web && pnpm prettier:check
+
       - name: Run build
         run: cd web && pnpm build
+
       # TODO: activate when tests are available
       # - name: Run unit tests
       #   run: cd web && pnpm test

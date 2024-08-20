@@ -2,24 +2,21 @@ name: Release Package & Docker Images
 on:
   push:
     branches:
-      - main
-      # - release
+      - release
 jobs:
   setup-and-test:
     uses: ./.github/workflows/unit-test.yml
     with:
       os: ubuntu-latest
     secrets: inherit
+
   publish-python-package:
     if: github.repository == 'Admyral-Security/admyral'
     needs:
       - setup-and-test
     uses: ./.github/workflows/publish-to-pypi.yml
-    # Set permissions for trusted publishing.
-    permissions:
-      id-token: write
-      contents: read
     secrets: inherit
+
   publish-docker-images:
     if: github.repository == 'Admyral-Security/admyral'
     needs:
