@@ -212,3 +212,24 @@ def test_action_parser_3():
     )
     python_action = parse_action(MODULE_TEST_3, "test_action")
     assert python_action == expected_python_action
+
+
+#########################################################################################################
+
+
+CODE_TEST_4 = """def custom_action1(arg: int) ->str:
+    print('Hey! This is my Custom Action 1')
+    return 'Custom Action 1'
+"""
+
+
+def test_missing_argument_annotation():
+    try:
+        parse_action(CODE_TEST_4, "custom_action1")
+    except ValueError as e:
+        assert (
+            str(e)
+            == "Arguments must be annotated using Annotated[<type>, ArgumentMetadata(...)]."
+        )
+    else:
+        assert False, "Should raise an error"
