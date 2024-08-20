@@ -13,7 +13,6 @@ from admyral.utils.aio import makedirs, dirname
 from admyral.config.config import (
     ADMYRAL_PIP_CACHE_DIRECTORY,
     ADMYRAL_PIP_LOCK_CACHE_DIRECTORY,
-    ADMYRAL_PYTHON_PATH,
     ADMYRAL_DISABLE_NSJAIL,
     ADMYRAL_PIP_LOCKFILE_CACHE_TTL_IN_SECONDS,
     ADMYRAL_USE_LOCAL_ADMYRAL_PIP_PACKAGE,
@@ -36,6 +35,9 @@ MOUNT_TEMPLATE = """mount {{
     dst: \"{REQUIREMENT_PATH}\"
     is_bind: true
 }}"""
+
+
+ADMYRAL_PYTHON_PATH = "/usr/local/bin/python"
 
 
 async def get_nsjail_dir() -> str:
@@ -162,13 +164,15 @@ async def _run_python_action_without_nsjail(
     job_dir: str,
     python_action: PythonAction,
 ) -> None:
-    logger.info(f"Python Path: {ADMYRAL_PYTHON_PATH}")
+    python_path = sys.executable
+
+    logger.info(f"Python Path: {python_path}")
 
     # load secrets as environment for subprocess
     env = await _load_secrets(python_action)
 
     cmd = [
-        ADMYRAL_PYTHON_PATH,
+        python_path,
         "-u",  # unbuffered binary stdout and stderr
         os.path.join(job_dir, "python_action_executor.py"),
     ]
