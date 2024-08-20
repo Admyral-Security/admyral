@@ -20,8 +20,8 @@ jobs:
           virtualenvs-create: true
           virtualenvs-in-project: true
 
-      - name: Build package
-        run: poetry build
+      - name: Package docker compose file
+        run: ./scripts/package_docker_compose.sh
 
       - name: Build package
         run: poetry build
