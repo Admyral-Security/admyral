@@ -1,4 +1,12 @@
+import { Callout } from "nextra/components";
+
 # Self-Hosting with Docker
+
+<Callout type="warning">
+	For workflow development purposes, we highly recommend running Admyral via
+	the **Admyral CLI**. The purpose of docker compose is rather for development
+	and deployment.
+</Callout>
 
 Docker is the easiest way to get started with self-hosted Admyral. This guide assumes you are running the command from the machine you intend to host from.
 
@@ -20,19 +28,16 @@ Follow these steps to start Admyral:
 git clone https://github.com/Admyral-Security/admyral.git
 
 # Change directory to docker self-hosting
-cd admyral/deploy/selfhosting
+cd admyral/deploy/docker-compose
 
 # Copy the env vars
 cp .env.example .env
 
+# Source the environment variables
+source .env
+
 # Start the services in detached mode
 docker compose up -d
-```
-
-**Hint:** Supabase sometimes might fail to start. If you see a service failing to start, simply run the following command to resolve the issue:
-
-```bash
-docker compose restart
 ```
 
 After Admyral has started, you can see the containers running in the background:
@@ -45,21 +50,15 @@ docker compose ps
 
 Admyral is now running on your machine on port `3000`. For example, `http://<your-ip>:3000` or `http://localhost:3000` if you are running Docker locally.
 
-You will be asked to create an account. After creating an account, you can directly go to the login page and log in because accounts are confirmed automatically by default.
-
 ## Securing Admyral
 
 Inside the `.env` file, we provided you with some example secrets for getting easily started. However, you should change these secrets to secure your Admyral instance as soon as possible.
-You can find the example secrets on top of the `.env` file inside the `deploy/selfhosting` directory:
+You should replace the following secrets in your `.env` file inside the `deploy/docker-compose` directory:
 
 ```bash
 POSTGRES_PASSWORD=...
-JWT_SECRET=...
-ANON_KEY=...
-SERVICE_ROLE_KEY=...
-CREDENTIALS_SECRET=...
-WEBHOOK_SIGNING_SECRET=...
-DASHBOARD_PASSWORD=...
+ADMYRAL_SECRETS_ENCRYPTION_KEY=...
+ADMYRAL_WEBHOOK_SIGNING_SECRET=...
 ```
 
 To generate new secrets, you can run the following commands from the project root directory:
@@ -72,23 +71,19 @@ cd scripts
 ./generate_secrets.sh
 ```
 
-After generating new secrets, you need to update the top of the `.env` file inside `deploy/selfhosting` with the new secrets. Afterwards, you need to restart Admyral.
+After generating new secrets, you need to update the environment variables in the `.env` file inside `deploy/docker-compose` with the new secrets. Afterwards, you need to restart Admyral.
 
 ## Restarting all services
 
-To restart all services, run the following command inside the `deploy/selfhosting` directory:
+To restart all services, run the following command inside the `deploy/docker-compose` directory:
 
 ```bash
-# Stop and remove the containers
-docker compose down
-
-# Recreate and start the containers
-docker compose up -d
+docker compose restart
 ```
 
 ## Stopping all services
 
-To stop all services, run the following command inside the `deploy/selfhosting` directory:
+To stop all services, run the following command inside the `deploy/docker-compose` directory:
 
 ```bash
 docker compose down
@@ -96,7 +91,7 @@ docker compose down
 
 ## Uninstalling Admyral
 
-To uninstall Admyral, run the following command inside the `deploy/selfhosting` directory:
+To uninstall Admyral, run the following command inside the `deploy/docker-compose` directory:
 
 ```bash
 # Stop docker and remove volumes:
@@ -106,8 +101,17 @@ docker compose down -v
 rm -rf volumes/db/data/
 ```
 
-## Troubleshooting
+## Pulling the latest version of Admyral
 
-### dependency failed to start
+In order to get the latest version of Admyral, run the following commands inside the `deploy/docker-compose` directory:
 
-Run the following command: `docker compose restart`
+```bash
+# Stop docker
+docker compose down
+
+# Pull the newest images from the docker hub
+docker compose pull
+
+# Start Admyral
+docker compose up -d
+```

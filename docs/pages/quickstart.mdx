@@ -4,11 +4,11 @@ import { Callout } from "nextra/components";
 
 # Quickstart: Run Your First Workflow
 
-This quickstart helps you to create your first workflow within Admyral. The workflow checks a simple URL check using the community version of VirusTotal.
+This quickstart helps you to create your first workflow within Admyral. The workflow performs a simple URL check using the community version of VirusTotal.
 
 **Prerequisites**:
 
--   Python 3.8 or higher
+-   Python 3.8 or higher (recommended: Python 3.12)
 -   Docker
 
 ## Getting Started
@@ -18,30 +18,45 @@ You can create your first workflow within less than 10 minutes:
 <Steps>
 ### Step 1: Installing and Starting Admyral
 
-To install Admyral, simply navigate to your wished directory in your terminal (hint: use `cd <your_path>`) and enter the following:
+To install Admyral, simply install the Admyral pip package using your favorite dependency management tool:
 
-```bash
-pip install admyral
-```
+<Tabs items={['Pip', 'Poetry', 'Conda']}>
+    <Tabs.Tab>
+        ```bash
+        pip install admyral
+        ```
+    </Tabs.Tab>
 
-To start Admyral use the following command:
+    <Tabs.Tab>
+        ```bash
+        poetry add admyral
+        ```
+    </Tabs.Tab>
+
+    <Tabs.Tab>
+        ```bash
+        conda install admyral
+        ```
+    </Tabs.Tab>
+
+</Tabs>
+
+To launch Admyral use the following command:
 
 ```bash
 admyral up
 ```
 
-You should then see the Admyral web app interface when you open `localhost:3000` in your browser.
-
-Note: If port 3000 is occupied, check out `localhost:3001`.
+You can open the Admyral UI by visiting `http://localhost:3000` in your browser.
 
 ### Step 2: Tool and Secret Setup
 
-Now, let's get the VirusTotal API Key. If you don't have a VirusTotal account, sign up [here](https://www.virustotal.com/gui/join-us) for free.
-Then click on your name on the top right, select `API Key`, and copy your api key.
+Now, let's get a VirusTotal API Key. If you don't have a VirusTotal account, sign up [here](https://www.virustotal.com/gui/join-us) for free.
+Then, click on your name on the top right, select `API Key`, and copy your API key.
 
-With Admyral offering an _CLI_ as well as a _web interface_, you can select how you'd like to set up your VirusTotal secret.
+With Admyral offering a _CLI_ as well as a _web UI_, you can decide how you'd like to set up your VirusTotal secret.
 
-<Tabs items={['Code', 'No-Code']}>
+<Tabs items={['CLI', 'Admyral UI']}>
     <Tabs.Tab>
         To create a secret using the CLI, use the following CLI command: 
         ```bash 
@@ -67,20 +82,29 @@ With Admyral offering an _CLI_ as well as a _web interface_, you can select how 
 
 ### Step 3: Create your workflow
 
-As Admyral offers two options to create workflows, you can pick from below: (1) Create your workflow using `Code` or (2) using the `No-Code` workflow builder.
+With Admyral, you can decide whether you want to build your workflows with `Code` or `No-Code`.
 
 <Tabs items={['Code', 'No-Code']}>
     <Tabs.Tab>
 
-        Open Admyral within your IDE, navigate to TODO, and create a new Python file named `virus_total_workflow.py`.
+        We recommend to setup a Github project for managing your workflows. You can checkout our [quickstart Github repository](https://github.com/Admyral-Security/admyral-quickstart). Feel free to clone it and use it for your setup or simply just get inspired.
+
+        Open your project with your favorite IDE and create a new Python file named `virus_total_workflow.py` for the workflow.
+
+        =======
 
         Within this newly created file, your new workflow automation is being created using Python code.
 
-        Let's start with creating our workflow function. This function has the `@workflow` decorator and defines the the control flow of our workflow automation.
+        In Admyr
+
+        Let's start with building your first workflow function. This function has the `@workflow` decorator and defines the the control flow of our workflow automation.
 
         ```python
-        @workflow()
-        def virus_total_workflow():
+        from admyral.workflow import workflow
+        from admyral.typings import JsonValue
+
+        @workflow
+        def virus_total_workflow(payload: dict[str, JsonValue]):
             # will be completed soon
         ```
 
@@ -101,7 +125,7 @@ As Admyral offers two options to create workflows, you can pick from below: (1) 
 
         ```python
         from admyral.workflow import workflow
-        from admyral.actions import virus_total
+        from admyral.actions import virus_total_analyze_hash
 
         @workflow()
         def virus_total_workflow(payload: dict[str, JsonValue]):
@@ -136,6 +160,7 @@ As Admyral offers two options to create workflows, you can pick from below: (1) 
         ```
 
     </Tabs.Tab>
+
     <Tabs.Tab>
 
         1. Go to `localhost:3000`. When this exact domain is displayed in your browser, you are on the workflow overview page.

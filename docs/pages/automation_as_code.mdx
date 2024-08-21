@@ -17,22 +17,19 @@ Automation-as-Code is a way to create automations using Python code. Benefits in
 For compatability and increased reusability, the recommended project setup in Git should be as follows:
 
 <FileTree>
-	<FileTree.Folder name="admyral" defaultOpen>
-		<FileTree.File name="__init__.py" />
-		<FileTree.File name="access_review.py" />
-		<FileTree.File name="phishing_automation.py" />
-		<FileTree.Folder name="investigation_workflows" defaultOpen>
+	<FileTree.Folder name="your_project_name" defaultOpen>
+		<FileTree.Folder name="actions" defaultOpen>
+			<FileTree.File name="__init__.py" />
+			<FileTree.File name="custom_action1.py" />
+		</FileTree.Folder>
+		<FileTree.Folder name="workflows" defaultOpen>
+			<FileTree.File name="__init__.py" />
 			<FileTree.File name="workflow1.py" />
-			<FileTree.File name="workflow2.py" />
-			<FileTree.File name="workflow3.py" />
 		</FileTree.Folder>
 	</FileTree.Folder>
 </FileTree>
 
--   stored in git
--   Workflows, custom_actions, ...
-
-TODO
+For an example, checkout our [Github example project](https://github.com/Admyral-Security/admyral-quickstart).
 
 ## The Workflow Function
 
@@ -40,15 +37,20 @@ The workflow function is a python function that is used to specify the control f
 It is specified with the `@workflow` decorator:
 
 ```bash
+from admyral.workflow import workflow
+from adymral.typings import JsonValue
+
 @workflow
-def example_workflow():
+def example_workflow(dict: [str, JsonValue]):
     # some actions / control flow of your automation
 ```
 
 When referring from one action to another, it is suggested to store the output from the previous action in a variable.
 
+If an action returns
+
 ```bash
-workflow
+@workflow
 def example_workflow():
     a = action1()
     b = action2(a)
@@ -58,6 +60,14 @@ This creates a dependency which is visualized accordingly in the No-Code Editor.
 
 The workflow function is slightly restrictive as Admyral compiles it and maps it onto a [no-code interface](/no_code_editor). For example, as of now, for loops are not supported within the workflow function.
 You would define a [custom action](/custom_actions) in which the for-loop is executed. The results can be used within the workflow function. This setup enables you to create a modular setup.
+
+TODO: run_after
+TODO: secrets
+TODO: workflow decorator
+TODO: Things which are not allowed =>
+TODO: accessing data
+TODO: list, dict, string formatting
+TODO: for-loops coming soon
 
 ### Custom actions within in the workflow function
 
@@ -92,17 +102,47 @@ def example_workflow():
         # do something
 ```
 
+TODO: if condition syntax => supported operators
+
 ## Executing an Automation
 
-Automation based on Admyral are written in Python. This allows you to run and test your automation locally.
-To execute an automation locally, write the following in your terminal:
+Automation based on Admyral is written in Python. This allows you to run and test your automations locally as standard Python scripts.
 
-```bash
-py <your_script.py>
+To execute an automation locally, simply call it like a normal Python function
+
+```python
+from admyral.workflow import workflow
+from adymral.typings import JsonValue
+
+
+@workflow
+def example_workflow(dict: [str, JsonValue]):
+    # some actions / control flow of your automation
+    ...
+
+
+if __name__ == "__main__":
+    # just call your workflow function
+    example_workflow({})
+
+    # you can also pass a payload to your workflow as input
+    example_workflow({
+        "some_argument": ...
+    })
 ```
 
-To execute an automation using Admyral's infrastructure, write the following into your terminal:
+and then simply execute it as a normal Python script:
 
 ```bash
-admyral TODO
+python example_workflow.py
+```
+
+To execute an automation using Admyral's infrastructure, you first need to push the workflow (Note: by adding `--activate` your workflow is also immediately activated)
+and then you can simply trigger it using the CLI:
+
+```bash
+# Push your workflow to Admyral
+admyral workflow push example_workflow -f example_workflow.py --activate
+# Trigger your workflow
+admyral workflow trigger example_workflow
 ```

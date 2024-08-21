@@ -1,20 +1,21 @@
 # Admyral CLI
 
-Being code-first, Admyral has a Command Line Interface (CLI). Enter the following command to retrieve all commands:
+You can leverage Admyral's CLI to manage your workflows and actions from your commandline, within your scripts, or CI/CD pipelines.
+Enter the following command to for more information while directly interacting with the CLI:
 
 ```bash
 admyral --help
 ```
 
-## Start and Stop Admyral locally
+## Start and Stop Admyral Locally
 
-Starts the Admyral environment locally:
+Start Admyral locally:
 
 ```bash
 admyral up
 ```
 
-Stops the Admyral environment running locally:
+Stop Admyral running locally:
 
 ```bash
 admyral down
@@ -25,14 +26,16 @@ admyral down
 Push a Python action to Admyral:
 
 ```bash
-admyral action <your_custom_action.py> push
+admyral action push <your_custom_action> -a <path/to/your/action.py>
 ```
+
+where `your_custom_action` is the Python function name and `<file_path>` is the path to the file where the action is defined.
 
 ## Secrets Management
 
-Manages secrets in Admyral. Secrets are secure values such as API keys or passwords.
+Manages secrets in Admyral. Secrets are encrypted values, such as API keys or passwords. See [Secrets Management](/secrets) for more information.
 
-List all secret IDs stored in Admyral:
+List the IDs of all your stored secrets:
 
 ```bash
 admyral secret list
@@ -50,36 +53,34 @@ Delete a secret stored in Admyral:
 admyral secret delete <secret_name>
 ```
 
-## Show
-
-Displays information about the current state of Admyral:
-
-```bash
-admyral show
-```
-
 ## Workflow Management
 
-Activates a specific workflow:
+Activatesa specific workflow:
 
 ```bash
-admyral workflow <your_workflow.py> --activate
+admyral workflow activate <your_workflow_name>
 ```
 
-Deactivates a specific workflow:
+Deactivate a specific workflow:
 
 ```bash
-admyral workflow <your_workflow.py> --deactivate
+admyral workflow deactivate <your_workflow_name>
 ```
 
 Push a workflow to Admyral:
 
 ```bash
-admyral workflow <your_workflow.py> --push
+admyral workflow push <your_workflow_name>
+
+# Optional: Activate the workflow on push
+admyral workflow push <your_workflow_name> --activate
 ```
 
 Trigger the execution of a workflow:
 
 ```bash
-admyral workflow <your_workflow> --trigger
+admyral workflow trigger <your_workflow_name>
+
+# Pass payload as serialized JSON
+admyral workflow trigger <your_workflow_name> -p '{"key1": "value1", "key2": "value2"}'
 ```

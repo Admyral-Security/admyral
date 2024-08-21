@@ -3,7 +3,7 @@
 	"version": "0.0.1",
 	"description": "Admyral Documentation",
 	"scripts": {
-		"dev": "next dev",
+		"dev": "next dev -p 3333",
 		"build": "next build",
 		"start": "next start",
 		"prettier": "prettier --write ."

@@ -3,36 +3,240 @@ import { Callout } from "nextra/components";
 
 # Custom Actions
 
-Admyral supports the creation of custom actions as well as the usage of third-party libraries within custom actions.
+With Admyral's custom actions, you can build your own internal actions leveraging Python together with its rich ecosystem.
+Custom actions are available as Python functions for your workflows defined in code as well as building blocks in the UI editor.
 
-<Callout type="info">
-	With Admyral's infrastructure, only the latest versions of packages are
-	being used. Due to this, you don't have to worry about maintenance of
-	packages anymore as this will be done automatically.
-</Callout>
-
-## Creation of Custom Actions
+## Building Custom Actions
 
 There are three ways to create custom actions:
 
-1. As a separate function:
-   a. Within the workflow Python file
+1. As a Python function: <br/>
+   a. Within the workflow Python file <br/>
    b. Within a Python file dedicated for the specific custom action
+
 2. As a sub-part of the workflow function
+
+### 1. Function
 
 Using (1.a) or (1.b), the structure of the custom action is as follows:
 
+Custom Action Structure:
+
 ```python
+from admyral.action import action
+
 @action(
     display_name="Send two Slack Messages",
     display_namespace="Slack",
     description="Send two Slack messages in a row to the same person",
 )
-def send_two_slack_messages(
-    user_id
-):
+def send_two_slack_messages():
     ...
 ```
+
+The following metadata fields defined in the `@action` decorator is used for rendering the custom action in the no-code editor and providing information about the action to the user.
+
+-   `display_name` (Required): The name displayed on the action building blocks in the no-code editor.
+-   `display_namespace` (Required): The group under which the action will be rendered in the left sidebar of the no-code editor.
+-   `description` (Optional): Description of the action.
+
+### Supported Action and Return Types
+
+Currently, Admyral only supports JSON-serializable types as input and output for actions, i.e., the following types are supported:
+
+-   `str`
+-   `None`
+-   `bool`
+-   `int`
+-   `float`
+-   `list` consisting of JSON-serializable types
+-   `dict` consisting of JSON-serializable types
+-   our custom type representing a JSON-serializable type: `JsonValue` (Usage: `from admyral.typings import JsonValue`)
+
+### Action Arguments and Return Types
+
+Action arguments are simple function arguments. However, each argument must be typed as well as annotated with `ArgumentMetadata` which is used to populate the UI.
+Hence, the following format is used as type hint: `Annotated[<argument-type>, ArgumentMetadata(display_name="...", description="...")]`.
+
+Additionally, it is highly recommended to also define a return type hint. If nothing is returned by the action, simply use `None` as return type.
+
+Example:
+
+```python
+from typing import Annotated
+from admyral.action import action, ArgumentMetadata
+from admyral.typings import JsonValue
+
+@action(
+    display_name="Send two Slack Messages",
+    display_namespace="Slack",
+    description="Send two Slack messages in a row to the same person. Returns the API results.",
+)
+def send_two_slack_messages(
+    user_id: Annotated[
+        str,
+        ArgumentMetadata(
+            display_name="User ID",
+            description="ID of the user which receives the messages."
+        )
+    ]
+) -> list[JsonValue]:
+    ...
+```
+
+You can also make an action argument optional by assigning a default value. This implies that you don't need to pass a value to the argument when calling the action in the workflow function:
+
+```python
+# ...
+
+def send_two_slack_messages(
+    user_id: Annotated[
+        str,
+        ArgumentMetadata(
+            display_name="User ID",
+            description="ID of the user which receives the messages."
+        )
+    ] = "this-is-my-default-user-id",
+) -> list[JsonValue]:
+    ...
+```
+
+Here is another example where the argument is optional and can be `None` in Python:
+
+```python
+# ...
+
+def send_two_slack_messages(
+    user_id: Annotated[
+        str | None,
+        ArgumentMetadata(
+            display_name="User ID",
+            description="ID of the user which receives the messages."
+        )
+    ] = None,
+) -> list[JsonValue]:
+    ...
+```
+
+### Handling Secrets
+
+If you need to use one or more secrets in your custom action, you need to define placeholders to which secrets are mapped when they are used in workflows.
+You simpley define secret placeholders using the `secrets_placeholders` field of the `@action` decorator. To access the secret, you can load the secret
+using the get secrets functionality provided by the action context `ctx.get().secrets.get("MY_PLACEHOLDER")`.
+
+Decrypted secrets in Admyral are a simple string dictionary, i.e., `dict[str, str]`.
+
+Example:
+
+```python
+from typing import Annotated
+from admyral.action import action, ArgumentMetadata
+from admyral.typings import JsonValue
+from admyral.context import ctx # Include the action local context to access the secret
+
+@action(
+    display_name="Send two Slack Messages",
+    display_namespace="Slack",
+    description="Send two Slack messages in a row to the same person. Returns the API results.",
+    # Define Secrets Placeholders here:
+    secrets_placeholders=["SLACK_SECRET"]
+)
+def send_two_slack_messages(
+    user_id: Annotated[
+        str,
+        ArgumentMetadata(
+            display_name="User ID",
+            description="ID of the user which receives the messages."
+        )
+    ]
+) -> list[JsonValue]:
+    # Usage of the secret mapped to the secret placeholder
+    secret = ctx.get().secrets.get("SLACK_SECRET")
+    api_key = secret["api_key"]
+    ...
+```
+
+In the workflow function, you map a secret (e.g., `my_stored_slack_secret`) to the secret placeholder (e.g., `SLACK_SECRET`) inside the `secrets` argument (Note: you don't need to ):
+
+```python
+send_two_slack_message(
+    user_id="some_user_id",
+    secrets={"SLACK_SECRET": "my_stored_slack_secret"}
+)
+```
+
+This mapping then allows the action to load `my_stored_slack_secret` for `SLACK_SECRET`.
+
+For more information see [Secrets Management](/secrets).
+
+### Handling Dependencies
+
+In order to use pip packages inside your custom Python action, you need to add the needed packages to the `requirements` argument in the `@action` decorator:
+
+```python
+import requests
+from boto3 import resource as aws_resource
+
+@action(
+    display_name="Requirements Example",
+    display_namespace="Example",
+    # define your requirements in the requirements list
+    requirements=[
+        # don't fix a version to always use the latest version
+        "boto3",
+        # you can also fix a version
+        "requests==2.32.3"
+    ]
+)
+def custom_action() -> None:
+    r = requests.get('https://httpbin.org/basic-auth/user/pass', auth=('user', 'pass'))
+
+    # Note: ignoring credentials here
+    s3 = aws_resource('s3')
+```
+
+### Using Existing Actions inside your Custom Action
+
+You can also build custom Python actions on top of existing pre-built or custom actions. You can simply call them.
+
+**IMPORTANT:** You must make sure that the secrets placeholders of the used actions are also defined in the `secrets_placeholders` list of the new custom action.
+
+```python
+from typing import Annotated
+from admyral.action import action, ArgumentMetadata
+from admyral.typings import JsonValue
+from admyral.context import ctx
+# we import the existing send_slack_message
+from admyral.actions import send_slack_message
+
+@action(
+    display_name="Send two Slack Messages",
+    display_namespace="Slack",
+    description="Send two Slack messages in a row to the same person. Returns the API results.",
+    # The existing send_slack_message requires the SLACK_SECRET placeholder, so we must also add it to this action:
+    secrets_placeholders=["SLACK_SECRET"]
+)
+def send_two_slack_messages(
+    user_id: Annotated[
+        str,
+        ArgumentMetadata(
+            display_name="User ID",
+            description="ID of the user which receives the messages."
+        )
+    ]
+) -> None:
+    # we can simply call the actions here. the secrets are made available automatically.
+    send_slack_message(
+        channel_id=user_id,
+        text="Message 1"
+    )
+    send_slack_message(
+        channel_id=user_id,
+        text="Message 2"
+    )
+```
+
+### Pushing Actions
 
 After creating your custom action, push it to Admyral using the following CLI command to use it in other workflows or within the no-code editor:
 
@@ -40,19 +244,39 @@ After creating your custom action, push it to Admyral using the following CLI co
 admyral action <your_custom_action.py> push
 ```
 
-For way (2), defining custom actions within the workflow function, they have to be wrapped by two comments: `# {% custom %}` and `# {% endcustom %}`. In doing so, the custom action can be displayed in the no-code editor as a single node.
+### Currently Unsupported Patterns
 
-it looks like the following:
+The following typical patterns are currently NOT supported (this might change in the future):
+
+-   usage of variables defined outside of the action
+-   usage of your own utility functions (Note: other actions or functions from pip packages are allowed)
+
+### 2. Python Sections in the Workflow Function
+
+<Callout type="warning">
+	Custom Python sections in workflow functions are not yet released. They will
+	be available within the upcoming weeks.
+</Callout>
+
+For way (2), defining custom actions within the workflow function, they have to be wrapped by two following two comments: `# {% custom %}` and `# {% endcustom %}`. In doing so, the custom action can be displayed
+in the no-code editor as a single node, i.e., a Python script action. This implies that the code is only available within the particular workflow and it is not
+usable by other workflows.
+
+Python sections currently do **not** support third-party libraries, i.e., only the standard library is available within the section.
+Third-party library support is only allowed in the Python function approach.
+
+Example:
 
 ```python
 @workflow
-def workflow_function ():
+def workflow_function(payload: dict[str, JsonValue]):
     # some workflow logic
 
     # define the custom action enclosed by the following comments:
 
     # {% custom %}
 
+    # just write normal Python code here
     alert_messages = []
     for alert in alerts:
         alert_messages.append({
@@ -72,10 +296,9 @@ def workflow_function ():
     # {% endcustom %}
 
     # continue you workflow logic here
-
 ```
 
-TODO: Does the custom action have to be pushed to Admyral using the CLI as well?
+In order to use the action within your workflow, you simply push your workflow as normal using `admyral workflow push ...`.
 
 ## Usage of Custom Actions
 
