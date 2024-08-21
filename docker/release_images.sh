@@ -1,10 +1,5 @@
 #!/bin/bash
 
-# Stop execution on any error
-set -e
-set -x
-
-
 if command -v docker-compose &> /dev/null
 then
     COMPOSE_CMD="docker-compose"
@@ -20,6 +15,11 @@ for i in "${!services[@]}"; do
     service=${services[$i]}
     docker rmi admyralai/$service:latest
 done
+
+
+# Stop execution on any error (Note: we use set -e because docker rmi might fail because the image does not exist which is okay)
+set -e
+# set -x
 
 
 for i in "${!services[@]}"; do
