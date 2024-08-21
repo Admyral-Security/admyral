@@ -1,7 +1,6 @@
 #!/bin/bash
 
-#Stop execution on any error
-trap "fail_trap" EXIT
+# Stop execution on any error
 set -e
 set -x
 
