@@ -1,5 +1,11 @@
 #!/bin/bash
 
+#Stop execution on any error
+trap "fail_trap" EXIT
+set -e
+set -x
+
+
 if command -v docker-compose &> /dev/null
 then
     COMPOSE_CMD="docker-compose"
@@ -17,14 +23,16 @@ for i in "${!services[@]}"; do
 done
 
 
-for service in "${!services[@]}"; do
+for i in "${!services[@]}"; do
     service=${services[$i]}
     context=${contexts[$i]}
 
+    echo "Building and pushing image for $service..."
     docker buildx build \
         --platform=linux/amd64,linux/arm64 \
         --file=./Dockerfile.$service \
         --tag=admyralai/$service:latest \
         --push \
         $context
+    echo "Finished building and pushing image for $service."
 done
