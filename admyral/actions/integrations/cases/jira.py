@@ -230,3 +230,51 @@ def comment_jira_issue_status(
             json={"body": comment},
         )
         response.raise_for_status()
+
+
+@action(
+    display_name="Jira Issue Search",
+    display_namespace="Jira",
+    description="Search Jira issues using JQL",
+    secrets_placeholders=["JIRA_SECRET"],
+)
+def search_jira_issues(
+    jql: Annotated[
+        str,
+        ArgumentMetadata(
+            display_name="JQL",
+            description="The JQL query to search for issues",
+        ),
+    ],
+    limit: Annotated[
+        int | None,
+        ArgumentMetadata(
+            display_name="Limit",
+            description="The maximum number of issues to return",
+        ),
+    ] = 1000,
+) -> list[JsonValue]:
+    # https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issue-search/#api-rest-api-3-search-get
+    secret = ctx.get().secrets.get("JIRA_SECRET")
+    domain = secret["domain"]
+    email = secret["email"]
+    api_key = secret["api_key"]
+
+    with get_jira_client(domain, email, api_key) as client:
+        offset = 0
+        issues = []
+
+        while limit is None or len(issues) < limit:
+            response = client.get(
+                "/search",
+                params={"jql": jql, "maxResults": 100, "startAt": offset},
+            )
+            response.raise_for_status()
+            data = response.json()
+
+            issues.extend(data["issues"])
+            offset = len(issues)
+            if offset == data["total"]:
+                break
+
+        return issues if limit is None else issues[:limit]
