@@ -20,16 +20,10 @@
 
 ## Quick start 🚀
 
-Install all the dependencies:
+Install Admyral:
 
 ```bash
 $ pip install admyral
-```
-
-Create the project structure for your automations:
-
-```bash
-$ admyral init
 ```
 
 Start Admyral to access the frontend, execute workflows using Admyral's scalable workflow infrastructure:
@@ -67,9 +61,9 @@ Deploy in under 5 minutes without infrastructure or scalability worries.
 
 ### Start Automating Any Workflow - SecOps or GRC 🎬
 
-Make your *security operations* more efficient, accomplish more with less resources, and standardize the quality of your SOPs.
+Make your _security operations_ more efficient, accomplish more with less resources, and standardize the quality of your SOPs.
 
-When automating workflows in *GRC/Compliance*, reduce the effort for IT-dependent manual controls.
+When automating workflows in _GRC/Compliance_, reduce the effort for IT-dependent manual controls.
 
 Example workflows can be found in [examples/playbooks/workflows](https://github.com/Admyral-Security/admyral/tree/main/examples).
 
