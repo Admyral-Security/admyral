@@ -14,55 +14,96 @@ Admyral provides pre-defined actions to enable you to get started quickly. They 
 
 Send emails as part of an automation.
 
-| Parameter     | Type | Description                                                                                                                                                         |
-| ------------- | ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `recipients`  | str  | The email addresses of the recipients. This should be a single string containing one or more email addresses, separated by commas if there are multiple recipients. |
-| `sender_name` | str  | The name of the sender. This name will appear in the "From" field of the email.                                                                                     |
-| `subject`     | str  | The subject of the email. This will be displayed in the subject line of the email.                                                                                  |
-| `body`        | str  | The body of the email. This is the main content of the email message.                                                                                               |
+| Parameter     | Type             | Description                                                                                                                                                     |
+| ------------- | ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `recipients`  | str \| list[str] | The email addresses of the recipient(s). For a single recipient, either use a list of strings or just a string. For multiple recipients, use a list of strings. |
+| `sender_name` | str              | The name of the sender. This name will appear in the "From" field of the email.                                                                                 |
+| `subject`     | str              | The subject of the email. This will be displayed in the subject line of the email.                                                                              |
+| `body`        | str              | The body of the email. This is the main content of the email message.                                                                                           |
 
 **Response**: The response from the `resend.Emails.send()` method, typically a JSON object indicating the status of the email sending operation.
 
 <Tabs items={['Code Example', 'No-Code Example']}>
     <Tabs.Tab>
         ```python
-        import ... TODO
+        from admyral.workflow import workflow
+        from admyral.typings import JsonValue
+        from admyral.actions import send_email
 
         @workflow
-        def example_workflow(): # previous workflow logic
-        email = send_email(
-        recipients="daniel@admyral.dev, chris@admyral.dev",
-        sender_name="Admyral",
-        subject="Admyral Documentation",
-        body="Hi there, This is for documentation purposes. Cheers!"
-        )
-        ````
+        def example_workflow(payload: dict[str, JsonValue]): # previous workflow logic
+          # multiple recipients
+          email = send_email(
+            recipients=["daniel@admyral.dev", "chris@admyral.dev"],
+            sender_name="Admyral",
+            subject="Admyral Documentation",
+            body="Hi there, This is for documentation purposes. Cheers!"
+          )
 
-  </Tabs.Tab>
-  <Tabs.Tab>
-    <div align="center">
-	    <br />
-	    ![No-Code Send Email](../../img/no_code_send_email.png)
-    </div>
-    _No-Code Editor: Send Email_
-  </Tabs.Tab>
+          # Single recipient
+          email = send_email(
+            recipients="daniel@admyral.dev",
+            sender_name="Admyral",
+            subject="Admyral Documentation",
+            body="Hi there, This is for documentation purposes. Cheers!"
+          )
+        ```
+
+    </Tabs.Tab>
+
+    <Tabs.Tab>
+      <div align="center">
+          <br />
+          ![No-Code Send Email - Multiple Recipients](/no_code_send_email.png)
+          _No-Code Send Email - Multiple Recipients_
+
+          ![No-Code Send Email - Single Recipient](/no_code_send_email_single_recipient.png)
+          _No-Code Send Email - Single Recipient_
+      </div>
+      _No-Code Editor: Send Email_
+    </Tabs.Tab>
+
 </Tabs>
 
 ## If-Condition
 
 Create if-branches within your automations.
 
+The following Python for if-conditions is currently supported:
+
+-   Binary Operators: `==`, `!=`, `<`, `<=`, `>`, `>=`, `in`
+-   Unary Operators: `not`, `is None`, `is not None`
+
+You can construct condition expressions of the following types:
+
+-   Using truthy and falsy values <br/>
+    _Falsy_ Values: empty lists `[]`, empty dicts `{}`, empty tuples `()`, empty strings `""`, `None`, `False`, integer zero `0` <br/>
+    All other values are considered to be _truthy_
+-   Unary Expression: `not <Expression>`, `<Expression> is None`, `<Expression> is not None` <br/>
+    Example: `not payload["some_value"]`
+-   Binary Expression: `<Expression> <Binary Operator> <Expression>` <br/>
+    Example: `payload["url"] == "https://admyral.dev"`
+-   Combine conidtion expressions using `and`, `or` together with parenthesis `(...)` for ensuring correct precedence: <br/>
+    Example: `payload["url"] == "https://admyral.dev" or (payload["values"][0] > 0 and payload["values"][1] <= 10)`
+
+<Callout type="info">
+	**No-Code**: The No-Code editor expects the same syntax except for accessing
+	variables. There, you must use references. See the [No-Code
+	Editor](/no_code_editor) for more information about references.
+</Callout>
+
 <Tabs items={['Code Example', 'No-Code Example']}>
     <Tabs.Tab>
         Simply stick with the python-based if-statements.
 
         ```python
-        import ...
+        from admyral.workflow import workflow
+        from admyral.typings import JsonValue
 
         @workflow
-        def example_workflow():
+        def example_workflow(payload: dict[str, JsonValue]):
             # previous workflow logic
-            if result == True:
+            if payload["url"] == "https://admyral.dev":
                 # do this
             else:
                 # to that
@@ -72,17 +113,20 @@ Create if-branches within your automations.
   <Tabs.Tab>
     <div align="center">
 	    <br />
-	    ![No-Code If Condition](../../img/no_code_if_condition.png)
+	    ![No-Code If Condition](/no_code_if_condition.png)
     </div>
     _No-Code Editor: If Condition_
   </Tabs.Tab>
 </Tabs>
 
+## For Loops
+
+<Callout type="info">Coming soon...</Callout>
+
 ## AI Action
 
 Use advanced AI models to perform complex tasks, such as categorization, analysis, summarization, or decision support.
-The pre-defined AI Action only supports OpenAI's latest models provided by Admyral (Cloud version only). To use other models from providers like Mistral AI, Anthropic, or Azure OpenAI, use the actions
-from the interaction screen. For these, an API key is required.
+The pre-defined AI Action only supports OpenAI's latest models provided by Admyral (Cloud version only). To use other models or use your own API keys use the corresponding integration action of providers like OpenAI, Mistral AI, Anthropic, or Azure OpenAI.
 
 | Parameter     | Type          | Description                                                                                                                                                                     | Required/Optional |
 | ------------- | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------- |
@@ -96,14 +140,15 @@ from the interaction screen. For these, an API key is required.
 <Tabs items={['Code Example', 'No-Code Example']}>
     <Tabs.Tab>
         ```python
-        import ...
+        from admyral.workflow import workflow
+        from admyral.typings import JsonValue
 
         @workflow
-        def example_workflow():
+        def example_workflow(payload: dict[str, JsonValue]):
             # previous workflow logic incl. a request to VirusTotal saved in `virustotal`
             ai_action(
                 model="gpt-4o",
-                prompt="summarize the findings from virustotal: f{virustotal.output}"
+                prompt=f"summarize the findings from virustotal: {virustotal.output}"
             )
         ```
 
@@ -111,7 +156,7 @@ from the interaction screen. For these, an API key is required.
   <Tabs.Tab>
     <div align="center">
 	    <br />
-	    ![No-Code AI Action](../../img/no_code_ai_action.png)
+	    ![No-Code AI Action](/no_code_ai_action.png)
     </div>
     _No-Code Editor: AI Action_
   </Tabs.Tab>
@@ -119,27 +164,67 @@ from the interaction screen. For these, an API key is required.
 
 ## Deserialize JSON String
 
-Deserializes a JSON String / transforms a string to an object.
+Deserializes a JSON String.
 
-| Parameter | Type | Description                    | Required/Optional |
-| --------- | ---- | ------------------------------ | ----------------- |
-| `str`     | str  | The string to be deserialized. | Required          |
+| Parameter         | Type | Description                    | Required/Optional |
+| ----------------- | ---- | ------------------------------ | ----------------- |
+| `serialized_json` | str  | The string to be deserialized. | Required          |
+
+**Response:** The deserialized JSON.
 
 <Tabs items={['Code Example', 'No-Code Example']}>
     <Tabs.Tab>
         ```python
-        import ...
+        from admyral.workflow import workflow
+        from admyral.typings import JsonValue
+        from admyral.actions import deserialize_json_string
 
         @workflow
-        def example_workflow():
+        def example_workflow(payload: dict[str, JsonValue]):
             # previous workflow logic incl. a serialized JSON string saved in `example_string`
             value = deserialize_json_string(
-                serialized_json=example_string
+                serialized_json="{\"foo\": [1, 4, 7, 10], \"bar\": \"baz\"}"
             )
         ```
 
   </Tabs.Tab>
   <Tabs.Tab>
-    TODO 
+    ![No-Code Deserialization Action](/no_code_deserialization_action.png)
+    _No-Code Editor - Deserialization Action Example_
+  </Tabs.Tab>
+</Tabs>
+
+## Serialize JSON String
+
+Serializes JSON into a string.
+
+| Parameter   | Type | Description                    | Required/Optional |
+| ----------- | ---- | ------------------------------ | ----------------- |
+| `json_vaue` | str  | The string to be deserialized. | Required          |
+
+**Response:** The serialized JSON string.
+
+<Tabs items={['Code Example', 'No-Code Example']}>
+    <Tabs.Tab>
+        ```python
+        from admyral.workflow import workflow
+        from admyral.typings import JsonValue
+        from admyral.actions import serialize_json_string
+
+        @workflow
+        def example_workflow(payload: dict[str, JsonValue]):
+            # previous workflow logic incl. a serialized JSON string saved in `example_string`
+            value = serialize_json_string(
+                json_value={
+                  "foo": [1, 4, 7, 10],
+                  "bar": "baz"
+                }
+            )
+        ```
+
+  </Tabs.Tab>
+  <Tabs.Tab>
+      ![No-Code Serialization Action](/no_code_editor_serialization.png)
+      _No-Code Editor - Serialization Action Example_
   </Tabs.Tab>
 </Tabs>
