@@ -16,7 +16,7 @@ resend.api_key = os.getenv("RESEND_API_KEY")
 )
 def send_email(
     recipients: Annotated[
-        str,  # TODO: make list again as soon as we improved parameter handling
+        str | list[str],
         ArgumentMetadata(
             display_name="Recipients",
             description="The email addresses of the recipients",
@@ -48,7 +48,7 @@ def send_email(
 
     body = {
         "from": f"{sender_name} <{RESEND_EMAIL}>",
-        "to": [recipients],  # TODO: remove list construction here
+        "to": [recipients] if isinstance(recipients, str) else recipients,
         "subject": subject,
         "text": body,
     }
