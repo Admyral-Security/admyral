@@ -35,7 +35,9 @@ For an example, checkout our [Github example project](https://github.com/Admyral
 
 The workflow function is a Python function that is used to specify the control flow of the actions and orchestrates the input and output for the actions.
 Think of it like the receipt for the ingredients (pre-build actions, integrations, and custom actions).
-It is specified with the `@workflow` decorator:
+The workflow function is more restrictive than pure Python code as Admyral needs to compile it and map it onto the [no-code interface](/no_code_editor).
+
+A workflow function is defined as a Python function with the `@workflow` decorator:
 
 ```python
 from admyral.workflow import workflow
@@ -46,7 +48,7 @@ def example_workflow(payload: dict[str, JsonValue]):
     # some actions / control flow of your automation
 ```
 
-A workflow function must always have the parameter `payload: dict[str, JsonValue]` defined. No other parameters for the workflow function are allowed.
+Additionally, a workflow function must always have the parameter `payload: dict[str, JsonValue]`. No other parameters for the workflow function are allowed.
 
 ### Workflow Decorator
 
@@ -152,29 +154,74 @@ def example_workflow(payload: dict[str, JsonValue]):
     # some actions / control flow of your automation
 ```
 
-### Action Calling
+### Action Calling and Data Flow
 
-TODO: list, dict, string formatting
+Actions are called like normal functions and they can return data which can be assigned to variables.
+Hence, in order to pass output data from one action to another action, you need to assign the action call
+to variable:
 
-### Data Flow
-
-TODO: references, accessing data, supported data types
-
-When referring from one action to another, it is suggested to store the output from the previous action in a variable.
-
-If an action returns
-
-```bash
-@workflow
-def example_workflow():
-    a = action1()
-    b = action2(a)
+```python
+result = my_action_call()
 ```
 
-This creates a dependency which is visualized accordingly in the No-Code Editor. (Action1 then Action2)
+The data is always passed using **keyword arguments**:
 
-The workflow function is slightly restrictive as Admyral compiles it and maps it onto a [no-code interface](/no_code_editor). For example, as of now, for loops are not supported within the workflow function.
-You would define a [custom action](/custom_actions) in which the for-loop is executed. The results can be used within the workflow function. This setup enables you to create a modular setup.
+```python
+result = my_action_call()
+my_other_action(
+    arg=result
+)
+```
+
+This creates a dependency between the two actions which is visualized accordingly in the No-Code Editor (`my_action_call` --> `my_other_action`).
+Due to the dependency, Admyral will always first execute `my_action_call` and then `my_other_action` because `my_other_action` depends on the
+output of `my_action_call`.
+
+The following semantics are supported for passing data as arguments to an action:
+
+-   f-strings `f"this is a string with some value: {x}"`
+-   constants of type `int`, `float`, `str`, `list`, `dict`, `None`, `bool`
+-   dict constructions
+-   list constructions
+-   variables incl. access paths for possibly nested lists and dicts, e.g., `payload["some_list"][0]["some_key"]`
+
+Example:
+
+```python
+from admyral.workflow import workflow
+from adymral.typings import JsonValue
+from admyral.actions import send_email, send_slack_message_to_user_by_email
+
+@workflow
+def example_workflow(payload: dict[str, JsonValue]):
+    sent_emails = send_email(
+        # You can manually build lists using constants and variables
+        recipients=["daniel@admyral.dev", payload["recipient"]],
+        sender_name="Admyral",
+        subject="Test",
+        body="Test Body"
+    )
+
+    send_slack_message_to_user_by_email(
+        # use a variable to pass data
+        email=payload["recipient"],
+        # use an f-string for building formatted strings
+        text=f"Hey! You received the following emails: {sent_emails}",
+    )
+```
+
+### Supported Data types
+
+Currently, Admyral only supports JSON-serializable types as input and output for actions, i.e., the following types are supported:
+
+-   `str`
+-   `None`
+-   `bool`
+-   `int`
+-   `float`
+-   `list` consisting of JSON-serializable types
+-   `dict` consisting of JSON-serializable types
+-   our custom type representing a JSON-serializable type: `JsonValue` (Usage: `from admyral.typings import JsonValue`)
 
 ### Secrets
 
