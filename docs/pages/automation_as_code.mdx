@@ -1,4 +1,4 @@
-import { FileTree } from "nextra/components";
+import { FileTree, Callout } from "nextra/components";
 
 # Automation-as-Code
 
@@ -33,17 +33,132 @@ For an example, checkout our [Github example project](https://github.com/Admyral
 
 ## The Workflow Function
 
-The workflow function is a python function that is used to specify the control flow of the actions. Think of it like the receipt for the ingredients (pre-build actions, integrations, and custom actions).
+The workflow function is a Python function that is used to specify the control flow of the actions and orchestrates the input and output for the actions.
+Think of it like the receipt for the ingredients (pre-build actions, integrations, and custom actions).
 It is specified with the `@workflow` decorator:
 
-```bash
+```python
 from admyral.workflow import workflow
 from adymral.typings import JsonValue
 
 @workflow
-def example_workflow(dict: [str, JsonValue]):
+def example_workflow(payload: dict[str, JsonValue]):
     # some actions / control flow of your automation
 ```
+
+A workflow function must always have the parameter `payload: dict[str, JsonValue]` defined. No other parameters for the workflow function are allowed.
+
+### Workflow Decorator
+
+A workflow function must always be decorated with the `@workflow` decorator imported via `from admyral.workflow import workflow`.
+The workflow decorator supports the following arguments:
+
+-   `description`: Add a description to your workflow which will be displayed in the Admyral UI
+-   `triggers`: Define triggers for your workflow. See the Triggers section below for more information.
+
+Example:
+
+```python
+from admyral.workflow import workflow, Webhook, Schedule
+from adymral.typings import JsonValue
+
+@workflow(
+    description="This is my workflow description example",
+    triggers=[
+        Webhook(),
+        Schedule(interval_hours=1)
+    ]
+)
+def example_workflow(payload: dict[str, JsonValue]):
+    # some actions / control flow of your automation
+```
+
+### Triggers
+
+Admyral supports the following trigger types:
+
+-   Webhook: An event-based trigger which let's you use the workflow as an API.
+
+    In order to call your webhook, you need the webhook URL and the webhook secret. You can find both
+    if you go to your workflow in the Admyral UI and click on the **Start Worfklow** node.
+
+    Option 1: Authenticate via the API URL
+
+    ```bash
+    curl -X POST <webhook-url>/<webhook-secret>
+    ```
+
+    Option 2: Authenticate via the header
+
+    ```bash
+    curl -X POST <webhook-url> -H 'Authorization: <webhook-secret>'
+    ```
+
+-   Schedule: A schedule-based trigger. The following schedule types are supported:
+
+        - `interval_seconds`: Run the workflow every X seconds
+        - `interval_minutes`: Run the workflow every X minutes
+        - `interval_hours`: Run the workflow every X hours
+        - `interval_days`: Run the workflow every X days
+        - `cron`: Run the workflow based on the defined cron expression
+
+Example:
+
+```python
+from admyral.workflow import workflow, Webhook, Schedule
+from adymral.typings import JsonValue
+
+@workflow(
+    description="This is my workflow description example",
+    triggers=[
+        Webhook(),
+        Schedule(interval_seconds=60),
+        Schedule(interval_hours=1),
+        Schedule(cron="0 0 * * *"),
+    ]
+)
+def example_workflow(payload: dict[str, JsonValue]):
+    # some actions / control flow of your automation
+```
+
+### Triggers - Default Arguments
+
+Triggers also support **default arguments**. Default arguments are passed to triggers via **keyword arguments**. If a workflow execution is started by
+a trigger, the default arguments are injected into the `payload` dictionary if the key does not yet exist in the `payload`. This implies that for a
+scheduled execution, default arguments are always injected while for a webhook-based or manually-triggered execution a value is only injected if the
+key is not present in the incoming payload.
+
+Example:
+
+```python
+from admyral.workflow import workflow, Webhook, Schedule
+from adymral.typings import JsonValue
+
+@workflow(
+    description="This is my workflow description example",
+    triggers=[
+        Webhook(
+            # Define your default arguments as keyword arguments here
+            some_key="hello from webhook"
+        ),
+        Schedule(
+            interval_seconds=60,
+            # Define your default arguments as keyword arguments here
+            some_key="hello from schedule"
+        ),
+    ]
+)
+def example_workflow(payload: dict[str, JsonValue]):
+    # some actions / control flow of your automation
+```
+
+### Action Calling
+
+TODO: list, dict, string formatting
+
+### Data Flow
+
+TODO: references, accessing data, supported data types
 
 When referring from one action to another, it is suggested to store the output from the previous action in a variable.
 
@@ -61,49 +176,88 @@ This creates a dependency which is visualized accordingly in the No-Code Editor.
 The workflow function is slightly restrictive as Admyral compiles it and maps it onto a [no-code interface](/no_code_editor). For example, as of now, for loops are not supported within the workflow function.
 You would define a [custom action](/custom_actions) in which the for-loop is executed. The results can be used within the workflow function. This setup enables you to create a modular setup.
 
-TODO: run_after
-TODO: secrets
-TODO: workflow decorator
-TODO: Things which are not allowed =>
-TODO: accessing data
-TODO: list, dict, string formatting
-TODO: for-loops coming soon
-TODO: Triggers
+### Secrets
 
-### Custom actions within in the workflow function
+TODO:
 
-To facilitate a natural coding flow, Admyral supports custom actions within the workflow function. Each action has to be encapsulated by starting with `# {% custom %}` and `# {% endcustom %}`.
+### Custom Python Code
 
-```bash
-@workflow
-def example_workflow():
-    # some actions
+Admyral supports two options for leveraging custom Python code in your workflows:
 
-    # {% custom %}
-    # add custom python code here
-    users = [a, b, c]
-    for user in users:
-        # do something
-    # {% endcustom %}
+-   **Custom Actions**: Build your own custom action and make it available for your code and no-code workflow
 
-    # continue your workflow function
-```
+    Example:
 
-Within the No-Code Editor, the `custom_action` will be displayed as a separate node. Read more about custom actions [here](/custom_actions).
+    ```python
+    from admyral.workflow import workflow
+    from admyral.typings import JsonValue
+
+    # Import your custom action in your workflow file
+    from actions.my_custom_actions import my_custom_action
+
+    @workflow
+    def example_workflow(payload: dict[str, JsonValue]):
+        # Use your custom action like you would use pre-built actions!
+        my_custom_action()
+    ```
+
+-   **Python Sections**: A marked section where you can write custom Python code directly in the workflow function.
+    A Python section starts with the `# {% custom %}` marker and ends with `# {% endcustom %}` marker.
+    The Python section is displayed as a Python script node in the No-Code Editor.
+
+    Example:
+
+    ```python
+    from admyral.workflow import workflow
+    from admyral.typings import JsonValue
+
+    @workflow
+    def example_workflow():
+        # some actions
+
+        # {% custom %}
+        # add custom python code here
+        users = [a, b, c]
+        for user in users:
+            # do something
+        # {% endcustom %}
+
+        # continue your workflow function
+    ```
+
+    <Callout type="info">
+    	Python sections are not yet available but will be released in the
+    	upcoming weeks.
+    </Callout>
+
+See [Custom Actions](/custom_actions) to learn more about using custom actions in your workflows.
 
 ### If-Conditions
 
 Within the workflow function, it is allowed to use if-statements and nested if-statements. Admyral compiles these into an If-Condition node in the no-code editor.
 
-```bash
+```python
+from admyral.workflow import workflow
+from admyral.typings import JsonValue
+
 @workflow
-def example_workflow():
+def example_workflow(payload: dict[str, JsonValue]):
     # previous workflow logic with action A and B
     if result_from_action_a == true and result_from_action_b:
         # do something
 ```
 
-TODO: if condition syntax => supported operators
+See [If Conditions in Pre-built Actions](/pre_defined_actions#if-condition) for more information.
+
+### For Loops
+
+<Callout type="info">
+	For loops are not yet available but will be released in the upcoming weeks.
+</Callout>
+
+### Handling Side-Effects with run_after
+
+TODO: run_after
 
 ## Executing an Automation
 
@@ -115,18 +269,16 @@ To execute an automation locally, simply call it like a normal Python function
 from admyral.workflow import workflow
 from adymral.typings import JsonValue
 
-
 @workflow
 def example_workflow(dict: [str, JsonValue]):
     # some actions / control flow of your automation
     ...
 
-
 if __name__ == "__main__":
-    # just call your workflow function
+    # just call your workflow function like a normal Python function
     example_workflow({})
 
-    # you can also pass a payload to your workflow as input
+    # you can also pass input via the payload to your workflow
     example_workflow({
         "some_argument": ...
     })
@@ -138,7 +290,7 @@ and then simply execute it as a normal Python script:
 python example_workflow.py
 ```
 
-To execute an automation using Admyral's infrastructure, you first need to push the workflow (Note: by adding `--activate` your workflow is also immediately activated)
+To execute an automation using Admyral's workflow engine, you first need to push the workflow (Note: by adding `--activate` your workflow is also immediately activated)
 and then you can simply trigger it using the CLI:
 
 ```bash
@@ -147,3 +299,5 @@ admyral workflow push example_workflow -f example_workflow.py --activate
 # Trigger your workflow
 admyral workflow trigger example_workflow
 ```
+
+See [Admyral CLI](/cli) to learn more information about the available CLI commands.
