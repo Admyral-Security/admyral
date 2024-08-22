@@ -37,7 +37,8 @@ RUN pip install -r requirements.txt
 
 # add admyral
 COPY . .
+RUN pip install -e .
 
 EXPOSE 8000
 
-CMD ["python", "-m", "admyral.main", "api", "--docker"]
+CMD ["python", "admyral/main.py", "api", "--docker"]
