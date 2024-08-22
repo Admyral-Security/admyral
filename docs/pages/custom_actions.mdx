@@ -40,7 +40,7 @@ The following metadata fields defined in the `@action` decorator is used for ren
 -   `display_namespace` (Required): The group under which the action will be rendered in the left sidebar of the no-code editor.
 -   `description` (Optional): Description of the action.
 
-### Supported Action and Return Types
+#### Supported Action and Return Types
 
 Currently, Admyral only supports JSON-serializable types as input and output for actions, i.e., the following types are supported:
 
@@ -53,7 +53,7 @@ Currently, Admyral only supports JSON-serializable types as input and output for
 -   `dict` consisting of JSON-serializable types
 -   our custom type representing a JSON-serializable type: `JsonValue` (Usage: `from admyral.typings import JsonValue`)
 
-### Action Arguments and Return Types
+#### Action Arguments and Return Types
 
 Action arguments are simple function arguments. However, each argument must be typed as well as annotated with `ArgumentMetadata` which is used to populate the UI.
 Hence, the following format is used as type hint: `Annotated[<argument-type>, ArgumentMetadata(display_name="...", description="...")]`.
@@ -118,7 +118,7 @@ def send_two_slack_messages(
     ...
 ```
 
-### Handling Secrets
+#### Handling Secrets
 
 If you need to use one or more secrets in your custom action, you need to define placeholders to which secrets are mapped when they are used in workflows.
 You simpley define secret placeholders using the `secrets_placeholders` field of the `@action` decorator. To access the secret, you can load the secret
@@ -169,7 +169,7 @@ This mapping then allows the action to load `my_stored_slack_secret` for `SLACK_
 
 For more information see [Secrets Management](/secrets).
 
-### Handling Dependencies
+#### Handling Dependencies
 
 In order to use pip packages inside your custom Python action, you need to add the needed packages to the `requirements` argument in the `@action` decorator:
 
@@ -195,7 +195,7 @@ def custom_action() -> None:
     s3 = aws_resource('s3')
 ```
 
-### Using Existing Actions inside your Custom Action
+#### Using Existing Actions inside your Custom Action
 
 You can also build custom Python actions on top of existing pre-built or custom actions. You can simply call them.
 
@@ -236,7 +236,7 @@ def send_two_slack_messages(
     )
 ```
 
-### Pushing Actions
+#### Pushing Actions
 
 After creating your custom action, push it to Admyral using the following CLI command to use it in other workflows or within the no-code editor:
 
@@ -244,7 +244,7 @@ After creating your custom action, push it to Admyral using the following CLI co
 admyral action <your_custom_action.py> push
 ```
 
-### Currently Unsupported Patterns
+#### Currently Unsupported Patterns
 
 The following typical patterns are currently NOT supported (this might change in the future):
 

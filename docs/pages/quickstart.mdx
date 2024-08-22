@@ -15,6 +15,12 @@ This quickstart helps you to create your first workflow within Admyral. The work
 
 You can create your first workflow within less than 10 minutes:
 
+<Callout type="info">
+	You can also clone the [Admyral Quickstart Github
+	Repo](https://github.com/Admyral-Security/admyral-quickstart) to follow
+	along.
+</Callout>
+
 <Steps>
 ### Step 1: Installing and Starting Admyral
 
@@ -87,15 +93,11 @@ With Admyral, you can decide whether you want to build your workflows with `Code
 <Tabs items={['Code', 'No-Code']}>
     <Tabs.Tab>
 
-        We recommend to setup a Github project for managing your workflows. You can checkout our [quickstart Github repository](https://github.com/Admyral-Security/admyral-quickstart). Feel free to clone it and use it for your setup or simply just get inspired.
+        We recommend to setup a Github project for managing your workflows. You can checkout our [quickstart Github repository](https://github.com/Admyral-Security/admyral-quickstart). Feel free to clone it and use
+        it for your setup or simply just get inspired.
 
         Open your project with your favorite IDE and create a new Python file named `virus_total_workflow.py` for the workflow.
-
-        =======
-
         Within this newly created file, your new workflow automation is being created using Python code.
-
-        In Admyr
 
         Let's start with building your first workflow function. This function has the `@workflow` decorator and defines the the control flow of our workflow automation.
 
@@ -108,77 +110,105 @@ With Admyral, you can decide whether you want to build your workflows with `Code
             # will be completed soon
         ```
 
-        Additionally, we need the corresponding imports. In this case, it is `from admyral.workflow import workflow` for the workflow function as well as `from admyral.actions import virus_total` for the integration.
-        For the latter, we are using the pre-built integration to analyze an url (`virus_total.analyze_url(url: str)`) which takes an url as a string such as `www.example.org` and returns a JSON. The return value is the regular return value you'd receive from the [VirusTotal Scan URL API](https://docs.virustotal.com/reference/scan-url).
-        With this knowledge, we can know create the workflow using plain Python:
+        The workflow function must always have the parameter `payload: dict[str, JsonValue]` defined. No other parameters for the workflow function are allowed.
+
+        The function name `virus_total_workflow`, also called workflow name, is used as an identifier for your workflow and must be unique across all your workflows.
+
+        Additionally, we need the corresponding imports. In this case, it is `from admyral.workflow import workflow` for the workflow decorator as well as `from admyral.actions import virus_total_analyze_url` for the integration action.
+        For the latter, we are using the pre-built integration to analyze an url which takes an url as a string such as `www.example.org` and returns a JSON. The return value is the
+        regular return value you'd receive from the [VirusTotal Scan URL API](https://docs.virustotal.com/reference/scan-url).
+        With this knowledge, we can now create the workflow using plain Python:
 
         ```python
         from admyral.workflow import workflow
-        from admyral.actions import virus_total
+        from admyral.typings import JsonValue
+        from admyral.actions import virus_total_analyze_url
 
-        @workflow()
+        @workflow
         def virus_total_workflow(payload: dict[str, JsonValue]):
-            virus_total.analyze_url(payload["url"])
+            virus_total_analyze_url(payload["url"])
         ```
 
-        To use our previously stored secret for virustotal, we add `secrets={"TOOL_SECRET": "<secret_name>"}` as the last argument of an integration. In our case, it would look like the following:
+        To use our previously stored secret for VirusTotal, we add the secret mapping `secrets={"TOOL_SECRET": "<secret_name>"}` as the last argument of an integration. In our case, it would look like the following:
 
         ```python
         from admyral.workflow import workflow
-        from admyral.actions import virus_total_analyze_hash
+        from admyral.typings import JsonValue
+        from admyral.actions import virus_total_analyze_url
 
         @workflow()
         def virus_total_workflow(payload: dict[str, JsonValue]):
-            virus_total.analyze_url(
+            virus_total_analyze_url(
                 payload["url"],
                 secrets={"VIRUS_TOTAL_SECRET": "virus_total"}
             )
         ```
 
-        Now, we need to add triggers and a description (optional) to the workflow automation. Triggers can either be event-based (a webhook), based on one or more schedules, based on manual execution, or a combination of them.
+        Performing the access `payload["url"]` implies that we always expect
+        a JSON body which contains a field called `url` be sent to the webhook. For example:
+
+        ```json
+        {
+            "url": "www.example.org"
+        }
+        ```
+
+        For more information about secrets, please refer to [Secrets Management](/secrets).
+
+        Now, we add a trigger and a description (optional) to the workflow automation. Admyral supports event-based triggers (webhook) as well as schedueld triggers.
+        You can also omit defining a trigger since you can always execute your workflows using manual execution via the CLI (`admyral workflow trigger ...`) or in the Admyral UI.
         In this quickstart, we opt to create a webhook:
 
         ```python
         from admyral.workflow import workflow
-        from admyral.actions import virus_total
+        from admyral.typings import JsonValue
+        from admyral.actions import virus_total_analyze_url
 
         @workflow(
             description="Analyze an URL using VirusTotal",
             triggers=[Webhook()]
         )
         def virus_total_workflow(payload: dict[str, JsonValue]):
-            virus_total.analyze_url(
+            virus_total_analyze_url(
                 payload["url"],
                 secrets={"VIRUS_TOTAL_SECRET": "virus_total"}
             )
         ```
 
         Now, you have created the workflow. The last step is to push the workflow to the Admyral infrastructure.
-        Within your terminal, write the following command:
+        We use the following push command from the CLI to push the workflow:
         ```bash
-        admyral workflow virus_total_workflow.py --push
+        admyral workflow push <workflow_name> -f <path_to_your_workflow_file.py>
         ```
+
+        If you saved your workflow in `workflows/virus_total_workflow.py`, the command is:
+        ```bash
+        admyral workflow push virus_total_workflow -f workflows/virus_total_workflow.py
+        ```
+
+        You can now go visit Admyral running on `http://localhost:3000`. There, you should find the workflow and can inspect the workflow inside the no-code editor.
 
     </Tabs.Tab>
 
     <Tabs.Tab>
 
-        1. Go to `localhost:3000`. When this exact domain is displayed in your browser, you are on the workflow overview page.
-        2. Click on `Create new workflow` on the top right.
-        3. In Workflow Settings, give the workflow a name, e.g. `Quickstart - VirusTotal URL Analysis`, and save the workflow.
-        4. On the left sidepanel, click on the VirusTotal dropdown and drag+drop the `Analyze url` action on the canvas.
-        Then connect the start node with the newly created `Analyze url` action. It should look like the following:
+        1. Visit `http://localhost:3000` in your favorite browser.
+        2. Click on `Create New Workflow` on the top right.
+        3. In Workflow Settings, give the workflow a name, e.g. `virus_total_workflow`. The workflow name must be in `snake_case`.
+        4. Save the workflow by clicking on the `Save` button.
+        4. On the left sidepanel, click on the VirusTotal dropdown and drag+drop the `Analyze URL` action on the canvas.
+        Then, connect the start node with the newly created `Analyze URL` action. It should look like the following:
 
         <div align="center">
             <br />
-            ![No-Code Editor](../../img/no_code_quickstart.png)
+            ![No-Code Editor](/no_code_quickstart.png)
         </div>
         _No-Code Editor: Start and VirusTotal Analyze URL Action_
 
         To finish it off, the VirusTotal action has to be configured:
-        1. Optional: Enter a result name to later reference on the output of the action, e.g. `analyzed_url`
+        1. Optional: Enter a result name, `analyzed_url`, to later use the output of `Analyze URL` in another action
         2. Enter the secret name for the action: `virus_total`
-        3. Fill out the arguments, e.g., just URL in this case: `www.example.org`
+        3. Fill out the arguments of the `Analyze URL` action. In this case, it is just the URL argument: `www.example.org`
 
         <Callout type="warning">
             When you enter an url in the URL field in VirusTotal's configuration panel on the right, everytime the workflow is executed, the same URL will be analyzed.
@@ -189,13 +219,20 @@ With Admyral, you can decide whether you want to build your workflows with `Code
         For this, click on the Start action and then on the "+" next to Webhook.
 
         To refer to a previous input, we use `{{ <input> }}`.
-        With this in mind, we can reference the url dynamically within the VirusTotal action using the following reference: `{{ payload["url"] }}`.
+        With this in mind, we can reference the url dynamically within the VirusTotal action using the following reference: `{{ payload["url"] }}`. This implies that we always expect
+        a JSON body which contains a field called `url` be sent to the webhook. For example:
+
+        ```json
+        {
+            "url": "www.example.org"
+        }
+        ```
 
         Note: *payload* is the Result Name of the Start node (see right sidepanel).
 
         Enter the reference above in the URL field for the VirusTotal action.
 
-        Lastly click on "Save" on the top bar to save all the changes.
+        Lastly, click on "Save" on the top bar to save all the changes.
     </Tabs.Tab>
 
 </Tabs>
@@ -204,26 +241,26 @@ With Admyral, you can decide whether you want to build your workflows with `Code
 
 ### Step 4: Execute Your Workflow
 
-Upon building our workflow, you can activate and execute your workflow. Again, you have two options for each action: (1) Using the CLI or (2) using the no-code interface.
+Upon building our workflow, you can activate and execute your workflow. Again, you have two options for each action: (1) Using the CLI or (2) using the Admyral UI.
 
-<Tabs items={['CLI', 'No-Code']}>
+<Tabs items={['CLI', 'Admyral UI']}>
     <Tabs.Tab>
         #### Activate the workflow
         To activate a workflow type in the CLI:
         ```bash
-        admyral workflow <your_workflow.py> --activate
+        admyral workflow activate <your_workflow_name>
         ```
 
-        As we called the workflow file `virus_total_workflow.py`, type in the following:
+        As we called the workflow function `virus_total_workflow`, use the following command:
         ```bash
-        admyral workflow virus_total_workflow.py --activate
+        admyral workflow activate virus_total_workflow
         ```
 
         #### Execute the workflow
         Upon activation, the workflow can be executed. The CLI command to trigger a workflow is:
 
         ```bash
-        admyral workflow <your_workflow> --trigger
+        admyral workflow trigger <your_workflow_name>
         ```
 
         So similar to above, the command to use is:
@@ -261,13 +298,15 @@ Upon building our workflow, you can activate and execute your workflow. Again, y
 </Tabs>
 </Steps>
 
-Now, you have created your first workflow in Admyral. With this quickstart, you covered all concepts of Admyral. The missing concept is _Custom Actions_.
-You can further read about it [here](/custom_actions).
+**Congratulations!** You just built your first workflow in Admyral. With this quickstart, you covered the basics of Admyral.
+Checkout [Automation-as-Code](/automation_as_code) to learn more about workflow building in Python.
 
 ## What now?
 
 You can further explore Admyral in the following ways:
 
+-   Checkout [Automation-as-Code](/automation_as_code) for more information about building your workflows in Python
+-   Review [Custom Actions](/custom_actions) for building your own actions with Python
 -   Enhance the workflow you just created:
     -   Add more URL checks using other enrichment tools such as AlienVault OTX
     -   Add a Slack integration to share your results within an threat intelligence channel or within your team

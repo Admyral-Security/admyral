@@ -82,5 +82,8 @@ Trigger the execution of a workflow:
 admyral workflow trigger <your_workflow_name>
 
 # Pass payload as serialized JSON
+admyral workflow trigger <your_workflow_name> --payload '{"key1": "value1", "key2": "value2"}'
+
+# or
 admyral workflow trigger <your_workflow_name> -p '{"key1": "value1", "key2": "value2"}'
 ```
