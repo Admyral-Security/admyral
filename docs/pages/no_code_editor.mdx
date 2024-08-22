@@ -32,7 +32,32 @@ The workflow name will also be the name of the workflow function in Code.
 
 ## References
 
-TODO:
+In order to use the output of an action, you need to first give the action from which you want to use the output a result name. Simply click on an action and
+define the `Result Name` field. Result names must be in `snake_case`.
+
+![No Code Result Name](/no_code_result_name.png)
+
+In order to pass the `jira_issues` result as an argument to an action, simply use the following pattern: `{{ jira_issues }}`
+
+The double curly brackets indicate that it is a reference. Inside the reference, you can use Python syntax to access nested data from JSON arrays or objects.
+Use numbers to access the index of an array and strings to access values by key in an object.
+
+Exampe for accessing the ID field of the first Jira issue (`jira_issues` is an array of JSON objects):
+
+```
+{{ jira_issues[0]["id"] }}
+```
+
+Example if you want to pass all the Jira issues as input to some action:
+
+```
+{{ jira_issues }}
+```
+
+<Callout type="info">
+	Tip: In order to construct references more easily, check out the run
+	history. There, you can inspect the output of an executed action.
+</Callout>
 
 ## Executing Workflows
 
