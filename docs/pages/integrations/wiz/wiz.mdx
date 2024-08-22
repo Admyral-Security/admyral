@@ -1,0 +1,45 @@
+# Wiz
+
+1. Go to your Wiz Console and log in.
+
+2. In the top-right corner, click on your user and then **User Settings**.
+
+3. Go to **Tenant** and **Copy** your API Endpoint URL
+
+The API Endpoint URL should be of the following form: `https://api.<region>.app.wiz.io/graphql`
+
+![Wiz API](/wiz_api.png)
+
+4. Next, go to **Settings** and **Service Accounts**. Click **+ Add Service Account** and create your service account.
+
+![Wiz Service Account](/wiz_create_service_account.png)
+
+5. Copy the **Client ID** and **Secret**.
+
+6. Go again to **Settings** and **Service Accounts**.
+
+7. At the top of the screen, you should find the token URL. Copy the URL.
+
+![Wiz Token URL](/wiz_token_url.png)
+
+Your token URL should be one of the following:
+
+| Idp            | Endpoint                              | Endpoint for gov tenants               |
+| -------------- | ------------------------------------- | -------------------------------------- |
+| Amazon Cognito | `https://auth.app.wiz.io/oauth/token` | `https://auth.gov.wiz.io/oauth/token`  |
+| Auth0          | `https://auth.wiz.io/oauth/token`     | `https://auth0.gov.wiz.io/oauth/token` |
+
+8. Go to the **Settings** page in **Admyral**. Click on **Create New Secret** in the **Secrets** section.
+
+9. Give your credential a name, e.g. `Wiz`.
+
+10. The following secrets structure is expected:
+
+| Key             | Value                                |
+| --------------- | ------------------------------------ |
+| `client_id`     | Paste your **Client ID** here        |
+| `client_secret` | Paste your **Client Secrtet** here   |
+| `auth_url`      | Paste your **Token URL** here        |
+| `api_endpoint`  | Paste your **API Endpoint URL** here |
+
+11. Click on the **Save** button.

@@ -1,0 +1,38 @@
+# Azure OpenAI
+
+1. Go to your [Azure Portal](https://portal.azure.com) and log in.
+
+2. In Azure, go to Azure OpenAI and create an Azure OpenAI deployment.
+
+![Azure OpenAI](/azure_openai.png)
+
+3. Go to [Azure OpenAI Studio](https://oai.azure.com).
+
+4. In the left-side panel, click on **Deployments** and then on **+ Create new deployment**.
+
+![Azure OAI Studio](/azure_oai_deploy_model.png)
+
+5. Deploy the model of your choice. The name of the model deployment is used as model parameter for the actions.
+
+6. Next, go back to your [Azure Portal](https://portal.azure.com) and go to the subscription which contains the Azure OpenAI deployment.
+
+7. Go to the **Resources** of your subscription. There, you should find your Azure OpenAI deployment. Click on it.
+
+![Azure Resources OpenAI](/azure_resources_openai.png)
+
+8. Go to **Keys and Endpoint**. There, you can find your **API key** as well as **Azure OpenAI endpoint**.
+
+![Azure OpenAI Keys and Endpoint](/azure_openai_keys.png)
+
+9. Go to the **Settings** page in **Admyral** and click on **Add New Credential** in the **Credentials** section.
+
+10. Give your credential a name, e.g. `Azure OpenAI`.
+
+11. The following secrets structure is expected:
+
+| Key        | Value                                    |
+| ---------- | ---------------------------------------- |
+| `api_key`  | Paste the **API key** here               |
+| `endpoint` | Paste the **Azure OpenAI endpoint** here |
+
+12. Click on the **Save** button.

@@ -1,0 +1,24 @@
+# Snyk
+
+1. Go to [Snyk](https://app.snyk.io) and log in.
+
+2. Go to your **Organization Settings** and **General**.
+
+3. Click on **Manage service accounts** to create an API key.
+
+![Snyk Org Settings](/snyk_org_settings.png)
+
+4. Copy your API key.
+
+5. Go to the **Settings** page in **Admyral**. Click on **Create New Secret** in the **Secrets** section.
+
+6. Give your credential a name, e.g. `Snyk`.
+
+7. The following secrets structure is expected:
+
+| Key       | Value                                       |
+| --------- | ------------------------------------------- |
+| `api_key` | Paste your **API Key** here                 |
+| `region`  | `eu`, `au`, or `us` - paste your API region |
+
+8. Click on the **Save** button.

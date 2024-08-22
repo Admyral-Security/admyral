@@ -1,0 +1,22 @@
+# SentinelOne
+
+1. Go to your SentinelOne instance.
+
+2. In the top-right corner, click on **My User**.
+
+3. In the dialog, click _Generate_ to generate the API token. If you have previously generated an API token with SentinelOne, click **Options** and then **Regenerate API** token.
+
+4. Copy the API token.
+
+5. Go to the **Settings** page in **Admyral**. Click on **Create New Secret** in the **Secrets** section.
+
+6. Give your credential a name, e.g. `SentinelOne`.
+
+7. The following secrets structure is expected:
+
+| Key        | Value                            |
+| ---------- | -------------------------------- |
+| `api_key`  | Paste your **API key** here      |
+| `base_url` | Paste your **API base URL** here |
+
+8. Click on the **Save** button.

@@ -51,24 +51,20 @@
 
 <img src="/slack5.png" />
 
-11. Go to the **Settings** page in **Admyral** and click **Create New Credential**. Select **Slack**.
+11. Go to the **Settings** page in **Admyral**. Click on **Create New Secret** in the **Secrets** section.
 
-<img src="/slack6.png" />
+12. Give your credential a name, e.g. `Slack`.
 
-12. Paste the **Bot User OAuth Access Token** in the **API Key** field and hit **Save Credential**.
+13. The following secrets structure is expected:
+
+| Key       | Value                                    |
+| --------- | ---------------------------------------- |
+| `api_key` | Paste your **Bot User OAuth Token** here |
+
+14. Click on the **Save** button.
 
 <img src="/slack7.png" />
 
-13. To communicate with existing Slack channels, you need to invite the bot to the channel. Go to the channel and type `/invite @<your app name>` (e.g. `/invite @Admyral`). Alternatively, you can add the scope `chat:write.public` to the **Bot Token Scopes**.
+15. To communicate with existing Slack channels, you need to invite the bot to the channel. Go to the channel and type `/invite @<your app name>` (e.g. `/invite @Admyral`). Alternatively, you can add the scope `chat:write.public` to the **Bot Token Scopes**.
 
-14. You can now use the Slack APIs in Admyral.
-
-## Supported Slack APIs
-
-The following APIs are available for Slack. If you need any additional Slack API, please reach out to us on [Discord](https://discord.com/invite/GqbJZT9Hbf).
-
--   [Send a message](/integrations/available_integrations/slack/apis/send_message)
--   [List users](/integrations/available_integrations/slack/apis/list_users)
--   [Lookup user by email](/integrations/available_integrations/slack/apis/lookup_by_email)
--   [Open a conversation](/integrations/available_integrations/slack/apis/conversations_open)
--   [Add a reaction](/integrations/available_integrations/slack/apis/reactions_add)
+16. You can now use the Slack APIs in Admyral.

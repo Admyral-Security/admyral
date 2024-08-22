@@ -53,7 +53,7 @@ Admyral provides out-of-the-box integrations to enable you to get started quickl
 <Tabs items={['Code', 'No-Code']}>
     <Tabs.Tab>
         
-		When creating your automation, you add a secret placeholder to them. In the example below it is `slack_secret`.
+		When using an integration, you need to map secrets to the required secret placeholders. In the example below it is `slack_secret`.
 
     	```python
     	secrets={"SLACK_SECRET": "slack_secret"}
@@ -64,7 +64,6 @@ Admyral provides out-of-the-box integrations to enable you to get started quickl
     	admyral secret slack_secret oasiofaj12839naofnaofa set
     	```
 
-
     </Tabs.Tab>
     <Tabs.Tab>
     	In the No-Code Workflow Builder, you simply select the used integration and add the name of your stored secret on the action configuration panel on the right.
@@ -74,4 +73,4 @@ Admyral provides out-of-the-box integrations to enable you to get started quickl
 
 </Tabs>
 
-Read more about it [here](/secrets).
+See [Secrets Management](/secrets) for more information.

@@ -1,0 +1,28 @@
+# Okta
+
+1. Go to your Okta Admin console.
+
+2. In the left sidebar, click on **Security** and then on **API**.
+
+![Okta Admin Panel > Security > API](/okta_admin_panel.png)
+
+3. On the API page, click on **Tokens**.
+
+4. Click **Create token**.
+
+![Okta Create Tokens](/okta_tokens.png)
+
+5. Create the token and copy the token value.
+
+6. Go to the **Settings** page in **Admyral**. Click on **Create New Secret** in the **Secrets** section.
+
+7. Give your credential a name, e.g. `Okta`.
+
+8. The following secrets structure is expected:
+
+| Key       | Value                           |
+| --------- | ------------------------------- |
+| `api_key` | Paste your **API Key** here     |
+| `domain`  | Paste your **Okta domain** here |
+
+9. Click on the **Save** button.

@@ -18,7 +18,7 @@ def azure_openai_chat_completion(
         str,
         ArgumentMetadata(
             display_name="Model",
-            description="The model to use.",
+            description="Deployment name of the model to use.",
         ),
     ],
     prompt: Annotated[

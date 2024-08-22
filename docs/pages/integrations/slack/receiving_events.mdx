@@ -1,57 +1,40 @@
 import { Callout } from "nextra/components";
 
-# Receiving Slack Events
+# Receiving Slack Interactivity Events via a Webhook
 
-In order to receive events from Slack, you need to set up an event subscription in your Slack app. This allows Slack to send events that you specify which triggers a workflow in Admyral. Follow the steps below to set up event subscriptions:
+Any interactions with shortcuts, modals, or interactive components (such as buttons, select menus, and datepickers) will be sent to a URL you specify.
 
-1. Go to the [Your Apps](https://api.slack.com/apps) page and continue to the app you created for Admyral.
+1. Go to [api.slack.com/apps](https://api.slack.com/apps) and navigate to your app
 
-2. Go to **Event Subscriptions**
+2. In the left-side panel, go to **Interactivity & Shortcuts**.
 
-<img src="/slack_events1.png" />
+3. Click the toggle to turn interactivity on.
 
-3. Click the toggle to enable events.
+![Slack Interactivity](/slack_interactivity.png)
 
-<img src="/slack_events2.png" />
+## Scenario 1: Admyral API Server is reachable from the Internet
 
-4. Go to your workflow in Admyral which should process the incoming Slack events. Add a **Start Workflow** action, click on the action node, and select **Event-based Workflow Execution** as **Start Workflow Type**.
+4. In order to receive the events from Slack, you need to make Admyral publicly available. If you are running locally, you can install a tunneling agent, such as [ngrok](https://ngrok.com/).
 
-<img src="/slack_events3.png" />
+5. If you installed ngrok, you can simply make the port on which Admyral is running locally, e.g., on port `8000`, publicly available with the following command:
 
-5. Copy the API URL from the **Start Workflow** action and paste it in the **Request URL** field in the **Event Subscriptions** page in Slack. Admyral automatically handles the Slack [URL verification challenge](https://api.slack.com/apis/events-api#handshake).
+    ```bash
+    ngrok http 8000
+    ```
 
-<img src="/slack_events4.png" />
+    It will return a forwarding URL.
 
-6. After the URL verification, you need to choose the events you want to subscribe to. Click on **Add Workspace Event** and select the events you want to subscribe to.
+6. Next, follow the steps from **Scenario 2** but replace `https://api.admyral.dev` with the forwarding URL from ngrok.
 
-## Example: React to messages posted in a Slack channel
+## Scenario 2: Admyral API Server is reachable from the Internet
 
-This is what we are going to build:
+4. Input the webhook URL, e.g., `https://api.admyral.dev/webhooks/332c5a8c-0cf2-4306-9541-cc9d590e7e8b` and append the webhook secret for authentication, i.e.,
 
-<img src="/slack_events_example2.png" />
+````
+https://api.admyral.dev/webhooks/332c5a8c-0cf2-4306-9541-cc9d590e7e8b/3903100d842c6bb4732d1073edaa18e5e8be5a61809913dd15b1202aaedd5fd9
+```,
+of the workflow receiving the interactivity events.
 
-7. In the **Event Subscriptions** page in Slack, add the `message.channels` event in the **Subscribe to Bot Events** section. Click on **Save Changes** at the bottom of the page.
+````
 
-<Callout type="info">
-  Admyral can only receive events from channels that the app is a member of. Make sure to invite the app to the channel you want to receive events from. You can invite the app to a channel by typing `/invite @<app-name>` in the channel (e.g., `/invite @Admyral`).
-</Callout>
-
-<br />
-
-<img src="/slack_events_example1.png" />
-
-8. First, we add an **If-Condition** action below the **Start Workflow** action. We need to check whether the received message is from user. We configure the If-Condition with the following parameters:
-
--   **Condition**: `<<slack_events_input.body.event.bot_id>>` does not exist
-
-9. Next, we use the **Send Message** API from the Slack integration to comment on the message. In the **Credential** dropdown, we select our Slack credentials. We configure the **Send Message** action with the following parameters:
-
--   **Channel**: `<<slack_events_input.body.event.channel>>`
--   **Text**: `Yo! Admyral here. What's up?`
--   **Thread Timestamp**: `<<slack_events_input.body.event.ts>>`
-
-10. Finally, we also use the **Add Reaction** API from the Slack integration to add a reaction to the message. First, we need to select our Slack credentials. Then, we configure the **Add Reaction** action with the following parameters:
-
--   **Channel**: `<<slack_events_input.body.event.channel>>`
--   **Name**: `thumbsup`
--   **Timestamp**: `<<slack_events_input.body.event.ts>>`
+5. Click on **Save Changes**.

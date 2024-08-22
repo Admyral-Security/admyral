@@ -12,6 +12,16 @@
 
 <img src="/jira_software3.png" />
 
-4. Go to the **Settings** page in **Admyral**. Click on **Create New Credential** in the **Credentials** section. Select **Jira Software** from the dropdown list. Give your credential a name, e.g. `Jira`. Paste the token you copied in the previous step into the **API Key** field. Click **Save Credential**.
+4. Go to the **Settings** page in **Admyral** and click on **Add New Credential** in the **Credentials** section.
 
-<img src="/jira_software4.png" />
+5. Give your credential a name, e.g. `AlienVault`.
+
+6. The following secrets structure is expected:
+
+| Key       | Value                                                                                                                                                           |
+| --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `api_key` | Paste the API key here                                                                                                                                          |
+| `domain`  | Paste your Jira/Atlassian domain here, e.g., if you access Jira via URL like `https://admyral.atlassian.net`, then your domain would be `admyral.atlassian.net` |
+| `email`   | The email of the account who provisioned the API key                                                                                                            |
+
+7. Click on the **Save** button.
