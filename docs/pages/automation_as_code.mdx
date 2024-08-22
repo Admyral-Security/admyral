@@ -178,7 +178,40 @@ You would define a [custom action](/custom_actions) in which the for-loop is exe
 
 ### Secrets
 
-TODO:
+A lot of actions interact with other tools which require authentication. Hence, they need to be given access to secrets.
+
+If an action requires access to a secret, it defines a secret placeholder. In order to use this action, you need to map a
+secret to the secret placeholder when calling the action.
+
+Example: Calling `send_slack_message_to_user_by_email`
+
+The action `send_slack_message_to_user_by_email` requires a secret to be mapped to `SLACK_SECRET`.
+We previously setup the Slack connection by following the guide from our [integrations documentation](integrations/integrations)
+and stored the Slack secret with the name `my_stored_slack_secret`.
+
+Hence, we map our stored Slack secret `my_stored_slack_secret` to the secret placeholder to give the action access to Slack:
+
+```python
+from admyral.workflow import workflow
+from admyral.typings import JsonValue
+from admyral.actions import send_slack_message_to_user_by_email
+
+@workflow
+def example_workflow(payload: dict[str, JsonValue]):
+    send_slack_message_to_user_by_email(
+        email="daniel@admyral.dev",
+        text="Hello from Admyral",
+        # map the stored slack secret to the placeholder
+        secrets={
+            "SLACK_SECRET": "my_stored_slack_secret"
+        }
+    )
+```
+
+If you build your custom actions, you don't need to define it because the `secrets`
+argument is automatically available if you define secret placeholders.
+
+See [Secrets](/secrets) for more information.
 
 ### Custom Python Code
 
@@ -257,7 +290,46 @@ See [If Conditions in Pre-built Actions](/pre_defined_actions#if-condition) for 
 
 ### Handling Side-Effects with run_after
 
-TODO: run_after
+The Admyral compiler automatically parallelizes actions which are independent from each other. Since the compiler
+parallelizes the action based on the data flow in the workflow function, there might be situations where there are hidden
+dependencies between two actions due to some side-effects. In order to enforce, the correct execution order you can use
+the `run_after` argument.
+
+This workflow
+
+```python
+from admyral.workflow import workflow
+from admyral.typings import JsonValue
+
+@workflow
+def example_workflow(payload: dict[str, JsonValue]):
+    custom_action1()
+    custom_action2()
+```
+
+would be transformed into a no-code workflow where the start workflow has two children `custom_action1` and `custom_action2`.
+Since these actions are assumed to be independent, they are executed in parallel.
+
+To ensure that both actions are executed in sequential order, use `run_after`:
+
+```python
+from admyral.workflow import workflow
+from admyral.typings import JsonValue
+
+@workflow
+def example_workflow(payload: dict[str, JsonValue]):
+    # do a variable assignment - even if the action does not return anything
+    result = custom_action1()
+    custom_action2(
+        # enforce that custom_action2 is executed after
+        # custom_action1 by passing result to the run_after
+        # argument
+        run_after=[result]
+    )
+```
+
+Note that all actions (custom and pre-built) support `run_after`. If you build your custom actions, you don't need to define it because the run_after
+argument is automatically available.
 
 ## Executing an Automation
 
