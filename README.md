@@ -4,7 +4,6 @@
 
 <div align="center">
   <div>
-      <a href="https://admyral.dev/login"><strong>Login</strong></a> ·
       <a href="https://docs.admyral.dev/"><strong>Docs</strong></a> ·
       <a href="https://discord.gg/GqbJZT9Hbf"><strong>Discord</strong></a>
   </div>
