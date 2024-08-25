@@ -350,8 +350,9 @@ class AdmyralStore(StoreInterface):
                 await db.exec(
                     update(WorkflowSchema)
                     .where(WorkflowSchema.user_id == user_id)
-                    .where(WorkflowSchema.workflow_name == workflow.workflow_name)
+                    .where(WorkflowSchema.workflow_id == workflow.workflow_id)
                     .values(
+                        workflow_name=workflow.workflow_name,  # consider workflow name changes
                         workflow_dag=workflow.workflow_dag.model_dump(),
                         is_active=workflow.is_active,
                     )
