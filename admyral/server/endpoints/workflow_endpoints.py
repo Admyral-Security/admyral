@@ -22,6 +22,7 @@ logger = get_logger(__name__)
 
 
 MANUAL_TRIGGER_SOURCE_NAME = "manual"
+SPACE = " "
 
 
 class WorkflowBody(BaseModel):
@@ -60,6 +61,9 @@ async def push_workflow_impl(
     """
     admyral_store = get_admyral_store()
     workers_client = get_workers_client()
+
+    if SPACE in workflow_name:
+        raise ValueError("Workflow name must not contain spaces.")
 
     if workflow_id:
         existing_workflow = await admyral_store.get_workflow_by_id(workflow_id)

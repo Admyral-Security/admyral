@@ -8,6 +8,8 @@ import { useEffect } from "react";
 import { errorToast, infoToast } from "@/lib/toast";
 import { AxiosError } from "axios";
 
+const SPACE = " ";
+
 export default function SaveWorkflowButton() {
 	const { getWorkflow, updateWebhookIdAndSecret } = useWorkflowStore();
 	const saveWorkflow = useSaveWorkflowApi();
@@ -41,11 +43,14 @@ export default function SaveWorkflowButton() {
 
 	const handleSaveWorkflow = () => {
 		const workflow = getWorkflow();
-		// TODO(frontend): validate workflow name
 		if (workflow.workflowName.length === 0) {
 			errorToast(
 				"Workflow name must not be empty. Go to settings to set one.",
 			);
+			return;
+		}
+		if (workflow.workflowName.includes(SPACE)) {
+			errorToast("Workflow name must contain empty spaces.");
 			return;
 		}
 		saveWorkflow.mutate(workflow);
