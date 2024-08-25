@@ -8,3 +8,43 @@ This method lists all groups a user is a member of, along with the last time a u
 	For more information on the Retool API, see [Retool API
 	Documentation](https://docs.retool.com/reference/api).
 </Callout>
+
+**SDK Import:**
+
+```python
+from admyral.actions import list_groups_per_user
+```
+
+## Arguments
+
+| Argument Name | Description | Required |
+| ------------- | :---------: | -------- |
+
+## Returns
+
+A JSON object containing a mapping from users to another JSON object storing the names of the groups a user belongs to as well as the last active date.
+
+Schema:
+
+```
+{
+	<user_email>: {
+		"last_active": <last_active_date>,
+		"groups": <list_of_group_names>
+	}
+}
+```
+
+## Required Secrets
+
+| Secret Placeholder | Description                                                    |
+| ------------------ | -------------------------------------------------------------- |
+| `RETOOL_SECRET`    | Retool secret. See [Retool setup](/integrations/retool/retool) |
+
+## SDK Example
+
+```python
+groups_per_user = list_groups_per_user(
+	secrets={"RETOOL_SECRET": "my_stored_retool_secret"}
+)
+```

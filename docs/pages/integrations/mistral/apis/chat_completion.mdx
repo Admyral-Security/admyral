@@ -1,57 +1,48 @@
 import { Callout } from "nextra/components";
 
-# Mistral AI - Chat Completion
+# Chat Completion
 
 Leverage advanced AI models from Mistral AI to perform complex tasks such as categorization, analysis, summarization, or decision support.
 
 <Callout type="info">
-	For more information on Mistral AI's API, see [Mistral AI
-	Documentation](https://docs.mistral.ai/api/#tag/chat/operation/chat_completion_v1_chat_completions_post).
+	For more information on Mistral AI's API, see [Mistral AI Chat
+	Completion](https://docs.mistral.ai/api/#tag/chat/operation/chat_completion_v1_chat_completions_post).
 </Callout>
 
-## Parameters:
+**SDK Import:**
 
-| Field           | Description                                                                                                                                                                                             | Required |
-| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------: |
-| **Model**       | The model to use for the chat completion (e.g., `mistral-7B`).                                                                                                                                          |   Yes    |
-| **Prompt**      | The input prompt to use for generating the chat completion.                                                                                                                                             |   Yes    |
-| **Top P**       | Value between 0 and 1 for nucleus sampling. Only tokens with the top P probability mass are considered. Recommended to tweak this or temperature, but not both.                                         |    No    |
-| **Temperature** | Sampling temperature, between 0 and 2. Higher values (e.g., 0.8) increase randomness, while lower values (e.g., 0.2) make output more deterministic. Recommended to adjust this or Top P, but not both. |    No    |
-| **Max Tokens**  | The maximum number of tokens to generate for the completion.                                                                                                                                            |    No    |
+```python
+from admyral.actions import mistralai_chat_completion
+```
 
-## Example Output
+## Arguments:
 
-```json
-{
-	"id": "cmpl-e5cc70bb28c444948073e77776eb30ef",
-	"object": "chat.completion",
-	"model": "mistral-small-latest",
-	"usage": {
-		"prompt_tokens": 16,
-		"completion_tokens": 34,
-		"total_tokens": 50
-	},
-	"created": 1702256327,
-	"choices": [
-		{
-			"index": 0,
-			"message": {
-				"content": "string",
-				"tool_calls": [
-					{
-						"id": "null",
-						"type": "function",
-						"function": {
-							"name": "string",
-							"arguments": {}
-						}
-					}
-				],
-				"prefix": false,
-				"role": "assistant"
-			},
-			"finish_reason": "stop"
-		}
-	]
-}
+| Argument Name                 | Description                                                                                                                                                                                             | Required |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------: |
+| **Model** `model`             | The model to use for the chat completion (e.g., `open-mistral-7B`).                                                                                                                                     |   Yes    |
+| **Prompt** `prompt`           | The input prompt to use for generating the chat completion.                                                                                                                                             |   Yes    |
+| **Top P** `top_p`             | Value between 0 and 1 for nucleus sampling. Only tokens with the top P probability mass are considered. Recommended to tweak this or temperature, but not both.                                         |    -     |
+| **Temperature** `temperature` | Sampling temperature, between 0 and 2. Higher values (e.g., 0.8) increase randomness, while lower values (e.g., 0.2) make output more deterministic. Recommended to adjust this or Top P, but not both. |    -     |
+| **Max Tokens** `max_tokens`   | The maximum number of tokens to generate for the completion.                                                                                                                                            |    -     |
+
+## Returns
+
+A string.
+
+## Required Secrets
+
+| Secret Placeholder | Description                                                              |
+| ------------------ | ------------------------------------------------------------------------ |
+| `MISTRALAI_SECRET` | Mistral AI secret. See [Mistral AI setup](/integrations/mistral/mistral) |
+
+## SDK Example
+
+```python
+response = mistralai_chat_completion(
+	model="open-mixtral-8x22b",
+	prompt="Why is the ocean salty?",
+	secrets={
+		"MISTRALAI_SECRET": "my_stored_mistralai_secret"
+	}
+)
 ```

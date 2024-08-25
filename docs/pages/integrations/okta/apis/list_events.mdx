@@ -9,11 +9,35 @@ Retrieve a list of events from Okta within a specified time range. This API allo
 	Documentation](https://developer.okta.com/docs/reference/api/system-log/#list-events).
 </Callout>
 
-## Parameters:
+**SDK Import:**
 
-| Field          | Description                                                                               | Required |
-| -------------- | ----------------------------------------------------------------------------------------- | :------: |
-| **User ID**    | The user ID to list events for. If not provided, events for all users will be returned.   |    No    |
-| **Start Time** | The start time for the events to list. Must be in ISO 8601 format (YYYY-MM-DDTHH:MM:SSZ). |    No    |
-| **End Time**   | The end time for the events to list. Must be in ISO 8601 format (YYYY-MM-DDTHH:MM:SSZ).   |    No    |
-| **Limit**      | The maximum number of events to retrieve. The default and maximum value is 1000.          |    No    |
+```python
+from admyral.actions import list_okta_events
+```
+
+## Arguments:
+
+| Argument Name               | Description                                                                               | Required |
+| --------------------------- | ----------------------------------------------------------------------------------------- | :------: |
+| **User ID** `user_id`       | The user ID to list events for. If not provided, events for all users will be returned.   |    -     |
+| **Start Time** `start_time` | The start time for the events to list. Must be in ISO 8601 format (YYYY-MM-DDTHH:MM:SSZ). |    -     |
+| **End Time** `end_time`     | The end time for the events to list. Must be in ISO 8601 format (YYYY-MM-DDTHH:MM:SSZ).   |    -     |
+| **Limit** `limit`           | The maximum number of events to retrieve. Default: 1000                                   |   Yes    |
+
+## Returns
+
+A JSON array of events.
+
+## Required Secrets
+
+| Secret Placeholder | Description                                            |
+| ------------------ | ------------------------------------------------------ |
+| `OKTA_SECRET`      | Okta secret. See [Okta setup](/integrations/okta/okta) |
+
+## SDK Example
+
+```python
+events = list_okta_events(
+	secrets={"OKTA_SECRET": "my_stored_okta_secret"}
+)
+```

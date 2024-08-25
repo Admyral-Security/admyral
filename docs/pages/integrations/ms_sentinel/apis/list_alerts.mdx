@@ -9,52 +9,74 @@ Retrieve a list of alerts from Microsoft Sentinel within a specified time range.
 	Documentation](https://learn.microsoft.com/en-us/rest/api/securityinsights/incidents/list-alerts?view=rest-securityinsights-2024-03-01&tabs=HTTP).
 </Callout>
 
-## Parameters:
+**SDK Import:**
 
-| Field          | Description                                                                                                                      | Required |
-| -------------- | -------------------------------------------------------------------------------------------------------------------------------- | :------: |
-| **Start Time** | The start time for the alerts to list. Must be in ISO 8601 format (YYYY-MM-DDTHH:MM:SSZ). The default is "1970-01-01T00:00:00Z". |    No    |
-| **End Time**   | The end time for the alerts to list. Must be in ISO 8601 format (YYYY-MM-DDTHH:MM:SSZ). The default is "2100-01-01T00:00:00Z".   |    No    |
-| **Limit**      | The maximum number of alerts to retrieve. The default is 100, and the maximum value is 5000.                                     |    No    |
+```python
+from admyral.actions import list_ms_sentinel_alerts
+```
+
+## Arguments:
+
+| Argument Name               | Description                                                                                                                      | Required |
+| --------------------------- | -------------------------------------------------------------------------------------------------------------------------------- | :------: |
+| **Start Time** `start_time` | The start time for the alerts to list. Must be in ISO 8601 format (YYYY-MM-DDTHH:MM:SSZ). The default is "1970-01-01T00:00:00Z". |    -     |
+| **End Time** `end_time`     | The end time for the alerts to list. Must be in ISO 8601 format (YYYY-MM-DDTHH:MM:SSZ). The default is "2100-01-01T00:00:00Z".   |    -     |
+| **Limit** `limit`           | The maximum number of alerts to retrieve. Default: 100                                                                           |   Yes    |
+
+## Returns
+
+A JSON array of alerts.
+
+## Required Secrets
+
+| Secret Placeholder | Description                                                                        |
+| ------------------ | ---------------------------------------------------------------------------------- |
+| `AZURE_SECRET`     | MS Sentinel secret. See [MS Sentinel setup](/integrations/ms_sentinel/ms_sentinel) |
+
+## SDK Example
+
+```python
+alerts = list_ms_sentinel_alerts(
+	secrets={"AZURE_SECRET": "my_stored_ms_sentinel_secret"}
+)
+```
 
 ## Example Output:
 
 ```json
-{
-	"value": [
-		{
-			"id": "/subscriptions/bd794837-4d29-4647-9105-6339bfdb4e6a/resourceGroups/myRG/providers/Microsoft.OperationalInsights/workspaces/myWorkspace/providers/Microsoft.SecurityInsights/Entities/baa8a239-6fde-4ab7-a093-d09f7b75c58c",
-			"name": "baa8a239-6fde-4ab7-a093-d09f7b75c58c",
-			"type": "Microsoft.SecurityInsights/Entities",
-			"kind": "SecurityAlert",
-			"properties": {
-				"systemAlertId": "baa8a239-6fde-4ab7-a093-d09f7b75c58c",
-				"tactics": [],
-				"alertDisplayName": "myAlert",
-				"confidenceLevel": "Unknown",
-				"severity": "Low",
-				"vendorName": "Microsoft",
-				"productName": "Azure Security Center",
-				"alertType": "myAlert",
-				"processingEndTime": "2020-07-20T18:21:53.6158361Z",
-				"status": "New",
-				"endTimeUtc": "2020-07-20T18:21:53.6158361Z",
-				"startTimeUtc": "2020-07-20T18:21:53.6158361Z",
-				"timeGenerated": "2020-07-20T18:21:53.6158361Z",
-				"resourceIdentifiers": [
-					{
-						"type": "LogAnalytics",
-						"workspaceId": "c8c99641-985d-4e4e-8e91-fb3466cd0e5b",
-						"subscriptionId": "bd794837-4d29-4647-9105-6339bfdb4e6a",
-						"resourceGroup": "myRG"
-					}
-				],
-				"additionalData": {
-					"AlertMessageEnqueueTime": "2020-07-20T18:21:57.304Z"
-				},
-				"friendlyName": "myAlert"
-			}
+[
+	{
+		"id": "/subscriptions/bd794837-4d29-4647-9105-6339bfdb4e6a/resourceGroups/myRG/providers/Microsoft.OperationalInsights/workspaces/myWorkspace/providers/Microsoft.SecurityInsights/Entities/baa8a239-6fde-4ab7-a093-d09f7b75c58c",
+		"name": "baa8a239-6fde-4ab7-a093-d09f7b75c58c",
+		"type": "Microsoft.SecurityInsights/Entities",
+		"kind": "SecurityAlert",
+		"properties": {
+			"systemAlertId": "baa8a239-6fde-4ab7-a093-d09f7b75c58c",
+			"tactics": [],
+			"alertDisplayName": "myAlert",
+			"confidenceLevel": "Unknown",
+			"severity": "Low",
+			"vendorName": "Microsoft",
+			"productName": "Azure Security Center",
+			"alertType": "myAlert",
+			"processingEndTime": "2020-07-20T18:21:53.6158361Z",
+			"status": "New",
+			"endTimeUtc": "2020-07-20T18:21:53.6158361Z",
+			"startTimeUtc": "2020-07-20T18:21:53.6158361Z",
+			"timeGenerated": "2020-07-20T18:21:53.6158361Z",
+			"resourceIdentifiers": [
+				{
+					"type": "LogAnalytics",
+					"workspaceId": "c8c99641-985d-4e4e-8e91-fb3466cd0e5b",
+					"subscriptionId": "bd794837-4d29-4647-9105-6339bfdb4e6a",
+					"resourceGroup": "myRG"
+				}
+			],
+			"additionalData": {
+				"AlertMessageEnqueueTime": "2020-07-20T18:21:57.304Z"
+			},
+			"friendlyName": "myAlert"
 		}
-	]
-}
+	}
+]
 ```

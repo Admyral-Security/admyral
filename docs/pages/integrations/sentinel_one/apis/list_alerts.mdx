@@ -9,10 +9,36 @@ Retrieve a list of alerts from SentinelOne within a specified time range. The AP
 	Documentation](https://github.com/fragtastic/sentinelone-api-python/blob/main/sentineloneapi/client.py).
 </Callout>
 
-## Parameters:
+**SDK Import:**
 
-| Field          | Description                                                                               | Required |
-| -------------- | ----------------------------------------------------------------------------------------- | :------: |
-| **Start Time** | The start time for the alerts to list. Must be in ISO 8601 format (YYYY-MM-DDTHH:MM:SSZ). |    No    |
-| **End Time**   | The end time for the alerts to list. Must be in ISO 8601 format (YYYY-MM-DDTHH:MM:SSZ).   |    No    |
-| **Limit**      | The maximum number of alerts to retrieve. Default is 1000.                                |    No    |
+```python
+from admyral.actions import list_sentinel_one_alerts
+```
+
+## Arguments:
+
+| Argument Name               | Description                                                                               | Required |
+| --------------------------- | ----------------------------------------------------------------------------------------- | :------: |
+| **Start Time** `start_time` | The start time for the alerts to list. Must be in ISO 8601 format (YYYY-MM-DDTHH:MM:SSZ). |    -     |
+| **End Time** `end_time`     | The end time for the alerts to list. Must be in ISO 8601 format (YYYY-MM-DDTHH:MM:SSZ).   |    -     |
+| **Limit** `limit`           | The maximum number of alerts to retrieve. Default: 1000                                   |   Yes    |
+
+## Returns
+
+A JSON array of alerts.
+
+## Required Secrets
+
+| Secret Placeholder    | Description                                                                          |
+| --------------------- | ------------------------------------------------------------------------------------ |
+| `SENTINEL_ONE_SECRET` | SentinelOne secret. See [SentinelOne setup](/integrations/sentinel_one/sentinel_one) |
+
+## SDK Example
+
+```python
+cases = list_sentinel_one_alerts(
+	secrets={
+		"SENTINEL_ONE_SECRET": "my_stored_sentinel_one_secret"
+	}
+)
+```

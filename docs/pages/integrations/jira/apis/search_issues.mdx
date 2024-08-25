@@ -1,0 +1,43 @@
+import { Callout } from "nextra/components";
+
+# Search Issues
+
+Search Jira issues.
+
+<Callout type="info">
+	For Jira's documentation, see [Search for issues using
+	JQL](https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issue-search/#api-rest-api-3-search-get).
+</Callout>
+
+**SDK Import:**
+
+```python
+from admyral.actions import search_jira_issues
+```
+
+## Arguments:
+
+| Argument Name     | Description                                                                                                                          | Required |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------ | :------: |
+| **JQL** `jql`     | The [JQL](https://support.atlassian.com/jira-software-cloud/docs/what-is-advanced-search-in-jira-cloud/) query to search for issues. |   Yes    |
+| **Limit** `limit` | The maximum number of issues to return.                                                                                              |   Yes    |
+
+## Returns
+
+A JSON array of JSON objects.
+
+## Required Secrets
+
+| Secret Placeholder | Description                                            |
+| ------------------ | ------------------------------------------------------ |
+| `JIRA_SECRET`      | Jira secret. See [Jira setup](/integrations/jira/jira) |
+
+## SDK Example
+
+```python
+search_jira_issues(
+    jql='project = SJ AND status IN ("In Progress", "To Do") AND updated < -1w AND updated >= -8d',
+    limit=10,
+    secrets={"JIRA_SECRET": "my_stored_jira_secret"}
+)
+```

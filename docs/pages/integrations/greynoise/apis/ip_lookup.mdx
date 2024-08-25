@@ -9,11 +9,38 @@ Lookup information about an IP address using GreyNoise.
 	API](https://docs.greynoise.io/reference/get_v3-community-ip).
 </Callout>
 
-## Parameters:
+**SDK Import:**
 
-| Field          | Description             | Required |
-| -------------- | ----------------------- | :------: |
-| **IP Address** | The IP address to query |   Yes    |
+```python
+from admyral.actions import grey_noise_ip_lookup
+```
+
+## Arguments:
+
+| Argument Name               | Description             | Required |
+| --------------------------- | ----------------------- | :------: |
+| **IP Address** `ip_address` | The IP address to query |   Yes    |
+
+## Returns
+
+A JSON object.
+
+## Required Secrets
+
+| Secret Placeholder  | Description                                                                |
+| ------------------- | -------------------------------------------------------------------------- |
+| `GREY_NOISE_SECRET` | GreyNoise secret. See [GreyNoise setup](/integrations/greynoise/greynoise) |
+
+## SDK Example
+
+```python
+result = grey_noise_ip_lookup(
+	ip_address="8.8.8.8",
+	secrets={
+		"GREY_NOISE_SECRET"
+	}
+)
+```
 
 ## Example Output
 

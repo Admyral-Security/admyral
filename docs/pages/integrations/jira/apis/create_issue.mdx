@@ -1,32 +1,76 @@
 import { Callout } from "nextra/components";
 
-# Create an Issue
+# Create Issue
 
-Create a new issue.
+Create a new Jira issue.
 
 <Callout type="info">
 	For Jira's documentation, see [Create
 	Issue](https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issues/#api-rest-api-3-issue-post).
 </Callout>
 
-## Parameters:
+**SDK Import:**
 
-| Field             | Description                                                                                                                                                                                                                                                                                       | Required |
-| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------: |
-| **Summary**       | Summary of the issue                                                                                                                                                                                                                                                                              |   Yes    |
-| **Project ID**    | The ID of the project to create the issue in. See [here](https://confluence.atlassian.com/jirakb/how-to-get-project-id-from-the-jira-user-interface-827341414.html) for finding the project ID using the Jira UI.                                                                                 |   Yes    |
-| **Issue Type**    | The name of the issue type to create (e.g. "Story", "Bug").                                                                                                                                                                                                                                       |   Yes    |
-| **Description**   | Description of the issue in [Atlassian Document Format](https://developer.atlassian.com/cloud/jira/platform/apis/document/structure/)                                                                                                                                                             |    -     |
-| **Assignee**      | The account ID of the assignee. You can obtain the ID in the UI (see [here](https://community.atlassian.com/t5/Jira-questions/where-can-i-find-my-Account-ID/qaq-p/976527)) or use the [Find users API](/integrations/available_integrations/jira/apis/find_users).                               |    -     |
-| **Labels**        | Comma-separated list of labels (e.g., `label, label2`). Note that a label must not contain spaces.                                                                                                                                                                                                |    -     |
-| **Priority**      | The priority of the issue (e.g., `High`, `Medium`)                                                                                                                                                                                                                                                |    -     |
-| **Custom Fields** | Custom fields for the issue (e.g., `{ "customfield_10000": "value" }`) defined as a JSON object. Note that you must use the IDs of the custom fields. See [here](https://confluence.atlassian.com/jirakb/how-to-find-any-custom-field-s-ids-744522503.html) for finding the ID of a custom field. |    -     |
-| **Components**    | JSON array of components for the issue (e.g., `[ { "name": "component1" }, { "name": "component2" } ]`)                                                                                                                                                                                           |    -     |
+```python
+from admyral.actions import create_jira_issue
+```
+
+## Arguments:
+
+| Argument Name                     | Description                                                                                                                                                                                                                                                                                       | Required |
+| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------: |
+| **Summary** `summary`             | Summary of the issue                                                                                                                                                                                                                                                                              |   Yes    |
+| **Project ID** `project_id`       | The ID of the project to create the issue in. See [here](https://confluence.atlassian.com/jirakb/how-to-get-project-id-from-the-jira-user-interface-827341414.html) for finding the project ID using the Jira UI.                                                                                 |   Yes    |
+| **Issue Type** `issue_type`       | The name of the issue type to create (e.g. "Story", "Bug").                                                                                                                                                                                                                                       |   Yes    |
+| **Description** `description`     | Description of the issue in [Atlassian Document Format](https://developer.atlassian.com/cloud/jira/platform/apis/document/structure/)                                                                                                                                                             |    -     |
+| **Assignee** `assignee`           | The account ID of the assignee. You can obtain the ID in the UI (see [here](https://community.atlassian.com/t5/Jira-questions/where-can-i-find-my-Account-ID/qaq-p/976527)) or use the [Find users API](/integrations/available_integrations/jira/apis/find_users).                               |    -     |
+| **Labels** `labels`               | List of labels. Note that a label must not contain spaces.                                                                                                                                                                                                                                        |    -     |
+| **Priority** `priority`           | The priority of the issue (e.g., `High`, `Medium`)                                                                                                                                                                                                                                                |    -     |
+| **Custom Fields** `custom_fields` | Custom fields for the issue (e.g., `{ "customfield_10000": "value" }`) defined as a JSON object. Note that you must use the IDs of the custom fields. See [here](https://confluence.atlassian.com/jirakb/how-to-find-any-custom-field-s-ids-744522503.html) for finding the ID of a custom field. |    -     |
+
+## Returns
+
+A JSON object.
+
+## Required Secrets
+
+| Secret Placeholder | Description                                            |
+| ------------------ | ------------------------------------------------------ |
+| `JIRA_SECRET`      | Jira secret. See [Jira setup](/integrations/jira/jira) |
+
+## SDK Example
+
+```python
+result = create_jira_issue(
+	summary="Case: New case",
+	project_id="10001",
+	issue_type="Bug",
+	description={
+		"content": [
+			{
+				"content": [
+					{
+						"text": "Order entry fails when selecting supplier.",
+						"type": "text",
+					}
+				],
+				"type": "paragraph",
+			}
+		],
+		"type": "doc",
+		"version": 1,
+	},
+	assignee="712020:8f417ffa-dc11-42b9-8464-b9e8b7a31559",
+	labels=["case", "new"],
+	priority="Medium",
+	secrets={"JIRA_SECRET": "jira_secret"},
+)
+```
 
 ## Example Output:
 
 ```json
-`
+{
 	"id": "10016",
 	"key": "SJ-15",
 	"self": "https://christesting123.atlassian.net/rest/api/3/issue/10016"

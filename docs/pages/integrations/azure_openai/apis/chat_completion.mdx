@@ -9,12 +9,40 @@ Leverage advanced AI models from Azure OpenAI to perform complex tasks such as c
 	Documentation](https://learn.microsoft.com/en-us/azure/ai-services/openai/).
 </Callout>
 
-## Parameters:
+**SDK Import:**
 
-| Field           | Description                                                                                                                                                                                             | Required |
-| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------: |
-| **Model**       | The model to use for the chat completion (e.g., `gpt-4o`).                                                                                                                                              |   Yes    |
-| **Prompt**      | The input prompt to use for generating the chat completion.                                                                                                                                             |   Yes    |
-| **Top P**       | Value between 0 and 1 for nucleus sampling. Only tokens with the top P probability mass are considered. Recommended to tweak this or temperature, but not both.                                         |    No    |
-| **Temperature** | Sampling temperature, between 0 and 2. Higher values (e.g., 0.8) increase randomness, while lower values (e.g., 0.2) make output more deterministic. Recommended to adjust this or Top P, but not both. |    No    |
-| **Stop Tokens** | A list of tokens to stop the completion upon encountering.                                                                                                                                              |    No    |
+```python
+from admyral.actions import azure_openai_chat_completion
+```
+
+## Arguments:
+
+| Argument Name                 | Description                                                                                                                                                                                             | Required |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------: |
+| **Model** `model`             | Deployment name of the model to use.                                                                                                                                                                    |   Yes    |
+| **Prompt** `prompt`           | The input prompt to use for generating the chat completion.                                                                                                                                             |   Yes    |
+| **Top P** `top_p`             | Value between 0 and 1 for nucleus sampling. Only tokens with the top P probability mass are considered. Recommended to tweak this or temperature, but not both.                                         |    -     |
+| **Temperature** `temperature` | Sampling temperature, between 0 and 2. Higher values (e.g., 0.8) increase randomness, while lower values (e.g., 0.2) make output more deterministic. Recommended to adjust this or Top P, but not both. |    -     |
+| **Stop Tokens** `stop_tokens` | A list of tokens to stop the completion upon encountering.                                                                                                                                              |    -     |
+
+## Returns
+
+A string.
+
+## Required Secrets
+
+| Secret Placeholder    | Description                                                                                 |
+| --------------------- | ------------------------------------------------------------------------------------------- |
+| `AZURE_OPENAI_SECRET` | Azure OpenAI secret. See [Abnormal Security setup](/integrations/azure_openai/azure_openai) |
+
+## SDK Example
+
+```python
+response = azure_openai_chat_completion(
+	model="my_gpt-4o_deployment",
+	prompt="Why is the ocean salty?",
+	secrets={
+		"AZURE_OPENAI_SECRET": "my_azure_openai_secret"
+	}
+)
+```

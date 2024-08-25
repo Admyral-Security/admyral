@@ -18,24 +18,24 @@ from admyral.actions.integrations.shared.ms_graph import (
 )
 def list_ms_sentinel_alerts(
     start_time: Annotated[
-        str,
+        str | None,
         ArgumentMetadata(
             display_name="Start Time",
             description="The start time for the cases to list. Must be in ISO 8601 format (YYYY-MM-DDTHH:MM:SSZ).",
         ),
-    ] = "1970-01-01T00:00:00Z",
+    ] = None,
     end_time: Annotated[
         str,
         ArgumentMetadata(
             display_name="End Time",
             description="The end time for the cases to list. Must be in ISO 8601 format (YYYY-MM-DDTHH:MM:SSZ).",
         ),
-    ] = "2100-01-01T00:00:00Z",
+    ] = None,
     limit: Annotated[
         int,
         ArgumentMetadata(
             display_name="Limit",
-            description="The maximum number of cases to list. Maximum: 5000",
+            description="The maximum number of cases to list.",
         ),
     ] = 100,
 ) -> list[dict[str, JsonValue]]:

@@ -7,203 +7,227 @@ Retrieve a list of vulnerabilities detected by Amazon Inspector2 within a specif
 <Callout type="info">
 	For more information on setting up Amazon Inspector2 and its API, see
 	[Amazon Inspector2
-	Documentation](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/inspector2/client/list_findings.html).
+	Documentation](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/inspector2/client/list_findings.html)
 </Callout>
 
-## Parameters:
+```python
+from admyral.actions import list_amazon_inspector2_vulnerabilities
+```
 
-| Field          | Description                                                                 | Required |
-| -------------- | --------------------------------------------------------------------------- | :------: |
-| **Start Time** | The start time of the findings as an ISO-8601 formatted string (inclusive). |    No    |
-| **End Time**   | The end time of the findings as an ISO-8601 formatted string (inclusive).   |    No    |
-| **Limit**      | The maximum number of findings to return. The default is 1000.              |    No    |
+## Arguments:
+
+| Argument Name               | Description                                                                 | Required |
+| --------------------------- | --------------------------------------------------------------------------- | :------: |
+| **Start Time** `start_time` | The start time of the findings as an ISO-8601 formatted string (inclusive). |    -     |
+| **End Time** `end_time`     | The end time of the findings as an ISO-8601 formatted string (inclusive).   |    -     |
+| **Limit** `limit`           | The maximum number of findings to return. Default: 1000                     |    -     |
+
+## Returns
+
+A JSON array of JSON objects.
+
+## Required Secrets
+
+| Secret Placeholder | Description                                                                                                |
+| ------------------ | ---------------------------------------------------------------------------------------------------------- |
+| `AWS_SECRET`       | Amazon Inspector2 secret. See [Amazon Inspector2 setup](/integrations/amazon_inspector2/amazon_inspector2) |
+
+## SDK Example
+
+```python
+vulnerabilities = list_amazon_inspector2_vulnerabilities(
+	start_time="2024-09-21T00:00:00Z",
+	end_time="2024-09-22T00:00:00Z",,
+	limit=10,
+	secrets={
+		"AWS_SECRET": "my_stored_aws_secret"
+	}
+)
+```
 
 ## Example Output:
 
 ```json
-{
-    'findings': [
-        {
-            'awsAccountId': 'string',
-            'codeVulnerabilityDetails': {
-                'cwes': [
-                    'string',
-                ],
-                'detectorId': 'string',
-                'detectorName': 'string',
-                'detectorTags': [
-                    'string',
-                ],
-                'filePath': {
-                    'endLine': 123,
-                    'fileName': 'string',
-                    'filePath': 'string',
-                    'startLine': 123
-                },
-                'referenceUrls': [
-                    'string',
-                ],
-                'ruleId': 'string',
-                'sourceLambdaLayerArn': 'string'
+[
+    {
+        "awsAccountId": "string",
+        "codeVulnerabilityDetails": {
+            "cwes": [
+                "string",
+            ],
+            "detectorId": "string",
+            "detectorName": "string",
+            "detectorTags": [
+                "string",
+            ],
+            "filePath": {
+                "endLine": 123,
+                "fileName": "string",
+                "filePath": "string",
+                "startLine": 123
             },
-            'description': 'string',
-            'epss': {
-                'score': 123.0
-            },
-            'exploitAvailable': 'YES'|'NO',
-            'exploitabilityDetails': {
-                'lastKnownExploitAt': datetime(2015, 1, 1)
-            },
-            'findingArn': 'string',
-            'firstObservedAt': datetime(2015, 1, 1),
-            'fixAvailable': 'YES'|'NO'|'PARTIAL',
-            'inspectorScore': 123.0,
-            'inspectorScoreDetails': {
-                'adjustedCvss': {
-                    'adjustments': [
-                        {
-                            'metric': 'string',
-                            'reason': 'string'
-                        },
-                    ],
-                    'cvssSource': 'string',
-                    'score': 123.0,
-                    'scoreSource': 'string',
-                    'scoringVector': 'string',
-                    'version': 'string'
-                }
-            },
-            'lastObservedAt': datetime(2015, 1, 1),
-            'networkReachabilityDetails': {
-                'networkPath': {
-                    'steps': [
-                        {
-                            'componentId': 'string',
-                            'componentType': 'string'
-                        },
-                    ]
-                },
-                'openPortRange': {
-                    'begin': 123,
-                    'end': 123
-                },
-                'protocol': 'TCP'|'UDP'
-            },
-            'packageVulnerabilityDetails': {
-                'cvss': [
+            "referenceUrls": [
+                "string",
+            ],
+            "ruleId": "string",
+            "sourceLambdaLayerArn": "string"
+        },
+        "description": "string",
+        "epss": {
+            "score": 123.0
+        },
+        "exploitAvailable": "YES",
+        "exploitabilityDetails": {
+            "lastKnownExploitAt": 1724583919
+        },
+        "findingArn": "string",
+        "firstObservedAt": 1724583919,
+        "fixAvailable": "YES",
+        "inspectorScore": 123.0,
+        "inspectorScoreDetails": {
+            "adjustedCvss": {
+                "adjustments": [
                     {
-                        'baseScore': 123.0,
-                        'scoringVector': 'string',
-                        'source': 'string',
-                        'version': 'string'
+                        "metric": "string",
+                        "reason": "string"
                     },
                 ],
-                'referenceUrls': [
-                    'string',
-                ],
-                'relatedVulnerabilities': [
-                    'string',
-                ],
-                'source': 'string',
-                'sourceUrl': 'string',
-                'vendorCreatedAt': datetime(2015, 1, 1),
-                'vendorSeverity': 'string',
-                'vendorUpdatedAt': datetime(2015, 1, 1),
-                'vulnerabilityId': 'string',
-                'vulnerablePackages': [
+                "cvssSource": "string",
+                "score": 123.0,
+                "scoreSource": "string",
+                "scoringVector": "string",
+                "version": "string"
+            }
+        },
+        "lastObservedAt": 1724583919,
+        "networkReachabilityDetails": {
+            "networkPath": {
+                "steps": [
                     {
-                        'arch': 'string',
-                        'epoch': 123,
-                        'filePath': 'string',
-                        'fixedInVersion': 'string',
-                        'name': 'string',
-                        'packageManager': 'BUNDLER'|'CARGO'|'COMPOSER'|'NPM'|'NUGET'|'PIPENV'|'POETRY'|'YARN'|'GOBINARY'|'GOMOD'|'JAR'|'OS'|'PIP'|'PYTHONPKG'|'NODEPKG'|'POM'|'GEMSPEC',
-                        'release': 'string',
-                        'remediation': 'string',
-                        'sourceLambdaLayerArn': 'string',
-                        'sourceLayerHash': 'string',
-                        'version': 'string'
+                        "componentId": "string",
+                        "componentType": "string"
                     },
                 ]
             },
-            'remediation': {
-                'recommendation': {
-                    'Url': 'string',
-                    'text': 'string'
-                }
+            "openPortRange": {
+                "begin": 123,
+                "end": 123
             },
-            'resources': [
+            "protocol": "TCP"
+        },
+        "packageVulnerabilityDetails": {
+            "cvss": [
                 {
-                    'details': {
-                        'awsEc2Instance': {
-                            'iamInstanceProfileArn': 'string',
-                            'imageId': 'string',
-                            'ipV4Addresses': [
-                                'string',
-                            ],
-                            'ipV6Addresses': [
-                                'string',
-                            ],
-                            'keyName': 'string',
-                            'launchedAt': datetime(2015, 1, 1),
-                            'platform': 'string',
-                            'subnetId': 'string',
-                            'type': 'string',
-                            'vpcId': 'string'
-                        },
-                        'awsEcrContainerImage': {
-                            'architecture': 'string',
-                            'author': 'string',
-                            'imageHash': 'string',
-                            'imageTags': [
-                                'string',
-                            ],
-                            'platform': 'string',
-                            'pushedAt': datetime(2015, 1, 1),
-                            'registry': 'string',
-                            'repositoryName': 'string'
-                        },
-                        'awsLambdaFunction': {
-                            'architectures': [
-                                'X86_64'|'ARM64',
-                            ],
-                            'codeSha256': 'string',
-                            'executionRoleArn': 'string',
-                            'functionName': 'string',
-                            'lastModifiedAt': datetime(2015, 1, 1),
-                            'layers': [
-                                'string',
-                            ],
-                            'packageType': 'IMAGE'|'ZIP',
-                            'runtime': 'NODEJS'|'NODEJS_12_X'|'NODEJS_14_X'|'NODEJS_16_X'|'JAVA_8'|'JAVA_8_AL2'|'JAVA_11'|'PYTHON_3_7'|'PYTHON_3_8'|'PYTHON_3_9'|'UNSUPPORTED'|'NODEJS_18_X'|'GO_1_X'|'JAVA_17'|'PYTHON_3_10',
-                            'version': 'string',
-                            'vpcConfig': {
-                                'securityGroupIds': [
-                                    'string',
-                                ],
-                                'subnetIds': [
-                                    'string',
-                                ],
-                                'vpcId': 'string'
-                            }
-                        }
-                    },
-                    'id': 'string',
-                    'partition': 'string',
-                    'region': 'string',
-                    'tags': {
-                        'string': 'string'
-                    },
-                    'type': 'AWS_EC2_INSTANCE'|'AWS_ECR_CONTAINER_IMAGE'|'AWS_ECR_REPOSITORY'|'AWS_LAMBDA_FUNCTION'
+                    "baseScore": 123.0,
+                    "scoringVector": "string",
+                    "source": "string",
+                    "version": "string"
                 },
             ],
-            'severity': 'INFORMATIONAL'|'LOW'|'MEDIUM'|'HIGH'|'CRITICAL'|'UNTRIAGED',
-            'status': 'ACTIVE'|'SUPPRESSED'|'CLOSED',
-            'title': 'string',
-            'type': 'NETWORK_REACHABILITY'|'PACKAGE_VULNERABILITY'|'CODE_VULNERABILITY',
-            'updatedAt': datetime(2015, 1, 1)
+            "referenceUrls": [
+                "string",
+            ],
+            "relatedVulnerabilities": [
+                "string",
+            ],
+            "source": "string",
+            "sourceUrl": "string",
+            "vendorCreatedAt": 1724583919,
+            "vendorSeverity": "string",
+            "vendorUpdatedAt": 1724583919,
+            "vulnerabilityId": "string",
+            "vulnerablePackages": [
+                {
+                    "arch": "string",
+                    "epoch": 123,
+                    "filePath": "string",
+                    "fixedInVersion": "string",
+                    "name": "string",
+                    "packageManager": "BUNDLER",
+                    "release": "string",
+                    "remediation": "string",
+                    "sourceLambdaLayerArn": "string",
+                    "sourceLayerHash": "string",
+                    "version": "string"
+                },
+            ]
         },
-    ],
-    'nextToken': 'string'
-}
+        "remediation": {
+            "recommendation": {
+                "Url": "string",
+                "text": "string"
+            }
+        },
+        "resources": [
+            {
+                "details": {
+                    "awsEc2Instance": {
+                        "iamInstanceProfileArn": "string",
+                        "imageId": "string",
+                        "ipV4Addresses": [
+                            "string",
+                        ],
+                        "ipV6Addresses": [
+                            "string",
+                        ],
+                        "keyName": "string",
+                        "launchedAt": 1724583919,
+                        "platform": "string",
+                        "subnetId": "string",
+                        "type": "string",
+                        "vpcId": "string"
+                    },
+                    "awsEcrContainerImage": {
+                        "architecture": "string",
+                        "author": "string",
+                        "imageHash": "string",
+                        "imageTags": [
+                            "string",
+                        ],
+                        "platform": "string",
+                        "pushedAt": 1724583919,
+                        "registry": "string",
+                        "repositoryName": "string"
+                    },
+                    "awsLambdaFunction": {
+                        "architectures": [
+                            "X86_64"|"ARM64",
+                        ],
+                        "codeSha256": "string",
+                        "executionRoleArn": "string",
+                        "functionName": "string",
+                        "lastModifiedAt": 1724583919,
+                        "layers": [
+                            "string",
+                        ],
+                        "packageType": "IMAGE",
+                        "runtime": "NODEJS",
+                        "version": "string",
+                        "vpcConfig": {
+                            "securityGroupIds": [
+                                "string",
+                            ],
+                            "subnetIds": [
+                                "string",
+                            ],
+                            "vpcId": "string"
+                        }
+                    }
+                },
+                "id": "string",
+                "partition": "string",
+                "region": "string",
+                "tags": {
+                    "string": "string"
+                },
+                "type": "AWS_EC2_INSTANCE"
+            },
+        ],
+        "severity": "CRITICAL",
+        "status": "ACTIVE",
+        "title": "string",
+        "type": "NETWORK_REACHABILITY",
+        "updatedAt": 1724583919
+    }
+]
 ```

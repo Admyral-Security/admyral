@@ -1,0 +1,41 @@
+import { Callout } from "nextra/components";
+
+# Analyze Hash
+
+Retrieve detailed information about a file hash from VirusTotal.
+
+<Callout type="info">
+	For VirusTotal's documentation, see [Retrieve File
+	Information](https://docs.virustotal.com/reference/file-info).
+</Callout>
+
+**SDK Import:**
+
+```python
+from admyral.actions import virus_total_analyze_hash
+```
+
+## Parameters:
+
+| Field           | Description              | Required |
+| --------------- | ------------------------ | :------: |
+| **Hash** `hash` | SHA-256 hash to analyze. |   Yes    |
+
+## Returns
+
+A JSON object.
+
+## Required Secrets
+
+| Secret Placeholder   | Description                                                                      |
+| -------------------- | -------------------------------------------------------------------------------- |
+| `VIRUS_TOTAL_SECRET` | VirusTotal secret. See [VirusTotal setup](/integrations/virus_total/virus_total) |
+
+## SDK Example
+
+```python
+result = virus_total_analyze_hash(
+	hash="8d3f68b16f0710f858d8c1d2c699260e6f43161a5510abb0e7ba567bd72c965b",
+	secrets={"VIRUS_TOTAL_SECRET": "my_stored_virus_total_secret"}
+)
+```

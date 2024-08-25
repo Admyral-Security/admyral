@@ -1,0 +1,57 @@
+import { Callout } from "nextra/components";
+
+# Comment Issue
+
+Adds a comment to an issue.
+
+<Callout type="info">
+	For Jira's documentation, see [Add
+	Comment](https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issue-comments/#api-rest-api-3-issue-issueidorkey-comment-post).
+</Callout>
+
+**SDK Import:**
+
+```python
+from admyral.actions import comment_jira_issue_status
+```
+
+## Arguments:
+
+| Argument Name                         | Description                                    | Required |
+| ------------------------------------- | ---------------------------------------------- | :------: |
+| **Issue ID or Key** `issue_id_or_key` | The ID or key of the issue.                    |   Yes    |
+| **Comment** `comment`                 | The comment text in Atlassian Document Format. |   Yes    |
+
+## Returns
+
+Nothing.
+
+## Required Secrets
+
+| Secret Placeholder | Description                                            |
+| ------------------ | ------------------------------------------------------ |
+| `JIRA_SECRET`      | Jira secret. See [Jira setup](/integrations/jira/jira) |
+
+## SDK Example
+
+```python
+comment_jira_issue_status(
+	issue_id_or_key="SJ-23",
+	comment={
+		"content": [
+			{
+				"content": [
+					{
+						"text": "This is an example comment.",
+						"type": "text",
+					}
+				],
+				"type": "paragraph",
+			},
+		],
+		"type": "doc",
+		"version": 1,
+	},
+	secrets={"JIRA_SECRET": "jira_secret"},
+)
+```

@@ -9,14 +9,37 @@ List alerts from Microsoft Defender for Cloud.
 	Alerts](https://learn.microsoft.com/en-us/rest/api/defenderforcloud/alerts/list?view=rest-defenderforcloud-2022-01-01&tabs=HTTP).
 </Callout>
 
-## Parameters:
+**SDK Import:**
 
-| Field               | Description                                                                                  | Required |
-| ------------------- | -------------------------------------------------------------------------------------------- | :------: |
-| **Subscription ID** | Azure subscription ID                                                                        |   Yes    |
-| **Resource Group**  | The name of the resource group within the user's subscription. The name is case insensitive. |    -     |
-| **ASC Location**    | The location where Azure Security Center stores the data of the subscription.                |    -     |
-| **Page Limit**      | The maximum number of pages to fetch. One page consists of up to 100 alerts. Default: 1      |    -     |
+```python
+from admyral.actions import list_ms_defender_for_cloud_alerts
+```
+
+## Arguments:
+
+| Argument Name               | Description                                                                              | Required |
+| --------------------------- | ---------------------------------------------------------------------------------------- | :------: |
+| **Start Time** `start_time` | The start time for the cases to list. Must be in ISO 8601 format (YYYY-MM-DDTHH:MM:SSZ). |    -     |
+| **End Time** `end_time`     | The end time for the cases to list. Must be in ISO 8601 format (YYYY-MM-DDTHH:MM:SSZ).   |    -     |
+| **Limit** `limit`           | The maximum number of cases to list. Default: 100                                        |   Yes    |
+
+## Returns
+
+A JSON array of alerts.
+
+## Required Secrets
+
+| Secret Placeholder | Description                                                                                                                |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------- |
+| `AZURE_SECRET`     | MS Defender for Cloud secret. See [MS Defender for Cloud setup](/integrations/ms_defender_for_cloud/ms_defender_for_cloud) |
+
+## SDK Example
+
+```python
+alerts = list_ms_defender_for_cloud_alerts(
+	secrets={"AZURE_SECRET": "my_azure_secret"}
+)
+```
 
 ## Example Output:
 

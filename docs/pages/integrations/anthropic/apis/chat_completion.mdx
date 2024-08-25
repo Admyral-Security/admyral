@@ -9,16 +9,44 @@ Leverage advanced AI models from Anthropic to perform complex tasks such as cate
 	Documentation](https://docs.anthropic.com).
 </Callout>
 
-## Parameters:
+**SDK Import:**
 
-| Field           | Description                                                                                                                                                                                             | Required |
-| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------: |
-| **Model**       | The model to use for the chat completion (e.g., `claude-v2`).                                                                                                                                           |   Yes    |
-| **Prompt**      | The input prompt to use for generating the chat completion.                                                                                                                                             |   Yes    |
-| **Top P**       | Value between 0 and 1 for nucleus sampling. Only tokens with the top P probability mass are considered. Recommended to tweak this or temperature, but not both.                                         |    No    |
-| **Temperature** | Sampling temperature, between 0 and 2. Higher values (e.g., 0.8) increase randomness, while lower values (e.g., 0.2) make output more deterministic. Recommended to adjust this or Top P, but not both. |    No    |
-| **Max Tokens**  | The maximum number of tokens to generate for the completion.                                                                                                                                            |    No    |
-| **Stop Tokens** | A list of tokens to stop the completion upon encountering.                                                                                                                                              |    No    |
+```python
+from admyral.actions import anthropic_chat_completion
+```
+
+## Arguments:
+
+| Argument Name                 | Description                                                                                                                                                                                             | Required |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------: |
+| **Model** `model`             | The model to use for the chat completion (e.g., `claude-3-5-sonnet-20240620`).                                                                                                                          |   Yes    |
+| **Prompt** `prompt`           | The input prompt to use for generating the chat completion.                                                                                                                                             |   Yes    |
+| **Top P** `top_p`             | Value between 0 and 1 for nucleus sampling. Only tokens with the top P probability mass are considered. Recommended to tweak this or temperature, but not both.                                         |    -     |
+| **Temperature** `temperature` | Sampling temperature, between 0 and 2. Higher values (e.g., 0.8) increase randomness, while lower values (e.g., 0.2) make output more deterministic. Recommended to adjust this or Top P, but not both. |    -     |
+| **Max Tokens** `max_tokens`   | The maximum number of tokens to generate for the completion.                                                                                                                                            |    -     |
+| **Stop Tokens** `stop_tokens` | A list of tokens to stop the completion upon encountering.                                                                                                                                              |    -     |
+
+## Returns
+
+A string.
+
+## Required Secrets
+
+| Secret Placeholder | Description                                                                |
+| ------------------ | -------------------------------------------------------------------------- |
+| `ANTHROPIC_SECRET` | Anthropic secret. See [Anthropic setup](/integrations/anthropic/anthropic) |
+
+## SDK Example
+
+```python
+response = anthropic_chat_completion(
+	model="claude-3-5-sonnet-20240620",
+	prompt="Why is the ocean salty?",
+	secrets={
+		"ANTHROPIC_SECRET": "my_stored_anthropic_secret"
+	}
+)
+```
 
 ## Example Output:
 

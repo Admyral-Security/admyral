@@ -1,6 +1,6 @@
 import { Callout } from "nextra/components";
 
-# Get Domain Report
+# Analyze Domain
 
 Retrieve information about a domain.
 
@@ -9,11 +9,36 @@ Retrieve information about a domain.
 	Info](https://docs.virustotal.com/reference/domain-info).
 </Callout>
 
-## Parameters:
+**SDK Import:**
 
-| Field      | Description                                         | Required |
-| ---------- | --------------------------------------------------- | :------: |
-| **Domain** | The domain for which information will be retrieved. |   Yes    |
+```python
+from admyral.actions import virus_total_analyze_domain
+```
+
+## Arguments:
+
+| Argument Name       | Description                                         | Required |
+| ------------------- | --------------------------------------------------- | :------: |
+| **Domain** `domain` | The domain for which information will be retrieved. |   Yes    |
+
+## Returns
+
+A JSON object.
+
+## Required Secrets
+
+| Secret Placeholder   | Description                                                                      |
+| -------------------- | -------------------------------------------------------------------------------- |
+| `VIRUS_TOTAL_SECRET` | VirusTotal secret. See [VirusTotal setup](/integrations/virus_total/virus_total) |
+
+## SDK Example
+
+```python
+result = virus_total_analyze_domain(
+	domain="google.com",
+	secrets={"VIRUS_TOTAL_SECRET": "my_stored_virus_total_secret"}
+)
+```
 
 ## Example Output:
 

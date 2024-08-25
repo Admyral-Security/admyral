@@ -9,25 +9,49 @@ Get a list of Abnormal cases identified by Abnormal Security.
 	API](https://app.swaggerhub.com/apis-docs/abnormal-security/abx/1.4.3#/Cases/get_cases).
 </Callout>
 
-## Parameters:
+**SDK Import:**
 
-| Field      | Description                                                                                                                                                                                                                                                                                                                    | Required |
-| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | :------: |
-| **Filter** | Value must be of the format `filter={FILTER KEY} gte YYYY-MM-DDTHH:MM:SSZ lte YYYY-MM-DDTHH:MM:SSZ`. A `{FILTER KEY}` must be specified, and currently the only key that is supported for /threats is receivedTime. At least 1 of gte/lte must be specified, with a datetime string following the YYYY-MM-DDTHH:MM:SSZ format. |   Yes    |
+```python
+from admyral.actions import list_abnormal_security_cases
+```
+
+## Arguments:
+
+| Argument Name               |                                                       Description                                                        | Required |
+| --------------------------- | :----------------------------------------------------------------------------------------------------------------------: | -------- |
+| **Start Time** `start_time` | The start time for the cases to list. Must be in ISO 8601 format (YYYY-MM-DDTHH:MM:SSZ). Default: `1970-01-01T00:00:00Z` | Yes      |
+| **End Time** `end_time`     |  The end time for the cases to list. Must be in ISO 8601 format (YYYY-MM-DDTHH:MM:SSZ). Default: `2100-01-01T00:00:00Z`  | Yes      |
+| **Limit** `limit`           |                                   The maximum number of cases to list. Default: `1000`                                   | Yes      |
+
+## Returns
+
+A JSON array of cases.
+
+## Required Secrets
+
+| Secret Placeholder         | Description                                                                              |
+| -------------------------- | ---------------------------------------------------------------------------------------- |
+| `ABNORMAL_SECURITY_SECRET` | Abnormal Security secret. See [Abnormal Security setup](/integrations/abnormal/abnormal) |
+
+## SDK Example
+
+```python
+cases = list_abnormal_security_cases(
+	secrets={
+		"ABNORMAL_SECURITY_SECRET": "my_stored_abnormal_secret"
+	}
+)
+```
 
 ## Example Output
 
 A list of the top 100 cases identified in Abnormal Cases if no filter query parameter is specified, or a paginated list of cases if a filter query parameter is specified.
 
 ```json
-{
-	"cases": [
-		{
-			"caseId": "1234",
-			"severity": "Potential Account Takeover"
-		}
-	],
-	"pageNumber": 1,
-	"nextPageNumber": 2
-}
+[
+	{
+		"caseId": "1234",
+		"severity": "Potential Account Takeover"
+	}
+]
 ```

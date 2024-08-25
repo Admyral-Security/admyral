@@ -1,6 +1,6 @@
 import { Callout } from "nextra/components";
 
-# List Alerts (Wiz)
+# List Alerts
 
 List alerts from Wiz with filtering options for time range, status, severity, and type. If no time range is provided, the alerts from the last 24 hours will be listed.
 
@@ -9,13 +9,37 @@ List alerts from Wiz with filtering options for time range, status, severity, an
 	Documentation](https://docs.wiz.io/docs).
 </Callout>
 
-## Parameters:
+**SDK Import:**
 
-| Field          | Description                                                                               | Required |
-| -------------- | ----------------------------------------------------------------------------------------- | :------: |
-| **Start Time** | The start time for the alerts to list. Must be in ISO 8601 format (YYYY-MM-DDTHH:MM:SSZ). |    No    |
-| **End Time**   | The end time for the alerts to list. Must be in ISO 8601 format (YYYY-MM-DDTHH:MM:SSZ).   |    No    |
-| **Limit**      | The maximum number of alerts to list.                                                     |    No    |
+```python
+from admyral.actions import virus_total_analyze_url
+```
+
+## Arguments:
+
+| Argument Name               | Description                                                                               | Required |
+| --------------------------- | ----------------------------------------------------------------------------------------- | :------: |
+| **Start Time** `start_time` | The start time for the alerts to list. Must be in ISO 8601 format (YYYY-MM-DDTHH:MM:SSZ). |    -     |
+| **End Time** `end_time`     | The end time for the alerts to list. Must be in ISO 8601 format (YYYY-MM-DDTHH:MM:SSZ).   |    -     |
+| **Limit** `limit`           | The maximum number of alerts to list. Default: 1000                                       |   Yes    |
+
+## Returns
+
+A JSON array of alerts.
+
+## Required Secrets
+
+| Secret Placeholder | Description                                        |
+| ------------------ | -------------------------------------------------- |
+| `WIZ_SECRET`       | Wiz secret. See [Wiz setup](/integrations/wiz/wiz) |
+
+## SDK Example
+
+```python
+alerts = list_wiz_alerts(
+	secrets={"WIZ_SECRET": "my_stored_wiz_secret"}
+)
+```
 
 ## Example Output:
 

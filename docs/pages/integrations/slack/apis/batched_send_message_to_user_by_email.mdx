@@ -1,0 +1,42 @@
+import { Callout } from "nextra/components";
+
+# Batched Send Message to User by Email
+
+Send a batch of messages where each message is sent to its own defined user.
+
+<Callout type="info">
+	For Slack's documentation, see
+	[users.lookupByEmail](https://api.slack.com/methods/users.lookupByEmail) and
+	[chat.postMessage](https://api.slack.com/methods/chat.postMessage).
+</Callout>
+
+**SDK Import:**
+
+```python
+from admyral.actions import batched_send_slack_message_to_user_by_email
+```
+
+## Arguments:
+
+| Argument Name           | Description                                                                                                                                                                                                                                                               | Required |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------: |
+| **Messages** `messages` | A list of messages where each message consists of a tuple containing the arguments of `send_slack_message_to_user_by_email`: `(email, text, blocks)`. If `text` or `blocks` should not be provided, then it must be set to `None` in the SDK and `null` in the UI editor. |   Yes    |
+
+## Required Secrets
+
+| Secret Placeholder | Description                                                |
+| ------------------ | ---------------------------------------------------------- |
+| `SLACK_SECRET`     | Slack secret. See [Slack setup](/integrations/slack/slack) |
+
+## SDK Example
+
+```python
+user = batched_send_slack_message_to_user_by_email(
+    messages=[
+        ("daniel@admyral.dev", "Example slack message", None)
+    ],
+	secrets={
+		"SLACK_SECRET": "my_stored_slack_secret"
+	}
+)
+```

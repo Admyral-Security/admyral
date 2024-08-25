@@ -1,6 +1,6 @@
 import { Callout } from "nextra/components";
 
-# URL Info
+# Analyze URL
 
 Retrieve detailed information about a URL.
 
@@ -9,11 +9,38 @@ Retrieve detailed information about a URL.
 	Info](https://docs.virustotal.com/reference/url-info).
 </Callout>
 
-## Parameters:
+**SDK Import:**
 
-| Field   | Description                          | Required |
-| ------- | ------------------------------------ | :------: |
-| **URL** | The URL to retrieve information for. |   Yes    |
+```python
+from admyral.actions import virus_total_analyze_url
+```
+
+## Arguments:
+
+| Argument Name | Description         | Required |
+| ------------- | ------------------- | :------: |
+| **URL**       | The URL to analyze. |   Yes    |
+
+## Returns
+
+A JSON object.
+
+## Required Secrets
+
+| Secret Placeholder   | Description                                                                      |
+| -------------------- | -------------------------------------------------------------------------------- |
+| `VIRUS_TOTAL_SECRET` | VirusTotal secret. See [VirusTotal setup](/integrations/virus_total/virus_total) |
+
+## SDK Example
+
+```python
+result = virus_total_analyze_url(
+	ip_address="https://www.google.com",
+	secrets={
+		"VIRUS_TOTAL_SECRET": "my_stored_virus_total_secret"
+	}
+)
+```
 
 ## Example Output:
 

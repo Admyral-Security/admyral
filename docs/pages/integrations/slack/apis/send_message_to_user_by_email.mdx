@@ -1,0 +1,45 @@
+import { Callout } from "nextra/components";
+
+# Send Message to User by Email
+
+Send a user identified by email a Slack message.
+
+<Callout type="info">
+	For Slack's documentation, see
+	[users.lookupByEmail](https://api.slack.com/methods/users.lookupByEmail) and
+	[chat.postMessage](https://api.slack.com/methods/chat.postMessage).
+</Callout>
+
+**SDK Import:**
+
+```python
+from admyral.actions import send_slack_message_to_user_by_email
+```
+
+## Arguments:
+
+| Argument Name       | Description                                                                                                                                                                                                                                                                           | Required |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------: |
+| **Email** `email`   | An email address belonging to a user in the Slack workspace.                                                                                                                                                                                                                          |   Yes    |
+| **Text** `text`     | The purpose of this field changes depends on whether the blocks field is used. If blocks is used, this is used as a fallback string to display in notifications. If blocks is not used, this is the main body text of the message. It can be formatted as plain text, or with mrkdwn. |    -     |
+| **Blocks** `blocks` | A JSON-based array of structured blocks (Example: `[{"type": "section", "text": {"type": "plain_text", "text": "Hello world"}}]`). See [here](https://api.slack.com/block-kit/building) for more information about blocks.                                                            |    -     |
+
+Tip: Slack offers an online [Block Kit Builder](https://app.slack.com/block-kit-builder) to help you create blocks for your messages more easily.
+
+## Required Secrets
+
+| Secret Placeholder | Description                                                |
+| ------------------ | ---------------------------------------------------------- |
+| `SLACK_SECRET`     | Slack secret. See [Slack setup](/integrations/slack/slack) |
+
+## SDK Example
+
+```python
+user = send_slack_message_to_user_by_email(
+	email="daniel@admyral.dev",
+    text="Example slack message",
+	secrets={
+		"SLACK_SECRET": "my_stored_slack_secret"
+	}
+)
+```

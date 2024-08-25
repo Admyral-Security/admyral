@@ -5,7 +5,6 @@ from admyral.action import action, ArgumentMetadata
 from admyral.context import ctx
 
 
-# TODO: test
 @action(
     display_name="Chat Completion",
     display_namespace="Mistral AI",

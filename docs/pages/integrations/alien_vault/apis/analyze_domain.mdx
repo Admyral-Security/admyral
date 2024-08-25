@@ -9,11 +9,38 @@ Analyze a domain using AlienVault OTX (Open Threat Exchange) to gather threat in
 	Documentation](https://otx.alienvault.com/assets/static/external_api.html).
 </Callout>
 
-## Parameters:
+**SDK Import:**
 
-| Field      | Description                                  | Required |
-| ---------- | -------------------------------------------- | :------: |
-| **Domain** | The domain to analyze (e.g., `example.com`). |   Yes    |
+```python
+from admyral.actions import alienvault_otx_analyze_domain
+```
+
+## Arguments:
+
+| Argument Name       | Description                                  | Required |
+| ------------------- | -------------------------------------------- | :------: |
+| **Domain** `domain` | The domain to analyze (e.g., `example.com`). |   Yes    |
+
+## Returns
+
+A JSON object.
+
+## Required Secrets
+
+| Secret Placeholder      | Description                                                                              |
+| ----------------------- | ---------------------------------------------------------------------------------------- |
+| `ALIENVAULT_OTX_SECRET` | AlienVault OTX secret. See [AlienVault OTX setup](/integrations/alien_vault/alien_vault) |
+
+## SDK Example
+
+```python
+analysis_result = alienvault_otx_analyze_domain(
+	domain="google.com",
+	secrets={
+		"ALIENVAULT_OTX_SECRET": "my_stored_alienvault_secret"
+	}
+)
+```
 
 ## Example Output:
 

@@ -1,0 +1,45 @@
+import { Callout } from "nextra/components";
+
+# Update Issue Status
+
+Transitions an issue to a new status.
+
+<Callout type="info">
+	For Jira's documentation, see [Transition
+	Issue](https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issues/#api-rest-api-3-issue-issueidorkey-transitions-post).
+</Callout>
+
+**SDK Import:**
+
+```python
+from admyral.actions import update_jira_issue_status
+```
+
+## Arguments:
+
+| Arugment Name                         | Description                                                                                                                                                        | Required |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | :------: |
+| **Issue ID or Key** `issue_id_or_key` | The ID or the key of the issue to transition.                                                                                                                      |   Yes    |
+| **Transition ID** `transition_id`     | The ID of the transition. See [here](https://community.atlassian.com/t5/Jira-questions/How-do-i-find-a-transition-ID/qaq-p/2113213) for finding the transition ID. |   Yes    |
+
+## Returns
+
+Nothing.
+
+## Required Secrets
+
+| Secret Placeholder | Description                                            |
+| ------------------ | ------------------------------------------------------ |
+| `JIRA_SECRET`      | Jira secret. See [Jira setup](/integrations/jira/jira) |
+
+## SDK Example
+
+```python
+update_jira_issue_status(
+	issue_id_or_key="SJ-23",
+	transition_id="31",
+	secrets={
+		"JIRA_SECRET": "my_stored_jira_secret"
+	}
+)
+```

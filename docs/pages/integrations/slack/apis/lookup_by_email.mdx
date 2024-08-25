@@ -13,11 +13,34 @@ Required scopes:
 	[users.lookupByEmail](https://api.slack.com/methods/users.lookupByEmail).
 </Callout>
 
-## Parameters:
+**SDK Import:**
 
-| Field     | Description                                           | Required |
-| --------- | ----------------------------------------------------- | :------: |
-| **Email** | An email address belonging to a user in the workspace |   Yes    |
+```python
+from admyral.actions import lookup_slack_user_by_email
+```
+
+## Arguments:
+
+| Argument Name     | Description                                                  | Required |
+| ----------------- | ------------------------------------------------------------ | :------: |
+| **Email** `email` | An email address belonging to a user in the Slack workspace. |   Yes    |
+
+## Required Secrets
+
+| Secret Placeholder | Description                                                |
+| ------------------ | ---------------------------------------------------------- |
+| `SLACK_SECRET`     | Slack secret. See [Slack setup](/integrations/slack/slack) |
+
+## SDK Example
+
+```python
+user = lookup_slack_user_by_email(
+	email="daniel@admyral.dev",
+	secrets={
+		"SLACK_SECRET": "my_stored_slack_secret"
+	}
+)
+```
 
 ## Example Output:
 

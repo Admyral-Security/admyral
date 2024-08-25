@@ -58,7 +58,7 @@ def create_jira_issue(
         str | None,
         ArgumentMetadata(
             display_name="Assignee",
-            description="The username of the assignee",
+            description="The ID of the assignee",
         ),
     ] = None,
     labels: Annotated[
@@ -69,7 +69,7 @@ def create_jira_issue(
         ),
     ] = [],
     priority: Annotated[
-        Literal["lowest", "low", "medium", "high", "highest"] | None,
+        Literal["Lowest", "Low", "Medium", "High", "Highest"] | None,
         ArgumentMetadata(
             display_name="Priority",
             description="The priority of the issue",

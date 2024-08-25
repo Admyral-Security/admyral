@@ -21,7 +21,7 @@ def get_grey_noise_client(api_key: str) -> Client:
     display_name="Analyze IP Address",
     display_namespace="GreyNoise",
     description="Analyze an IP address using GreyNoise",
-    secrets_placeholders=["GREY_NOISE_API_KEY"],
+    secrets_placeholders=["GREY_NOISE_SECRET"],
 )
 def grey_noise_ip_lookup(
     ip_address: Annotated[
@@ -31,7 +31,7 @@ def grey_noise_ip_lookup(
         ),
     ],
 ) -> JsonValue:
-    secret = ctx.get().secrets.get("GREY_NOISE_API_KEY")
+    secret = ctx.get().secrets.get("GREY_NOISE_SECRET")
     api_key = secret["api_key"]
     with get_grey_noise_client(api_key) as client:
         response = client.get(f"/community/{ip_address}")

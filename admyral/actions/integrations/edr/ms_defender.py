@@ -35,7 +35,7 @@ def list_ms_defender_for_endpoint_alerts(
         int,
         ArgumentMetadata(
             display_name="Limit",
-            description="The maximum number of cases to list. Maximum: 5000",
+            description="The maximum number of cases to list.",
         ),
     ] = 100,
 ) -> list[dict[str, JsonValue]]:

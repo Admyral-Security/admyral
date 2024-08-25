@@ -1,6 +1,6 @@
 import { Callout } from "nextra/components";
 
-# Create PagerDuty Incident
+# Create Incident
 
 Create a new incident in PagerDuty using the provided incident details such as title, service ID, urgency, and optional assignees.
 
@@ -9,15 +9,44 @@ Create a new incident in PagerDuty using the provided incident details such as t
 	API](https://developer.pagerduty.com/docs/ZG9jOjExMDI5NTY0-incident-creation-api).
 </Callout>
 
-## Parameters:
+**SDK Import:**
 
-| Field           | Description                                                         | Required |
-| --------------- | ------------------------------------------------------------------- | :------: |
-| **Title**       | The title of the incident.                                          |   Yes    |
-| **Service ID**  | The ID of the service associated with the incident.                 |   Yes    |
-| **Urgency**     | The urgency level of the incident. Options are `"high"` or `"low"`. |   Yes    |
-| **Assign To**   | A list of user IDs to assign the incident to.                       |    No    |
-| **Description** | Additional details describing the incident.                         |    No    |
+```python
+from admyral.actions import create_pagerduty_incident
+```
+
+## Arguments:
+
+| Argument Name                 | Description                                                         | Required |
+| ----------------------------- | ------------------------------------------------------------------- | :------: |
+| **Title** `title`             | The title of the incident.                                          |   Yes    |
+| **Service ID** `service_id`   | The ID of the service associated with the incident.                 |   Yes    |
+| **Urgency** `urgency`         | The urgency level of the incident. Options are `"high"` or `"low"`. |   Yes    |
+| **Assign To** `assign_to`     | A list of user IDs to assign the incident to.                       |    -     |
+| **Description** `description` | Additional details describing the incident.                         |    -     |
+
+## Returns
+
+A JSON object.
+
+## Required secrets
+
+| Secret Placeholder | Description                                                                |
+| ------------------ | -------------------------------------------------------------------------- |
+| `PAGERDUTY_SECRET` | PagerDuty secret. See [PagerDuty setup](/integrations/pagerduty/pagerduty) |
+
+## SDK Example
+
+```python
+incident = create_pagerduty_incident(
+	title="New case created",
+	service_id="PS16N1G",
+	urgency="high",
+	assign_to=["PM36128"],
+	description="My loooooong and highly detailed incident description",
+	secrets={"PAGERDUTY_SECRET": "my_stored_pagerduty_secret"},
+)
+```
 
 ## Example Output:
 

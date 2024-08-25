@@ -1,6 +1,6 @@
 import { Callout } from "nextra/components";
 
-# List Inactive Retool Users
+# List Inactive Users
 
 This method lists Retool users who have not logged in for a specified number of days. It helps identify users who are inactive and may no longer need access.
 
@@ -9,8 +9,32 @@ This method lists Retool users who have not logged in for a specified number of 
 	Documentation](https://docs.retool.com/reference/api).
 </Callout>
 
-## Parameters:
+**SDK Import:**
 
-| Field                            | Description                                                                        | Required |
-| -------------------------------- | ---------------------------------------------------------------------------------- | :------: |
-| **Inactivity Threshold in Days** | The number of days since the last login after which a user is considered inactive. |    No    |
+```python
+from admyral.actions import list_retool_inactive_users
+```
+
+## Arguments:
+
+| Argument Name                                                   | Description                                                                                    | Required |
+| --------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- | :------: |
+| **Inactivity Threshold in Days** `inactivity_threshold_in_days` | The number of days since the last login after which a user is considered inactive. Default: 60 |   Yes    |
+
+## Returns
+
+A JSON array of JSON objects.
+
+## Required Secrets
+
+| Secret Placeholder | Description                                                    |
+| ------------------ | -------------------------------------------------------------- |
+| `RETOOL_SECRET`    | Retool secret. See [Retool setup](/integrations/retool/retool) |
+
+## SDK Example
+
+```python
+inactive_users = list_retool_inactive_users(
+	secrets={"RETOOL_SECRET": "my_stored_retool_secret"}
+)
+```
