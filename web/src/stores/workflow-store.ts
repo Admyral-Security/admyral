@@ -395,6 +395,14 @@ export const useWorkflowStore = create<WorkflowStoreState>((set, get) => ({
 	closeSettingsSidePanel: () =>
 		set(
 			produce((draft) => {
+				if (draft.detailPageType === "action") {
+					// we also must make sure that the action node in reactflow is
+					// unselected.
+					draft.nodes = draft.nodes.map((node: any) => {
+						node.selected = false;
+						return node;
+					});
+				}
 				draft.detailPageType = null;
 				draft.selectedNodeIdx = null;
 			}),
