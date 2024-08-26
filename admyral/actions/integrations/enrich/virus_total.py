@@ -105,6 +105,7 @@ def virus_total_analyze_url(
     api_key = secret["api_key"]
     with get_virus_total_client(api_key) as client:
         url_base64 = base64.b64encode(url.encode()).decode()
+        url_base64 = url_base64.rstrip("=")
         response = client.get(f"/urls/{url_base64}")
         response.raise_for_status()
         return response.json()
