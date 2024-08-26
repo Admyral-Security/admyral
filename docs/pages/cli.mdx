@@ -1,3 +1,5 @@
+import { Callout } from "nextra/components";
+
 # Admyral CLI
 
 You can leverage Admyral's CLI to manage your workflows and actions from your commandline, within your scripts, or CI/CD pipelines.
@@ -29,7 +31,7 @@ Push a Python action to Admyral:
 admyral action push <your_custom_action> -a <path/to/your/action.py>
 ```
 
-where `your_custom_action` is the Python function name and `<file_path>` is the path to the file where the action is defined.
+where `your_custom_action` is the Python function name and `<file_path>` is the path to the Python file where the action is defined.
 
 ## Secrets Management
 
@@ -55,7 +57,11 @@ admyral secret delete <secret_name>
 
 ## Workflow Management
 
-Activatesa specific workflow:
+<Callout type="info">
+    In the following, `<your_workflow_name>` refers to the name of the workflow Python function and `<file_path>` to the path of the Python file where the workflow function is defined.
+</Callout>
+
+Activate a specific workflow:
 
 ```bash
 admyral workflow activate <your_workflow_name>
@@ -70,10 +76,10 @@ admyral workflow deactivate <your_workflow_name>
 Push a workflow to Admyral:
 
 ```bash
-admyral workflow push <your_workflow_name>
+admyral workflow push <your_workflow_name> -f <path/to/your/workflow/file.py>
 
 # Optional: Activate the workflow on push
-admyral workflow push <your_workflow_name> --activate
+admyral workflow push <your_workflow_name> -f <path/to/your/workflow/file.py> --activate
 ```
 
 Trigger the execution of a workflow:
