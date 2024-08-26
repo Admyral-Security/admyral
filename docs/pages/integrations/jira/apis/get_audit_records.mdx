@@ -1,0 +1,44 @@
+import { Callout } from "nextra/components";
+
+# Get Audit Records
+
+Get Jira audit records.
+
+<Callout type="info">
+	For Jira's documentation, see [Get audit
+	records](https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-audit-records/#api-rest-api-3-auditing-record-get).
+</Callout>
+
+**SDK Import:**
+
+```python
+from admyral.actions import get_jira_audit_records
+```
+
+## Arguments:
+
+| Argument Name               | Description                                                                                                                  | Required |
+| --------------------------- | ---------------------------------------------------------------------------------------------------------------------------- | :------: |
+| **Start Date** `start_date` | The start date in in ISO-8601 format (YYYY-MM-DDTHH:MM:SSZ).                                                                 |    -     |
+| **End Date** `end_date`     | The end date in in ISO-8601 format (YYYY-MM-DDTHH:MM:SSZ).                                                                   |    -     |
+| **Filter** `filter`         | A list of strings to match with audit field content. The strings must not contain spaces. Example: `["user", "permissions"]` |    -     |
+| **Limit** `limit`           | The maximum number of audit records to return. Default: 1000                                                                 |    -     |
+
+## Returns
+
+A JSON array of JSON objects.
+
+## Required Secrets
+
+| Secret Placeholder | Description                                            |
+| ------------------ | ------------------------------------------------------ |
+| `JIRA_SECRET`      | Jira secret. See [Jira setup](/integrations/jira/jira) |
+
+## SDK Example
+
+```python
+audit_records = get_jira_audit_records(
+    filter=["user", "permissions"],
+    secrets={"JIRA_SECRET": "my_stored_jira_secret"}
+)
+```

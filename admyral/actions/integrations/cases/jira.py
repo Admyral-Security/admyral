@@ -278,3 +278,74 @@ def search_jira_issues(
                 break
 
         return issues if limit is None else issues[:limit]
+
+
+@action(
+    display_name="Get Audit Records",
+    display_namespace="Jira",
+    description="Get audit records",
+    secrets_placeholders=["JIRA_SECRET"],
+)
+def get_jira_audit_records(
+    start_date: Annotated[
+        str | None,
+        ArgumentMetadata(
+            display_name="Start Date",
+            description="The start date in in ISO-8601 format (YYYY-MM-DDTHH:MM:SSZ).",
+        ),
+    ] = None,
+    end_date: Annotated[
+        str | None,
+        ArgumentMetadata(
+            display_name="End Date",
+            description="The end date in in ISO-8601 format (YYYY-MM-DDTHH:MM:SSZ).",
+        ),
+    ] = None,
+    filter: Annotated[
+        list[str] | None,
+        ArgumentMetadata(
+            display_name="Filter",
+            description="A list of strings to match with audit field content. The strings must not contain spaces.",
+        ),
+    ] = None,
+    limit: Annotated[
+        int | None,
+        ArgumentMetadata(
+            display_name="Limit",
+            description="The maximum number of audit records to return.",
+        ),
+    ] = None,
+):
+    # https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-audit-records/#api-rest-api-3-auditing-record-get
+    secret = ctx.get().secrets.get("JIRA_SECRET")
+    domain = secret["domain"]
+    email = secret["email"]
+    api_key = secret["api_key"]
+
+    with get_jira_client(domain, email, api_key) as client:
+        offset = 0
+        issues = []
+
+        params = {
+            "offset": offset,
+        }
+        if start_date is not None:
+            params["from"] = start_date
+        if end_date is not None:
+            params["to"] = end_date
+        if filter is not None:
+            if any(" " in f for f in filter):
+                raise ValueError("Filter strings must not contain spaces.")
+            params["filter"] = " ".join(filter)
+
+        while limit is None or len(issues) < limit:
+            response = client.get("/auditing/record", params=params)
+            response.raise_for_status()
+            data = response.json()
+
+            issues.extend(data["records"])
+            offset = len(issues)
+            if offset == data["total"]:
+                break
+
+        return issues if limit is None else issues[:limit]

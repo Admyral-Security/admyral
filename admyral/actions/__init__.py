@@ -20,6 +20,7 @@ from admyral.actions.integrations.cases import (
     update_jira_issue_status,
     comment_jira_issue_status,
     search_jira_issues,
+    get_jira_audit_records,
     create_opsgenie_alert,
     create_pagerduty_incident,
 )
@@ -69,6 +70,7 @@ __all__ = [
     "update_jira_issue_status",
     "comment_jira_issue_status",
     "search_jira_issues",
+    "get_jira_audit_records",
     "create_opsgenie_alert",
     "create_pagerduty_incident",
     "list_snyk_vulnerabilities",
