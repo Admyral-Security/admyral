@@ -23,8 +23,7 @@
 		"title": "More"
 	},
 	"open-source": "Open-Source",
-	"dev": "Development Setup",
-	"build_integrations": "Build New Integrations",
+	"development_setup": "Development Setup",
 	"security": "Security and Privacy",
 	"contact": {
 		"title": "Contact Us ↗",

@@ -1,0 +1,79 @@
+import { Callout } from "nextra/components";
+
+# Development Setup
+
+## Prerequisites
+
+-   Python 3.12
+-   Poetry (For installation please refer to [Poetry Installation](https://python-poetry.org/docs/#installation))
+-   Temporal CLI (For installation please refer to [Temporal CLI Installation](https://docs.temporal.io/cli))
+-   Node.js 20 (For installation please refer to [Node.js Installation](https://nodejs.org/en/download/))
+-   pnpm (For installation please refer to [pnpm Installation](https://pnpm.io/installation))
+
+## Setup
+
+```bash
+git clone git@github.com:Admyral-Security/admyral.git
+
+cd admyral
+
+# Install dependencies
+poetry install
+```
+
+### Environment Variable
+
+```bash
+cp .env.example .env
+
+# activate the environment variables (Tip: use a tool, such as autoenv or autodir, for
+# automatically sourcing the environment variables)
+source .env
+```
+
+<Callout type="info">
+	To enable the AI action and send email action, you must set an `OpenAI` and
+	`Resend` API key in the `.env` file.
+</Callout>
+
+### Temporal
+
+Start the Temporal development server:
+
+```bash
+temporal server start-dev
+```
+
+### API Backend
+
+```bash
+poetry run python admyral/main.py api
+```
+
+### Workflow Worker
+
+```bash
+poetry run python admyral/main.py worker
+```
+
+### Web
+
+```bash
+# 1. Go to the `web` directory and install the dependencies:
+cd web
+pnpm i
+
+# 2. Start the development server:
+pnpm dev
+```
+
+### Documentation
+
+```bash
+# 1. Go to the `docs` directory and install the dependencies:
+cd docs
+pnpm i
+
+# 2. Start the development server:
+pnpm dev
+```
