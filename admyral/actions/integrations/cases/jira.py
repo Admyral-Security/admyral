@@ -5,6 +5,7 @@ from httpx import Client
 from admyral.typings import JsonValue
 from admyral.action import action, ArgumentMetadata
 from admyral.context import ctx
+from admyral.utils.collections import is_empty
 
 
 def get_jira_client(domain: str, email: str, api_key: str) -> Client:
@@ -324,11 +325,9 @@ def get_jira_audit_records(
 
     with get_jira_client(domain, email, api_key) as client:
         offset = 0
-        issues = []
+        logs = []
 
-        params = {
-            "offset": offset,
-        }
+        params = {}
         if start_date is not None:
             params["from"] = start_date
         if end_date is not None:
@@ -338,14 +337,15 @@ def get_jira_audit_records(
                 raise ValueError("Filter strings must not contain spaces.")
             params["filter"] = " ".join(filter)
 
-        while limit is None or len(issues) < limit:
+        while limit is None or len(logs) < limit:
+            params["offset"] = offset
             response = client.get("/auditing/record", params=params)
             response.raise_for_status()
             data = response.json()
 
-            issues.extend(data["records"])
-            offset = len(issues)
-            if offset == data["total"]:
+            logs.extend(data["records"])
+            offset = len(logs)
+            if offset == data["total"] or is_empty(data["records"]):
                 break
 
-        return issues if limit is None else issues[:limit]
+        return logs if limit is None else logs[:limit]
