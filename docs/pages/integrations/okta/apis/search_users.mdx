@@ -1,0 +1,70 @@
+import { Callout } from "nextra/components";
+
+# Search Users (Okta)
+
+Search for users in Okta based on a search query.
+
+<Callout type="info">
+	For more information on setting up Okta API tokens, see [Okta
+	Documentation](https://developer.okta.com/docs/reference/api/users/#list-users-with-search).
+</Callout>
+
+**SDK Import:**
+
+```python
+from admyral.actions import okta_search_users
+```
+
+## Arguments:
+
+| Argument Name       | Description                                        | Required |
+| ------------------- | -------------------------------------------------- | :------: |
+| **Search** `search` | The search query to filter users.                  |    -     |
+| **Limit** `limit`   | The maximum number of users to list. Default: 1000 |    -     |
+
+### Search Examples
+
+The search query supports various properties and operators:
+
+-   Searches many properties:
+
+    -   Any user profile property, including custom-defined properties
+    -   Top-level properties: `id`, `status`, `created`, `activated`, `statusChanged`, and `lastUpdated`
+    -   User Type accessed as `type.id`
+
+-   Accepts `sortBy` and `sortOrder` parameters:
+
+    -   `sortBy` can be any single property, e.g., `sortBy=profile.lastName`
+    -   `sortOrder` is optional and defaults to ascending
+    -   `sortOrder` is ignored if `sortBy` is not present
+    -   Users with the same value for the `sortBy` property will be ordered by `id`
+
+-   The `ne` (not equal) operator isn't supported, but you can use `lt ... or ... gt` instead
+
+| Search Term Example                           | Description                                     |
+| --------------------------------------------- | ----------------------------------------------- |
+| `status eq "STAGED"`                          | Users that have a `status` of `STAGED`          |
+| `lastUpdated gt "yyyy-MM-dd'T'HH:mm:ss.SSSZ"` | Users last updated after a specific timestamp   |
+| `id eq "00u1ero7vZFVEIYLWPBN"`                | Users with a specified `id`                     |
+| `type.id eq "otyfnjfba4ye7pgjB0g4"`           | Users with a specified User Type ID             |
+| `profile.department eq "Engineering"`         | Users that have a `department` of `Engineering` |
+| `profile.occupation eq "Leader"`              | Users that have an `occupation` of `Leader`     |
+| `profile.lastName sw "Smi"`                   | Users whose `lastName` starts with `Smi`        |
+
+## Returns
+
+A JSON array of events.
+
+## Required Secrets
+
+| Secret Placeholder | Description                                            |
+| ------------------ | ------------------------------------------------------ |
+| `OKTA_SECRET`      | Okta secret. See [Okta setup](/integrations/okta/okta) |
+
+## SDK Example
+
+```python
+events = okta_search_users(
+	secrets={"OKTA_SECRET": "my_stored_okta_secret"}
+)
+```

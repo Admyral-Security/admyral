@@ -105,3 +105,54 @@ def list_okta_events(
             prev_num_events = len(events)
 
         return events[:limit]
+
+
+@action(
+    display_name="Search Users",
+    display_namespace="Okta",
+    description="Search Users from Okta",
+    secrets_placeholders=["OKTA_SECRET"],
+)
+def okta_search_users(
+    search: Annotated[
+        str,
+        ArgumentMetadata(
+            display_name="Search",
+            description="The search query to filter users.",
+        ),
+    ] = None,
+    limit: Annotated[
+        int,
+        ArgumentMetadata(
+            display_name="Limit",
+            description="The maximum number of users to list.",
+        ),
+    ] = 1000,
+) -> list[dict[str, JsonValue]]:
+    secret = ctx.get().secrets.get("OKTA_SECRET")
+    okta_domain = secret["domain"]
+    api_key = secret["api_key"]
+
+    with get_okta_client(okta_domain, api_key) as client:
+        params = {
+            "search": search,
+            "limit": min(limit, 200),  # Okta's maximum limit per request is 200
+        }
+
+        response = client.get("/users", params=params)
+        response.raise_for_status()
+
+        users = response.json()
+
+        # handle pagination
+        prev_num_users = len(users)
+        base_url = str(client.base_url)
+        while link := _get_next_link(response):
+            response = client.get(link.replace(base_url, ""))
+            response.raise_for_status()
+            users.extend(response.json())
+            if len(users) >= limit or prev_num_users == len(users):
+                break
+            prev_num_users = len(users)
+
+        return users[:limit]
