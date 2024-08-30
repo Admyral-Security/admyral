@@ -65,6 +65,8 @@ A JSON array of events.
 
 ```python
 events = okta_search_users(
+	search="status eq \"STAGED\"",
+	limit=1000,
 	secrets={"OKTA_SECRET": "my_stored_okta_secret"}
 )
 ```
