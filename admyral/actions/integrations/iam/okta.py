@@ -156,3 +156,23 @@ def okta_search_users(
             prev_num_users = len(users)
 
         return users[:limit]
+
+
+@action(
+    display_name="Get All User Types",
+    display_namespace="Okta",
+    description="Retrieve all user types from Okta",
+    secrets_placeholders=["OKTA_SECRET"],
+)
+def okta_get_all_user_types() -> list[dict[str, JsonValue]]:
+    secret = ctx.get().secrets.get("OKTA_SECRET")
+    okta_domain = secret["domain"]
+    api_key = secret["api_key"]
+
+    with get_okta_client(okta_domain, api_key) as client:
+        response = client.get("/meta/types/user")
+        response.raise_for_status()
+
+        user_types = response.json()
+
+        return user_types

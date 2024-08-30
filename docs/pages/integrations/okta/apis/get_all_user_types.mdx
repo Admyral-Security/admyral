@@ -1,0 +1,38 @@
+import { Callout } from "nextra/components";
+
+# Get All User Types (Okta)
+
+Retrieve all user types from Okta.
+
+<Callout type="info">
+	For more information on setting up Okta API tokens, see [Okta
+	Documentation](https://developer.okta.com/docs/reference/api/user-types/).
+</Callout>
+
+**SDK Import:**
+
+```python
+from admyral.actions import okta_get_all_user_types
+```
+
+## Arguments:
+
+None
+
+## Returns
+
+A JSON array of all user types.
+
+## Required Secrets
+
+| Secret Placeholder | Description                                            |
+| ------------------ | ------------------------------------------------------ |
+| `OKTA_SECRET`      | Okta secret. See [Okta setup](/integrations/okta/okta) |
+
+## SDK Example
+
+```python
+events = okta_get_all_user_types(
+	secrets={"OKTA_SECRET": "my_stored_okta_secret"}
+)
+```
