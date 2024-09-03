@@ -25,7 +25,7 @@ The maintainers are available on [Discord](https://discord.gg/GqbJZT9Hbf) in cas
 
 ## Development Setup
 
-For development setup, please refer to our documentation on [Admyral Docs](https://docs.admyral.dev/setup/dev).
+For development setup, please refer to our documentation on [Admyral Docs](https://docs.admyral.dev/development_setup).
 
 ## Making a change
 
