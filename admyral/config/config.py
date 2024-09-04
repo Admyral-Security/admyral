@@ -2,8 +2,10 @@ import click
 import os
 from enum import Enum
 import logging
-
+from dotenv import load_dotenv
 from pydantic import BaseModel
+
+load_dotenv()
 
 
 class LoggingLevel(Enum):
