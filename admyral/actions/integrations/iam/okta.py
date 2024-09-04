@@ -115,7 +115,7 @@ def list_okta_events(
 )
 def okta_search_users(
     search: Annotated[
-        str,
+        str | None,
         ArgumentMetadata(
             display_name="Search",
             description="The search query to filter users.",
