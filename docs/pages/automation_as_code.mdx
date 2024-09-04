@@ -4,7 +4,7 @@ import { FileTree, Callout } from "nextra/components";
 
 Automation-as-Code is a way to create automations using Python code. Benefits include:
 
--   Being able to leverage Software Engineering best practices:
+-   Being able to leverage software engineering best practices:
     -   Reduction of errors through automated testing when deploying an automation
     -   Version Control
     -   Pull requests (propose changes for review, encourage collaboration and discussion among team members, ensure good documentation)
@@ -29,12 +29,12 @@ For compatability and increased reusability, the recommended project setup in Gi
 	</FileTree.Folder>
 </FileTree>
 
-For an example, checkout our [Github example project](https://github.com/Admyral-Security/admyral-quickstart).
+For an example, check out our [Github example project](https://github.com/Admyral-Security/admyral-quickstart).
 
 ## The Workflow Function
 
 The workflow function is a Python function that is used to specify the control flow of the actions and orchestrates the input and output for the actions.
-Think of it like the receipt for the ingredients (pre-build actions, integrations, and custom actions).
+Think of it like the recipe for the ingredients (pre-build actions, integrations, and custom actions).
 The workflow function is more restrictive than pure Python code as Admyral needs to compile it and map it onto the [No-Code interface](/no_code_editor).
 
 A workflow function is defined as a Python function with the `@workflow` decorator:
@@ -339,7 +339,7 @@ See [If Conditions in Pre-built Actions](/pre_defined_actions#if-condition) for 
 
 The Admyral compiler automatically parallelizes actions which are independent from each other. Since the compiler
 parallelizes the action based on the data flow in the workflow function, there might be situations where there are hidden
-dependencies between two actions due to some side-effects. In order to enforce, the correct execution order you can use
+dependencies between two actions due to some side-effects. In order to enforce the correct execution order, you can use
 the `run_after` argument.
 
 This workflow
@@ -381,6 +381,10 @@ argument is automatically available.
 ## Executing an Automation
 
 Automation based on Admyral is written in Python. This allows you to run and test your automations locally as standard Python scripts.
+
+<Callout type="info">
+    Note that for this to work, the secrets (e.g. API keys) must be available as environment variables.
+</Callout>
 
 To execute an automation locally, simply call it like a normal Python function
 

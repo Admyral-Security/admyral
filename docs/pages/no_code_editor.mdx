@@ -42,7 +42,7 @@ In order to pass the `jira_issues` result as an argument to an action, simply us
 The double curly brackets indicate that it is a reference. Inside the reference, you can use Python syntax to access nested data from JSON arrays or objects.
 Use numbers to access the index of an array and strings to access values by key in an object.
 
-Exampe for accessing the ID field of the first Jira issue (`jira_issues` is an array of JSON objects):
+Example for accessing the ID field of the first Jira issue (`jira_issues` is an array of JSON objects):
 
 ```
 {{ jira_issues[0]["id"] }}
