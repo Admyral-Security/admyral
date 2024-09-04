@@ -9,7 +9,6 @@ REFERENCE_REGEX = re.compile(r"{{((?!}}).)*}}")
 
 """
 
-
 Behavior:
 
 - If something is wrapped in quotes, it is a string.
@@ -46,6 +45,7 @@ def _is_string_escaped_json_value(value: str) -> bool:
         or value in ("true", "false")
         or (value.startswith("{") and value.endswith("}"))
         or (value.startswith("[") and value.endswith("]"))
+        or value == "null"
     ):
         return False
     try:
@@ -65,7 +65,7 @@ def _handle_value_inside_container(value: JsonValue) -> str:
 
 
 def serialize_json_with_reference(value: JsonValue) -> str:
-    if isinstance(value, (bool, int, float)):
+    if value is None or isinstance(value, (bool, int, float)):
         return json.dumps(value)
 
     if isinstance(value, str):
@@ -114,6 +114,10 @@ def deserialize_json_with_reference(value: str) -> JsonValue:
     # Handle Booleans
     if value in ("true", "false"):
         return value == "true"
+
+    # Handle Null
+    if value == "null":
+        return None
 
     is_list = value.startswith("[") and value.endswith("]")
     is_dict = value.startswith("{") and value.endswith("}")
@@ -181,6 +185,8 @@ def deserialize_json_with_reference(value: str) -> JsonValue:
         )
 
     # Wrap references into qutoes which are not yet within quotes
+    # We can't simply just use regex replace because a reference might be used multiple times
+    # where some usages are within quotes and some are not.
     out = [value]
     for start, end, replacement in reversed(replacements):
         str1 = out[-1][end:]
@@ -191,11 +197,5 @@ def deserialize_json_with_reference(value: str) -> JsonValue:
         out.append(str2)
 
     out = "".join(reversed(out))
-
-    # handle string escaping for ints, floats, bools, dicts, and lists
-    if out.startswith('"') and out.endswith('"'):
-        if _is_string_escaped_json_value(out[1:-1]):
-            return out[1:-1]
-        return out
 
     return json.loads(out)

@@ -229,3 +229,15 @@ def test_escaped_string_serialization():
 
     assert json_str == '"something before and after"'
     assert input_json_obj == json_obj
+
+
+#########################################################################################################
+
+
+def test_none_serialization():
+    input_value = None
+    json_str = serialize_json_with_reference(input_value)
+    json_obj = deserialize_json_with_reference(json_str)
+
+    assert json_str == "null"
+    assert json_obj is None
