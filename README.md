@@ -47,7 +47,7 @@ Empower your workflows with AI! Admyral supports custom AI Actions using top-tie
 
 ### No-Code Editor Sync -- Bi-directional 👈 👉
 
-While Admyral is code-first, there is No-Code functionality as well. Visualize your coded workflows and edit them directly in the drag-and-drop workflow builder. All changes are synced back into your code.
+While Admyral is Code-First, there is No-Code functionality as well. Visualize your coded workflows and edit them directly in the drag-and-drop workflow builder. All changes are synced back into your code.
 
 <img src="img/sync.svg" alt="admyral" />
 
