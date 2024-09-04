@@ -34,10 +34,10 @@ def send_two_slack_messages():
     ...
 ```
 
-The following metadata fields defined in the `@action` decorator is used for rendering the custom action in the no-code editor and providing information about the action to the user.
+The following metadata fields defined in the `@action` decorator is used for rendering the custom action in the No-Code editor and providing information about the action to the user.
 
--   `display_name` (Required): The name displayed on the action building blocks in the no-code editor.
--   `display_namespace` (Required): The group under which the action will be rendered in the left sidebar of the no-code editor.
+-   `display_name` (Required): The name displayed on the action building blocks in the No-Code editor.
+-   `display_namespace` (Required): The group under which the action will be rendered in the left sidebar of the No-Code editor.
 -   `description` (Optional): Description of the action.
 
 #### Supported Action and Return Types
@@ -238,7 +238,7 @@ def send_two_slack_messages(
 
 #### Pushing Actions
 
-After creating your custom action, push it to Admyral using the following CLI command to use it in other workflows or within the no-code editor:
+After creating your custom action, push it to Admyral using the following CLI command to use it in other workflows or within the No-Code editor:
 
 ```bash
 admyral action push <your_custom_action> -a <path/to/your/action.py>
