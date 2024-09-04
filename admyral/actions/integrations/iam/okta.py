@@ -176,3 +176,73 @@ def okta_get_all_user_types() -> list[dict[str, JsonValue]]:
         user_types = response.json()
 
         return user_types
+
+
+@action(
+    display_name="Get Okta Logs",
+    display_namespace="Okta",
+    description="Retrieve Okta system logs",
+    secrets_placeholders=["OKTA_SECRET"],
+)
+def get_okta_logs(
+    query: Annotated[
+        str | None,
+        ArgumentMetadata(
+            display_name="Query",
+            description="The query to filter logs. For example, 'logout'",
+        ),
+    ] = None,
+    start_time: Annotated[
+        str | None,
+        ArgumentMetadata(
+            display_name="Start Time",
+            description="The start time for the logs to retrieve. Must be in ISO 8601 format (YYYY-MM-DDTHH:MM:SSZ).",
+        ),
+    ] = None,
+    end_time: Annotated[
+        str | None,
+        ArgumentMetadata(
+            display_name="End Time",
+            description="The end time for the logs to retrieve. Must be in ISO 8601 format (YYYY-MM-DDTHH:MM:SSZ).",
+        ),
+    ] = None,
+    limit: Annotated[
+        int,
+        ArgumentMetadata(
+            display_name="Limit",
+            description="The maximum number of logs to retrieve.",
+        ),
+    ] = 1000,
+) -> list[dict[str, JsonValue]]:
+    secret = ctx.get().secrets.get("OKTA_SECRET")
+    okta_domain = secret["domain"]
+    api_key = secret["api_key"]
+
+    with get_okta_client(okta_domain, api_key) as client:
+        params = {
+            "limit": min(limit, 1000),
+        }
+        if query:
+            params["q"] = query
+        if start_time:
+            params["since"] = start_time
+        if end_time:
+            params["until"] = end_time
+
+        response = client.get("/logs", params=params)
+        response.raise_for_status()
+
+        logs = response.json()
+
+        # handle pagination
+        prev_num_logs = len(logs)
+        base_url = str(client.base_url)
+        while link := _get_next_link(response):
+            response = client.get(link.replace(base_url, ""))
+            response.raise_for_status()
+            logs.extend(response.json())
+            if len(logs) >= limit or prev_num_logs == len(logs):
+                break
+            prev_num_logs = len(logs)
+
+        return logs[:limit]

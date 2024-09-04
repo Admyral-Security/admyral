@@ -49,6 +49,7 @@ from admyral.actions.integrations.iam import (
     list_okta_events,
     okta_search_users,
     okta_get_all_user_types,
+    get_okta_logs,
 )
 
 from admyral.actions.integrations.compliance import (
@@ -96,4 +97,5 @@ __all__ = [
     "list_groups_per_user",
     "okta_search_users",
     "okta_get_all_user_types",
+    "get_okta_logs",
 ]
