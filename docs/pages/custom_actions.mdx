@@ -121,7 +121,7 @@ def send_two_slack_messages(
 #### Handling Secrets
 
 If you need to use one or more secrets in your custom action, you need to define placeholders to which secrets are mapped when they are used in workflows.
-You simpley define secret placeholders using the `secrets_placeholders` field of the `@action` decorator. To access the secret, you can load the secret
+You simply define secret placeholders using the `secrets_placeholders` field of the `@action` decorator. To access the secret, you can load the secret
 using the get secrets functionality provided by the action context `ctx.get().secrets.get("MY_PLACEHOLDER")`.
 
 Decrypted secrets in Admyral are a simple string dictionary, i.e., `dict[str, str]`.
@@ -156,7 +156,7 @@ def send_two_slack_messages(
     ...
 ```
 
-In the workflow function, you map a secret (e.g., `my_stored_slack_secret`) to the secret placeholder (e.g., `SLACK_SECRET`) inside the `secrets` argument (Note: you don't need to ):
+In the workflow function, you map a secret (e.g., `my_stored_slack_secret`) to the secret placeholder (e.g., `SLACK_SECRET`) inside the `secrets` argument (Note: you don't need to):
 
 ```python
 send_two_slack_message(
@@ -311,7 +311,7 @@ In order to use the action within your workflow, you simply push your workflow a
 
         Use your imported custom action as a regular function:
 
-        ```
+        ```python
     	@workflow(
     		description="example_workflow",
     		triggers=[Webhook()],

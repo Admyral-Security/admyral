@@ -68,14 +68,14 @@ With Admyral offering a _CLI_ as well as a _web UI_, you can decide how you'd li
         ```bash 
         admyral secret set <secret_name> --value <key1>=<value1> --value <key2>=<value2>
         ```
-        For our quickstart, navigate in your terminal to your admyral repository and enter the following but replacing `<your_copied_virus_total_api_key>` with your copied api key:
+        For our quickstart, navigate in your terminal to your admyral repository and enter the following but replacing `<your_copied_virus_total_api_key>` with your copied API key:
         ```bash
         admyral secret set virus_total --value api_key=<your_copied_virus_total_api_key>
         ```
 
     </Tabs.Tab>
     <Tabs.Tab>
-        Go to Admyral running on [localhost:3000](localhost:3000). On the bottom left, click on settings and add your VirusTotal api key:
+        Go to Admyral running on [localhost:3000](localhost:3000). On the bottom left, click on settings and add your VirusTotal API key:
         1. Select "Add new secret"
         2. Secret name: `virus_total` (*any other name works as well*)
         3. Key: `api_key`
@@ -93,7 +93,7 @@ With Admyral, you can decide whether you want to build your workflows with `Code
 <Tabs items={['Code', 'No-Code']}>
     <Tabs.Tab>
 
-        We recommend to setup a Github project for managing your workflows. You can checkout our [quickstart Github repository](https://github.com/Admyral-Security/admyral-quickstart). Feel free to clone it and use
+        We recommend to setup a Github project for managing your workflows. You can check out our [Quickstart Github Repo](https://github.com/Admyral-Security/admyral-quickstart). Feel free to clone it and use
         it for your setup or simply just get inspired.
 
         Open your project with your favorite IDE and create a new Python file named `virus_total_workflow.py` for the workflow.
@@ -115,7 +115,7 @@ With Admyral, you can decide whether you want to build your workflows with `Code
         The function name `virus_total_workflow`, also called workflow name, is used as an identifier for your workflow and must be unique across all your workflows.
 
         Additionally, we need the corresponding imports. In this case, it is `from admyral.workflow import workflow` for the workflow decorator as well as `from admyral.actions import virus_total_analyze_url` for the integration action.
-        For the latter, we are using the pre-built integration to analyze an url which takes an url as a string such as `www.example.org` and returns a JSON. The return value is the
+        For the latter, we are using the pre-built integration to analyze a URL which takes a URL as a string such as `www.example.org` and returns a JSON. The return value is the
         regular return value you'd receive from the [VirusTotal Scan URL API](https://docs.virustotal.com/reference/scan-url).
         With this knowledge, we can now create the workflow using plain Python:
 
@@ -166,7 +166,7 @@ With Admyral, you can decide whether you want to build your workflows with `Code
         from admyral.actions import virus_total_analyze_url
 
         @workflow(
-            description="Analyze an URL using VirusTotal",
+            description="Analyze a URL using VirusTotal",
             triggers=[Webhook()]
         )
         def virus_total_workflow(payload: dict[str, JsonValue]):
@@ -212,15 +212,15 @@ With Admyral, you can decide whether you want to build your workflows with `Code
         3. Fill out the arguments of the `Analyze URL` action. In this case, it is just the URL argument: `www.example.org`
 
         <Callout type="warning">
-            When you enter an url in the URL field in VirusTotal's configuration panel on the right, everytime the workflow is executed, the same URL will be analyzed.
+            When you enter a URL in the URL field in VirusTotal's configuration panel on the right, everytime the workflow is executed, the same URL will be analyzed.
             To avoid this, you would like to leverage the input from the webhook (event-based execution of the workflow).
         </Callout>
 
         To create a dynamic input, you can refer to the input coming from the webhook. Whenever the webhook is called (= an event happened), we require to send an url with it as well.
-        For this, click on the Start action and then on the "+" next to Webhook.
+        For this, click on the Start action and then on the "+" next to webhook.
 
         To refer to a previous input, we use `{{ <input> }}`.
-        With this in mind, we can reference the url dynamically within the VirusTotal action using the following reference: `{{ payload["url"] }}`. This implies that we always expect
+        With this in mind, we can reference the URL dynamically within the VirusTotal action using the following reference: `{{ payload["url"] }}`. This implies that we always expect
         a JSON body which contains a field called `url` be sent to the webhook. For example:
 
         ```json
@@ -280,7 +280,7 @@ Upon building our workflow, you can activate and execute your workflow. Again, y
 
         #### Execute the workflow
 
-        On the top right, click on "Run" to execute the workflow manually. A modal opens in which you can enter a payload. As the workflow requires the url
+        On the top right, click on "Run" to execute the workflow manually. A modal opens in which you can enter a payload. As the workflow requires the URL
         and as we have used `{{ payload["url"] }}` as a reference, we have to add a test payload. The payload is in JSON format and looks like the following:
 
         ```json

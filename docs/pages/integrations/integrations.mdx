@@ -12,7 +12,7 @@ Admyral provides out-of-the-box integrations to enable you to get started quickl
 
 <Callout type="info">
 	Any integration missing? Either [build it yourself](/build_integrations) or
-	write us in [Discord](https://discord.gg/GqbJZT9Hbf)!
+	write us on [Discord](https://discord.gg/GqbJZT9Hbf)!
 </Callout>
 
 ## Using Integrations
@@ -29,9 +29,9 @@ Admyral provides out-of-the-box integrations to enable you to get started quickl
 				Webhook()
 			],
 		)
-		def enrich_workflow(payload: str):
+		def enrich_workflow(payload: dict[str, JsonValue]):
 			result = virus_total_analyze_ip(
-				ip=payload,
+				ip=payload["ip"],
 				secrets={"VIRUS_TOTAL_SECRET": "virus_total_api_key"},
 			)
 			send_slack_message(
@@ -60,8 +60,8 @@ Admyral provides out-of-the-box integrations to enable you to get started quickl
     	```
 
     	You then add your `slack_secret` to the secrets securely stored in Admyral using the CLI with `oasiofaj12839naofnaofa` being the API key:
-    	```
-    	admyral secret slack_secret oasiofaj12839naofnaofa set
+    	```bash
+    	admyral secret set slack_secret --value api_key=oasiofaj12839naofnaofa
     	```
 
     </Tabs.Tab>
