@@ -1,8 +1,11 @@
 import asyncio
 import argparse
+from dotenv import load_dotenv
 
 from admyral.services.api_service import run_api
 from admyral.services.worker_service import launch_worker
+
+load_dotenv()
 
 
 def parse_args() -> dict:
