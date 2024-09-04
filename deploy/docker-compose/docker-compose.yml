@@ -78,6 +78,8 @@ services:
     #     context: ../..
     #     dockerfile: ./docker/Dockerfile.worker
     image: admyralai/worker:latest
+    entrypoint: ["python", "admyral/main.py", "worker", "--docker"]
+    privileged: true
     depends_on:
       temporal:
         condition: service_healthy
