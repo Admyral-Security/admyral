@@ -46,6 +46,15 @@ def send_email(
 ) -> JsonValue:
     RESEND_EMAIL = os.getenv("RESEND_EMAIL")
 
+    if not resend.api_key:
+        raise ValueError(
+            "RESEND_API_KEY environment variable is not set. Please set it to use the send_email action."
+        )
+    if not RESEND_EMAIL:
+        raise ValueError(
+            "RESEND_EMAIL environment variable is not set. Please set it to use the send_email action."
+        )
+
     body = {
         "from": f"{sender_name} <{RESEND_EMAIL}>",
         "to": [recipients] if isinstance(recipients, str) else recipients,

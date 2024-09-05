@@ -1,6 +1,7 @@
 from sqlmodel import Field, Relationship
-from sqlalchemy import TEXT, JSON, ForeignKeyConstraint
+from sqlalchemy import TEXT, JSON, ForeignKeyConstraint, TIMESTAMP
 from typing import TYPE_CHECKING
+from datetime import datetime
 
 from admyral.db.schemas.base_schemas import BaseSchema
 from admyral.models import WorkflowRun, WorkflowRunStep, WorkflowRunMetadata
@@ -34,6 +35,9 @@ class WorkflowRunSchema(BaseSchema, table=True):
 
     # other fields
     source_name: str = Field(sa_type=TEXT())
+    completed_at: datetime | None = Field(sa_type=TIMESTAMP(), nullable=True)
+    failed_at: datetime | None = Field(sa_type=TIMESTAMP(), nullable=True)
+    canceled_at: datetime | None = Field(sa_type=TIMESTAMP(), nullable=True)
 
     # relationship parents
     workflow: "WorkflowSchema" = Relationship(back_populates="workflow_runs")
@@ -51,6 +55,9 @@ class WorkflowRunSchema(BaseSchema, table=True):
                 "trigger_id": self.trigger_id,
                 "payload": self.payload,
                 "created_at": self.created_at,
+                "completed_at": self.completed_at,
+                "failed_at": self.failed_at,
+                "canceled_at": self.canceled_at,
             }
         )
 
@@ -68,6 +75,9 @@ class WorkflowRunSchema(BaseSchema, table=True):
             {
                 "run_id": self.run_id,
                 "created_at": self.created_at,
+                "completed_at": self.completed_at,
+                "failed_at": self.failed_at,
+                "canceled_at": self.canceled_at,
             }
         )
 
@@ -99,6 +109,7 @@ class WorkflowRunStepsSchema(BaseSchema, table=True):
     input_args: dict[str, JsonValue] | None = Field(sa_type=JSON(), nullable=True)
     logs: str | None = Field(sa_type=TEXT(), nullable=True)
     result: JsonValue = Field(sa_type=JSON(), nullable=True)
+    error: str | None = Field(sa_type=TEXT(), nullable=True)
 
     # relationship parents
     workflow_run: WorkflowRunSchema = Relationship(back_populates="steps")
@@ -111,6 +122,7 @@ class WorkflowRunStepsSchema(BaseSchema, table=True):
                 "prev_step_id": self.prev_step_id,
                 "logs": self.logs,
                 "result": self.result,
+                "error": self.error,
                 "input_args": self.input_args,
             }
         )

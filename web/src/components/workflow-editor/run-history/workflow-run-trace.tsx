@@ -8,6 +8,7 @@ import ErrorCallout from "@/components/utils/error-callout";
 import { TWorkflowRunStepMetadata } from "@/types/workflow-runs";
 import { useEditorActionStore } from "@/stores/editor-action-store";
 import ActionIcon from "../action-icon";
+import { CrossCircledIcon } from "@radix-ui/react-icons";
 
 export default function WorkflowRunTrace({
 	workflowId,
@@ -77,12 +78,19 @@ export default function WorkflowRunTrace({
 								<ActionIcon
 									actionType={workflowStep.actionType}
 								/>
-								<Text size="2">
-									{workflowStep.actionType === "start"
-										? "Start"
-										: actionsIndex[workflowStep.actionType]
-												.displayName}
-								</Text>
+								<Flex align="center" justify="center" gap="1">
+									<Text size="1">
+										{workflowStep.actionType === "start"
+											? "Start"
+											: actionsIndex[
+													workflowStep.actionType
+												].displayName}
+									</Text>
+
+									{workflowStep.error !== null && (
+										<CrossCircledIcon color="red" />
+									)}
+								</Flex>
 							</Flex>
 						</Row>
 					),

@@ -13,6 +13,7 @@ from admyral.db.admyral_store import AdmyralStore
 from admyral.logger import get_logger
 from admyral.workers.action_executor import action_executor
 from admyral.workers.workflow_run_initializer import init_workflow_run
+from admyral.workers.workflow_run_completor import mark_workflow_as_completed
 from admyral.secret.secrets_manager import secrets_manager_factory
 from admyral.workers.if_condition_executor import execute_if_condition
 from admyral.utils.future_executor import capture_main_event_loop
@@ -49,7 +50,7 @@ async def run_worker(
         ]
         + [action_executor("execute_python_action", execute_python_action)]
         + [action_executor("if_condition", execute_if_condition)]
-        + [init_workflow_run]
+        + [init_workflow_run, mark_workflow_as_completed]
     )
 
     logger.info(f"Starting worker {worker_name}...")

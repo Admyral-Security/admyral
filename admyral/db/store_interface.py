@@ -123,6 +123,11 @@ class StoreInterface(ABC):
     ) -> None: ...
 
     @abstractmethod
+    async def mark_workflow_run_as_completed(
+        self, run_id: str, completed_at: str
+    ) -> None: ...
+
+    @abstractmethod
     async def get_workflow_run(
         self, workflow_id: str, run_id: str
     ) -> Optional[WorkflowRun]: ...
@@ -150,6 +155,17 @@ class StoreInterface(ABC):
         action_type: str,
         prev_step_id: str,
         result: JsonValue,
+        input_args: dict[str, JsonValue],
+    ) -> None: ...
+
+    @abstractmethod
+    async def store_workflow_run_error(
+        self,
+        step_id: str,
+        run_id: str,
+        action_type: str,
+        prev_step_id: str,
+        error: str,
         input_args: dict[str, JsonValue],
     ) -> None: ...
 

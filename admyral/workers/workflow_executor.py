@@ -1,5 +1,7 @@
 from typing import Optional, Any
 from temporalio import workflow
+from temporalio.common import RetryPolicy
+from temporalio.exceptions import ActivityError
 from dataclasses import dataclass
 from datetime import timedelta
 from collections import deque, defaultdict
@@ -26,6 +28,10 @@ logger = get_logger(__name__)
 
 
 START_TO_CLOSE_TIMEOUT = timedelta(seconds=60 * 15)  # 15 min
+ACTION_RETRY_POLICY = RetryPolicy(
+    maximum_attempts=3,
+    non_retryable_error_types=["NonRetryableActionError"],
+)
 
 
 # NOTE: params as objects are strongly encouraged
@@ -54,6 +60,19 @@ class JobQueueEntry(BaseModel):
 # run methods only accept positional parameters
 
 
+async def _execute_activity(action_type: str, args: list[JsonValue]) -> JsonValue:
+    try:
+        return await workflow.execute_activity(
+            action_type,
+            args=args,
+            start_to_close_timeout=START_TO_CLOSE_TIMEOUT,
+            retry_policy=ACTION_RETRY_POLICY,
+        )
+    except ActivityError as e:
+        logger.error(f"Error executing activity of type {action_type}: {e.message}")
+        raise e
+
+
 @workflow.defn(name="WorkflowExecutor")
 class WorkflowExecutor:
     @workflow.run
@@ -63,12 +82,10 @@ class WorkflowExecutor:
 
         # initialize workflow run
         payload = self._inject_default_args(params.payload, params.trigger_default_args)
-        workflow_run_id = await workflow.execute_activity(
+
+        workflow_run_id = await _execute_activity(
             "init_workflow_run",
             args=[params.workflow.workflow_id, params.source_name, payload],
-            start_to_close_timeout=timedelta(
-                seconds=120
-            ),  # TODO: choose a timeout here
         )
 
         logger.info(
@@ -183,6 +200,8 @@ class WorkflowExecutor:
         if exception:
             raise exception
 
+        await _execute_activity("mark_workflow_as_completed", args=[workflow_run_id])
+
         logger.info(
             f'Workflow execution of workflow "{params.workflow.workflow_id}" with run ID "{workflow_run_id}" completed successfully.'
         )
@@ -219,19 +238,17 @@ class WorkflowExecutor:
 
         if action_type not in ActionRegistry.get_action_types():
             # Custom Python action
-            return await workflow.execute_activity(
+            return await _execute_activity(
                 "execute_python_action",
                 args=[
                     ctx_dict,
                     node.secrets_mapping,
                     {"action_type": action_type, "action_args": action_args},
                 ],
-                start_to_close_timeout=START_TO_CLOSE_TIMEOUT,
             )
-        return await workflow.execute_activity(
+        return await _execute_activity(
             action_type,
             args=[ctx_dict, node.secrets_mapping, action_args],
-            start_to_close_timeout=START_TO_CLOSE_TIMEOUT,
         )
 
     async def _execute_if_condition(
@@ -254,10 +271,9 @@ class WorkflowExecutor:
         dag_node_copy_json = dag_node_copy.model_dump()
         condition_json = dag_node_copy_json["condition"]
 
-        step_id, condition_result = await workflow.execute_activity(
+        step_id, condition_result = await _execute_activity(
             "if_condition",
             args=[ctx_dict, {}, {"condition_expr": condition_json}],
-            start_to_close_timeout=START_TO_CLOSE_TIMEOUT,
         )
 
         # 2) path elimination: remove the untaken path from the execution order
@@ -296,13 +312,13 @@ def path_elimination(
     incoming degree is 0. Therefore, we must reduce the incoming degree of action3 in order to
     be able to execute it. This is done by eliminating the path that is not taken by the if-condition.
     """
-    elminated_nodes = set()
+    eliminated_nodes = set()
 
     # BFS traversal for elimination - don't expand nodes with in_deg > 0
     queue = deque(node_ids)
     while is_not_empty(queue):
         current_node_id = queue.popleft()
-        elminated_nodes.add(current_node_id)
+        eliminated_nodes.add(current_node_id)
 
         # reduce in_deg of children
         node = workflow_dag.dag[current_node_id]
@@ -324,4 +340,4 @@ def path_elimination(
                 if in_deg[child_id] == 0:
                     queue.append(child_id)
 
-    return elminated_nodes
+    return eliminated_nodes

@@ -47,8 +47,12 @@ def ai_action(
         ),
     ] = None,
 ) -> str:
-    # TODO: error handling
-    client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
+    api_key = os.environ.get("OPENAI_API_KEY")
+    if not api_key:
+        raise ValueError(
+            "OPENAI_API_KEY environment variable is not set. Please set it to use the send_email action."
+        )
+    client = OpenAI(api_key=api_key)
     chat_completion = client.chat.completions.create(
         messages=[{"role": "user", "content": prompt}],
         model=model,

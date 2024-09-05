@@ -11,6 +11,7 @@ from admyral.context import ctx
 from admyral.secret.secrets_access import Secrets, SecretsStoreAccessImpl
 from admyral.workers.shared_worker_state import SharedWorkerState
 from admyral.typings import JsonValue
+from admyral.exceptions import NonRetryableActionError
 
 if TYPE_CHECKING:
     F = TypeVar("F", bound=Callable[..., Any])
@@ -29,19 +30,25 @@ def action_executor(action_type: str, func: "F") -> "F":
 
             exec_ctx = ExecutionContext(**ctx_dict)
             exec_ctx.step_id = str(uuid4())
-            exec_ctx.secrets = Secrets(
-                SecretsStoreAccessImpl(
-                    user_id=exec_ctx.user_id,
-                    secret_mappings=secret_mappings,
-                    secrets_manager=SharedWorkerState.get_secrets_manager(),
+
+            try:
+                exec_ctx.secrets = Secrets(
+                    SecretsStoreAccessImpl(
+                        user_id=exec_ctx.user_id,
+                        secret_mappings=secret_mappings,
+                        secrets_manager=SharedWorkerState.get_secrets_manager(),
+                    )
                 )
-            )
 
-            # make available to the function as a contextvar
-            ctx.set(exec_ctx)
+                # make available to the function as a contextvar
+                ctx.set(exec_ctx)
 
-            result = await func(**args)
-            throw_if_not_allowed_return_type(result)
+                result = await func(**args)
+                throw_if_not_allowed_return_type(result)
+            except Exception as e:
+                # Store error
+                await _store_action_error(exec_ctx, str(e), args)
+                raise NonRetryableActionError(str(e))
 
             await _store_action_result(exec_ctx, result, args)
 
@@ -59,19 +66,25 @@ def action_executor(action_type: str, func: "F") -> "F":
 
             exec_ctx = ExecutionContext(**ctx_dict)
             exec_ctx.step_id = str(uuid4())
-            exec_ctx.secrets = Secrets(
-                SecretsStoreAccessImpl(
-                    user_id=exec_ctx.user_id,
-                    secret_mappings=secret_mappings,
-                    secrets_manager=SharedWorkerState.get_secrets_manager(),
+
+            try:
+                exec_ctx.secrets = Secrets(
+                    SecretsStoreAccessImpl(
+                        user_id=exec_ctx.user_id,
+                        secret_mappings=secret_mappings,
+                        secrets_manager=SharedWorkerState.get_secrets_manager(),
+                    )
                 )
-            )
 
-            # make available to the function as a contextvar
-            ctx.set(exec_ctx)
+                # make available to the function as a contextvar
+                ctx.set(exec_ctx)
 
-            result = func(**args)
-            throw_if_not_allowed_return_type(result)
+                result = func(**args)
+                throw_if_not_allowed_return_type(result)
+            except Exception as e:
+                # Store error
+                execute_future(_store_action_error(exec_ctx, str(e), args))
+                raise NonRetryableActionError(str(e))
 
             execute_future(_store_action_result(exec_ctx, result, args))
 
@@ -89,5 +102,18 @@ async def _store_action_result(
         exec_ctx.action_type,
         exec_ctx.prev_step_id,
         result,
+        args,
+    )
+
+
+async def _store_action_error(
+    exec_ctx: ExecutionContext, error: str, args: dict[str, Any]
+) -> None:
+    await SharedWorkerState.get_store().store_workflow_run_error(
+        exec_ctx.step_id,
+        exec_ctx.run_id,
+        exec_ctx.action_type,
+        exec_ctx.prev_step_id,
+        error,
         args,
     )

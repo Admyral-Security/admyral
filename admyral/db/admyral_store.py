@@ -560,6 +560,23 @@ class AdmyralStore(StoreInterface):
 
             await db.commit()
 
+    async def mark_workflow_run_as_completed(
+        self, run_id: str, completed_at: datetime
+    ) -> None:
+        # TODO: consider user_id
+        user_id = self.config.user_id
+
+        async with self._get_async_session() as db:
+            await db.exec(
+                update(WorkflowRunSchema)
+                .where(WorkflowRunSchema.run_id == run_id)
+                .where(WorkflowRunSchema.user_id == user_id)
+                .values(
+                    completed_at=completed_at,
+                )
+            )
+            await db.commit()
+
     async def _get_workflow_run(
         self, db: AdmyralDatabaseSession, user_id: str, workflow_id: str, run_id: str
     ) -> Optional[WorkflowRunSchema]:
@@ -592,17 +609,16 @@ class AdmyralStore(StoreInterface):
         async with self._get_async_session() as db:
             result = await db.exec(
                 select(
-                    WorkflowRunStepsSchema.step_id, WorkflowRunStepsSchema.action_type
+                    WorkflowRunStepsSchema.step_id,
+                    WorkflowRunStepsSchema.action_type,
+                    WorkflowRunStepsSchema.error,
                 )
                 .where(WorkflowRunStepsSchema.run_id == run_id)
                 .order_by(WorkflowRunStepsSchema.created_at)
             )
             return [
                 WorkflowRunStepMetadata.model_validate(
-                    {
-                        "step_id": row[0],
-                        "action_type": row[1],
-                    }
+                    {"step_id": row[0], "action_type": row[1], "error": row[2]}
                 )
                 for row in result.all()
             ]
@@ -691,6 +707,39 @@ class AdmyralStore(StoreInterface):
                         input_args=input_args,
                     )
                 )
+            await db.commit()
+
+    async def store_workflow_run_error(
+        self,
+        step_id: str,
+        run_id: str,
+        action_type: str,
+        prev_step_id: str,
+        error: str,
+        input_args: dict[str, JsonValue],
+    ) -> None:
+        # TODO: consider user_id
+        user_id = self.config.user_id
+
+        async with self._get_async_session() as db:
+            await db.exec(
+                insert(WorkflowRunStepsSchema).values(
+                    step_id=step_id,
+                    run_id=run_id,
+                    action_type=action_type,
+                    prev_step_id=prev_step_id,
+                    input_args=input_args,
+                    error=error,
+                )
+            )
+
+            await db.exec(
+                update(WorkflowRunSchema)
+                .where(WorkflowRunSchema.run_id == run_id)
+                .where(WorkflowRunSchema.user_id == user_id)
+                .values(failed_at=utc_now())
+            )
+
             await db.commit()
 
     ########################################################

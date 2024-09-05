@@ -1,10 +1,46 @@
 import { useListWorkflowRunsApi } from "@/hooks/use-list-workflow-runs-api";
 import { errorToast } from "@/lib/toast";
-import { Box, Flex, Text } from "@radix-ui/themes";
+import { Box, Flex, Spinner, Text } from "@radix-ui/themes";
 import { useEffect, useState } from "react";
 import WorkflowRunTrace from "./workflow-run-trace";
 import Row from "./row";
 import ErrorCallout from "@/components/utils/error-callout";
+import { CheckCircledIcon, CrossCircledIcon } from "@radix-ui/react-icons";
+import { TWorkflowRunMetadata } from "@/types/workflow-runs";
+
+function WorkflowRunRow({
+	workflowRun: { createdAt, failedAt, completedAt },
+}: {
+	workflowRun: TWorkflowRunMetadata;
+}) {
+	if (failedAt === null && completedAt === null) {
+		// In Progress
+		return (
+			<Flex align="center" justify="between" width="100%">
+				<Text size="1">{createdAt}</Text>
+				<Spinner size="1" />
+			</Flex>
+		);
+	}
+
+	if (completedAt === null) {
+		// Failure
+		return (
+			<Flex align="center" justify="between" width="100%">
+				<Text size="1">{createdAt}</Text>
+				<CrossCircledIcon color="red" />
+			</Flex>
+		);
+	}
+
+	// Success
+	return (
+		<Flex align="center" justify="between" width="100%">
+			<Text size="1">{createdAt}</Text>
+			<CheckCircledIcon color="green" />
+		</Flex>
+	);
+}
 
 export default function WorkflowRunHistory({
 	workflowId,
@@ -58,9 +94,7 @@ export default function WorkflowRunHistory({
 						selected={idx === selectedRunIdx}
 						onClickOnUnselectedRow={() => handleClickRun(idx)}
 					>
-						<Flex align="center" justify="between" width="100%">
-							<Text size="2">{workflowRun.createdAt}</Text>
-						</Flex>
+						<WorkflowRunRow workflowRun={workflowRun} />
 					</Row>
 				))}
 			</Box>

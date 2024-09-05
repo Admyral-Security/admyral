@@ -58,6 +58,7 @@ export default function WorkflowRunStep({
 	}
 
 	const inputArgs = data.inputArgs as Record<string, TJson>;
+	const isError = data.error !== null;
 
 	return (
 		<Flex
@@ -120,7 +121,9 @@ export default function WorkflowRunStep({
 			<Flex direction="column" p="4" height="calc((100vh - 56px) / 2)">
 				<Tabs.Root defaultValue="result">
 					<Tabs.List>
-						<Tabs.Trigger value="result">Result</Tabs.Trigger>
+						<Tabs.Trigger value="result">
+							{isError ? "Error" : "Result"}
+						</Tabs.Trigger>
 						<Tabs.Trigger value="logs">Logs</Tabs.Trigger>
 					</Tabs.List>
 
@@ -134,7 +137,11 @@ export default function WorkflowRunStep({
 							}}
 						>
 							<CodeBlock
-								text={JSON.stringify(data.result, null, 4)}
+								text={
+									isError
+										? data.error!
+										: JSON.stringify(data.result, null, 4)
+								}
 								language="json"
 								showLineNumbers
 								theme={a11yLight}
