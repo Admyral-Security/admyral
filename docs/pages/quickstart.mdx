@@ -66,11 +66,11 @@ With Admyral offering a _CLI_ as well as a _web UI_, you can decide how you'd li
     <Tabs.Tab>
         To create a secret using the CLI, use the following CLI command: 
         ```bash 
-        admyral secret set <secret_name> --value <key1>=<value1> --value <key2>=<value2>
+        admyral secret set secret_name --value key1=value1 --value key2=value2
         ```
-        For our quickstart, navigate in your terminal to your admyral repository and enter the following but replacing `<your_copied_virus_total_api_key>` with your copied API key:
+        For our quickstart, navigate in your terminal to your admyral repository and enter the following but replacing `your_copied_virus_total_api_key` with your copied API key:
         ```bash
-        admyral secret set virus_total --value api_key=<your_copied_virus_total_api_key>
+        admyral secret set virus_total --value api_key=your_copied_virus_total_api_key
         ```
 
     </Tabs.Tab>
@@ -79,7 +79,7 @@ With Admyral offering a _CLI_ as well as a _web UI_, you can decide how you'd li
         1. Select "Add new secret"
         2. Secret name: `virus_total` (*any other name works as well*)
         3. Key: `api_key`
-        4. Value: `<your_copied_virus_total_api_key>`
+        4. Value: `your_copied_virus_total_api_key`
         5. Save it
 
      </Tabs.Tab>
@@ -129,7 +129,7 @@ With Admyral, you can decide whether you want to build your workflows with `Code
             virus_total_analyze_url(payload["url"])
         ```
 
-        To use our previously stored secret for VirusTotal, we add the secret mapping `secrets={"TOOL_SECRET": "<secret_name>"}` as the last argument of an integration. In our case, it would look like the following:
+        To use our previously stored secret for VirusTotal, we add the secret mapping `secrets={"TOOL_SECRET": "secret_name"}` as the last argument of an integration. In our case, it would look like the following:
 
         ```python
         from admyral.workflow import workflow
@@ -179,7 +179,7 @@ With Admyral, you can decide whether you want to build your workflows with `Code
         Now, you have created the workflow. The last step is to push the workflow to the Admyral infrastructure.
         We use the following push command from the CLI to push the workflow:
         ```bash
-        admyral workflow push <workflow_name> -f <path_to_your_workflow_file.py>
+        admyral workflow push workflow_name -f path_to_your_workflow_file.py
         ```
 
         If you saved your workflow in `workflows/virus_total_workflow.py`, the command is:
@@ -249,7 +249,7 @@ Upon building our workflow, you can activate and execute your workflow. Again, y
         #### Activate the workflow
         To activate a workflow type in the CLI:
         ```bash
-        admyral workflow activate <your_workflow_name>
+        admyral workflow activate your_workflow_name
         ```
 
         As we called the workflow function `virus_total_workflow`, use the following command:
@@ -261,7 +261,7 @@ Upon building our workflow, you can activate and execute your workflow. Again, y
         Upon activation, the workflow can be executed. The CLI command to trigger a workflow is:
 
         ```bash
-        admyral workflow trigger <your_workflow_name>
+        admyral workflow trigger your_workflow_name
         ```
 
         So similar to above, the command to use is:

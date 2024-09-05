@@ -56,7 +56,7 @@ Currently, Admyral only supports JSON-serializable types as input and output for
 #### Action Arguments and Return Types
 
 Action arguments are simple function arguments. However, each argument must be typed as well as annotated with `ArgumentMetadata` which is used to populate the UI.
-Hence, the following format is used as type hint: `Annotated[<argument-type>, ArgumentMetadata(display_name="...", description="...")]`.
+Hence, the following format is used as type hint: `Annotated[argument-type, ArgumentMetadata(display_name="...", description="...")]`.
 
 Additionally, it is highly recommended to also define a return type hint. If nothing is returned by the action, simply use `None` as return type.
 
@@ -241,7 +241,7 @@ def send_two_slack_messages(
 After creating your custom action, push it to Admyral using the following CLI command to use it in other workflows or within the No-Code editor:
 
 ```bash
-admyral action push <your_custom_action> -a <path/to/your/action.py>
+admyral action push your_custom_action -a path/to/your/action.py
 ```
 
 #### Currently Unsupported Patterns

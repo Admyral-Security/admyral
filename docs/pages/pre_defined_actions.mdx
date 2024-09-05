@@ -79,9 +79,9 @@ You can construct condition expressions of the following types:
 -   Using truthy and falsy values <br/>
     _Falsy_ Values: empty lists `[]`, empty dicts `{}`, empty tuples `()`, empty strings `""`, `None`, `False`, integer zero `0` <br/>
     All other values are considered to be _truthy_
--   Unary Expression: `not <Expression>`, `<Expression> is None`, `<Expression> is not None` <br/>
+-   Unary Expression: `not Expression`, `Expression is None`, `Expression is not None` <br/>
     Example: `not payload["some_value"]`
--   Binary Expression: `<Expression> <Binary Operator> <Expression>` <br/>
+-   Binary Expression: `Expression Binary Operator Expression` <br/>
     Example: `payload["url"] == "https://admyral.dev"`
 -   Combine conidtion expressions using `and`, `or` together with parenthesis `(...)` for ensuring correct precedence: <br/>
     Example: `payload["url"] == "https://admyral.dev" or (payload["values"][0] > 0 and payload["values"][1] <= 10)`

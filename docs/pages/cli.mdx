@@ -28,10 +28,10 @@ admyral down
 Push a Python action to Admyral:
 
 ```bash
-admyral action push <your_custom_action> -a <path/to/your/action.py>
+admyral action push your_custom_action -a path/to/your/action.py
 ```
 
-where `your_custom_action` is the Python function name and `<file_path>` is the path to the Python file where the action is defined.
+where `your_custom_action` is the Python function name and `file_path` is the path to the Python file where the action is defined.
 
 ## Secrets Management
 
@@ -46,50 +46,50 @@ admyral secret list
 Set a secret stored in Admyral:
 
 ```bash
-admyral secret set <secret_name> --value <key1>=<value1> --value <key2>=<value2>
+admyral secret set secret_name --value key1=value1 --value key2=value2
 ```
 
 Delete a secret stored in Admyral:
 
 ```bash
-admyral secret delete <secret_name>
+admyral secret delete secret_name
 ```
 
 ## Workflow Management
 
 <Callout type="info">
-    In the following, `<your_workflow_name>` refers to the name of the workflow Python function and `<file_path>` to the path of the Python file where the workflow function is defined.
+    In the following, `your_workflow_name` refers to the name of the workflow Python function and `file_path` to the path of the Python file where the workflow function is defined.
 </Callout>
 
 Activate a specific workflow:
 
 ```bash
-admyral workflow activate <your_workflow_name>
+admyral workflow activate your_workflow_name
 ```
 
 Deactivate a specific workflow:
 
 ```bash
-admyral workflow deactivate <your_workflow_name>
+admyral workflow deactivate your_workflow_name
 ```
 
 Push a workflow to Admyral:
 
 ```bash
-admyral workflow push <your_workflow_name> -f <path/to/your/workflow/file.py>
+admyral workflow push your_workflow_name -f path/to/your/workflow/file.py
 
 # Optional: Activate the workflow on push
-admyral workflow push <your_workflow_name> -f <path/to/your/workflow/file.py> --activate
+admyral workflow push your_workflow_name -f path/to/your/workflow/file.py --activate
 ```
 
 Trigger the execution of a workflow:
 
 ```bash
-admyral workflow trigger <your_workflow_name>
+admyral workflow trigger your_workflow_name
 
 # Pass payload as serialized JSON
-admyral workflow trigger <your_workflow_name> --payload '{"key1": "value1", "key2": "value2"}'
+admyral workflow trigger your_workflow_name --payload '{"key1": "value1", "key2": "value2"}'
 
 # or
-admyral workflow trigger <your_workflow_name> -p '{"key1": "value1", "key2": "value2"}'
+admyral workflow trigger your_workflow_name -p '{"key1": "value1", "key2": "value2"}'
 ```
