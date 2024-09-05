@@ -92,7 +92,7 @@ export default function ActionEditPanel() {
 						{actionDefinition.secretsPlaceholders.map(
 							(secretPlaceholder) => (
 								<Flex
-									key={`secret_placeholder_${secretPlaceholder}`}
+									key={`${action.id}_secret_placeholder_${secretPlaceholder}`}
 									direction="column"
 									gap="1"
 								>
@@ -126,7 +126,7 @@ export default function ActionEditPanel() {
 						</Text>
 						{actionDefinition.arguments.map((argument) => (
 							<Flex
-								key={`action_edit_${argument.argName}`}
+								key={`${action.id}_action_edit_${argument.argName}`}
 								direction="column"
 								gap="1"
 							>
