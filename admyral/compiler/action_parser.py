@@ -224,6 +224,10 @@ def _parse_type_annotation(arg: ast.arg) -> tuple[str, bool, dict[str, str]]:
             keyword.value.value, str
         ):
             raise ValueError("Argument metadata parameters must be a string.")
+        if keyword.arg in arg_metadata_parmas:
+            raise ValueError(
+                f"Found duplicate ArgumentMetadata parameter: {keyword.arg}. ArgumentMetadata parameters must be unique."
+            )
         arg_metadata_parmas[keyword.arg] = keyword.value.value
     arg_metadata = ArgumentMetadata.model_validate(arg_metadata_parmas)
 

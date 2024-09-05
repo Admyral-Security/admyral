@@ -233,3 +233,32 @@ def test_missing_argument_annotation():
         )
     else:
         assert False, "Should raise an error"
+
+
+#########################################################################################################
+
+
+CODE_TEST_5 = """from typing import Annotated
+from admyral.action import action, ArgumentMetadata
+
+@action(
+    display_name="Custom Action 1",
+    display_namespace="Test",
+    description="Test 123"
+)
+def custom_action1(arg: Annotated[int, ArgumentMetadata(display_name="Arg", description="description 1", description="description 2")]) ->str:
+    print('Hey! This is my Custom Action 1')
+    return 'Custom Action 1'
+"""
+
+
+def test_duplicate_parameter_in_argument_metadata():
+    try:
+        parse_action(CODE_TEST_5, "custom_action1")
+    except ValueError as e:
+        assert (
+            str(e)
+            == "Found duplicate ArgumentMetadata parameter: description. ArgumentMetadata parameters must be unique."
+        )
+    else:
+        assert False, "Should raise an error"
