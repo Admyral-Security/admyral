@@ -87,13 +87,13 @@ Admyral supports the following trigger types:
     Option 1: Authenticate via the API URL
 
     ```bash
-    curl -X POST <webhook-url>/<webhook-secret>
+    curl -X POST webhook-url/webhook-secret
     ```
 
     Option 2: Authenticate via the header
 
     ```bash
-    curl -X POST <webhook-url> -H 'Authorization: <webhook-secret>'
+    curl -X POST webhook-url -H 'Authorization: webhook-secret'
     ```
 
 -   Schedule: A schedule-based trigger. The following schedule types are supported:
