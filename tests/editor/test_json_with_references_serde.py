@@ -241,3 +241,23 @@ def test_none_serialization():
 
     assert json_str == "null"
     assert json_obj is None
+
+
+#########################################################################################################
+
+
+def test_string_escaping_serialization():
+    """
+    Textfield Input in UI:
+    ```
+    "{"foo": [1, 4, 7, 10], "bar": "bar"}"
+    ```
+
+    Note: the " wil be automatically escaped by the UI.
+    """
+    input_value = '"{"foo": [1, 4, 7, 10], "bar": "baz"}"'
+    json_obj = deserialize_json_with_reference(input_value)
+    json_str = serialize_json_with_reference(json_obj)
+
+    assert json_obj == '{"foo": [1, 4, 7, 10], "bar": "baz"}'
+    assert json_str == input_value
