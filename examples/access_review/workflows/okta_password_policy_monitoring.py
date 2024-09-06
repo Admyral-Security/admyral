@@ -13,7 +13,7 @@ from admyral.actions import get_okta_logs, send_slack_message_to_user_by_email
     display_namespace="Utilities",
     description="Calculate the time range for the last full hour",
 )
-def calculate_time_range() -> tuple[str, str]:
+def get_time_range_of_last_full_hour() -> tuple[str, str]:
     end_time = datetime.utcnow().replace(minute=0, second=0, microsecond=0)
 
     start_time = (end_time - timedelta(hours=1)).isoformat() + "Z"
@@ -47,7 +47,6 @@ def get_okta_password_policy_update_logs(
         query="policy.lifecycle.update Password",
         start_time=start_time,
         end_time=end_time,
-        secrets={"OKTA_SECRET": "okta_secret"},
     )
 
     return [
@@ -74,47 +73,38 @@ def format_okta_policy_update_message(
 ) -> str:
     message = f"Attention: {len(logs)} Okta password policy update(s) detected in the last hour.\n\n"
     for log in logs:
+        message += f"Event ID: {log.get('transaction', {}).get('id')}\n"
+        message += f"Timestamp: {log.get('published')}\n"
+        message += f"Actor: {log.get('actor', {}).get('displayName')} ({log.get('actor', {}).get('alternateId')})\n"
+
+        debug_data = log.get("debugContext", {}).get("debugData", {})
+
         new_policy = json.loads(
-            log.get("debugContext", {})
-            .get("debugData", {})
-            .get("newPolicyExtensiblePropertiesJson", "{}")
+            debug_data.get("newPolicyExtensiblePropertiesJson", "{}")
         )
-
         old_policy = json.loads(
-            log.get("debugContext", {})
-            .get("debugData", {})
-            .get("oldPolicyExtensiblePropertiesJson", "{}")
+            debug_data.get("oldPolicyExtensiblePropertiesJson", "{}")
         )
 
-        differences = {}
+        message += "Changes:\n"
 
         for key in new_policy:
             new_value = str(new_policy.get(key))
             old_value = str(old_policy.get(key))
 
             if new_value.lower() != old_value.lower():
-                differences[key] = f"{old_value} -> {new_value}"
-
-        message += f"Event ID: {log.get('transaction', {}).get('id')}\n"
-        message += f"Timestamp: {log.get('published')}\n"
-        message += f"Actor: {log.get('actor', {}).get('displayName')} ({log.get('actor', {}).get('alternateId')})\n"
-        if differences:
-            message += "Changes:\n"
-            for key, change in differences.items():
-                message += f"- {key}: {change}\n"
-        else:
-            message += "No changes detected.\n"
+                message += f"- {key}: {old_value} -> {new_value}\n"
 
         message += "---\n"
     return message
 
 
 @workflow(
-    description="Monitor Okta policy lifecycle updates and notify via Slack",
+    description="Monitor Okta password policy changes and notify via Slack",
     triggers=[Schedule(cron="0 * * * *")],
 )
-def okta_policy_monitoring(payload: dict[str, JsonValue]):
-    time_range = calculate_time_range()
+def okta_password_policy_monitoring(payload: dict[str, JsonValue]):
+    time_range = get_time_range_of_last_full_hour()
 
     logs = get_okta_password_policy_update_logs(
         start_time=time_range[0],
