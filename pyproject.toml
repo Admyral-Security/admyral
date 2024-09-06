@@ -70,3 +70,7 @@ asyncio_mode = "auto"
 
 [tool.setuptools_scm]
 version_scheme = "guess-next-dev"
+
+[tool.pdm]
+version = { source = "file", path = "admyral/__init__.py" }
+distribution = true

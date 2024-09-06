@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# Capture the tag from the first argument. Default to 'latest' if not provided.
+TAG=${1:-latest}
+
+
 if command -v docker-compose &> /dev/null
 then
     COMPOSE_CMD="docker-compose"
@@ -17,7 +21,8 @@ for i in "${!services[@]}"; do
 done
 
 
-# Stop execution on any error (Note: we use set -e because docker rmi might fail because the image does not exist which is okay)
+# Stop execution on any error (Note: we use set -e because 
+# docker rmi might fail because the image does not exist which is okay)
 set -e
 # set -x
 
@@ -30,7 +35,7 @@ for i in "${!services[@]}"; do
     docker buildx build \
         --platform=linux/amd64,linux/arm64 \
         --file=./Dockerfile.$service \
-        --tag=admyralai/$service:latest \
+        --tag=admyralai/$service:$TAG \
         --push \
         $context
     echo "Finished building and pushing image for $service."

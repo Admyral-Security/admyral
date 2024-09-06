@@ -1,4 +1,3 @@
-# TODO: switch to a tag-based approach later
 name: Publish PyPI Package
 on:
   workflow_call:
@@ -40,6 +39,9 @@ jobs:
           latest_version=$(curl -s https://pypi.org/pypi/$package_name/json | jq -r '.info.version')
           echo "Latest version on PyPI: $latest_version"
           echo "::set-output name=LATEST_VERSION::$latest_version"
+
+      - name: Inject version
+        run: touch ./admyral/VERSION && echo "${{ steps.get_version.outputs.VERSION }}" > ./admyral/VERSION
 
       - name: Publish the package with poetry if the version has changed
         if: steps.get_version.outputs.VERSION != steps.get_pypi_version.outputs.LATEST_VERSION

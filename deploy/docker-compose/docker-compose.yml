@@ -30,7 +30,7 @@ services:
     # build:
     #     context: ../..
     #     dockerfile: ./docker/Dockerfile.api
-    image: admyralai/api:latest
+    image: admyralai/api:${ADMYRAL_VERSION}
     healthcheck:
       test: ["CMD", "curl", "-f", "http://0.0.0.0:8000/health"]
       timeout: 5s
@@ -61,7 +61,7 @@ services:
     # build:
     #     context: ../../web
     #     dockerfile: ../docker/Dockerfile.web
-    image: admyralai/web:latest
+    image: admyralai/web:${ADMYRAL_VERSION}
     depends_on:
       admyral-api:
         condition: service_healthy
@@ -77,7 +77,7 @@ services:
     # build:
     #     context: ../..
     #     dockerfile: ./docker/Dockerfile.worker
-    image: admyralai/worker:latest
+    image: admyralai/worker:${ADMYRAL_VERSION}
     entrypoint: ["python", "admyral/main.py", "worker", "--docker"]
     privileged: true
     depends_on:

@@ -9,6 +9,7 @@ from admyral.utils.docker_utils import (
     list_running_docker_containers,
 )
 from admyral.config.config import get_local_postgres_volume
+from admyral import __version__
 
 
 WELCOME_MESSAGE = """
@@ -46,6 +47,8 @@ def up() -> None:
     Launches Admyral services locally.
     """
     click.echo(WELCOME_MESSAGE)
+
+    click.echo(f"Admyral Version: {__version__}\n")
 
     if not is_docker_running():
         click.echo(
@@ -99,6 +102,8 @@ def up() -> None:
     # Set persistance path
     env["POSTGRES_VOLUME_PATH"] = get_local_postgres_volume()
 
+    env["ADMYRAL_VERSION"] = __version__
+
     click.echo("\nStarting Admyral...\n")
 
     try:
@@ -131,6 +136,7 @@ def down() -> None:
     # Set persistance path
     env = os.environ.copy()
     env["POSTGRES_VOLUME_PATH"] = get_local_postgres_volume()
+    env["ADMYRAL_VERSION"] = __version__
 
     click.echo("\nShutting Admyral down...\n")
 

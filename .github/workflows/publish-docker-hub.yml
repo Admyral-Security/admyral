@@ -23,6 +23,13 @@ jobs:
           repository: ${{ github.repository }}
           ref: ${{ github.event.pull_request.head.sha }}
 
+      - name: Extract version from pyproject.toml
+        id: get_version
+        run: |
+          version=$(grep '^version = ' pyproject.toml | sed -E 's/version = "(.*)"/\1/')
+          echo "Package version: $version"
+          echo "::set-output name=VERSION::$version"
+
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
 
@@ -36,4 +43,4 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Build and push Docker images
-        run: cd docker && ./release_images.sh
+        run: cd docker && ./release_images.sh ${{ steps.get_version.outputs.VERSION }}
