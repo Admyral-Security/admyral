@@ -183,7 +183,8 @@ class WorkflowExecutor:
                 # Check for exceptions
                 try:
                     exception = exception_queue.get_nowait()
-                    # an exception occurred! cancel all active tasks
+                    # an exception occurred! we stop the scheduling loop
+                    # but we let the currently running tasks complete
                     break
                 except asyncio.QueueEmpty:
                     pass
