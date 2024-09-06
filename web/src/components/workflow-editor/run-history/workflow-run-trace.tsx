@@ -22,16 +22,19 @@ export default function WorkflowRunTrace({
 		workflowId,
 		workflowRunId,
 	);
-	const [selectedStepIdx, setSelectedStepIdx] = useState<number | null>(null);
+	const [selectedStepIdx, setSelectedStepIdx] = useState<number>(0);
+	const [steps, setSteps] = useState<TWorkflowRunStepMetadata[]>([]);
 
 	useEffect(() => {
 		if (data) {
-			setSelectedStepIdx(0);
+			setSteps(data);
 		}
 		if (error) {
 			errorToast("Failed to load workflow runs. Please reload the page.");
 		}
 	}, [data, error]);
+
+	useEffect(() => setSelectedStepIdx(0), [workflowRunId, setSelectedStepIdx]);
 
 	if (isPending) {
 		return <Text>Loading...</Text>;
@@ -67,7 +70,7 @@ export default function WorkflowRunTrace({
 					</Text>
 				</Box>
 
-				{data.map(
+				{steps.map(
 					(workflowStep: TWorkflowRunStepMetadata, idx: number) => (
 						<Row
 							key={`workflow_run_row_${idx}`}
@@ -97,11 +100,11 @@ export default function WorkflowRunTrace({
 				)}
 			</Box>
 
-			{selectedStepIdx !== null && (
+			{selectedStepIdx !== null && selectedStepIdx < steps.length && (
 				<WorkflowRunStep
 					workflowId={workflowId}
 					workflowRunId={workflowRunId}
-					workflowRunStepId={data[selectedStepIdx].stepId}
+					workflowRunStepId={steps[selectedStepIdx].stepId}
 				/>
 			)}
 		</Flex>

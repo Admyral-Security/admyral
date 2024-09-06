@@ -21,9 +21,12 @@ const buildListWorkflowRunsApi = (workflowId: string) =>
 		responseSchema: ListWorkflowRunsResponse,
 	});
 
+const REFETCH_INTERVAL_1_SECOND = 1_000; // in ms
+
 export const useListWorkflowRunsApi = (workflowId: string) => {
 	return useQuery({
 		queryKey: ["workflowRuns", workflowId],
 		queryFn: () => buildListWorkflowRunsApi(workflowId)(),
+		refetchInterval: REFETCH_INTERVAL_1_SECOND,
 	});
 };

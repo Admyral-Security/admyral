@@ -24,6 +24,8 @@ const buildGetWorkflowRunStepsApi = (
 		responseSchema: GetWorkflowRunStepsResponse,
 	});
 
+const REFETCH_INTERVAL_1_SECOND = 1_000; // in ms
+
 export const useGetWorkflowRunStepsApi = (
 	workflowId: string,
 	workflowRunId: string,
@@ -31,5 +33,6 @@ export const useGetWorkflowRunStepsApi = (
 	return useQuery({
 		queryKey: ["workflowRunSteps", workflowId, workflowRunId],
 		queryFn: () => buildGetWorkflowRunStepsApi(workflowId, workflowRunId)(),
+		refetchInterval: REFETCH_INTERVAL_1_SECOND,
 	});
 };

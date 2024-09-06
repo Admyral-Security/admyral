@@ -49,10 +49,24 @@ export default function WorkflowRunHistory({
 }) {
 	const { data, isPending, error } = useListWorkflowRunsApi(workflowId);
 	const [selectedRunIdx, setSelectedRunIdx] = useState<number | null>(null);
+	const [runs, setRuns] = useState<TWorkflowRunMetadata[]>([]);
 
 	useEffect(() => {
 		if (data && data.length > 0) {
-			setSelectedRunIdx(0);
+			if (runs.length > 0) {
+				// TODO: a selected run could get lost because we only return the last 100 runs
+				// calculate shift for selectedRunIdx
+				const shiftedSelectedRunIdx = data.findIndex(
+					(run) => run.runId === runs[selectedRunIdx!].runId,
+				);
+				setRuns(data);
+				setSelectedRunIdx(
+					shiftedSelectedRunIdx !== -1 ? shiftedSelectedRunIdx : 0,
+				);
+			} else {
+				setRuns(data);
+				setSelectedRunIdx(0);
+			}
 		}
 		if (error) {
 			errorToast("Failed to load workflow runs. Please reload the page.");
@@ -88,7 +102,7 @@ export default function WorkflowRunHistory({
 					</Text>
 				</Box>
 
-				{data.map((workflowRun, idx) => (
+				{runs.map((workflowRun, idx) => (
 					<Row
 						key={`workflow_run_row_${idx}`}
 						selected={idx === selectedRunIdx}
@@ -102,7 +116,7 @@ export default function WorkflowRunHistory({
 			{selectedRunIdx !== null && (
 				<WorkflowRunTrace
 					workflowId={workflowId}
-					workflowRunId={data[selectedRunIdx].runId}
+					workflowRunId={runs[selectedRunIdx].runId}
 				/>
 			)}
 		</Flex>
