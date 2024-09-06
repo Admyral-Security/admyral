@@ -87,7 +87,8 @@ export default function WorkflowRunTrace({
 											? "Start"
 											: actionsIndex[
 													workflowStep.actionType
-												].displayName}
+												]?.displayName ||
+												workflowStep.actionType}
 									</Text>
 
 									{workflowStep.error !== null && (
