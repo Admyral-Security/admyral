@@ -41,6 +41,11 @@ class ActionRegistry(metaclass=Singleton):
     def is_registered(cls, type_name: str) -> bool:
         return type_name in cls._actions
 
+    @classmethod
+    def deregister(cls, type_name: str) -> None:
+        if type_name in cls._actions:
+            del cls._actions[type_name]
+
 
 # needs to be defined after ActionRegistry, such that ActionRegistry is fully defined
 # before any action is registered

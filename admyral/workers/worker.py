@@ -43,15 +43,15 @@ async def run_worker(
     logger.info(f"Worker {worker_name} setup complete.")
 
     # we wrap the actions with anohter layer which automically persists the result
-    activities = (
-        [
-            action_executor(action.action_type, action.func)
-            for action in ActionRegistry.get_actions()
-        ]
-        + [action_executor("execute_python_action", execute_python_action)]
-        + [action_executor("if_condition", execute_if_condition)]
-        + [init_workflow_run, mark_workflow_as_completed]
-    )
+    activities = [
+        action_executor(action.action_type, action.func)
+        for action in ActionRegistry.get_actions()
+    ] + [
+        action_executor("execute_python_action", execute_python_action),
+        action_executor("if_condition", execute_if_condition),
+        init_workflow_run,
+        mark_workflow_as_completed,
+    ]
 
     logger.info(f"Starting worker {worker_name}...")
     client = await Client.connect(target_host)

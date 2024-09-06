@@ -61,7 +61,9 @@ async def execute_python_action(action_type: str, action_args: dict[str, Any]) -
     # Load the action from the store
     python_action = await store.get_action(action_type)
     if not python_action:
-        raise RuntimeError(f"Action with type '{action_type}' not found")
+        raise RuntimeError(
+            f"Action with type '{action_type}' not found. Did you push your action?"
+        )
 
     with tempfile.TemporaryDirectory() as job_dir:
         logger.info(f"Job directory: {job_dir}")

@@ -96,6 +96,18 @@ class AdmyralStore(StoreInterface):
 
         return store
 
+    @classmethod
+    async def create_test_store(cls) -> "AdmyralStore":
+        config = GlobalConfig()
+        config.database_type = DatabaseType.SQLITE
+        config.database_url = "sqlite+aiosqlite:///:memory:"
+
+        store = cls(config)
+        await store.setup()
+        store.performed_setup = True
+
+        return store
+
     ########################################################
     # Setup & Chore
     ########################################################

@@ -23,6 +23,21 @@ jobs:
           repository: ${{ github.repository }}
           ref: ${{ github.event.pull_request.head.sha }}
 
+      - name: Install Temporal CLI
+        run: |
+          curl -L https://temporal.download/cli?arch=amd64 | sudo tar -C /usr/local/bin -xz
+
+      - name: Start Temporal Dev Server
+        run: |
+          nohup temporal server start-dev > temporal.log 2>&1 &
+
+      - name: Wait for Temporal server to be ready
+        run: |
+          while ! nc -z localhost 7233; do   
+            sleep 5
+            echo "Waiting for Temporal to be ready..."
+          done
+
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
