@@ -24,8 +24,7 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha }}
 
       - name: Install Temporal CLI
-        run: |
-          curl -L https://temporal.download/cli?arch=amd64 | sudo tar -C /usr/local/bin -xz
+        run: sudo snap install temporal
 
       - name: Start Temporal Dev Server
         run: |
