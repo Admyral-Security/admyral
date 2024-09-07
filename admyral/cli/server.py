@@ -58,7 +58,7 @@ def up() -> None:
 
     # check if container is already running
     running_containers = list_running_docker_containers()
-    if set(running_containers) & {
+    all_services = {
         "admyral-web",
         "admyral-worker",
         "admyral-api",
@@ -67,7 +67,8 @@ def up() -> None:
         "temporal",
         "postgresql",
         "temporal-elasticsearch",
-    }:
+    }
+    if len(set(running_containers) & all_services) == len(all_services):
         click.echo("Admyral is already running.")
         click.echo(
             "You can access the Admyral UI at http://localhost:3000 or use the Admyral CLI.\n"
