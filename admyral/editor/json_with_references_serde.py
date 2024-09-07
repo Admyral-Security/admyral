@@ -91,6 +91,9 @@ def serialize_json_with_reference(value: JsonValue) -> str:
 def deserialize_json_with_reference(value: str) -> JsonValue:
     value = value.strip().strip("\n")
 
+    if value == "":
+        return None
+
     # handle string escaping for ints, floats, bools, dicts, and lists
     if (
         value.startswith('"')
