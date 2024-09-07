@@ -19,12 +19,6 @@ jobs:
           virtualenvs-create: true
           virtualenvs-in-project: true
 
-      - name: Package docker compose file
-        run: ./scripts/package_docker_compose.sh
-
-      - name: Build package
-        run: poetry build
-
       - name: Extract version from pyproject.toml
         id: get_version
         run: |
@@ -42,6 +36,12 @@ jobs:
 
       - name: Inject version
         run: touch ./admyral/VERSION && echo "${{ steps.get_version.outputs.VERSION }}" > ./admyral/VERSION
+
+      - name: Package docker compose file
+        run: ./scripts/package_docker_compose.sh
+
+      - name: Build package
+        run: poetry build
 
       - name: Publish the package with poetry if the version has changed
         if: steps.get_version.outputs.VERSION != steps.get_pypi_version.outputs.LATEST_VERSION
