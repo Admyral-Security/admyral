@@ -1,0 +1,187 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("ADMYRAL_WEB_DATABASE_URL")
+}
+
+model alembic_version {
+  version_num String @id
+}
+
+model pip_lockfile_cache {
+  created_at      DateTime @default(now())
+  updated_at      DateTime @default(now())
+  hash            String   @id
+  lockfile        String
+  expiration_time DateTime
+}
+
+model python_actions {
+  created_at           DateTime            @default(now())
+  updated_at           DateTime            @default(now())
+  user_id              String
+  action_type          String
+  import_statements    String
+  code                 String
+  display_name         String
+  display_namespace    String
+  description          String?
+  secrets_placeholders String?
+  requirements         String?
+  arguments            Unsupported("json")
+
+  @@id([user_id, action_type])
+}
+
+model secrets {
+  created_at             DateTime @default(now())
+  updated_at             DateTime @default(now())
+  secret_id              String   @id
+  user_id                String
+  encrypted_secret       String?
+  schema_json_serialized String
+
+  @@index([user_id], map: "ix_secrets_user_id")
+}
+
+model workflow_run_steps {
+  created_at    DateTime             @default(now())
+  updated_at    DateTime             @default(now())
+  step_id       String               @id
+  run_id        String
+  prev_step_id  String?
+  action_type   String
+  input_args    Unsupported("json")?
+  logs          String?
+  result        Unsupported("json")?
+  error         String?
+  workflow_runs workflow_runs        @relation(fields: [run_id], references: [run_id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model workflow_runs {
+  created_at         DateTime             @default(now())
+  updated_at         DateTime             @default(now())
+  run_id             String               @id
+  user_id            String
+  workflow_id        String
+  source_name        String
+  completed_at       DateTime?
+  failed_at          DateTime?
+  canceled_at        DateTime?
+  workflow_run_steps workflow_run_steps[]
+  workflows          workflows            @relation(fields: [workflow_id], references: [workflow_id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model workflow_schedules {
+  created_at       DateTime             @default(now())
+  updated_at       DateTime             @default(now())
+  schedule_id      String               @id
+  user_id          String
+  workflow_id      String
+  cron             String?
+  interval_seconds Int?
+  interval_minutes Int?
+  interval_hours   Int?
+  interval_days    Int?
+  default_args     Unsupported("json")?
+  workflows        workflows            @relation(fields: [workflow_id], references: [workflow_id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([workflow_id], map: "ix_workflow_schedules_workflow_id")
+  @@index([user_id], map: "ix_workflow_schedules_user_id")
+}
+
+model workflow_webhooks {
+  created_at     DateTime  @default(now())
+  updated_at     DateTime  @default(now())
+  webhook_id     String    @id
+  workflow_id    String
+  webhook_secret String
+  workflows      workflows @relation(fields: [workflow_id], references: [workflow_id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([workflow_id], map: "ix_workflow_webhooks_workflow_id")
+}
+
+model workflows {
+  created_at         DateTime             @default(now())
+  updated_at         DateTime             @default(now())
+  workflow_id        String               @id
+  user_id            String
+  workflow_name      String
+  workflow_dag       Unsupported("json")
+  is_active          Boolean
+  workflow_runs      workflow_runs[]
+  workflow_schedules workflow_schedules[]
+  workflow_webhooks  workflow_webhooks[]
+
+  @@unique([user_id, workflow_name], map: "sqlite_autoindex_workflows_2")
+  @@index([workflow_name], map: "ix_workflows_workflow_name")
+  @@index([user_id], map: "ix_workflows_user_id")
+}
+
+model Account {
+  id                String   @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  User              User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([provider, providerAccountId], map: "sqlite_autoindex_Account_2")
+}
+
+model Authenticator {
+  credentialID         String  @unique(map: "sqlite_autoindex_Authenticator_2")
+  userId               String
+  providerAccountId    String
+  credentialPublicKey  String
+  counter              Int
+  credentialDeviceType String
+  credentialBackedUp   Boolean
+  transports           String?
+  user                 User    @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([credentialID, userId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique(map: "sqlite_autoindex_Session_2")
+  userId       String
+  expires      DateTime
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model User {
+  id            String          @id @default(cuid())
+  name          String?
+  email         String?         @unique(map: "sqlite_autoindex_User_2")
+  emailVerified DateTime?
+  image         String?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime
+  accounts      Account[]
+  Authenticator Authenticator[]
+  sessions      Session[]
+}
+
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@id([identifier, token])
+}

@@ -8,6 +8,13 @@ from admyral.db.schemas.workflow_run_schemas import (
 from admyral.db.schemas.workflow_webhook_schemas import WorkflowWebhookSchema
 from admyral.db.schemas.workflow_schedule_schemas import WorkflowScheduleSchema
 from admyral.db.schemas.secrets_schemas import SecretsSchema
+from admyral.db.schemas.auth_schemas import (
+    UserSchema,
+    AccountSchema,
+    SessionSchema,
+    VerificationTokenSchema,
+    AuthenticatorSchema,
+)
 
 __all__ = [
     "PipLockfileCacheSchema",
@@ -18,4 +25,9 @@ __all__ = [
     "WorkflowWebhookSchema",
     "WorkflowScheduleSchema",
     "SecretsSchema",
+    "UserSchema",
+    "AccountSchema",
+    "SessionSchema",
+    "VerificationTokenSchema",
+    "AuthenticatorSchema",
 ]
