@@ -1,0 +1,94 @@
+import { Callout } from "nextra/components";
+
+# List Audit Events
+
+This endpoint returns information about actions performed by team members within a 1Password account. Events include when an action was performed and by whom,
+along with details about the type and object of the action and any other information about the activity.
+
+<Callout type="info">
+	For more information on the 1Password API, see [1Password
+	Documentation](https://developer.1password.com/docs/events-api/reference/#post-apiv1auditevents).
+</Callout>
+
+**SDK Import:**
+
+```python
+from admyral.actions import list_1password_audit_events
+```
+
+## Arguments:
+
+| Argument Name                               | Description                                                                                                                                                                                                                                    | Required |
+| ------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------: |
+| **Action Type Filter** `action_type_filter` | Filter audit events by an action type.                                                                                                                                                                                                         |    -     |
+| **Object Type Filter** `object_type_filter` | Filter audit events by an object type.                                                                                                                                                                                                         |    -     |
+| **Start Time** `start_time`                 | The date and time to start retrieving events in ISO 8601 format (YYYY-MM-DDTHH:MM:SSZ). If not specified, start_time will default to one hour before specified end_time. If no end_time is specified, start_time will default to one hour ago. |    -     |
+| **End Time** `end_time`                     | The date and time to stop retrieving events in ISO 8601 format (YYYY-MM-DDTHH:MM:SSZ).                                                                                                                                                         |    -     |
+| **Limit** `limit`                           | The maximum number of events to retrieve.                                                                                                                                                                                                      |    -     |
+
+<Callout type="info">
+	For more information about action and object types in 1Password audit
+	events, see [1Password Events Reporting audit events
+	docs](https://developer.1password.com/docs/events-api/audit-events).
+</Callout>
+
+## Returns
+
+A JSON array of alerts.
+
+## Required Secrets
+
+| Secret Placeholder | Description                                                          |
+| ------------------ | -------------------------------------------------------------------- |
+| `1PASSWORD_SECRET` | Wiz secret. See [1Password setup](/integrations/1password/1password) |
+
+## SDK Example
+
+```python
+alerts = list_1password_audit_events(
+    action_type_filter="grant",
+    object_type_filter="uva",
+	secrets={"1PASSWORD_SECRET": "my_stored_1password_secret"}
+)
+```
+
+## Example Output:
+
+```json
+[
+	{
+		"uuid": "56YE2TYN2VFYRLNSHKPW5NVT5E",
+		"timestamp": "2023-03-15T16:33:50-03:00",
+		"actor_uuid": "4HCGRGYCTRQFBMGVEGTABYDU2V",
+		"actor_details": {
+			"uuid:": "4HCGRGYCTRQFBMGVEGTABYDU2V",
+			"name": "Jeff Shiner",
+			"email": "jeff_shiner@agilebits.com"
+		},
+		"action": "join",
+		"object_type": "gm",
+		"object_uuid": "pf8soyakgngrphytsyjed4ae3u",
+		"aux_id": 9277034,
+		"aux_uuid": "K6VFYDCJKHGGDI7QFAXX65LCDY",
+		"aux_details": {
+			"uuid": "K6VFYDCJKHGGDI7QFAXX65LCDY",
+			"name": "Wendy Appleseed",
+			"email": "wendy_appleseed@agilebits.com"
+		},
+		"aux_info": "R",
+		"session": {
+			"uuid": "A5K6COGVRVEJXJW3XQZGS7VAMM",
+			"login_time": "2023-03-15T16:33:50-03:00",
+			"device_uuid": "lc5fqgbrcm4plajd8mwncv2b3u",
+			"ip": "192.0.2.254"
+		},
+		"location": {
+			"country": "Canada",
+			"region": "Ontario",
+			"city": "Toronto",
+			"latitude": 43.5991,
+			"longitude": -79.4988
+		}
+	}
+]
+```

@@ -55,6 +55,7 @@ from admyral.actions.integrations.iam import (
 from admyral.actions.integrations.compliance import (
     list_retool_inactive_users,
     list_groups_per_user,
+    list_1password_audit_events,
 )
 
 
@@ -95,6 +96,7 @@ __all__ = [
     "list_wiz_alerts",
     "list_retool_inactive_users",
     "list_groups_per_user",
+    "list_1password_audit_events",
     "okta_search_users",
     "okta_get_all_user_types",
     "get_okta_logs",
