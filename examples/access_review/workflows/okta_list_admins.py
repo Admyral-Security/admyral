@@ -6,7 +6,7 @@ from admyral.actions import okta_search_users, okta_get_all_user_types
 @workflow(
     description="Retrieves all user types from Okta and lists the corresponding admin users.",
 )
-def list_okta_admins(payload: dict[str, JsonValue]) -> list[dict[str, JsonValue]]:
+def list_okta_admins(payload: dict[str, JsonValue]):
     # Step 1: Get all user types
     user_types = okta_get_all_user_types()
 

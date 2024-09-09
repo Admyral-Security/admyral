@@ -1,5 +1,5 @@
 from typing import Annotated
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 import json
 
 from admyral.workflow import workflow, Schedule
@@ -14,7 +14,7 @@ from admyral.actions import get_okta_logs, send_slack_message_to_user_by_email
     description="Calculate the time range for the last full hour",
 )
 def get_time_range_of_last_full_hour() -> tuple[str, str]:
-    end_time = datetime.utcnow().replace(minute=0, second=0, microsecond=0)
+    end_time = datetime.now(UTC).replace(minute=0, second=0, microsecond=0)
 
     start_time = (end_time - timedelta(hours=1)).isoformat() + "Z"
 
