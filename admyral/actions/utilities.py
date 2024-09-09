@@ -46,7 +46,7 @@ def serialize_json_string(
 )
 def wait(
     seconds: Annotated[
-        float,
+        int,
         ArgumentMetadata(
             display_name="Seconds",
             description="Number of seconds to wait.",
