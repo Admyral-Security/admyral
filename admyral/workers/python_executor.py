@@ -182,7 +182,7 @@ async def _run_python_action_without_nsjail(
         cmd, lambda logs: ctx.get().append_logs_async(logs), env=env
     )
 
-    _handle_exit_code(exit_code, cmd)
+    _handle_exit_code(exit_code, cmd, python_action.action_type)
 
 
 async def _run_python_action_with_nsjail(
@@ -191,7 +191,9 @@ async def _run_python_action_with_nsjail(
     store: StoreInterface,
 ) -> None:
     lockfile = await _pip_compile(job_dir, python_action, store)
-    requirements_paths = await _pip_install_requirements(lockfile, job_dir)
+    requirements_paths = await _pip_install_requirements(
+        python_action.action_type, lockfile, job_dir
+    )
     await _jailed_python_execution(requirements_paths, job_dir, python_action)
 
 
@@ -223,7 +225,7 @@ async def _pip_compile(
         cmd, lambda logs: ctx.get().append_logs_async(logs)
     )
 
-    _handle_exit_code(exit_code, cmd)
+    _handle_exit_code(exit_code, cmd, python_action.action_type)
 
     lockfile_path = os.path.join(job_dir, "requirements.txt")
     async with aiofiles.open(lockfile_path) as f:
@@ -254,7 +256,9 @@ async def _pip_compile(
     return lockfile
 
 
-async def _pip_install_requirements(lockfile: list[str], job_dir: str) -> list[str]:
+async def _pip_install_requirements(
+    action_type: str, lockfile: list[str], job_dir: str
+) -> list[str]:
     pip_install_start = time.monotonic_ns()
 
     installed_requirements_paths = []
@@ -284,7 +288,11 @@ async def _pip_install_requirements(lockfile: list[str], job_dir: str) -> list[s
     installed_requirements_paths += await asyncio.gather(
         *[
             _pip_install_requirement(
-                requirement, requirement_cache_path, job_dir, install_requirement_script
+                action_type,
+                requirement,
+                requirement_cache_path,
+                job_dir,
+                install_requirement_script,
             )
             for requirement, requirement_cache_path in missing_requirements
         ]
@@ -299,6 +307,7 @@ async def _pip_install_requirements(lockfile: list[str], job_dir: str) -> list[s
 
 
 async def _pip_install_requirement(
+    action_type: str,
     requirement: str,
     requirement_cache_path: str,
     job_dir: str,
@@ -334,7 +343,7 @@ async def _pip_install_requirement(
         cmd, lambda logs: ctx.get().append_logs_async(logs)
     )
 
-    _handle_exit_code(exit_code, cmd)
+    _handle_exit_code(exit_code, cmd, action_type)
 
     return requirement_cache_path
 
@@ -397,7 +406,7 @@ async def _jailed_python_execution(
         lambda logs: ctx.get().append_logs_async(logs),
     )
 
-    _handle_exit_code(exit_code, cmd)
+    _handle_exit_code(exit_code, cmd, python_action.action_type)
 
     execution_end = time.monotonic_ns()
     logger.info(
@@ -405,9 +414,12 @@ async def _jailed_python_execution(
     )
 
 
-def _handle_exit_code(exit_code: int, cmd: list[str]):
+def _handle_exit_code(exit_code: int, cmd: list[str], action_type: str):
     if exit_code != 0:
         cmd_str = " ".join(cmd)
-        message = f'Failed to execute command "{cmd_str}". Exited with code {exit_code}'
-        logger.error(message)
-        raise RuntimeError(message)
+        logger.error(
+            f'Failed execute command "{cmd_str}". Exited with code {exit_code}.'
+        )
+        raise RuntimeError(
+            f"Failed to execute action: {action_type}. See logs for more details."
+        )

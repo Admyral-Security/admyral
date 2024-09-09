@@ -697,9 +697,9 @@ class AdmyralStore(StoreInterface):
         input_args: dict[str, JsonValue],
     ) -> None:
         async with self._get_async_session() as db:
-            workflow_run = await self._get_workflow_run_step(db, step_id)
+            workflow_run_step = await self._get_workflow_run_step(db, step_id)
 
-            if not workflow_run:
+            if not workflow_run_step:
                 await db.exec(
                     insert(WorkflowRunStepsSchema).values(
                         step_id=step_id,
@@ -734,16 +734,28 @@ class AdmyralStore(StoreInterface):
         user_id = self.config.user_id
 
         async with self._get_async_session() as db:
-            await db.exec(
-                insert(WorkflowRunStepsSchema).values(
-                    step_id=step_id,
-                    run_id=run_id,
-                    action_type=action_type,
-                    prev_step_id=prev_step_id,
-                    input_args=input_args,
-                    error=error,
+            workflow_run_step = await self._get_workflow_run_step(db, step_id)
+
+            if not workflow_run_step:
+                await db.exec(
+                    insert(WorkflowRunStepsSchema).values(
+                        step_id=step_id,
+                        run_id=run_id,
+                        action_type=action_type,
+                        prev_step_id=prev_step_id,
+                        input_args=input_args,
+                        error=error,
+                    )
                 )
-            )
+            else:
+                await db.exec(
+                    update(WorkflowRunStepsSchema)
+                    .where(WorkflowRunStepsSchema.step_id == step_id)
+                    .values(
+                        error=error,
+                        input_args=input_args,
+                    )
+                )
 
             await db.exec(
                 update(WorkflowRunSchema)
