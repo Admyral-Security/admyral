@@ -1,6 +1,10 @@
 from admyral.actions.ai_action import ai_action
 from admyral.actions.send_email import send_email
-from admyral.actions.utilities import deserialize_json_string, serialize_json_string
+from admyral.actions.utilities import (
+    deserialize_json_string,
+    serialize_json_string,
+    wait,
+)
 from admyral.actions.integrations.communication import (
     send_slack_message,
     lookup_slack_user_by_email,
@@ -63,6 +67,7 @@ __all__ = [
     "send_email",
     "deserialize_json_string",
     "serialize_json_string",
+    "wait",
     "send_slack_message",
     "lookup_slack_user_by_email",
     "send_slack_message_to_user_by_email",

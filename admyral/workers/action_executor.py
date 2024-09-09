@@ -42,8 +42,10 @@ def action_executor(action_type: str, func: "F") -> "F":
 
                 # make available to the function as a contextvar
                 ctx.set(exec_ctx)
-
-                result = await func(**args)
+                if exec_ctx.action_type != "wait":
+                    result = await func(**args)
+                else:
+                    result = None
                 throw_if_not_allowed_return_type(result)
             except Exception as e:
                 # Store error
@@ -79,7 +81,11 @@ def action_executor(action_type: str, func: "F") -> "F":
                 # make available to the function as a contextvar
                 ctx.set(exec_ctx)
 
-                result = func(**args)
+                # check for wait node => don't call the function
+                if exec_ctx.action_type != "wait":
+                    result = func(**args)
+                else:
+                    result = None
                 throw_if_not_allowed_return_type(result)
             except Exception as e:
                 # Store error

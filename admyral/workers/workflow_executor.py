@@ -135,6 +135,9 @@ class WorkflowExecutor:
                     candidates = node.true_children + node.false_children
                 elif isinstance(node, ActionNode):
                     if node.id != "start":
+                        if node.type == "wait":
+                            await asyncio.sleep(node.args.get("seconds", 0))
+
                         step_id, execution_result = await self._execute_action_node(
                             node, execution_state, ctx_dict
                         )
