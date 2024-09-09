@@ -6,7 +6,7 @@ from sqlmodel import (
     Relationship,
     func,
 )
-from sqlalchemy import TEXT, Column, DATETIME, BOOLEAN
+from sqlalchemy import TEXT, Column, TIMESTAMP, BOOLEAN
 from datetime import datetime
 
 
@@ -21,21 +21,21 @@ class UserSchema(SQLModel, table=True):
     __tablename__ = "User"
     __table_args__ = (UniqueConstraint("email"),)
 
-    id: str = Field(primary_key=True)
+    id: str = Field(sa_type=TEXT(), primary_key=True)
     name: str | None = Field(sa_type=TEXT(), nullable=True)
-    email: str | None = Field(sa_type=TEXT(), nullable=True)
+    email: str = Field(sa_type=TEXT())
     email_verified: datetime | None = Field(
-        sa_column=Column("emailVerified", DATETIME(), nullable=True)
+        sa_column=Column("emailVerified", TIMESTAMP(), nullable=True)
     )
     image: str | None = Field(sa_type=TEXT(), nullable=True)
 
     created_at: datetime = Field(
         sa_column=Column(
-            "createdAt", DATETIME(), nullable=False, server_default=func.now()
+            "createdAt", TIMESTAMP(), nullable=False, server_default=func.now()
         )
     )
     updated_at: datetime = Field(
-        sa_column=Column("updatedAt", DATETIME(), nullable=False)
+        sa_column=Column("updatedAt", TIMESTAMP(), nullable=False)
     )
 
     # relationship children
@@ -68,12 +68,11 @@ class AccountSchema(SQLModel, table=True):
         ),
     )
 
-    id: str = Field(primary_key=True)
     user_id: str = Field(sa_column=Column("userId", TEXT(), nullable=False))
     type: str = Field(sa_type=TEXT())
-    provider: str = Field(sa_type=TEXT())
+    provider: str = Field(sa_type=TEXT(), primary_key=True)
     provider_account_id: str = Field(
-        sa_column=Column("providerAccountId", TEXT(), nullable=False)
+        sa_column=Column("providerAccountId", TEXT(), nullable=False, primary_key=True)
     )
     refresh_token: str | None = Field(sa_type=TEXT(), nullable=True)
     access_token: str | None = Field(sa_type=TEXT(), nullable=True)
@@ -85,11 +84,11 @@ class AccountSchema(SQLModel, table=True):
 
     created_at: datetime = Field(
         sa_column=Column(
-            "createdAt", DATETIME(), nullable=False, server_default=func.now()
+            "createdAt", TIMESTAMP(), nullable=False, server_default=func.now()
         )
     )
     updated_at: datetime = Field(
-        sa_column=Column("updatedAt", DATETIME(), nullable=False)
+        sa_column=Column("updatedAt", TIMESTAMP(), nullable=False)
     )
 
     # relationship parents
@@ -114,18 +113,18 @@ class SessionSchema(SQLModel, table=True):
         ),
     )
 
-    id: str = Field(primary_key=True)
+    id: str = Field(sa_type=TEXT(), primary_key=True)
     session_token: str = Field(sa_column=Column("sessionToken", TEXT(), nullable=False))
     user_id: str = Field(sa_column=Column("userId", TEXT(), nullable=False))
     expires: datetime
 
     created_at: datetime = Field(
         sa_column=Column(
-            "createdAt", DATETIME(), nullable=False, server_default=func.now()
+            "createdAt", TIMESTAMP(), nullable=False, server_default=func.now()
         )
     )
     updated_at: datetime = Field(
-        sa_column=Column("updatedAt", DATETIME(), nullable=False)
+        sa_column=Column("updatedAt", TIMESTAMP(), nullable=False)
     )
 
     # relationship parents

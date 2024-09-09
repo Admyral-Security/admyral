@@ -129,6 +129,15 @@ ADMYRAL_DATABASE_URL = os.getenv(
     ENV_ADMYRAL_DATABASE_URL,
     f"sqlite+aiosqlite:///{get_local_storage_path()}/{SQLITE_DATABASE_NAME}",
 )
+if ADMYRAL_DATABASE_URL.startswith("postgresql://"):
+    ADMYRAL_DATABASE_URL = ADMYRAL_DATABASE_URL.replace(
+        "postgresql://", "postgresql+asyncpg://"
+    )
+elif ADMYRAL_DATABASE_URL.startswith("sqlite://"):
+    ADMYRAL_DATABASE_URL = ADMYRAL_DATABASE_URL.replace(
+        "sqlite://", "sqlite+aiosqlite://"
+    )
+
 ADMYRAL_SECRETS_MANAGER_TYPE = SecretsManagerType(
     os.getenv(ENV_ADMYRAL_SECRETS_MANAGER_TYPE, SecretsManagerType.SQL)
 )

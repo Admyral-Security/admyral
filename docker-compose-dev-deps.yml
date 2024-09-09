@@ -1,0 +1,82 @@
+services:
+  postgresql:
+    container_name: postgresql
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-your-super-secret-and-long-postgres-password}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+    image: postgres:${POSTGRES_VERSION:-16.4-bookworm}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready", "-d", "temporal"]
+      interval: 30s
+      timeout: 60s
+      retries: 5
+      start_period: 80s
+    networks:
+      - admyral-network
+    ports:
+      - 5432:5432
+    expose:
+      - 5432
+    volumes:
+      - ${POSTGRES_VOLUME_PATH:-.admyral/postgres}:/var/lib/postgresql/data
+
+  temporal:
+    container_name: temporal
+    environment:
+      - DB=postgres12
+      - DB_PORT=5432
+      - POSTGRES_USER=${POSTGRES_USER:-postgres}
+      - POSTGRES_PWD=${POSTGRES_PASSWORD:-your-super-secret-and-long-postgres-password}
+      - POSTGRES_SEEDS=postgresql
+      - DYNAMIC_CONFIG_FILE_PATH=config/dynamicconfig/development-sql.yml
+      - ENABLE_ES=false
+    image: temporalio/auto-setup:${TEMPORAL_VERSION:-latest}
+    healthcheck:
+      test: ["CMD", "tctl", "--address", "temporal:7233", "workflow", "list"]
+      interval: 1s
+      timeout: 5s
+      retries: 30
+    depends_on:
+      postgresql:
+        condition: service_healthy
+    networks:
+      - admyral-network
+    ports:
+      - 7233:7233
+    expose:
+      - 7233
+    volumes:
+      - ./temporal/dynamicconfig:/etc/temporal/config/dynamicconfig
+
+  temporal-admin-tools:
+    container_name: temporal-admin-tools
+    depends_on:
+      temporal:
+        condition: service_healthy
+    environment:
+      - TEMPORAL_ADDRESS=temporal:7233
+      - TEMPORAL_CLI_ADDRESS=temporal:7233
+    image: temporalio/admin-tools:${TEMPORAL_ADMINTOOLS_VERSION:-latest}
+    networks:
+      - admyral-network
+    stdin_open: true
+    tty: true
+
+  temporal-ui:
+    container_name: temporal-ui
+    depends_on:
+      temporal:
+        condition: service_healthy
+    environment:
+      - TEMPORAL_ADDRESS=temporal:7233
+      - TEMPORAL_CORS_ORIGINS=http://localhost:3000
+    image: temporalio/ui:${TEMPORAL_UI_VERSION:-latest}
+    networks:
+      - admyral-network
+    ports:
+      - 8080:8080
+
+networks:
+  admyral-network:
+    driver: bridge
+    name: admyral-network

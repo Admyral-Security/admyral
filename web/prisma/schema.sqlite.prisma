@@ -4,7 +4,7 @@ generator client {
 
 datasource db {
   provider = "sqlite"
-  url      = env("ADMYRAL_WEB_DATABASE_URL")
+  url      = env("ADMYRAL_DATABASE_URL")
 }
 
 model alembic_version {
@@ -122,7 +122,6 @@ model workflows {
 }
 
 model Account {
-  id                String   @id @default(cuid())
   userId            String
   type              String
   provider          String
@@ -136,9 +135,9 @@ model Account {
   session_state     String?
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
-  User              User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
-  @@unique([provider, providerAccountId], map: "sqlite_autoindex_Account_2")
+  @@id([provider, providerAccountId])
 }
 
 model Authenticator {
@@ -168,14 +167,14 @@ model Session {
 model User {
   id            String          @id @default(cuid())
   name          String?
-  email         String?         @unique(map: "sqlite_autoindex_User_2")
+  email         String          @unique(map: "sqlite_autoindex_User_2")
   emailVerified DateTime?
   image         String?
   createdAt     DateTime        @default(now())
-  updatedAt     DateTime
+  updatedAt     DateTime        @updatedAt
   accounts      Account[]
-  Authenticator Authenticator[]
   sessions      Session[]
+  Authenticator Authenticator[]
 }
 
 model VerificationToken {
