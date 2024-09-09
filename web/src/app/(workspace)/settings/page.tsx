@@ -1,3 +1,4 @@
+import SignOutButton from "@/components/auth/signout-button";
 import Secrets from "@/components/secrets/secrets";
 import { Box, Flex, Grid, Text } from "@radix-ui/themes";
 
@@ -44,6 +45,10 @@ export default async function SettingsPage() {
 					<LogoutButton />
 					<DeleteAccountButton />
 				</Flex> */}
+				<Flex width="50%" justify="start" gap="5">
+					<SignOutButton />
+					{/* <DeleteAccountButton /> */}
+				</Flex>
 			</Flex>
 		</Grid>
 	);

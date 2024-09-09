@@ -1,14 +1,186 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
-  url      = env("ADMYRAL_WEB_DATABASE_URL")
+  url      = env("ADMYRAL_DATABASE_URL")
+}
+
+model Account {
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  createdAt         DateTime @default(now()) @db.Timestamp(6)
+  updatedAt         DateTime @updatedAt @db.Timestamp(6)
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([provider, providerAccountId])
+}
+
+model Authenticator {
+  credentialID         String  @unique
+  userId               String
+  providerAccountId    String
+  credentialPublicKey  String
+  counter              Int
+  credentialDeviceType String
+  credentialBackedUp   Boolean
+  transports           String?
+  user                 User    @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([credentialID, userId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime @db.Timestamp(6)
+  createdAt    DateTime @default(now()) @db.Timestamp(6)
+  updatedAt    DateTime @updatedAt @db.Timestamp(6)
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model User {
+  id            String          @id @default(cuid())
+  name          String?
+  email         String          @unique
+  emailVerified DateTime?       @db.Timestamp(6)
+  image         String?
+  createdAt     DateTime        @default(now()) @db.Timestamp(6)
+  updatedAt     DateTime        @updatedAt @db.Timestamp(6)
+  accounts      Account[]
+  sessions      Session[]
+  Authenticator Authenticator[]
+}
+
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime @db.Timestamp(6)
+
+  @@id([identifier, token])
+}
+
+model alembic_version {
+  version_num String @id(map: "alembic_version_pkc") @db.VarChar(32)
+}
+
+model pip_lockfile_cache {
+  created_at      DateTime @default(now()) @db.Timestamp(6)
+  updated_at      DateTime @default(now()) @db.Timestamp(6)
+  hash            String   @id
+  lockfile        String
+  expiration_time DateTime @db.Timestamp(6)
+}
+
+model python_actions {
+  created_at           DateTime @default(now()) @db.Timestamp(6)
+  updated_at           DateTime @default(now()) @db.Timestamp(6)
+  user_id              String
+  action_type          String
+  import_statements    String
+  code                 String
+  display_name         String
+  display_namespace    String
+  description          String?
+  secrets_placeholders String?
+  requirements         String?
+  arguments            Json     @db.Json
+
+  @@id([user_id, action_type])
+}
+
+model secrets {
+  created_at             DateTime @default(now()) @db.Timestamp(6)
+  updated_at             DateTime @default(now()) @db.Timestamp(6)
+  secret_id              String   @id
+  user_id                String
+  encrypted_secret       String?
+  schema_json_serialized String
+
+  @@index([user_id], map: "ix_secrets_user_id")
+}
+
+model workflow_run_steps {
+  created_at    DateTime      @default(now()) @db.Timestamp(6)
+  updated_at    DateTime      @default(now()) @db.Timestamp(6)
+  step_id       String        @id
+  run_id        String
+  prev_step_id  String?
+  action_type   String
+  input_args    Json?         @db.Json
+  logs          String?
+  result        Json?         @db.Json
+  error         String?
+  workflow_runs workflow_runs @relation(fields: [run_id], references: [run_id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model workflow_runs {
+  created_at         DateTime             @default(now()) @db.Timestamp(6)
+  updated_at         DateTime             @default(now()) @db.Timestamp(6)
+  run_id             String               @id
+  user_id            String
+  workflow_id        String
+  source_name        String
+  completed_at       DateTime?            @db.Timestamp(6)
+  failed_at          DateTime?            @db.Timestamp(6)
+  canceled_at        DateTime?            @db.Timestamp(6)
+  workflow_run_steps workflow_run_steps[]
+  workflows          workflows            @relation(fields: [workflow_id], references: [workflow_id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model workflow_schedules {
+  created_at       DateTime  @default(now()) @db.Timestamp(6)
+  updated_at       DateTime  @default(now()) @db.Timestamp(6)
+  schedule_id      String    @id
+  user_id          String
+  workflow_id      String
+  cron             String?
+  interval_seconds Int?
+  interval_minutes Int?
+  interval_hours   Int?
+  interval_days    Int?
+  default_args     Json?     @db.Json
+  workflows        workflows @relation(fields: [workflow_id], references: [workflow_id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([user_id], map: "ix_workflow_schedules_user_id")
+  @@index([workflow_id], map: "ix_workflow_schedules_workflow_id")
+}
+
+model workflow_webhooks {
+  created_at     DateTime  @default(now()) @db.Timestamp(6)
+  updated_at     DateTime  @default(now()) @db.Timestamp(6)
+  webhook_id     String    @id
+  workflow_id    String
+  webhook_secret String
+  workflows      workflows @relation(fields: [workflow_id], references: [workflow_id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([workflow_id], map: "ix_workflow_webhooks_workflow_id")
+}
+
+model workflows {
+  created_at         DateTime             @default(now()) @db.Timestamp(6)
+  updated_at         DateTime             @default(now()) @db.Timestamp(6)
+  workflow_id        String               @id
+  user_id            String
+  workflow_name      String
+  workflow_dag       Json                 @db.Json
+  is_active          Boolean
+  workflow_runs      workflow_runs[]
+  workflow_schedules workflow_schedules[]
+  workflow_webhooks  workflow_webhooks[]
+
+  @@unique([user_id, workflow_name], map: "unique_workflow_name")
+  @@index([user_id], map: "ix_workflows_user_id")
+  @@index([workflow_name], map: "ix_workflows_workflow_name")
 }
