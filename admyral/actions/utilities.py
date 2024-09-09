@@ -37,3 +37,22 @@ def serialize_json_string(
     ],
 ) -> str:
     return json.dumps(json_value)
+
+
+@action(
+    display_name="Wait",
+    display_namespace="Admyral",
+    description="Waits for a specified number of seconds.",
+)
+def wait(
+    seconds: Annotated[
+        float,
+        ArgumentMetadata(
+            display_name="Seconds",
+            description="Number of seconds to wait.",
+        ),
+    ],
+) -> None:
+    import time
+
+    time.sleep(seconds)
