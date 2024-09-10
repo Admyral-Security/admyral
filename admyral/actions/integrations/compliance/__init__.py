@@ -7,6 +7,10 @@ from admyral.actions.integrations.compliance.one_password import (
 )
 from admyral.actions.integrations.compliance.github import (
     search_github_enterprise_audit_logs,
+    list_merged_prs,
+    list_commit_history_for_pr,
+    list_review_history_for_pr,
+    list_commits,
 )
 
 __all__ = [
@@ -14,4 +18,8 @@ __all__ = [
     "list_groups_per_user",
     "list_1password_audit_events",
     "search_github_enterprise_audit_logs",
+    "list_merged_prs",
+    "list_commit_history_for_pr",
+    "list_review_history_for_pr",
+    "list_commits",
 ]
