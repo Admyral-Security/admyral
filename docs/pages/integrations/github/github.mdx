@@ -2,10 +2,6 @@ import { Callout } from "nextra/components";
 
 # GitHub
 
-<Callout type="info">
-	Your email address has to be verified to create an access token.
-</Callout>
-
 1. Go to [GitHub](https://github.com) and log in.
 
 2. Click on your profile photo in the upper-right corner, then click **Settings**.
@@ -23,38 +19,32 @@ import { Callout } from "nextra/components";
 
 ![GitHub API](/github_api.png)
 
-6. Give your token a descriptive name.
+6. Optionally, you can give your token a descriptive name and adjust it's Expiration.
 
-7. Set an Expiration for the token.
-
-8. Select which Repositories should be accessible with this token and select the Permissions you would like to give this token. For more information about specific permission, click [Here](https://docs.github.com/en/rest/authentication/permissions-required-for-fine-grained-personal-access-tokens?apiVersion=2022-11-28).
+7. Select which Repositories should be accessible with this token and select the Permissions you would like to give this token. For more information about specific permission, click [Here](https://docs.github.com/en/rest/authentication/permissions-required-for-fine-grained-personal-access-tokens?apiVersion=2022-11-28).
 
 <Callout type="info">
-	To access the Audit logs, you need at least the **audit_log** permission.
+	The needed scopes depend on the API endpoint and are specified in the
+	corresponding documentation page.
 </Callout>
 
-9. Click **Generate token**.
+8. Click **Generate token**.
 
-10. Copy your token.
+9. Copy your token.
 
-11. Go to the **Settings** page in **Admyral**. Click on **Create New Secret** in the **Secrets** section.
+10. Go to the **Settings** page in **Admyral**. Click on **Create New Secret** in the **Secrets** section.
 
-12. Give your credential a name, e.g. `GitHub`.
+11. Give your credential a name, e.g. `GitHub`.
 
-13. The following secrets structure is expected:
+12. The following secrets structure is expected:
 
 | Key            | Value                            |
 | -------------- | -------------------------------- |
 | `access_token` | Paste your **Access Token** here |
 
-14. Click on the **Save** button.
+13. Click on the **Save** button.
 
 Alternatively, you can use the following CLI command structure:
-
-<Callout type="info">
-	To access enterprise features (e.g. Audit logs), use
-	**github_enterprise_secret** instead
-</Callout>
 
 ```bash
 admyral secret set github_secret --value access_token=your_access_token

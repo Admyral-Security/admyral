@@ -6,12 +6,13 @@
 	"amazon_inspector2": "Amazon Inspector 2",
 	"anthropic": "Anthropic",
 	"azure_openai": "Azure OpenAI",
+	"github": "GitHub",
 	"greynoise": "GreyNoise",
 	"jira": "Jira",
+	"mistral": "Mistral AI",
 	"ms_defender": "MS Defender for Endpoint",
 	"ms_defender_for_cloud": "MS Defender for Cloud",
 	"ms_sentinel": "MS Sentinel",
-	"mistral": "Mistral AI",
 	"okta": "Okta",
 	"openai": "OpenAI",
 	"opsgenie": "OpsGenie",
@@ -21,6 +22,5 @@
 	"slack": "Slack",
 	"snyk": "Snyk",
 	"virus_total": "VirusTotal",
-	"wiz": "Wiz",
-	"github": "GitHub"
+	"wiz": "Wiz"
 }
