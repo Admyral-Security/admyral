@@ -62,6 +62,13 @@ from admyral.actions.integrations.compliance import (
     search_github_enterprise_audit_logs,
 )
 
+from admyral.actions.integrations.compliance.github import (
+    list_merged_prs,
+    list_commit_history_for_pr,
+    list_review_history_for_pr,
+    list_commits,
+)
+
 
 __all__ = [
     "ai_action",
@@ -107,4 +114,8 @@ __all__ = [
     "okta_get_all_user_types",
     "get_okta_logs",
     "search_github_enterprise_audit_logs",
+    "list_merged_prs",
+    "list_commit_history_for_pr",
+    "list_review_history_for_pr",
+    "list_commits",
 ]

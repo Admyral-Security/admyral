@@ -4,7 +4,7 @@ Follow setup instruction from the github documentation to create personal access
 https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token
 """
 
-from typing import Annotated
+from typing import Annotated, Literal
 from httpx import Client
 
 from admyral.action import action, ArgumentMetadata
@@ -117,6 +117,41 @@ def get_github_client(access_token: str) -> Client:
         },
     )
 
+
+def _get_events_with_pagination(
+    client: Client,
+    url: str,
+    params: dict,
+    limit: int,
+    start_time: str = "",
+    end_time: str = "",
+    date_field: str = "",
+) -> list[dict[str, JsonValue]]:
+    events = []
+    while len(events) < limit:
+        response = client.get(url, params=params)
+        response.raise_for_status()
+        events_on_page = response.json()
+
+        if start_time and end_time and date_field:
+            for event in events_on_page:
+                if start_time <= event[date_field] <= end_time:
+                    events.append(event)
+                if len(events) >= limit:
+                    break
+
+        else:
+            events.extend(events_on_page)
+
+        if "next" in response.links:
+            url = response.links["next"]["url"][len(str(client.base_url)) :]
+            params = None
+        else:
+            break
+
+    return events
+
+
 @action(
     display_name="List Merged PRs for a Repository",
     display_namespace="GitHub",
@@ -152,6 +187,13 @@ def list_merged_prs(
             description="The end time for the cases to list. Must be in ISO 8601 format (YYYY-MM-DDTHH:MM:SSZ).",
         ),
     ] = "2100-01-01T00:00:00Z",
+    limit: Annotated[
+        str | None,
+        ArgumentMetadata(
+            display_name="Limit",
+            description="The maximum number of cases to list.",
+        ),
+    ] = 100,
 ) -> list[dict[str, JsonValue]]:
     # https://docs.github.com/en/rest/pulls/pulls?apiVersion=2022-11-28
 
@@ -166,24 +208,18 @@ def list_merged_prs(
             "per_page": 100,
         }
         url = f"/repos/{repo_owner}/{repo_name}/pulls"
-        events = []
 
-        # handle pagination
-        while True:
-            response = client.get(url, params=params)
-            response.raise_for_status()
-            events.extend(response.json())
+        events = _get_events_with_pagination(
+            client=client,
+            url=url,
+            params=params,
+            limit=limit,
+            start_time=start_time,
+            end_time=end_time,
+            date_field="merged_at",
+        )
 
-            if "next" in response.links:
-                url = response.links["next"]["url"]
-            else:
-                break
-
-        return [
-            pr
-            for pr in events
-            if pr["merged_at"] and start_time <= pr["merged_at"] <= end_time
-        ]
+        return events
 
 
 @action(
@@ -214,6 +250,20 @@ def list_commit_history_for_pr(
             description="The name of the repository",
         ),
     ],
+    start_time: Annotated[
+        str | None,
+        ArgumentMetadata(
+            display_name="Start Time",
+            description="The start time for the cases to list. Must be in ISO 8601 format (YYYY-MM-DDTHH:MM:SSZ).",
+        ),
+    ] = "1970-01-01T00:00:00Z",
+    end_time: Annotated[
+        str | None,
+        ArgumentMetadata(
+            display_name="End Time",
+            description="The end time for the cases to list. Must be in ISO 8601 format (YYYY-MM-DDTHH:MM:SSZ).",
+        ),
+    ] = "2100-01-01T00:00:00Z",
     limit: Annotated[
         str | None,
         ArgumentMetadata(
@@ -232,22 +282,18 @@ def list_commit_history_for_pr(
             "per_page": 100,
         }
         url = f"/repos/{repo_owner}/{repo_name}/pulls/{pr_number}/commits"
-        events = []
 
-        # handle pagination
-        while True:
-            response = client.get(url, params=params)
-            response.raise_for_status()
-            events.extend(response.json())
-
-            if "next" in response.links:
-                url = response.links["next"]["url"]
-            else:
-                break
-
-        return sorted(
-            events, key=lambda x: x["commit"]["committer"]["date"], reverse=True
+        events = _get_events_with_pagination(
+            client=client, url=url, params=params, limit=limit
         )
+
+        events_in_time_range = [
+            event
+            for event in events
+            if start_time <= event["commit"]["committer"]["date"] <= end_time
+        ]
+
+        return events_in_time_range[:limit]
 
 
 @action(
@@ -256,7 +302,7 @@ def list_commit_history_for_pr(
     description="List aproval history for a PR",
     secrets_placeholders=["GITHUB_SECRET"],
 )
-def list_approval_history_for_pr(
+def list_review_history_for_pr(
     repo_owner: Annotated[
         str,
         ArgumentMetadata(
@@ -278,6 +324,27 @@ def list_approval_history_for_pr(
             description="The name of the repository",
         ),
     ],
+    state: Annotated[
+        Literal["APPROVED", "CHANGES_REQUESTED", "COMMENTED", "DISMISSED"] | None,
+        ArgumentMetadata(
+            display_name="State",
+            description="The state of the reviews to list.",
+        ),
+    ],
+    start_time: Annotated[
+        str | None,
+        ArgumentMetadata(
+            display_name="Start Time",
+            description="The start time for the cases to list. Must be in ISO 8601 format (YYYY-MM-DDTHH:MM:SSZ).",
+        ),
+    ] = "1970-01-01T00:00:00Z",
+    end_time: Annotated[
+        str | None,
+        ArgumentMetadata(
+            display_name="End Time",
+            description="The end time for the cases to list. Must be in ISO 8601 format (YYYY-MM-DDTHH:MM:SSZ).",
+        ),
+    ] = "2100-01-01T00:00:00Z",
     limit: Annotated[
         str | None,
         ArgumentMetadata(
@@ -294,29 +361,28 @@ def list_approval_history_for_pr(
         params = {
             "per_page": 100,
         }
+
         url = f"/repos/{repo_owner}/{repo_name}/pulls/{pr_number}/reviews"
-        events = []
+        events = _get_events_with_pagination(
+            client=client,
+            url=url,
+            params=params,
+            limit=limit,
+            start_time=start_time,
+            end_time=end_time,
+            date_field="submitted_at",
+        )
 
-        # handle pagination
-        while True:
-            response = client.get(url, params=params)
-            response.raise_for_status()
-            events.extend(response.json())
-
-            if "next" in response.links:
-                url = response.links["next"]["url"]
-            else:
-                break
-
-        approves = [review for review in events if review["state"] == "APPROVED"]
-
-        return sorted(approves, key=lambda x: x["submitted_at"], reverse=True)
+        if state:
+            return [review for review in events if review["state"] == state]
+        else:
+            return events[:limit]
 
 
 @action(
-    display_name="Get Difference for a Commit",
+    display_name="List Commits",
     display_namespace="GitHub",
-    description="List diff for a commit",
+    description="List commits",
     secrets_placeholders=["GITHUB_SECRET"],
 )
 def list_commits(
@@ -332,13 +398,6 @@ def list_commits(
         ArgumentMetadata(
             display_name="Repository Name",
             description="The name of the repository",
-        ),
-    ],
-    sha: Annotated[
-        str,
-        ArgumentMetadata(
-            display_name="SHA or Branch Name",
-            description="The SHA of the commit",
         ),
     ],
     since: Annotated[
@@ -374,17 +433,8 @@ def list_commits(
             "per_page": 100,
         }
         url = f"/repos/{repo_owner}/{repo_name}/commits"
-        events = []
+        events = _get_events_with_pagination(
+            client=client, url=url, params=params, limit=limit
+        )
 
-        # handle pagination
-        while True:
-            response = client.get(url, params=params)
-            response.raise_for_status()
-            events.extend(response.json())
-
-            if "next" in response.links:
-                url = response.links["next"]["url"]
-            else:
-                break
-
-        return events
+        return events[:limit]
