@@ -3,6 +3,8 @@ on:
   push:
     branches:
       - main
+  pull_request:
+    types: [opened, synchronize, ready_for_review, reopened]
 jobs:
   setup-and-test:
     uses: ./.github/workflows/unit-test.yml
