@@ -42,6 +42,7 @@ def action_executor(action_type: str, func: "F") -> "F":
 
                 # make available to the function as a contextvar
                 ctx.set(exec_ctx)
+                # for wait actions, we skip the function call because the waiting is already executed in the WorkflowExecutor
                 if exec_ctx.action_type != "wait":
                     result = await func(**args)
                 else:
@@ -81,7 +82,7 @@ def action_executor(action_type: str, func: "F") -> "F":
                 # make available to the function as a contextvar
                 ctx.set(exec_ctx)
 
-                # check for wait node => don't call the function
+                # for wait actions, we skip the function call because the waiting is already executed in the WorkflowExecutor
                 if exec_ctx.action_type != "wait":
                     result = func(**args)
                 else:

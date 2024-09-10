@@ -1,5 +1,6 @@
 from typing import Annotated
 import json
+import time
 
 from admyral.action import action, ArgumentMetadata
 from admyral.typings import JsonValue
@@ -53,6 +54,4 @@ def wait(
         ),
     ],
 ) -> None:
-    import time
-
     time.sleep(seconds)
