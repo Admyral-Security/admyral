@@ -1,0 +1,53 @@
+import { Callout } from "nextra/components";
+
+# Search Audit Logs
+
+This method enables users to query the audit logs for a specified organization. Events include what action was performed,
+who performed the action, and when the action was performed.
+
+<Callout type="info">
+	For more information on the GitHub API, see [GitHub API
+	Documentation](https://docs.github.com/reference/api).
+</Callout>
+
+**SDK Import:**
+
+```python
+from admyral.actions import search_github_audit_logs
+```
+
+## Arguments
+
+| Argument Name               | Description                                                                                                                                                                                                                                                     | Required |
+| --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------: |
+| **Enterprise** `enterprise` | Search Audit Logs for specified enterprise.                                                                                                                                                                                                                     |   yes    |
+| **Filter** `filter`         | Filter the audit logs, see [Here](https://docs.github.com/en/organizations/keeping-your-organization-secure/managing-security-settings-for-your-organization/reviewing-the-audit-log-for-your-organization#searching-the-audit-log) for additional information. |    -     |
+| **Start Time** `start_time` | The date and time to start retrieving events in ISO 8601 format (YYYY-MM-DDTHH:MM:SSZ). If not specified, all available Audit logs will be returned                                                                                                             |    -     |
+| **End Time** `end_time`     | The date and time to stop retrieving events in ISO 8601 format (YYYY-MM-DDTHH:MM:SSZ).                                                                                                                                                                          |    -     |
+| **Limit** `limit`           | The maximum number of events to retrieve.                                                                                                                                                                                                                       |    -     |
+
+## Returns
+
+A JSON array of audit log events.
+
+<Callout type="info">
+	For more information about possible audit log events, see [Get the audit log
+	for an
+	enterprise](https://docs.github.com/en/enterprise-cloud@latest/rest/enterprise-admin/audit-log?apiVersion=2022-11-28#get-the-audit-log-for-an-enterprise).
+</Callout>
+
+## Required Secrets
+
+| Secret Placeholder         | Description                                                    |
+| -------------------------- | -------------------------------------------------------------- |
+| `GITHUB_ENTERPRISE_SECRET` | GitHub secret. See [GitHub setup](/integrations/github/github) |
+
+## SDK Example
+
+```python
+audit_log_entries = search_github_audit_logs(
+	enterprise:"admyral",
+	filter="action:org.update_member",
+	secrets={"GITHUB_ENTERPRISE_SECRET": "my_stored_github_enterprise_secret"}
+)
+```
