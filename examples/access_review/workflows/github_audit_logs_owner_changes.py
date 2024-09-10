@@ -1,13 +1,24 @@
 from typing import Annotated
-from datetime import datetime
+from datetime import datetime, timedelta, UTC
 
 from admyral.workflow import workflow, Schedule
 from admyral.typings import JsonValue
 from admyral.action import action, ArgumentMetadata
 from admyral.actions import (
-    search_github_audit_logs,
+    search_github_enterprise_audit_logs,
     batched_send_slack_message_to_user_by_email,
 )
+
+
+@action(
+    display_name="Calculate Time Range for Last Full Hour",
+    display_namespace="Utilities",
+    description="Calculate the time range for the last full hour",
+)
+def get_time_range_of_last_full_hour() -> tuple[str, str]:
+    end_time = datetime.now(UTC).replace(minute=0, second=0, microsecond=0)
+    start_time = (end_time - timedelta(hours=1)).isoformat() + "Z"
+    return (start_time, end_time.isoformat() + "Z")
 
 
 @action(
@@ -54,11 +65,13 @@ def build_info_message_owner_changes(
     ],
 )
 def github_audit_logs_owner_changes(payload: dict[str, JsonValue]):
-    logs = search_github_audit_logs(
+    start_and_end_time = get_time_range_of_last_full_hour()
+
+    logs = search_github_enterprise_audit_logs(
         enterprise=payload["enterprise"],
-        filter=payload["filter"],
-        start_time=payload["start_time"],
-        end_time=payload["end_time"],
+        filter="action:org.update_member",
+        start_time=start_and_end_time[0],
+        end_time=start_and_end_time[1],
         secrets={"GITHUB_ENTERPRISE_SECRET": "github_enterprise_secret"},
     )
 

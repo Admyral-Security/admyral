@@ -1,19 +1,24 @@
 import { Callout } from "nextra/components";
 
-# Search Audit Logs
+# Search Audit Logs for an Enterprise
 
-This method enables users to query the audit logs for a specified organization. Events include what action was performed,
+This method enables users to query the audit logs for a specified enterprise. Events include what action was performed,
 who performed the action, and when the action was performed.
 
 <Callout type="info">
-	For more information on the GitHub API, see [GitHub API
-	Documentation](https://docs.github.com/reference/api).
+	For more information on the GitHub Audit logs API, see
+	[Here](https://docs.github.com/en/enterprise-cloud@latest/admin/monitoring-activity-in-your-enterprise/reviewing-audit-logs-for-your-enterprise/using-the-audit-log-api-for-your-enterprise).
+</Callout>
+
+<Callout type="info">
+	To use this API endpoint, you need to enable the **audit_log** scope in your
+	GitHub token.
 </Callout>
 
 **SDK Import:**
 
 ```python
-from admyral.actions import search_github_audit_logs
+from admyral.actions import search_github_enterprise_audit_logs
 ```
 
 ## Arguments
@@ -38,15 +43,15 @@ A JSON array of audit log events.
 
 ## Required Secrets
 
-| Secret Placeholder         | Description                                                    |
-| -------------------------- | -------------------------------------------------------------- |
-| `GITHUB_ENTERPRISE_SECRET` | GitHub secret. See [GitHub setup](/integrations/github/github) |
+| Secret Placeholder         | Description                                                               |
+| -------------------------- | ------------------------------------------------------------------------- |
+| `GITHUB_ENTERPRISE_SECRET` | GitHub enterprise secret. See [GitHub setup](/integrations/github/github) |
 
 ## SDK Example
 
 ```python
-audit_log_entries = search_github_audit_logs(
-	enterprise:"admyral",
+audit_log_entries = search_github_enterprise_audit_logs(
+	enterprise="admyral",
 	filter="action:org.update_member",
 	secrets={"GITHUB_ENTERPRISE_SECRET": "my_stored_github_enterprise_secret"}
 )

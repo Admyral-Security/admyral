@@ -23,24 +23,24 @@ def get_github_enterprise_client(access_token: str, enterprise: str) -> Client:
 
 
 @action(
-    display_name="Query Organizaton Audit Logs",
+    display_name="Search Enterprise Audit Logs",
     display_namespace="GitHub",
-    description="Query GitHub audit logs for enterprise",
+    description="Search GitHub audit logs for an enterprise.",
     secrets_placeholders=["GITHUB_ENTERPRISE_SECRET"],
 )
-def search_github_audit_logs(
+def search_github_enterprise_audit_logs(
     enterprise: Annotated[
         str,
         ArgumentMetadata(
             display_name="Enterprise",
-            description="Enterprise to query audit logs for",
+            description="The slug version of the enterprise name. You can also substitute this value with the enterprise id.",
         ),
     ],
     filter: Annotated[
         str,
         ArgumentMetadata(
             display_name="Filter",
-            description="Filter to apply to the query",
+            description="Filter to apply to the query.",
         ),
     ] = None,
     start_time: Annotated[
@@ -58,18 +58,18 @@ def search_github_audit_logs(
         ),
     ] = None,
     limit: Annotated[
-        int,
+        int | None,
         ArgumentMetadata(
             display_name="Limit",
-            description="Maximum number of logs to return",
+            description="Maximum number of logs to return.",
         ),
-    ] = 100,
+    ] = None,
 ) -> list[dict[str, JsonValue]]:
+    # https://docs.github.com/en/search-github/getting-started-with-searching-on-github/understanding-the-search-syntax#query-for-dates
+
     secret = ctx.get().secrets.get("GITHUB_ENTERPRISE_SECRET")
     access_token = secret["access_token"]
 
-    # https://docs.github.com/en/search-github/getting-started-with-searching-on-github/understanding-the-search-syntax#query-for-dates
-    #
     with get_github_enterprise_client(access_token, enterprise) as client:
         params = {"order": "asc", "per_page": 100}
         if filter:
@@ -86,7 +86,7 @@ def search_github_audit_logs(
 
         url = "/audit-log"
         events = []
-        while len(events) < limit:
+        while limit is None or len(events) < limit:
             response = client.get(
                 url,
                 params=params,
@@ -100,4 +100,4 @@ def search_github_audit_logs(
             else:
                 break
 
-        return events[:limit]
+        return events if limit is None else events[:limit]
