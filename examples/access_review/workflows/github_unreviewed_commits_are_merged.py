@@ -1,14 +1,12 @@
 from typing import Annotated
-from datetime import datetime
+
+import requests
 
 from admyral.workflow import workflow, Schedule
 from admyral.typings import JsonValue
 from admyral.action import action, ArgumentMetadata
 from admyral.actions import (
     list_merged_prs,
-    list_commit_history_for_pr,
-    list_review_history_for_pr,
-    send_slack_message_to_user_by_email,
 )
 
 
@@ -16,6 +14,8 @@ from admyral.actions import (
     display_name="Check PRs for merging unreviewed commits",
     display_namespace="Utilities",
     description="Iterate over all PRs and check if approved commit is last commit",
+    secrets_placeholders=["GITHUB_SECRET"],
+    requirements=["requests"],
 )
 def check_prs_for_merging_unreviewed_commits(
     pull_requests: Annotated[
@@ -39,47 +39,34 @@ def check_prs_for_merging_unreviewed_commits(
             description="The name of the repository",
         ),
     ],
-) -> str:
+) -> None:
     for pr in pull_requests:
-        pr_number = pr.get("number")
-        latest_commit = list_commit_history_for_pr(
-            repo_owner=repo_owner, repo_name=repo_name, pr_number=pr_number
-        )[0]
-        latest_approval = list_review_history_for_pr(
-            repo_owner=repo_owner, repo_name=repo_name, pr_number=pr_number
-        )[0]
+        webhook_url = "http://127.0.0.1:8000/webhooks/be941ac5-4d35-4fc3-baf3-5c1eb65d5096/3ea17bf42a97e58e417b73a133528bf9aab7bab904e1c3fbafdb65e0b18dc66e"
+        payload = {
+            "repo_owner": repo_owner,
+            "repo_name": repo_name,
+            "pull_request": pr,
+        }
+        # make request
+        response = requests.post(url=webhook_url, json=payload)
 
-        # compare commit hash
-        if latest_commit.get("sha") != latest_approval.get("commit_id"):
-            latest_approval_date = datetime.fromisoformat(
-                latest_approval.get("submitted_at")
-            )
-            # build message
-            message = f"Attention, PR {pr_number} ({pr.get("html_url")}) has unreviewed commits merged\n"
-            message += f"Latest commit: {latest_commit.get('sha')} at {latest_commit.get('commit').get('committer').get('date')}\n"
-            message += f"Latest approval: {latest_approval.get('commit_id')} at {latest_approval_date}\n"
-
-        return message
+        response.raise_for_status()
 
 
 @workflow(
     description="Alert if major unreviewed commits are merged",
     triggers=[Schedule(cron="0 * * * *", repo_name="", repo_owner="")],
 )
-def github_major_unreviewed_commits_are_merged(payload: dict[str, JsonValue]):
+def github_unreviewed_commits_are_merged(payload: dict[str, JsonValue]):
     merged_prs = list_merged_prs(
-        repo_name=payload["repo_name"], repo_owner=payload["repo_owner"]
+        repo_owner=payload["repo_owner"],
+        repo_name=payload["repo_name"],
+        secrets={"GITHUB_SECRET": "github_secret"},
     )
 
-    results = check_prs_for_merging_unreviewed_commits(
+    check_prs_for_merging_unreviewed_commits(
         pull_requests=merged_prs,
         repo_name=payload["repo_name"],
         repo_owner=payload["repo_owner"],
+        secrets={"GITHUB_SECRET": "github_secret"},
     )
-
-    if results:
-        send_slack_message_to_user_by_email(
-            email="",
-            text=results,
-            secrets={"SLACK_SECRET": "slack_secret"},
-        )
