@@ -60,6 +60,7 @@ from admyral.actions.integrations.compliance import (
     list_retool_inactive_users,
     list_groups_per_user,
     list_1password_audit_events,
+    search_github_audit_logs,
 )
 
 
@@ -105,4 +106,5 @@ __all__ = [
     "okta_search_users",
     "okta_get_all_user_types",
     "get_okta_logs",
+    "search_github_audit_logs",
 ]
