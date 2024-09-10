@@ -1,8 +1,10 @@
 from typing import Annotated
+import time
 
 from admyral.action import action, ArgumentMetadata
 from admyral.workflow import workflow
 from admyral.typings import JsonValue
+from admyral.actions import wait
 
 
 @action(
@@ -78,6 +80,14 @@ def test_example_workflow_execution():
     result = 0
     example_workflow({"x": 2})
     assert result == 0
+
+
+def test_wait_action():
+    start = time.time()
+    wait(seconds=10)
+    end = time.time()
+
+    assert end - start >= 10
 
 
 # @action

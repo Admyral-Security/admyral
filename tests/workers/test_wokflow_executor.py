@@ -1,5 +1,6 @@
 import pytest
 from typing import Annotated
+import time
 
 from tests.workers.utils import execute_test_workflow
 
@@ -9,6 +10,7 @@ from admyral.action import action, ArgumentMetadata
 from admyral.typings import JsonValue
 from admyral.workers.action_executor import action_executor
 from admyral.context import ctx
+from admyral.actions import wait
 
 
 #########################################################################################################
@@ -171,3 +173,32 @@ async def test_missing_custom_action(store: AdmyralStore):
         run_steps[1].error
         == "Action with type 'action_test_missing_custom_action' not found. Did you push your action?"
     )
+
+
+#########################################################################################################
+
+
+@workflow
+def workflow_test_wait_action(payload: dict[str, JsonValue]):
+    wait(seconds=10)
+
+
+@pytest.mark.asyncio
+async def test_wait_action(store: AdmyralStore):
+    workflow_id = workflow_test_wait_action.func.__name__
+
+    start = time.time()
+
+    run, run_steps, exception = await execute_test_workflow(
+        store=store,
+        workflow_id=workflow_id,
+        workflow_name=workflow_id,
+        workflow_actions=[action_executor(wait.action_type, wait.func)],
+        workflow_code=workflow_test_wait_action,
+    )
+
+    end = time.time()
+
+    assert exception is None
+    assert run.failed_at is None
+    assert end - start >= 10
