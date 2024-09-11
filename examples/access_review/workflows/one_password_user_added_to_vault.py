@@ -82,8 +82,8 @@ def one_password_user_added_to_vault(payload: dict[str, JsonValue]):
     )
 
     messages = filter_by_vault_and_build_slack_message(
-        user_email="daniel@admyral.dev",
-        vault_id="ut22fmh7v55235s6t5gjd3t4cy",
+        user_email="daniel@admyral.dev",  # TODO: set your email here
+        vault_id="ut22fmh7v55235s6t5gjd3t4cy",  # TODO: set your vault ID here
         audit_events=events,
     )
 
