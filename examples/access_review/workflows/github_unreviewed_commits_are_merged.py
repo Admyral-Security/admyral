@@ -70,19 +70,20 @@ def check_prs_for_merging_unreviewed_commits(
     triggers=[Schedule(cron="0 * * * *", repo_name="", repo_owner="")],
 )
 def github_unreviewed_commits_are_merged(payload: dict[str, JsonValue]):
-    # start_end_end_time = get_time_range_of_last_full_hour()
+    start_end_end_time = get_time_range_of_last_full_hour()
 
-    merged_prs = list_merged_prs(
+    merged_prs_to_check = list_merged_prs(
         repo_owner=payload["repo_owner"],
         repo_name=payload["repo_name"],
-        # start_time=start_end_end_time[0],
-        # end_time=start_end_end_time[1],
+        start_time=start_end_end_time[0],
+        end_time=start_end_end_time[1],
         secrets={"GITHUB_SECRET": "github_secret"},
     )
 
-    check_prs_for_merging_unreviewed_commits(
-        pull_requests=merged_prs,
-        repo_name=payload["repo_name"],
-        repo_owner=payload["repo_owner"],
-        secrets={"GITHUB_SECRET": "github_secret"},
-    )
+    if merged_prs_to_check:
+        check_prs_for_merging_unreviewed_commits(
+            pull_requests=merged_prs_to_check,
+            repo_name=payload["repo_name"],
+            repo_owner=payload["repo_owner"],
+            secrets={"GITHUB_SECRET": "github_secret"},
+        )
