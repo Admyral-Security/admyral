@@ -128,12 +128,12 @@ def _get_events_with_pagination(
     date_field: str = "",
 ) -> list[dict[str, JsonValue]]:
     events = []
-    while len(events) < limit:
+    while limit is None or len(events) < limit:
         response = client.get(url, params=params)
         response.raise_for_status()
         events_on_page = response.json()
 
-        if start_time and end_time and date_field:
+        if start_time and end_time and date_field and limit:
             for event in events_on_page:
                 if start_time <= event[date_field] <= end_time:
                     events.append(event)
@@ -150,6 +150,114 @@ def _get_events_with_pagination(
             break
 
     return events
+
+
+@action(
+    display_name="Get Commit Diff Info for Two Commits",
+    display_namespace="GitHub",
+    description="Get the commit diff info for two commits.",
+    secrets_placeholders=["GITHUB_SECRET"],
+)
+def get_commit_diff_info_for_two_commits(
+    repo_owner: Annotated[
+        str,
+        ArgumentMetadata(
+            display_name="Repository Owner",
+            description="The owner of the repository",
+        ),
+    ],
+    repo_name: Annotated[
+        str,
+        ArgumentMetadata(
+            display_name="Repository Name",
+            description="The name of the repository",
+        ),
+    ],
+    base: Annotated[
+        str,
+        ArgumentMetadata(
+            display_name="Base",
+            description="The base commit (commit ID or SHA)",
+        ),
+    ],
+    head: Annotated[
+        str,
+        ArgumentMetadata(
+            display_name="Head",
+            description="The head commit (commit ID or SHA)",
+        ),
+    ],
+) -> dict[str, JsonValue]:
+    # https://docs.github.com/en/rest/commits/commits?apiVersion=2022-11-28#compare-two-commits
+
+    secret = ctx.get().secrets.get("GITHUB_SECRET")
+    access_token = secret["access_token"]
+
+    with get_github_client(access_token=access_token) as client:
+        url = f"/repos/{repo_owner}/{repo_name}/compare/{base}...{head}"
+
+        response = client.get(url)
+        response.raise_for_status()
+
+        return response.json()
+
+
+@action(
+    display_name="Get Commit Diff for Two Commits",
+    display_namespace="GitHub",
+    description="Get the commit diff for two commits.",
+    secrets_placeholders=["GITHUB_SECRET"],
+)
+def get_commit_diff_for_two_commits(
+    repo_owner: Annotated[
+        str,
+        ArgumentMetadata(
+            display_name="Repository Owner",
+            description="The owner of the repository",
+        ),
+    ],
+    repo_name: Annotated[
+        str,
+        ArgumentMetadata(
+            display_name="Repository Name",
+            description="The name of the repository",
+        ),
+    ],
+    base: Annotated[
+        str,
+        ArgumentMetadata(
+            display_name="Base",
+            description="The base commit (commit ID or SHA)",
+        ),
+    ],
+    head: Annotated[
+        str,
+        ArgumentMetadata(
+            display_name="Head",
+            description="The head commit (commit ID or SHA)",
+        ),
+    ],
+) -> str:
+    # https://docs.github.com/en/rest/commits/commits?apiVersion=2022-11-28#compare-two-commits
+
+    secret = ctx.get().secrets.get("GITHUB_SECRET")
+    access_token = secret["access_token"]
+
+    with get_github_client(access_token=access_token) as client:
+        headers = {"Accept": "application/vnd.github.v3.diff"}
+        url = f"/repos/{repo_owner}/{repo_name}/compare/{base}...{head}"
+
+        diff = ""
+        while True:
+            response = client.get(url, headers=headers)
+            response.raise_for_status()
+            diff += response.text
+
+            if "next" in response.links:
+                url = response.links["next"]["url"][len(str(client.base_url)) :]
+            else:
+                break
+        return diff
 
 
 @action(
@@ -193,7 +301,7 @@ def list_merged_prs(
             display_name="Limit",
             description="The maximum number of cases to list.",
         ),
-    ] = 100,
+    ] = None,
 ) -> list[dict[str, JsonValue]]:
     # https://docs.github.com/en/rest/pulls/pulls?apiVersion=2022-11-28
 
@@ -270,7 +378,7 @@ def list_commit_history_for_pr(
             display_name="Limit",
             description="The maximum number of cases to list.",
         ),
-    ] = 100,
+    ] = None,
 ) -> list[dict[str, JsonValue]]:
     # https://docs.github.com/en/rest/commits/commits?apiVersion=2022-11-28
 
@@ -351,7 +459,7 @@ def list_review_history_for_pr(
             display_name="Limit",
             description="The maximum number of cases to list.",
         ),
-    ] = 100,
+    ] = None,
 ) -> list[dict[str, JsonValue]]:
     # https://docs.github.com/en/rest/pulls/reviews?apiVersion=2022-11-28
     secret = ctx.get().secrets.get("GITHUB_SECRET")
@@ -374,9 +482,12 @@ def list_review_history_for_pr(
         )
 
         if state:
-            return [review for review in events if review["state"] == state]
+            filtered_for_state = [
+                review for review in events if review["state"] == state
+            ]
+            return filtered_for_state if limit is None else filtered_for_state[:limit]
         else:
-            return events[:limit]
+            return events if limit is None else events[:limit]
 
 
 @action(
@@ -420,7 +531,7 @@ def list_commits(
             display_name="Limit",
             description="The maximum number of cases to list.",
         ),
-    ] = 100,
+    ] = None,
 ) -> list[dict[str, JsonValue]]:
     # https://docs.github.com/en/rest/commits/commits?apiVersion=2022-11-28#get-a-commit
     secret = ctx.get().secrets.get("GITHUB_SECRET")

@@ -1,4 +1,5 @@
 from typing import Annotated
+from datetime import datetime, timedelta, UTC
 
 import requests
 
@@ -8,6 +9,17 @@ from admyral.action import action, ArgumentMetadata
 from admyral.actions import (
     list_merged_prs,
 )
+
+
+@action(
+    display_name="Calculate Time Range for Last Full Hour",
+    display_namespace="Utilities",
+    description="Calculate the time range for the last full hour",
+)
+def get_time_range_of_last_full_hour() -> tuple[str, str]:
+    end_time = datetime.now(UTC).replace(minute=0, second=0, microsecond=0)
+    start_time = (end_time - timedelta(hours=1)).isoformat() + "Z"
+    return (start_time, end_time.isoformat() + "Z")
 
 
 @action(
@@ -47,20 +59,24 @@ def check_prs_for_merging_unreviewed_commits(
             "repo_name": repo_name,
             "pull_request": pr,
         }
-        # make request
+        # call different workflow to handle the PR
         response = requests.post(url=webhook_url, json=payload)
 
         response.raise_for_status()
 
 
 @workflow(
-    description="Alert if major unreviewed commits are merged",
+    description="Alert if unreviewed commits are merged, which should have been reviewed",
     triggers=[Schedule(cron="0 * * * *", repo_name="", repo_owner="")],
 )
 def github_unreviewed_commits_are_merged(payload: dict[str, JsonValue]):
+    # start_end_end_time = get_time_range_of_last_full_hour()
+
     merged_prs = list_merged_prs(
         repo_owner=payload["repo_owner"],
         repo_name=payload["repo_name"],
+        # start_time=start_end_end_time[0],
+        # end_time=start_end_end_time[1],
         secrets={"GITHUB_SECRET": "github_secret"},
     )
 
