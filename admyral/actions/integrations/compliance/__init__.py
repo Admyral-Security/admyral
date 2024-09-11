@@ -11,6 +11,8 @@ from admyral.actions.integrations.compliance.github import (
     list_commit_history_for_pr,
     list_review_history_for_pr,
     list_commits,
+    get_commit_diff_for_two_commits,
+    get_commit_diff_info_for_two_commits,
 )
 
 __all__ = [
@@ -22,4 +24,6 @@ __all__ = [
     "list_commit_history_for_pr",
     "list_review_history_for_pr",
     "list_commits",
+    "get_commit_diff_for_two_commits",
+    "get_commit_diff_info_for_two_commits",
 ]
