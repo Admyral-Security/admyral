@@ -48,14 +48,12 @@ from admyral.actions.integrations.cdr import (
 )
 from admyral.actions.integrations.email import list_abnormal_security_cases
 from admyral.actions.integrations.siem import list_ms_sentinel_alerts
-
 from admyral.actions.integrations.iam import (
     list_okta_events,
     okta_search_users,
     okta_get_all_user_types,
     get_okta_logs,
 )
-
 from admyral.actions.integrations.compliance import (
     list_retool_inactive_users,
     list_groups_per_user,
