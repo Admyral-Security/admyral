@@ -60,15 +60,13 @@ def build_info_message_owner_changes(
 
 @workflow(
     description="Alert on GitHub Orga Owner Changes",
-    triggers=[
-        Schedule(cron="0 * * * *", enterprise="admyral", email="daniel@admyral.dev")
-    ],
+    triggers=[Schedule(cron="0 * * * *")],
 )
 def github_audit_logs_owner_changes(payload: dict[str, JsonValue]):
     start_and_end_time = get_time_range_of_last_full_hour()
 
     logs = search_github_enterprise_audit_logs(
-        enterprise=payload["enterprise"],
+        enterprise="admyral",  # TODO: set your enterprise slug here
         filter="action:org.update_member",
         start_time=start_and_end_time[0],
         end_time=start_and_end_time[1],
@@ -76,7 +74,10 @@ def github_audit_logs_owner_changes(payload: dict[str, JsonValue]):
     )
 
     if logs:
-        messages = build_info_message_owner_changes(logs=logs, email=payload["email"])
+        messages = build_info_message_owner_changes(
+            logs=logs,
+            email="daniel@admyral.dev",  # TODO: set your Slack email here
+        )
 
         batched_send_slack_message_to_user_by_email(
             messages=messages,
