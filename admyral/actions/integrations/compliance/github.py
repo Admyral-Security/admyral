@@ -21,6 +21,7 @@ def get_github_enterprise_client(access_token: str, enterprise: str) -> Client:
         },
     )
 
+
 @action(
     display_name="Search Enterprise Audit Logs",
     display_namespace="GitHub",
@@ -127,12 +128,13 @@ def _get_events_with_pagination(
         response.raise_for_status()
         events_on_page = response.json()
 
-        if start_time and end_time and date_field and limit:
+        if start_time and end_time and date_field:
             for event in events_on_page:
                 if start_time <= event[date_field] <= end_time:
                     events.append(event)
-                if len(events) >= limit:
-                    break
+                if limit:
+                    if len(events) >= limit:
+                        break
 
         else:
             events.extend(events_on_page)
@@ -147,12 +149,12 @@ def _get_events_with_pagination(
 
 
 @action(
-    display_name="Get Commit Diff Info for Two Commits",
+    display_name="Get Commit Diff Info Between Two Commits",
     display_namespace="GitHub",
-    description="Get the commit diff info for two commits.",
+    description="Get the commit diff info between two commits.",
     secrets_placeholders=["GITHUB_SECRET"],
 )
-def get_commit_diff_info_for_two_commits(
+def get_commit_diff_info_between_two_commits(
     repo_owner: Annotated[
         str,
         ArgumentMetadata(
@@ -197,12 +199,12 @@ def get_commit_diff_info_for_two_commits(
 
 
 @action(
-    display_name="Get Commit Diff for Two Commits",
+    display_name="Get Raw Commit Diff between Two Commits",
     display_namespace="GitHub",
-    description="Get the commit diff for two commits.",
+    description="Get the raw commit diff between two commits.",
     secrets_placeholders=["GITHUB_SECRET"],
 )
-def get_commit_diff_for_two_commits(
+def get_raw_commit_diff_between_two_commits(
     repo_owner: Annotated[
         str,
         ArgumentMetadata(
@@ -251,6 +253,7 @@ def get_commit_diff_for_two_commits(
                 url = response.links["next"]["url"][len(str(client.base_url)) :]
             else:
                 break
+
         return diff
 
 
@@ -395,7 +398,7 @@ def list_commit_history_for_pr(
             if start_time <= event["commit"]["committer"]["date"] <= end_time
         ]
 
-        return events_in_time_range[:limit]
+        return events_in_time_range if limit is None else events_in_time_range[:limit]
 
 
 @action(
@@ -542,4 +545,4 @@ def list_commits(
             client=client, url=url, params=params, limit=limit
         )
 
-        return events[:limit]
+        return events if limit is None else events[:limit]

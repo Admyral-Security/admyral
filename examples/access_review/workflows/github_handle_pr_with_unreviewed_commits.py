@@ -8,8 +8,8 @@ from admyral.actions import (
     list_review_history_for_pr,
     send_slack_message_to_user_by_email,
     create_jira_issue,
-    get_commit_diff_for_two_commits,
-    get_commit_diff_info_for_two_commits,
+    get_raw_commit_diff_between_two_commits,
+    get_commit_diff_info_between_two_commits,
     openai_chat_completion,
 )
 
@@ -229,7 +229,7 @@ def handle_pr_with_unreviewed_commits(payload: dict[str, JsonValue]):
     )
 
     if unreviewd_commits_result["has_unreviewed_commits"]:
-        commit_diff_info = get_commit_diff_info_for_two_commits(
+        commit_diff_info = get_commit_diff_info_between_two_commits(
             repo_owner=payload["repo_owner"],
             repo_name=payload["repo_name"],
             base=unreviewd_commits_result["latest_reviewed_commit"],
@@ -273,7 +273,7 @@ def handle_pr_with_unreviewed_commits(payload: dict[str, JsonValue]):
             )
 
         else:
-            commit_diff = get_commit_diff_for_two_commits(
+            commit_diff = get_raw_commit_diff_between_two_commits(
                 repo_owner=payload["repo_owner"],
                 repo_name=payload["repo_name"],
                 base=unreviewd_commits_result["latest_reviewed_commit"],
