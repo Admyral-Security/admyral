@@ -11,6 +11,7 @@ from admyral.actions import (
     get_raw_commit_diff_between_two_commits,
     get_commit_diff_info_between_two_commits,
     openai_chat_completion,
+    wait,
 )
 
 
@@ -354,13 +355,13 @@ def handle_pr_with_unreviewed_commits(payload: dict[str, JsonValue]):
                     run_after=[jira_issue],
                 )
 
-                # wait_res = wait(seconds = 5, run_after = [first_slack_message_result])
+                wait_res = wait(seconds=120, run_after=[first_message])
 
                 follow_up_done = follow_up_on_pr_with_unreviewed_commits(
                     pull_request=payload["pull_request"],
                     repo_owner=payload["repo_owner"],
                     repo_name=payload["repo_name"],
-                    run_after=[first_message],
+                    run_after=[wait_res],
                     secrets={"GITHUB_SECRET": "github_secret"},
                 )
 
