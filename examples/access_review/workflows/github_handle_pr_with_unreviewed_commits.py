@@ -49,8 +49,6 @@ def check_pr_for_unreviewed_commits(
         repo_owner=repo_owner, repo_name=repo_name, pr_number=pr_number
     )
 
-    print(commit_history)
-
     latest_commit = sorted(
         commit_history,
         key=lambda x: x["commit"]["committer"]["date"],
@@ -180,7 +178,7 @@ def follow_up_on_pr_with_unreviewed_commits(
     display_namespace="Utility",
     description="Analyze the analysis of a Git diff and build a slack message",
 )
-def build_slack_message_based_on_diff_summary(
+def build_slack_message_based_on_ai_decision(
     git_diff_analysis: Annotated[
         str,
         ArgumentMetadata(
@@ -212,8 +210,8 @@ def check_number_of_changes_in_git_diff(
         ),
     ],
 ) -> bool:
-    print(git_diff)
     changes = 0
+
     for changed_file in git_diff.get("files"):
         changes += changed_file.get("changes")
 
@@ -244,7 +242,7 @@ def handle_pr_with_unreviewed_commits(payload: dict[str, JsonValue]):
 
         if git_diff_is_too_large:
             jira_issue = create_jira_issue(
-                summary=f"Unreviewed commits in PR {payload["pull_request"]['html_url']}.",
+                summary=f"Unreviewed commits in merged Pull Request {payload["pull_request"]['html_url']}.",
                 project_id="10001",
                 issue_type="Bug",
                 description={
@@ -268,9 +266,8 @@ def handle_pr_with_unreviewed_commits(payload: dict[str, JsonValue]):
 
             send_slack_message_to_user_by_email(
                 email="leon@admyral.ai",
-                text=f"Unreviewed commits merged in Pull Request ({payload["pull_request"]['html_url']}).\n Jira issue created: https://christesting123.atlassian.net/browse/{jira_issue['key']} \n--------------\n",
+                text=f"Unreviewed commits in merged Pull Request ({payload["pull_request"]['html_url']}).\n Jira issue created: https://christesting123.atlassian.net/browse/{jira_issue['key']} \n--------------\n",
                 secrets={"SLACK_SECRET": "slack_secret"},
-                run_after=[jira_issue],
             )
 
         else:
@@ -315,18 +312,16 @@ def handle_pr_with_unreviewed_commits(payload: dict[str, JsonValue]):
                     2. The changes don't have to be reviewed as they only include minor changes which do not alter or add functionality of the software in any way.\
                     Here is the summary of the changes:\n{git_diff_summary}\
                     Please only answer with either 1 or 2 and nothing else.",
-                run_after=[git_diff_summary],
                 secrets={"OPENAI_SECRET": "openai_secret"},
             )
 
-            message = build_slack_message_based_on_diff_summary(
+            message = build_slack_message_based_on_ai_decision(
                 git_diff_analysis=git_diff_major_minor_change_decision,
-                run_after=[git_diff_major_minor_change_decision],
             )
 
             if message:
                 jira_issue = create_jira_issue(
-                    summary=f"Unreviewed commits in PR {payload["pull_request"]['html_url']}",
+                    summary=f"Unreviewed commits in merged Pull Request {payload["pull_request"]['html_url']}",
                     project_id="10001",
                     issue_type="Bug",
                     description={
@@ -350,9 +345,8 @@ def handle_pr_with_unreviewed_commits(payload: dict[str, JsonValue]):
 
                 first_message = send_slack_message_to_user_by_email(
                     email="leon@admyral.ai",
-                    text=f"Unreviewed commits merged in Pull Request ({payload["pull_request"]['html_url']}).\n{git_diff_summary}\n Jira issue created: https://christesting123.atlassian.net/browse/{jira_issue['key']} \n--------------\n",
+                    text=f"Unreviewed commits in merged Pull Request ({payload["pull_request"]['html_url']}).\n{git_diff_summary}\n Jira issue created: https://christesting123.atlassian.net/browse/{jira_issue['key']} \n--------------\n",
                     secrets={"SLACK_SECRET": "slack_secret"},
-                    run_after=[jira_issue],
                 )
 
                 wait_res = wait(seconds=120, run_after=[first_message])
@@ -368,7 +362,6 @@ def handle_pr_with_unreviewed_commits(payload: dict[str, JsonValue]):
                 if not follow_up_done:
                     send_slack_message_to_user_by_email(
                         email="leon@admyral.ai",
-                        text=f"There was no follow up on the PR {payload['pull_request']['html_url']} with unreviewed commits after the initial message. Please check the PR and follow up accordingly and close the Jira Ticket https://christesting123.atlassian.net/browse/{jira_issue['key']}.\n--------------\n",
+                        text=f"There was no follow up on the merged Pull Request {payload['pull_request']['html_url']} with unreviewed commits after the initial message. Please check the Pull Request, follow up accordingly and close the Jira Ticket https://christesting123.atlassian.net/browse/{jira_issue['key']}.\n--------------\n",
                         secrets={"SLACK_SECRET": "slack_secret"},
-                        run_after=[follow_up_done],
                     )
