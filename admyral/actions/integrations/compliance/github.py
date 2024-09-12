@@ -10,6 +10,7 @@ from httpx import Client
 from admyral.action import action, ArgumentMetadata
 from admyral.context import ctx
 from admyral.typings import JsonValue
+from admyral.utils.collections import is_not_empty
 
 
 def get_github_enterprise_client(access_token: str, enterprise: str) -> Client:
@@ -65,6 +66,7 @@ def search_github_enterprise_audit_logs(
         ),
     ] = None,
 ) -> list[dict[str, JsonValue]]:
+    # https://docs.github.com/en/enterprise-cloud@latest/rest/enterprise-admin/audit-log?apiVersion=2022-11-28#get-the-audit-log-for-an-enterprise
     # https://docs.github.com/en/search-github/getting-started-with-searching-on-github/understanding-the-search-syntax#query-for-dates
 
     secret = ctx.get().secrets.get("GITHUB_ENTERPRISE_SECRET")
@@ -72,17 +74,21 @@ def search_github_enterprise_audit_logs(
 
     with get_github_enterprise_client(access_token, enterprise) as client:
         params = {"order": "asc", "per_page": 100}
+
+        phrases = []
+
         if filter:
-            params["phrase"] = filter
+            phrases.append(filter)
 
         if start_time and end_time:
-            params["created"] = f"{start_time}..{end_time}"
-
+            phrases.append(f"created:{start_time}..{end_time}")
         elif start_time:
-            params["created"] = f">={start_time}"
-
+            phrases.append(f"created:>={start_time}")
         elif end_time:
-            params["created"] = f"<={end_time}"
+            phrases.append(f"created:<={end_time}")
+
+        if is_not_empty(phrases):
+            params["phrase"] = " ".join(phrases)
 
         url = "/audit-log"
         events = []
