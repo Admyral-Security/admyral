@@ -55,3 +55,20 @@ def wait(
     ],
 ) -> None:
     time.sleep(seconds)
+
+
+@action(
+    display_name="Transform",
+    display_namespace="Admyral",
+    description="Transforms a JSON.",
+)
+def transform(
+    value: Annotated[
+        JsonValue,
+        ArgumentMetadata(
+            display_name="Value",
+            description="A JSON value.",
+        ),
+    ],
+) -> JsonValue:
+    return value

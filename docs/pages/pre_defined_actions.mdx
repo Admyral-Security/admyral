@@ -142,6 +142,7 @@ The pre-defined AI Action only supports OpenAI's latest models provided by Admyr
         ```python
         from admyral.workflow import workflow
         from admyral.typings import JsonValue
+        from admyral.actions import ai_action
 
         @workflow
         def example_workflow(payload: dict[str, JsonValue]):
@@ -157,6 +158,56 @@ The pre-defined AI Action only supports OpenAI's latest models provided by Admyr
     <div align="center">
 	    <br />
 	    ![No-Code AI Action](/no_code_ai_action.png)
+    </div>
+    _No-Code Editor: AI Action_
+  </Tabs.Tab>
+</Tabs>
+
+## Transform
+
+Manipulate existing data or create new JSON within your workflows.
+
+Recommended Use Cases:
+
+-   Define constants
+-   Extract data from previous events
+-   Set up new JSON data (JSON object, array, int, float, boolean, null, string)
+
+| Parameter | Type | Description                | Required/Optional |
+| --------- | ---- | -------------------------- | ----------------- |
+| `value`   | JSON | Your constructed JSON data | Required          |
+
+<Tabs items={['Code Example', 'No-Code Example']}>
+    <Tabs.Tab>
+        ```python
+        from admyral.workflow import workflow
+        from admyral.typings import JsonValue
+        from admyral.actions import transform
+
+        @workflow
+        def example_workflow(payload: dict[str, JsonValue]):
+            # previous workflow logic incl. a request to VirusTotal saved in `virustotal`
+
+            # Define constants
+            my_constant = transform(value="constant value")
+
+            # Extract values and assign to a variable
+            key = transform(value=payload["key"])
+
+            # Build new JSON data
+            headers = transform(
+              value={
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {key}"
+              }
+            )
+        ```
+
+  </Tabs.Tab>
+  <Tabs.Tab>
+    <div align="center">
+	    <br />
+	    ![No-Code Transform](/no_code_transform.png)
     </div>
     _No-Code Editor: AI Action_
   </Tabs.Tab>
@@ -198,9 +249,9 @@ Deserializes a JSON String.
 
 Serializes JSON into a string.
 
-| Parameter    | Type | Description                    | Required/Optional |
-| ------------ | ---- | ------------------------------ | ----------------- |
-| `json_value` | str  | The object to be serialized.   | Required          |
+| Parameter    | Type | Description                  | Required/Optional |
+| ------------ | ---- | ---------------------------- | ----------------- |
+| `json_value` | str  | The object to be serialized. | Required          |
 
 **Response:** The serialized JSON string.
 

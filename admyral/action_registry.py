@@ -7,7 +7,7 @@ from admyral.action import Action
 F = TypeVar("F", bound=Callable[..., Any])
 
 
-_RESERVED_ACTION_TYPES = {"start", "end", "transform", "if_condition", "note", "python"}
+_RESERVED_ACTION_TYPES = {"start", "end", "if_condition", "note", "python"}
 
 
 class ActionRegistry(metaclass=Singleton):
