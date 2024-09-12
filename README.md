@@ -31,6 +31,11 @@ Start Admyral to access the frontend, execute workflows using Admyral's scalable
 $ admyral up
 ```
 
+> [!IMPORTANT]
+> Admyral is built with Python 3.12 and requires Docker to be installed on your machine. \
+> If you don't have Docker installed, you can download it [here](https://docs.docker.com/get-docker/). \
+> If you don't have Python 3.12 installed, you can download it [here](https://www.python.org/downloads/) or use your favorite package manager (e.g., `brew`).
+
 More instructions on self-hosting with Docker can be found [here](https://docs.admyral.dev/docker), and for the development setup, click [here](https://docs.admyral.dev/development_setup).
 
 ## Simple, reliable Security Engineering using Admyral's Python SDK

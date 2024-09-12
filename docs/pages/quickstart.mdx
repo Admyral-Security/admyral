@@ -8,8 +8,8 @@ This quickstart helps you to create your first workflow within Admyral. The work
 
 **Prerequisites**:
 
--   Python 3.12
--   Docker
+-   Python 3.12 (Download [here](https://www.python.org/downloads/) or use your favorite package manager, such as `brew`)
+-   [Docker](https://docs.docker.com/get-started/get-docker/)
 
 ## Getting Started
 
@@ -22,6 +22,20 @@ You can create your first workflow within less than 10 minutes:
 </Callout>
 
 <Steps>
+### Step 0: Verify your Setup
+
+Admyral requires Python 3.12 to be installed. You can check whether you have Python 3.12 installed by running the following:
+
+```bash
+python --version
+```
+
+Additionally, Docker must be installed and should be running. You can verify that Docker is installed and the Docker daemon is running by executing the following command:
+
+```bash
+docker ps
+```
+
 ### Step 1: Installing and Starting Admyral
 
 To install Admyral, simply install the Admyral pip package using your favorite dependency management tool:
