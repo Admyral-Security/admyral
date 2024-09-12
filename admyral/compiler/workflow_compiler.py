@@ -220,25 +220,7 @@ class WorkflowCompiler:
                     self._compile_if(statement, self.variable_to_nodes_mapping)
                 )
 
-                # Connect the if-condition node to the dependencies of the if-condition block
-                #
-                # But first, we need to remove transitive dependencies to avoid redundant edges in the DAG.
-                # Consider the following example:
-                # a = act1()
-                # b = act2(a)
-                # if a > 0 and b < 0:
-                #    ...
-                #
-                # Then, a and b are both dependencies for the if-block. But since b depends on a, we can
-                # remove the edge from a to the if-condition node because the if-condition node already
-                # implicilty depends on a due to the dependency on b.
-                #
-                # NOTE: we need to update the variable_to_nodes_mapping after we added the edges to the if-condition node
-                # because we might overwrite variables from before inside the if-condition block.
-                if_block_dependencies = self._remove_transitive_dependencies(
-                    if_block_dependencies, self.variable_to_nodes_mapping
-                )
-                # add edges to if-condition node after removing transitive dependencies
+                # Connect the if-condition node to the dependencies of the if-block
                 if len(if_block_dependencies) > 0:
                     self._connect_node_to_dependencies(
                         if_node_id,
@@ -906,6 +888,22 @@ class WorkflowCompiler:
         )
 
         # remove transitive dependencies from if_block_dependencies
+
+        # We need to remove transitive dependencies from the statements before the if-block to avoid
+        # connectng the if-block to redundant edges in the DAG.
+        #
+        # Consider the following example:
+        # a = act1()
+        # b = act2(a)
+        # if a > 0 and b < 0:
+        #    ...
+        #
+        # Then, a and b are both dependencies for the if-block. But since b depends on a, we can
+        # remove the edge from a to the if-condition node because the if-condition node already
+        # implicilty depends on a due to the dependency on b.
+        #
+        # NOTE: we need to use the initial variable_to_nodes_mapping because nested if-conditions
+        # might have overwritten the variable_to_nodes_mapping.
         if_block_dependencies = self._remove_transitive_dependencies(
             if_block_dependencies, prev_variables_to_nodes_mapping
         )
