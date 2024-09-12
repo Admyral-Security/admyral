@@ -21,6 +21,7 @@ from admyral.models import (
 from admyral.workflow import workflow, Webhook, Schedule
 from admyral.action import action, ArgumentMetadata
 from admyral.typings import JsonValue
+from admyral.actions import wait
 
 
 @action(
@@ -2627,3 +2628,210 @@ def test_workflow_without_payload_param():
         str(e.value)
         == 'Failed to compile workflow "workflow_without_payload_param" because the workflow function must have exactly one parameter called "payload" and no default value: payload: dict[str, JsonValue]'
     )
+
+
+#########################################################################################################
+
+
+@workflow
+def workflow_remove_transitive_dependencies_bug(payload: dict[str, JsonValue]):
+    """
+    Expected Workflow Graph:
+
+                <START>
+                  |
+            a = act1_dummy()
+                  |
+             if a == 1
+              True|
+            b = act5_dummy(x=a)
+                  |
+            c = act5_dummy(x=b)
+                  |
+        d = wait(seconds=1, run_after=[c])
+                  |
+        e = act5_dummy(x=c, run_after=[d])
+                  |
+              if e == 2
+              True|
+            act3_dummy(a=d, b=a)
+    """
+    a = act1_dummy()
+    if a == 1:
+        b = act5_dummy(x=a)
+        c = act5_dummy(x=b)
+        d = wait(seconds=1, run_after=[c])
+        e = act5_dummy(x=c, run_after=[d])
+        if e == 2:
+            act3_dummy(a=b, b=a)
+
+
+def test_workflow_remove_transitive_dependencies_bug():
+    expected_dag = WorkflowDAG(
+        name="workflow_remove_transitive_dependencies_bug",
+        start=WorkflowStart(triggers=[]),
+        dag={
+            "start": ActionNode(
+                id="start",
+                type="start",
+                children=["act1_dummy"],
+            ),
+            # a = act1_dummy()
+            "act1_dummy": ActionNode(
+                id="act1_dummy",
+                type="act1_dummy",
+                result_name="a",
+                children=["if"],
+            ),
+            # if a == 1
+            "if": IfNode(
+                id="if",
+                type="if_condition",
+                condition=BinaryConditionExpression(
+                    lhs=ConstantConditionExpression(value="{{ a }}"),
+                    op=BinaryOperator.EQUALS,
+                    rhs=ConstantConditionExpression(value=1),
+                ),
+                condition_str="a == 1",
+                true_children=["act5_dummy"],
+            ),
+            # b = act5_dummy(x=a)
+            "act5_dummy": ActionNode(
+                id="act5_dummy",
+                type="act5_dummy",
+                args={"x": "{{ a }}"},
+                result_name="b",
+                children=["act5_dummy_1"],
+            ),
+            # c = act5_dummy(x=b)
+            "act5_dummy_1": ActionNode(
+                id="act5_dummy_1",
+                type="act5_dummy",
+                args={"x": "{{ b }}"},
+                result_name="c",
+                children=["wait"],
+            ),
+            # d = wait(seconds=1, run_after=[c])
+            "wait": ActionNode(
+                id="wait",
+                type="wait",
+                args={"seconds": 1},
+                result_name="d",
+                children=["act5_dummy_2"],
+            ),
+            # d = act5_dummy(x=c)
+            "act5_dummy_2": ActionNode(
+                id="act5_dummy_2",
+                type="act5_dummy",
+                args={"x": "{{ c }}"},
+                result_name="e",
+                children=["if_1"],
+            ),
+            # if d == 2
+            "if_1": IfNode(
+                id="if_1",
+                type="if_condition",
+                condition=BinaryConditionExpression(
+                    lhs=ConstantConditionExpression(value="{{ e }}"),
+                    op=BinaryOperator.EQUALS,
+                    rhs=ConstantConditionExpression(value=2),
+                ),
+                condition_str="e == 2",
+                true_children=["act3_dummy"],
+            ),
+            # act3_dummy(a=b, b=a)
+            "act3_dummy": ActionNode(
+                id="act3_dummy",
+                type="act3_dummy",
+                args={"a": "{{ b }}", "b": "{{ a }}"},
+            ),
+        },
+    )
+    dag = WorkflowCompiler().compile(workflow_remove_transitive_dependencies_bug)
+    assert dag == expected_dag
+    assert WorkflowDAG.model_validate(dag.model_dump()) == expected_dag
+
+
+#########################################################################################################
+
+
+@workflow
+def workflow_remove_transitive_dependencies_bug2(payload: dict[str, JsonValue]):
+    """
+    Expected Workflow Graph:
+
+                <START>
+                  |
+            a = act1_dummy()
+                  |
+             if a == 1
+              True|
+            b = act5_dummy(x=a)
+                  |
+            c = act5_dummy(x=b)
+                  |
+            act3_dummy(a=b, b=c)
+    """
+    a = act1_dummy()
+    if a == 1:
+        b = act5_dummy(x=a)
+        c = act5_dummy(x=b)
+        act3_dummy(a=b, b=c)
+
+
+def test_workflow_remove_transitive_dependencies_bug2():
+    expected_dag = WorkflowDAG(
+        name="workflow_remove_transitive_dependencies_bug2",
+        start=WorkflowStart(triggers=[]),
+        dag={
+            "start": ActionNode(
+                id="start",
+                type="start",
+                children=["act1_dummy"],
+            ),
+            # a = act1_dummy()
+            "act1_dummy": ActionNode(
+                id="act1_dummy",
+                type="act1_dummy",
+                result_name="a",
+                children=["if"],
+            ),
+            # if a == 1
+            "if": IfNode(
+                id="if",
+                type="if_condition",
+                condition=BinaryConditionExpression(
+                    lhs=ConstantConditionExpression(value="{{ a }}"),
+                    op=BinaryOperator.EQUALS,
+                    rhs=ConstantConditionExpression(value=1),
+                ),
+                condition_str="a == 1",
+                true_children=["act5_dummy"],
+            ),
+            # b = act5_dummy(x=a)
+            "act5_dummy": ActionNode(
+                id="act5_dummy",
+                type="act5_dummy",
+                args={"x": "{{ a }}"},
+                result_name="b",
+                children=["act5_dummy_1"],
+            ),
+            # c = act5_dummy(x=b)
+            "act5_dummy_1": ActionNode(
+                id="act5_dummy_1",
+                type="act5_dummy",
+                args={"x": "{{ b }}"},
+                result_name="c",
+                children=["act3_dummy"],
+            ),
+            # act3_dummy(a=b, b=c)
+            "act3_dummy": ActionNode(
+                id="act3_dummy",
+                type="act3_dummy",
+                args={"a": "{{ b }}", "b": "{{ c }}"},
+            ),
+        },
+    )
+    dag = WorkflowCompiler().compile(workflow_remove_transitive_dependencies_bug2)
+    assert dag == expected_dag
+    assert WorkflowDAG.model_validate(dag.model_dump()) == expected_dag

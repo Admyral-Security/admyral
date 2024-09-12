@@ -180,7 +180,7 @@ async def test_missing_custom_action(store: AdmyralStore):
 
 @workflow
 def workflow_test_wait_action(payload: dict[str, JsonValue]):
-    wait(seconds=10)
+    wait(seconds=3)
 
 
 @pytest.mark.asyncio
@@ -201,4 +201,4 @@ async def test_wait_action(store: AdmyralStore):
 
     assert exception is None
     assert run.failed_at is None
-    assert end - start >= 10
+    assert end - start >= 3

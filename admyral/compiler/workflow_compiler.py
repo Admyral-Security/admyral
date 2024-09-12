@@ -882,13 +882,14 @@ class WorkflowCompiler:
         if_ast: ast.If,
         variable_to_nodes_mapping: dict[str, list[tuple[str, EdgeType]]],
     ) -> tuple[int, set[str], list[tuple[str, EdgeType]], set[str]]:
+        prev_variables_to_nodes_mapping = deepcopy(variable_to_nodes_mapping)
+
         # compile condition + collect dependencies from the condition
         if_condition, if_block_dependencies = self._compile_condition_expression(
             if_ast.test
         )
         if_condition_str = condition_to_str(if_ast.test)
 
-        # TODO: better name for if-condition node
         if_node_id = self._compute_unique_node_id("if")
         if_node = IfNode(
             id=if_node_id, condition=if_condition, condition_str=if_condition_str
@@ -902,6 +903,11 @@ class WorkflowCompiler:
         # Compile false branch
         if_block_dependencies |= self._compile_if_branch(
             if_ast.orelse, variable_to_nodes_mapping, if_node.add_false_edge
+        )
+
+        # remove transitive dependencies from if_block_dependencies
+        if_block_dependencies = self._remove_transitive_dependencies(
+            if_block_dependencies, prev_variables_to_nodes_mapping
         )
 
         # Collect leaf nodes and emitted variables from if-condition block

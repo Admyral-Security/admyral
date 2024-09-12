@@ -84,7 +84,7 @@ def test_example_workflow_execution():
 
 @workflow
 def wait_workflow(payload: dict[str, JsonValue]):
-    wait(seconds=10)
+    wait(seconds=3)
 
 
 def test_wait_workflow_execution():
@@ -92,7 +92,7 @@ def test_wait_workflow_execution():
     wait_workflow({})
     end = time.time()
 
-    assert end - start >= 10
+    assert end - start >= 3
 
 
 # @action
