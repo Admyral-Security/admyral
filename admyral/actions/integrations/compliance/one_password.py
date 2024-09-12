@@ -62,6 +62,8 @@ def list_1password_audit_events(
         ),
     ] = None,
 ) -> list[dict[str, JsonValue]]:
+    # https://developer.1password.com/docs/events-api/reference#post-apiv1auditevents
+
     secret = ctx.get().secrets.get("1PASSWORD_SECRET")
     api_key = secret["api_key"]
     domain = secret["domain"]
@@ -74,10 +76,12 @@ def list_1password_audit_events(
         }
         if start_time:
             body["start_time"] = (
-                start_time[:-1] if start_time.endswith("Z") else start_time
+                f"{start_time[:-1]}+00:00" if start_time.endswith("Z") else start_time
             )
         if end_time:
-            body["end_time"] = end_time[:-1] if end_time.endswith("Z") else end_time
+            body["end_time"] = (
+                f"{end_time[:-1]}+00:00" if end_time.endswith("Z") else end_time
+            )
 
         while limit is None or len(events) < limit:
             client_response = client.post("/api/v1/auditevents", json=body)
