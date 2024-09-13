@@ -22,6 +22,7 @@ with workflow.unsafe.imports_passed_through():
     from admyral.action_registry import ActionRegistry
     from admyral.workers.references import evaluate_references
     from admyral.workers.if_condition_executor import ConditionReferenceResolution
+    from admyral.utils.collections import is_not_empty
 
 
 logger = get_logger(__name__)
@@ -97,13 +98,21 @@ class WorkflowExecutor:
 
         eliminated_nodes = set()
         resolved_dependencies = defaultdict(int)
-        number_of_executed_actions = 0
+
+        number_of_running_tasks = 0
 
         job_queue = asyncio.Queue()
+        job_queue_length = 0
+
+        async def push_job(job: JobQueueEntry | None):
+            nonlocal job_queue_length
+            job_queue_length += 1
+            await job_queue.put(job)
+
         exception_queue = asyncio.Queue()
 
         async def task(action_id: str, prev_step_id: str):
-            nonlocal number_of_executed_actions
+            nonlocal number_of_running_tasks
             nonlocal eliminated_nodes
             nonlocal resolved_dependencies
 
@@ -119,8 +128,6 @@ class WorkflowExecutor:
                 }
 
                 logger.info(f"Executing action: {action_id}")
-
-                number_of_executed_actions += 1
 
                 # execution
                 if isinstance(node, IfNode):
@@ -158,30 +165,32 @@ class WorkflowExecutor:
                         child_id not in eliminated_nodes
                         and resolved_dependencies[child_id] == in_deg[child_id]
                     ):
-                        await job_queue.put(
+                        await push_job(
                             JobQueueEntry(action_id=child_id, prev_step_id=step_id)
                         )
 
-                # if now all tasks were scheduled, notify main execution loop that we are now done
-                if number_of_executed_actions + len(eliminated_nodes) == len(
-                    params.workflow.workflow_dag.dag
-                ):
-                    await job_queue.put(None)
-
             except Exception as e:
                 logger.error(f"Error executing task: {action_id}. Exception: {e}")
-                await job_queue.put(None)
+                await push_job(None)
                 await exception_queue.put(e)
 
-            job_queue.task_done()
+            finally:
+                number_of_running_tasks -= 1
+                if job_queue_length == 0:
+                    await push_job(None)
+
+                job_queue.task_done()
 
         # job trigger loop
-        await job_queue.put(JobQueueEntry(action_id="start", prev_step_id=None))
+        await push_job(JobQueueEntry(action_id="start", prev_step_id=None))
 
         exception = None
         async with asyncio.TaskGroup() as tg:
-            while True:
+            # we run the scheduling loop until all tasks are completed and no
+            # more task needs to be executed.
+            while job_queue_length > 0 or number_of_running_tasks > 0:
                 job = await job_queue.get()
+                job_queue_length -= 1
 
                 # Check for exceptions
                 try:
@@ -193,12 +202,13 @@ class WorkflowExecutor:
                     pass
 
                 if job is None:
-                    break
+                    continue
 
                 # launch new task
                 logger.info(
                     f"Scheduling action: {job.action_id}"
                 )  # TODO: better log message
+                number_of_running_tasks += 1
                 tg.create_task(task(job.action_id, job.prev_step_id))
 
         if exception:
