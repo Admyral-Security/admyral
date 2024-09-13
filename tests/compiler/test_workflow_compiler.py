@@ -2835,3 +2835,69 @@ def test_workflow_remove_transitive_dependencies_bug2():
     dag = WorkflowCompiler().compile(workflow_remove_transitive_dependencies_bug2)
     assert dag == expected_dag
     assert WorkflowDAG.model_validate(dag.model_dump()) == expected_dag
+
+
+#########################################################################################################
+
+
+@workflow
+def workflow_use_variable_only_emitted_by_one_branch(payload: dict[str, JsonValue]):
+    """
+    Expected Workflow Graph:
+
+                <START>
+                  |
+             if payload["a"] == 1
+            True/           \False
+    b = act1_dummy()        |
+                  \        /
+                act5_dummy(x=b)
+
+    Note: should pass None to act5_dummy if the condition is False
+    """
+    if payload["a"] == 1:
+        b = act1_dummy()
+    act5_dummy(x=b)
+
+
+def test_workflow_use_variable_only_emitted_by_one_branch():
+    expected_dag = WorkflowDAG(
+        name="workflow_use_variable_only_emitted_by_one_branch",
+        start=WorkflowStart(triggers=[]),
+        dag={
+            "start": ActionNode(
+                id="start",
+                type="start",
+                children=["if"],
+            ),
+            # if payload["a] == 1
+            "if": IfNode(
+                id="if",
+                type="if_condition",
+                condition=BinaryConditionExpression(
+                    lhs=ConstantConditionExpression(value="{{ payload['a'] }}"),
+                    op=BinaryOperator.EQUALS,
+                    rhs=ConstantConditionExpression(value=1),
+                ),
+                condition_str="payload['a'] == 1",
+                true_children=["act1_dummy"],
+                false_children=["act5_dummy"],
+            ),
+            # b = act1_dummy()
+            "act1_dummy": ActionNode(
+                id="act1_dummy",
+                type="act1_dummy",
+                result_name="b",
+                children=["act5_dummy"],
+            ),
+            # act5_dummy(x=b)
+            "act5_dummy": ActionNode(
+                id="act5_dummy",
+                type="act5_dummy",
+                args={"x": "{{ b }}"},
+            ),
+        },
+    )
+    dag = WorkflowCompiler().compile(workflow_use_variable_only_emitted_by_one_branch)
+    assert dag == expected_dag
+    assert WorkflowDAG.model_validate(dag.model_dump()) == expected_dag
