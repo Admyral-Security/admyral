@@ -17,8 +17,8 @@ from admyral.actions import (
 )
 def get_time_range_of_last_full_hour() -> tuple[str, str]:
     end_time = datetime.now(UTC).replace(minute=0, second=0, microsecond=0)
-    start_time = (end_time - timedelta(hours=1)).isoformat() + "Z"
-    return (start_time, end_time.isoformat() + "Z")
+    start_time = (end_time - timedelta(hours=1)).isoformat().replace("+00:00", "Z")
+    return (start_time, end_time.isoformat().replace("+00:00", "Z"))
 
 
 @action(
