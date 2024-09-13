@@ -1,27 +1,31 @@
 from typing import Annotated
+from dateutil import parser
 
 from admyral.workflow import workflow, Webhook
 from admyral.typings import JsonValue
 from admyral.action import action, ArgumentMetadata
 from admyral.actions import (
-    list_commit_history_for_pr,
-    list_review_history_for_pr,
+    list_commit_history_for_pull_request,
+    list_review_history_for_pull_request,
     send_slack_message_to_user_by_email,
+    send_slack_message,
     create_jira_issue,
-    get_raw_commit_diff_between_two_commits,
-    get_commit_diff_info_between_two_commits,
+    compare_two_github_commits,
     openai_chat_completion,
     wait,
+    transform,
 )
+from admyral.utils.collections import is_empty
 
 
 @action(
-    display_name="Check PR for unreviewed commits",
+    display_name="Check if PR has unreviewed commits",
     display_namespace="GitHub",
     description="Check PR for commits after last approval",
     secrets_placeholders=["GITHUB_SECRET"],
+    requirements=["dateutil"],
 )
-def check_pr_for_unreviewed_commits(
+def has_pr_unreviewed_commits(
     pull_request: Annotated[
         dict[str, JsonValue],
         ArgumentMetadata(
@@ -44,164 +48,66 @@ def check_pr_for_unreviewed_commits(
         ),
     ],
 ) -> dict[str, JsonValue]:
-    pr_number = pull_request.get("number")
-    commit_history = list_commit_history_for_pr(
-        repo_owner=repo_owner, repo_name=repo_name, pr_number=pr_number
-    )
-
-    latest_commit = sorted(
-        commit_history,
-        key=lambda x: x["commit"]["committer"]["date"],
-        reverse=True,
-    )[0]
-
-    approval_history = list_review_history_for_pr(
+    commit_history = list_commit_history_for_pull_request(
         repo_owner=repo_owner,
         repo_name=repo_name,
-        pr_number=pr_number,
-        state="APPROVED",
+        pull_request_number=pull_request["number"],
     )
 
-    # If there are no approvals, the latest approved commit is the last commit on the branch from which the PR was created
-    if not approval_history:
-        latest_approval_id = pull_request.get("base").get("sha")
-    else:
-        latest_approval = approval_history[0]
-        latest_approval_id = latest_approval.get("commit_id")
+    if is_empty(commit_history):
+        return {"has_unreviewed_commits": False}
 
-    latest_commit_id = latest_commit.get("sha")
+    # Identify the latest commit
+    last_commit = sorted(
+        commit_history,
+        key=lambda x: parser.parse(x["commit"]["committer"]["date"]),
+        reverse=True,
+    )[0]
+    last_commit_id = last_commit["sha"]
 
-    if latest_commit_id != latest_approval_id:
+    # Identify the last approved commit
+    approval_history = list_review_history_for_pull_request(
+        repo_owner=repo_owner,
+        repo_name=repo_name,
+        pull_request_number=pull_request["number"],
+        state="APPROVED",
+    )
+    approval_history = sorted(
+        approval_history, key=lambda x: parser.parse(x["submitted_at"]), reverse=True
+    )
+
+    # filter out self-approvals
+    # => we only disallow self-approvals of the user who created the PR
+    approval_history = [
+        approval
+        for approval in approval_history
+        if approval["user"]["login"] != pull_request["user"]["login"]
+    ]
+
+    if is_empty(approval_history):
         return {
             "has_unreviewed_commits": True,
-            "latest_commit_id": latest_commit_id,
-            "latest_reviewed_commit": latest_approval_id,
+            "last_commit_id": last_commit_id,
+            "last_approved_commit_id": pull_request["base"]["sha"],
+        }
+
+    last_approved_commit_id = approval_history[0]["commit_id"]
+    if last_approved_commit_id != last_commit_id:
+        return {
+            "has_unreviewed_commits": True,
+            "last_commit_id": last_commit_id,
+            "last_approved_commit_id": last_approved_commit_id,
         }
 
     return {"has_unreviewed_commits": False}
 
 
 @action(
-    display_name="Follow up on PR with Unreviewed Commits",
+    display_name="Count Number of Changes in Git Diff",
     display_namespace="GitHub",
-    description="Follow up on PR with unreviewed commits",
-    secrets_placeholders=["GITHUB_SECRET"],
+    description="Count the number of changes in a git diff",
 )
-def follow_up_on_pr_with_unreviewed_commits(
-    pull_request: Annotated[
-        dict[str, JsonValue],
-        ArgumentMetadata(
-            display_name="Merged Pull Request",
-            description="Pull request of interest",
-        ),
-    ],
-    repo_owner: Annotated[
-        str,
-        ArgumentMetadata(
-            display_name="Repository Owner",
-            description="The owner of the repository",
-        ),
-    ],
-    repo_name: Annotated[
-        str,
-        ArgumentMetadata(
-            display_name="Repository Name",
-            description="The name of the repository",
-        ),
-    ],
-) -> bool:
-    pr_number = pull_request.get("number")
-    approval_history = sorted(
-        list_review_history_for_pr(
-            repo_owner=repo_owner,
-            repo_name=repo_name,
-            pr_number=pr_number,
-            state="APPROVED",
-        ),
-        key=lambda x: x["submitted_at"],
-        reverse=True,
-    )
-
-    if approval_history:
-        latest_approval = approval_history[0]
-        date_of_last_review = latest_approval.get("submitted_at")
-    else:
-        date_of_last_review = pull_request.get("created_at")
-
-    commit_history = list_commit_history_for_pr(
-        repo_owner=repo_owner, repo_name=repo_name, pr_number=pr_number
-    )
-    unreviewd_commit_history = [
-        commit
-        for commit in commit_history
-        if commit.get("commit").get("committer").get("date") > date_of_last_review
-    ]
-
-    excluded_reviewers = []
-
-    for assigne in pull_request.get("assignees"):
-        person = assigne.get("login")
-        if person not in excluded_reviewers:
-            excluded_reviewers.append(assigne.get("login"))
-    for commit in unreviewd_commit_history:
-        committer = commit.get("committer").get("id")
-        author = commit.get("author").get("id")
-        if committer not in excluded_reviewers:
-            excluded_reviewers.append(committer)
-        if author not in excluded_reviewers:
-            excluded_reviewers.append(author)
-
-    review_history = list_review_history_for_pr(
-        repo_owner=repo_owner, repo_name=repo_name, pr_number=pr_number, state=None
-    )
-
-    merged_at = pull_request.get("merged_at")
-
-    # TODO: After merge, or after the latest commit?
-    review_history_after_merge = [
-        review for review in review_history if review.get("submitted_at") > merged_at
-    ]
-
-    for review in review_history_after_merge:
-        user_info = review.get("user")
-        if (
-            user_info.get("id") not in excluded_reviewers
-            or user_info.get("login") not in excluded_reviewers
-        ):
-            return True
-        else:
-            return False
-
-
-@action(
-    display_name="Build Slack Message Based on Git Diff Analysis",
-    display_namespace="Utility",
-    description="Analyze the analysis of a Git diff and build a slack message",
-)
-def build_slack_message_based_on_ai_decision(
-    git_diff_analysis: Annotated[
-        str,
-        ArgumentMetadata(
-            display_name="Git Diff Analysis",
-            description="Analysis of a Git diff",
-        ),
-    ],
-) -> str:
-    message = ""
-
-    if git_diff_analysis.startswith("1"):
-        message += "Major changes detected:\n"
-        message += f"Summary of the changes: {git_diff_analysis}\n"
-
-    return message
-
-
-@action(
-    display_name="Check Number of Changes in Git Diff",
-    display_namespace="GitHub",
-    description="Check if the git diff is too large to be interpreted by the AI",
-)
-def check_number_of_changes_in_git_diff(
+def count_number_of_changes_in_git_diff(
     git_diff: Annotated[
         dict[str, JsonValue],
         ArgumentMetadata(
@@ -209,18 +115,13 @@ def check_number_of_changes_in_git_diff(
             description="The git diff to be checked",
         ),
     ],
-) -> bool:
-    changes = 0
-
-    for changed_file in git_diff.get("files"):
-        changes += changed_file.get("changes")
-
-    return changes > 50
+) -> int:
+    return sum(map(lambda file: file["changes"], git_diff["files"]))
 
 
 @workflow(description="Handle PR with unreviewed commits", triggers=[Webhook()])
 def handle_pr_with_unreviewed_commits(payload: dict[str, JsonValue]):
-    unreviewd_commits_result = check_pr_for_unreviewed_commits(
+    unreviewd_commits_result = has_pr_unreviewed_commits(
         pull_request=payload["pull_request"],
         repo_owner=payload["repo_owner"],
         repo_name=payload["repo_name"],
@@ -228,54 +129,27 @@ def handle_pr_with_unreviewed_commits(payload: dict[str, JsonValue]):
     )
 
     if unreviewd_commits_result["has_unreviewed_commits"]:
-        commit_diff_info = get_commit_diff_info_between_two_commits(
+        commit_diff_info = compare_two_github_commits(
             repo_owner=payload["repo_owner"],
             repo_name=payload["repo_name"],
-            base=unreviewd_commits_result["latest_reviewed_commit"],
-            head=unreviewd_commits_result["latest_commit_id"],
+            base=unreviewd_commits_result["last_approved_commit_id"],
+            head=unreviewd_commits_result["last_commit_id"],
+            diff_type="json",
             secrets={"GITHUB_SECRET": "github_secret"},
         )
 
-        git_diff_is_too_large = check_number_of_changes_in_git_diff(
+        line_changes_count = count_number_of_changes_in_git_diff(
             git_diff=commit_diff_info
         )
 
-        if git_diff_is_too_large:
-            jira_issue = create_jira_issue(
-                summary=f"Unreviewed commits in merged Pull Request {payload["pull_request"]['html_url']}.",
-                project_id="10001",
-                issue_type="Bug",
-                description={
-                    "content": [
-                        {
-                            "content": [
-                                {
-                                    "text": "Unreviewed changes with too many changes. Please review manually.",
-                                    "type": "text",
-                                }
-                            ],
-                            "type": "paragraph",
-                        },
-                    ],
-                    "type": "doc",
-                    "version": 1,
-                },
-                priority="High",
-                secrets={"JIRA_SECRET": "jira_secret"},
-            )
-
-            send_slack_message_to_user_by_email(
-                email="leon@admyral.ai",
-                text=f"Unreviewed commits in merged Pull Request ({payload["pull_request"]['html_url']}).\n Jira issue created: https://christesting123.atlassian.net/browse/{jira_issue['key']} \n--------------\n",
-                secrets={"SLACK_SECRET": "slack_secret"},
-            )
-
-        else:
-            commit_diff = get_raw_commit_diff_between_two_commits(
+        if line_changes_count < 50:
+            # Perform classification of the git diff changes
+            commit_diff = compare_two_github_commits(
                 repo_owner=payload["repo_owner"],
                 repo_name=payload["repo_name"],
-                base=unreviewd_commits_result["latest_reviewed_commit"],
-                head=unreviewd_commits_result["latest_commit_id"],
+                base=unreviewd_commits_result["last_approved_commit_id"],
+                head=unreviewd_commits_result["last_commit_id"],
+                diff_type="diff",
                 secrets={"GITHUB_SECRET": "github_secret"},
             )
 
@@ -302,7 +176,7 @@ def handle_pr_with_unreviewed_commits(payload: dict[str, JsonValue]):
                 secrets={"OPENAI_SECRET": "openai_secret"},
             )
 
-            git_diff_major_minor_change_decision = openai_chat_completion(
+            is_major_change = openai_chat_completion(
                 model="gpt-4o",
                 prompt=f"You are an expert software engineer and should interpret summaries of git diffs, if there were major or only minor changes.\
                     Major changes would be adding a new feature or changing the functionality of an existing feature, hence potentially breaking changes.\
@@ -311,57 +185,75 @@ def handle_pr_with_unreviewed_commits(payload: dict[str, JsonValue]):
                     1. The changes should get reviewed as they include potentially breaking changes or alter the functionality of the code.\
                     2. The changes don't have to be reviewed as they only include minor changes which do not alter or add functionality of the software in any way.\
                     Here is the summary of the changes:\n{git_diff_summary}\
-                    Please only answer with either 1 or 2 and nothing else.",
+                    Please only answer with either 1 or 2 followed by \n and nothing else.",
+                stop_tokens=["\n"],
                 secrets={"OPENAI_SECRET": "openai_secret"},
             )
+        else:
+            # The diff is too large, hence, we have a major change
+            is_major_change = transform(value="1")
 
-            message = build_slack_message_based_on_ai_decision(
-                git_diff_analysis=git_diff_major_minor_change_decision,
+        if is_major_change == "1":
+            jira_issue = create_jira_issue(
+                summary=f"Unreviewed commits were merged. Pull Request: {payload["pull_request"]["title"]}",
+                project_id="10001",  # TODO: set your project id here
+                issue_type="Bug",
+                description={
+                    "content": [
+                        {
+                            "content": [
+                                {
+                                    "text": f"Title: {payload['pull_request']['title']}\n\
+                                        Description: {payload['pull_request']['body']}\n\
+                                        Repository: {payload['repo_owner']}/{payload['repo_name']}\n\
+                                        User: {payload['pull_request']['user']['login']}\n\
+                                        Link: {payload['pull_request']['html_url']}\n\
+                                        Closed At: {payload['pull_request']['closed_at']}\n",
+                                    "type": "text",
+                                }
+                            ],
+                            "type": "paragraph",
+                        },
+                    ],
+                    "type": "doc",
+                    "version": 1,
+                },
+                priority="High",
+                secrets={"JIRA_SECRET": "jira_secret"},
             )
 
-            if message:
-                jira_issue = create_jira_issue(
-                    summary=f"Unreviewed commits in merged Pull Request {payload["pull_request"]['html_url']}",
-                    project_id="10001",
-                    issue_type="Bug",
-                    description={
-                        "content": [
-                            {
-                                "content": [
-                                    {
-                                        "text": f"AI Summary: {git_diff_summary}",
-                                        "type": "text",
-                                    }
-                                ],
-                                "type": "paragraph",
-                            },
-                        ],
-                        "type": "doc",
-                        "version": 1,
-                    },
-                    priority="High",
-                    secrets={"JIRA_SECRET": "jira_secret"},
-                )
+            # Send to an alert channel
+            first_message = send_slack_message(
+                channel_id="C06QP0KV1L2",  # TODO: set your slack channel here
+                # TODO: set your Jira URL in the test message
+                text=f"Unreviewed commits were merged. \n \
+                    Pull Request: {payload["pull_request"]["title"]} \n \
+                    {payload["pull_request"]["html_url"]} \n\
+                    User: {payload['pull_request']['user']['login']}\n\
+                    Jira issue : https://admyral.atlassian.net/browse/{jira_issue["key"]} \n\
+                    \n \
+                    Please let the changes be reviewed by a peer within the next 24 hours and close the ticket after the review.",
+                secrets={"SLACK_SECRET": "slack_secret"},
+            )
 
-                first_message = send_slack_message_to_user_by_email(
-                    email="leon@admyral.ai",
-                    text=f"Unreviewed commits in merged Pull Request ({payload["pull_request"]['html_url']}).\n{git_diff_summary}\n Jira issue created: https://christesting123.atlassian.net/browse/{jira_issue['key']} \n--------------\n",
+            wait_res = wait(
+                seconds=120, run_after=[first_message]
+            )  # TODO: configure your wait time here
+
+            # check again whether there are still unreviewed commits
+            unreviewd_commits_result = has_pr_unreviewed_commits(
+                pull_request=payload["pull_request"],
+                repo_owner=payload["repo_owner"],
+                repo_name=payload["repo_name"],
+                secrets={"GITHUB_SECRET": "github_secret"},
+                run_after=[wait_res],
+            )
+
+            if unreviewd_commits_result["has_unreviewed_commits"]:
+                # Send message to compliance manager
+                send_slack_message_to_user_by_email(
+                    email="daniel@admyral.dev",  # TODO: set your email here
+                    text=f"ATTENTION: There was no follow up on the merged unreviewed commits of pull request {payload['pull_request']['title']}.\n \
+                            Jira Ticket: https://admyral.atlassian.net/browse/{jira_issue['key']}.",  # TODO: set your Jira URL here
                     secrets={"SLACK_SECRET": "slack_secret"},
                 )
-
-                wait_res = wait(seconds=120, run_after=[first_message])
-
-                follow_up_done = follow_up_on_pr_with_unreviewed_commits(
-                    pull_request=payload["pull_request"],
-                    repo_owner=payload["repo_owner"],
-                    repo_name=payload["repo_name"],
-                    run_after=[wait_res],
-                    secrets={"GITHUB_SECRET": "github_secret"},
-                )
-
-                if not follow_up_done:
-                    send_slack_message_to_user_by_email(
-                        email="leon@admyral.ai",
-                        text=f"There was no follow up on the merged Pull Request {payload['pull_request']['html_url']} with unreviewed commits after the initial message. Please check the Pull Request, follow up accordingly and close the Jira Ticket https://christesting123.atlassian.net/browse/{jira_issue['key']}.\n--------------\n",
-                        secrets={"SLACK_SECRET": "slack_secret"},
-                    )
