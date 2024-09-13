@@ -2,6 +2,7 @@ from typing import TYPE_CHECKING, TypeVar, Callable, Any
 from temporalio import activity
 import inspect
 from uuid import uuid4
+import time
 
 from admyral.context import ExecutionContext
 from admyral.utils.json import throw_if_not_allowed_return_type
@@ -44,7 +45,13 @@ def action_executor(action_type: str, func: "F") -> "F":
                 ctx.set(exec_ctx)
                 # for wait actions, we skip the function call because the waiting is already executed in the WorkflowExecutor
                 if exec_ctx.action_type != "wait":
+                    logger.info(f"Executing {action_type}...")
+                    start = time.time()
                     result = await func(**args)
+                    end = time.time()
+                    logger.info(
+                        f"Finished execution of {action_type} (async) in {int((end - start) * 1000)}ms"
+                    )
                 else:
                     result = None
                 throw_if_not_allowed_return_type(result)
@@ -84,7 +91,13 @@ def action_executor(action_type: str, func: "F") -> "F":
 
                 # for wait actions, we skip the function call because the waiting is already executed in the WorkflowExecutor
                 if exec_ctx.action_type != "wait":
+                    logger.info(f"Executing {action_type}...")
+                    start = time.time()
                     result = func(**args)
+                    end = time.time()
+                    logger.info(
+                        f"Finished execution of {action_type} (sync) in {int((end - start) * 1000)}ms"
+                    )
                 else:
                     result = None
                 throw_if_not_allowed_return_type(result)
