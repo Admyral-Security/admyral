@@ -60,15 +60,10 @@ from admyral.actions.integrations.compliance import (
     list_groups_per_user,
     list_1password_audit_events,
     search_github_enterprise_audit_logs,
-)
-
-from admyral.actions.integrations.compliance.github import (
-    list_merged_prs,
-    list_commit_history_for_pr,
-    list_review_history_for_pr,
-    list_commits,
-    get_raw_commit_diff_between_two_commits,
-    get_commit_diff_info_between_two_commits,
+    list_merged_pull_requests,
+    list_commit_history_for_pull_request,
+    list_review_history_for_pull_request,
+    compare_two_github_commits,
 )
 
 
@@ -116,10 +111,8 @@ __all__ = [
     "okta_get_all_user_types",
     "get_okta_logs",
     "search_github_enterprise_audit_logs",
-    "list_merged_prs",
-    "list_commit_history_for_pr",
-    "list_review_history_for_pr",
-    "list_commits",
-    "get_raw_commit_diff_between_two_commits",
-    "get_commit_diff_info_between_two_commits",
+    "list_merged_pull_requests",
+    "list_commit_history_for_pull_request",
+    "list_review_history_for_pull_request",
+    "compare_two_github_commits",
 ]

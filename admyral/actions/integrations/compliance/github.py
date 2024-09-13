@@ -4,8 +4,9 @@ Follow setup instruction from the github documentation to create personal access
 https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token
 """
 
-from typing import Annotated, Literal
+from typing import Annotated, Literal, Union
 from httpx import Client
+from dateutil import parser
 
 from admyral.action import action, ArgumentMetadata
 from admyral.context import ctx
@@ -20,6 +21,47 @@ def get_github_enterprise_client(access_token: str, enterprise: str) -> Client:
             "Accept": "application/vnd.github.v3+json",
         },
     )
+
+
+def get_github_client(access_token: str) -> Client:
+    return Client(
+        base_url="https://api.github.com",
+        headers={
+            "Authorization": f"Bearer {access_token}",
+            "Accept": "application/vnd.github.v3+json",
+        },
+    )
+
+
+def _get_events_with_pagination(
+    client: Client,
+    url: str,
+    params: dict,
+    limit: int | None = None,
+    event_filter_fn: Union[callable, None] = None,
+    early_stop_fn: Union[callable, None] = None,
+) -> list[dict[str, JsonValue]]:
+    events = []
+    while limit is None or len(events) < limit:
+        response = client.get(url, params=params)
+        response.raise_for_status()
+        events_on_page = response.json()
+
+        if event_filter_fn:
+            events.extend(filter(event_filter_fn, events_on_page))
+        else:
+            events.extend(events_on_page)
+
+        if early_stop_fn and early_stop_fn(events_on_page):
+            break
+
+        if "next" in response.links:
+            url = response.links["next"]["url"][len(str(client.base_url)) :]
+            params = None
+        else:
+            break
+
+    return events
 
 
 @action(
@@ -84,77 +126,23 @@ def search_github_enterprise_audit_logs(
         elif end_time:
             params["created"] = f"<={end_time}"
 
-        url = "/audit-log"
-        events = []
-        while limit is None or len(events) < limit:
-            response = client.get(
-                url,
-                params=params,
-            )
-            response.raise_for_status()
-            events.extend(response.json())
-
-            if "next" in response.links:
-                url = response.links["next"]["url"][len(str(client.base_url)) :]
-                params = None
-            else:
-                break
+        events = _get_events_with_pagination(
+            client=client,
+            url="/audit-log",
+            params=params,
+            limit=limit,
+        )
 
         return events if limit is None else events[:limit]
 
 
-def get_github_client(access_token: str) -> Client:
-    return Client(
-        base_url="https://api.github.com",
-        headers={
-            "Authorization": f"Bearer {access_token}",
-            "Accept": "application/vnd.github.v3+json",
-        },
-    )
-
-
-def _get_events_with_pagination(
-    client: Client,
-    url: str,
-    params: dict,
-    limit: int,
-    start_time: str = "",
-    end_time: str = "",
-    date_field: str = "",
-) -> list[dict[str, JsonValue]]:
-    events = []
-    while limit is None or len(events) < limit:
-        response = client.get(url, params=params)
-        response.raise_for_status()
-        events_on_page = response.json()
-
-        if start_time and end_time and date_field:
-            for event in events_on_page:
-                if start_time <= event[date_field] <= end_time:
-                    events.append(event)
-                if limit:
-                    if len(events) >= limit:
-                        break
-
-        else:
-            events.extend(events_on_page)
-
-        if "next" in response.links:
-            url = response.links["next"]["url"][len(str(client.base_url)) :]
-            params = None
-        else:
-            break
-
-    return events
-
-
 @action(
-    display_name="Get Commit Diff Info Between Two Commits",
+    display_name="Compare Two GitHub Commits",
     display_namespace="GitHub",
     description="Get the commit diff info between two commits.",
     secrets_placeholders=["GITHUB_SECRET"],
 )
-def get_commit_diff_info_between_two_commits(
+def compare_two_github_commits(
     repo_owner: Annotated[
         str,
         ArgumentMetadata(
@@ -183,6 +171,15 @@ def get_commit_diff_info_between_two_commits(
             description="The head commit (commit ID or SHA)",
         ),
     ],
+    diff_type: Annotated[
+        Literal["json", "diff"],
+        ArgumentMetadata(
+            display_name="Diff Type",
+            description="The type of diff to return. 'json' returns the diff as JSON. "
+            "'diff' returns the diff as string in the same format as the CLI command "
+            "git diff BASE..HEAD. Default: 'json'.",
+        ),
+    ] = "json",
 ) -> dict[str, JsonValue]:
     # https://docs.github.com/en/rest/commits/commits?apiVersion=2022-11-28#compare-two-commits
 
@@ -192,6 +189,21 @@ def get_commit_diff_info_between_two_commits(
     with get_github_client(access_token=access_token) as client:
         url = f"/repos/{repo_owner}/{repo_name}/compare/{base}...{head}"
 
+        if diff_type == "diff":
+            headers = {"Accept": "application/vnd.github.v3.diff"}
+            diff = ""
+            while True:
+                response = client.get(url, headers=headers)
+                response.raise_for_status()
+                diff += response.text
+
+                if "next" in response.links:
+                    url = response.links["next"]["url"][len(str(client.base_url)) :]
+                else:
+                    break
+
+            return diff
+
         response = client.get(url)
         response.raise_for_status()
 
@@ -199,71 +211,12 @@ def get_commit_diff_info_between_two_commits(
 
 
 @action(
-    display_name="Get Raw Commit Diff between Two Commits",
+    display_name="List Merged Pull Requests for a Repository",
     display_namespace="GitHub",
-    description="Get the raw commit diff between two commits.",
+    description="List all merged pull requests for a repository.",
     secrets_placeholders=["GITHUB_SECRET"],
 )
-def get_raw_commit_diff_between_two_commits(
-    repo_owner: Annotated[
-        str,
-        ArgumentMetadata(
-            display_name="Repository Owner",
-            description="The owner of the repository",
-        ),
-    ],
-    repo_name: Annotated[
-        str,
-        ArgumentMetadata(
-            display_name="Repository Name",
-            description="The name of the repository",
-        ),
-    ],
-    base: Annotated[
-        str,
-        ArgumentMetadata(
-            display_name="Base",
-            description="The base commit (commit ID or SHA)",
-        ),
-    ],
-    head: Annotated[
-        str,
-        ArgumentMetadata(
-            display_name="Head",
-            description="The head commit (commit ID or SHA)",
-        ),
-    ],
-) -> str:
-    # https://docs.github.com/en/rest/commits/commits?apiVersion=2022-11-28#compare-two-commits
-
-    secret = ctx.get().secrets.get("GITHUB_SECRET")
-    access_token = secret["access_token"]
-
-    with get_github_client(access_token=access_token) as client:
-        headers = {"Accept": "application/vnd.github.v3.diff"}
-        url = f"/repos/{repo_owner}/{repo_name}/compare/{base}...{head}"
-
-        diff = ""
-        while True:
-            response = client.get(url, headers=headers)
-            response.raise_for_status()
-            diff += response.text
-
-            if "next" in response.links:
-                url = response.links["next"]["url"][len(str(client.base_url)) :]
-            else:
-                break
-
-        return diff
-
-
-@action(
-    display_name="List Merged PRs for a Repository",
-    display_namespace="GitHub",
-    description="List all merged PRs for a repository",
-    secrets_placeholders=["GITHUB_SECRET"],
-)
-def list_merged_prs(
+def list_merged_pull_requests(
     repo_owner: Annotated[
         str,
         ArgumentMetadata(
@@ -284,14 +237,14 @@ def list_merged_prs(
             display_name="Start Time",
             description="The start time for the cases to list. Must be in ISO 8601 format (YYYY-MM-DDTHH:MM:SSZ).",
         ),
-    ] = "1970-01-01T00:00:00Z",
+    ] = None,
     end_time: Annotated[
         str | None,
         ArgumentMetadata(
             display_name="End Time",
             description="The end time for the cases to list. Must be in ISO 8601 format (YYYY-MM-DDTHH:MM:SSZ).",
         ),
-    ] = "2100-01-01T00:00:00Z",
+    ] = None,
     limit: Annotated[
         str | None,
         ArgumentMetadata(
@@ -312,28 +265,34 @@ def list_merged_prs(
             "direction": "desc",
             "per_page": 100,
         }
-        url = f"/repos/{repo_owner}/{repo_name}/pulls"
+
+        # convert into datetime object
+        start_time = parser.isoparse(
+            start_time if start_time else "1970-01-01T00:00:00Z"
+        )
+        end_time = parser.isoparse(end_time if end_time else "2100-01-01T00:00:00Z")
 
         events = _get_events_with_pagination(
             client=client,
-            url=url,
+            url=f"/repos/{repo_owner}/{repo_name}/pulls",
             params=params,
             limit=limit,
-            start_time=start_time,
-            end_time=end_time,
-            date_field="merged_at",
+            event_filter_fn=lambda event: event["merged_at"]
+            and start_time <= parser.isoparse(event["merged_at"]) <= end_time,
+            early_stop_fn=lambda events: end_time
+            < parser.isoparse(events[-1]["updated_at"]),
         )
 
         return events
 
 
 @action(
-    display_name="Get Commit History for a PR",
+    display_name="Get Commit History for a Pull Request",
     display_namespace="GitHub",
-    description="List commit history for a PR from most recent to oldest",
+    description="List commit history for a Pull Request from most recent to oldest",
     secrets_placeholders=["GITHUB_SECRET"],
 )
-def list_commit_history_for_pr(
+def list_commit_history_for_pull_request(
     repo_owner: Annotated[
         str,
         ArgumentMetadata(
@@ -348,34 +307,13 @@ def list_commit_history_for_pr(
             description="The name of the repository",
         ),
     ],
-    pr_number: Annotated[
+    pull_request_number: Annotated[
         int,
         ArgumentMetadata(
-            display_name="PR Number",
+            display_name="Pull Request Number",
             description="The name of the repository",
         ),
     ],
-    start_time: Annotated[
-        str | None,
-        ArgumentMetadata(
-            display_name="Start Time",
-            description="The start time for the cases to list. Must be in ISO 8601 format (YYYY-MM-DDTHH:MM:SSZ).",
-        ),
-    ] = "1970-01-01T00:00:00Z",
-    end_time: Annotated[
-        str | None,
-        ArgumentMetadata(
-            display_name="End Time",
-            description="The end time for the cases to list. Must be in ISO 8601 format (YYYY-MM-DDTHH:MM:SSZ).",
-        ),
-    ] = "2100-01-01T00:00:00Z",
-    limit: Annotated[
-        str | None,
-        ArgumentMetadata(
-            display_name="Limit",
-            description="The maximum number of cases to list.",
-        ),
-    ] = None,
 ) -> list[dict[str, JsonValue]]:
     # https://docs.github.com/en/rest/commits/commits?apiVersion=2022-11-28
 
@@ -383,31 +321,21 @@ def list_commit_history_for_pr(
     access_token = secret["access_token"]
 
     with get_github_client(access_token=access_token) as client:
-        params = {
-            "per_page": 100,
-        }
-        url = f"/repos/{repo_owner}/{repo_name}/pulls/{pr_number}/commits"
-
         events = _get_events_with_pagination(
-            client=client, url=url, params=params, limit=limit
+            client=client,
+            url=f"/repos/{repo_owner}/{repo_name}/pulls/{pull_request_number}/commits",
+            params={"per_page": 100},
         )
-
-        events_in_time_range = [
-            event
-            for event in events
-            if start_time <= event["commit"]["committer"]["date"] <= end_time
-        ]
-
-        return events_in_time_range if limit is None else events_in_time_range[:limit]
+        return events
 
 
 @action(
-    display_name="Get Approval History for a PR",
+    display_name="Get Approval History for a Pull Request",
     display_namespace="GitHub",
-    description="List aproval history for a PR",
+    description="List approval history for a Pull Request",
     secrets_placeholders=["GITHUB_SECRET"],
 )
-def list_review_history_for_pr(
+def list_review_history_for_pull_request(
     repo_owner: Annotated[
         str,
         ArgumentMetadata(
@@ -422,10 +350,10 @@ def list_review_history_for_pr(
             description="The name of the repository",
         ),
     ],
-    pr_number: Annotated[
+    pull_request_number: Annotated[
         int,
         ArgumentMetadata(
-            display_name="PR Number",
+            display_name="Pull Request Number",
             description="The name of the repository",
         ),
     ],
@@ -434,27 +362,6 @@ def list_review_history_for_pr(
         ArgumentMetadata(
             display_name="State",
             description="The state of the reviews to list.",
-        ),
-    ],
-    start_time: Annotated[
-        str | None,
-        ArgumentMetadata(
-            display_name="Start Time",
-            description="The start time for the cases to list. Must be in ISO 8601 format (YYYY-MM-DDTHH:MM:SSZ).",
-        ),
-    ] = "1970-01-01T00:00:00Z",
-    end_time: Annotated[
-        str | None,
-        ArgumentMetadata(
-            display_name="End Time",
-            description="The end time for the cases to list. Must be in ISO 8601 format (YYYY-MM-DDTHH:MM:SSZ).",
-        ),
-    ] = "2100-01-01T00:00:00Z",
-    limit: Annotated[
-        str | None,
-        ArgumentMetadata(
-            display_name="Limit",
-            description="The maximum number of cases to list.",
         ),
     ] = None,
 ) -> list[dict[str, JsonValue]]:
@@ -467,82 +374,16 @@ def list_review_history_for_pr(
             "per_page": 100,
         }
 
-        url = f"/repos/{repo_owner}/{repo_name}/pulls/{pr_number}/reviews"
+        if state:
+            event_filter_fn = lambda event: event["state"] == state  # noqa: E731
+        else:
+            event_filter_fn = None
+
         events = _get_events_with_pagination(
             client=client,
-            url=url,
+            url=f"/repos/{repo_owner}/{repo_name}/pulls/{pull_request_number}/reviews",
             params=params,
-            limit=limit,
-            start_time=start_time,
-            end_time=end_time,
-            date_field="submitted_at",
+            event_filter_fn=event_filter_fn,
         )
 
-        if state:
-            filtered_for_state = [
-                review for review in events if review["state"] == state
-            ]
-            return filtered_for_state if limit is None else filtered_for_state[:limit]
-        else:
-            return events if limit is None else events[:limit]
-
-
-@action(
-    display_name="List Commits",
-    display_namespace="GitHub",
-    description="List commits",
-    secrets_placeholders=["GITHUB_SECRET"],
-)
-def list_commits(
-    repo_owner: Annotated[
-        str,
-        ArgumentMetadata(
-            display_name="Repository Owner",
-            description="The owner of the repository",
-        ),
-    ],
-    repo_name: Annotated[
-        str,
-        ArgumentMetadata(
-            display_name="Repository Name",
-            description="The name of the repository",
-        ),
-    ],
-    since: Annotated[
-        str | None,
-        ArgumentMetadata(
-            display_name="Since",
-            description="The start time for the cases to list. Must be in ISO 8601 format (YYYY-MM-DDTHH:MM:SSZ).",
-        ),
-    ] = "1970-01-01T00:00:00Z",
-    until: Annotated[
-        str | None,
-        ArgumentMetadata(
-            display_name="Until",
-            description="The end time for the cases to list. Must be in ISO 8601 format (YYYY-MM-DDTHH:MM:SSZ).",
-        ),
-    ] = "2099-12-31T00:00:00Z",
-    limit: Annotated[
-        str | None,
-        ArgumentMetadata(
-            display_name="Limit",
-            description="The maximum number of cases to list.",
-        ),
-    ] = None,
-) -> list[dict[str, JsonValue]]:
-    # https://docs.github.com/en/rest/commits/commits?apiVersion=2022-11-28#get-a-commit
-    secret = ctx.get().secrets.get("GITHUB_SECRET")
-    access_token = secret["access_token"]
-
-    with get_github_client(access_token=access_token) as client:
-        params = {
-            "since": since,
-            "until": until,
-            "per_page": 100,
-        }
-        url = f"/repos/{repo_owner}/{repo_name}/commits"
-        events = _get_events_with_pagination(
-            client=client, url=url, params=params, limit=limit
-        )
-
-        return events if limit is None else events[:limit]
+        return events
