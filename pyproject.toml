@@ -55,6 +55,7 @@ asyncpg = "^0.29.0"
 psycopg2-binary = "^2.9.9"
 setuptools-scm = "^8.1.0"
 docker = "^7.1.0"
+fastapi-nextauth-jwt = "^2.0.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.2.2"

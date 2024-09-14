@@ -65,14 +65,13 @@ async def _handle_webhook_trigger(
     if not isinstance(payload, dict):
         raise ValueError("Payload must be a JSON object.")
 
-    # TODO: check user id
     webhook = await get_admyral_store().get_webhook(webhook_id)
     if not webhook:
         raise ValueError(f"Webhook with id {webhook_id} not found.")
     if webhook.webhook_secret != webhook_secret:
         raise ValueError("Invalid webhook secret.")
     # check whether the workflow is active
-    workflow = await get_admyral_store().get_workflow_by_id(webhook.workflow_id)
+    workflow = await get_admyral_store().get_workflow_for_webhook(webhook.workflow_id)
     if not workflow.is_active:
         return WorkflowTriggerResponse.inactive()
 

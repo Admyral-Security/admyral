@@ -1,7 +1,5 @@
-"use server";
+"use client";
 
-import axios from "axios";
-import { API_BASE_URL } from "@/constants/env";
 import { HTTPMethod } from "@/types/api";
 
 export async function apiCall<Request, Response>(
@@ -9,21 +7,23 @@ export async function apiCall<Request, Response>(
 	path: string,
 	requestData: Request,
 ): Promise<Response> {
-	// TODO: we could add a flag if this is an authenticated call,
-	// if yes, then we could fetch the API token here but first
-	// we need to make sure that the user is signed in!
+	const apiPath =
+		method === HTTPMethod.GET &&
+		requestData &&
+		Object.keys(requestData as object).length > 0
+			? `${path}?${new URLSearchParams(requestData as Record<string, string>)}`
+			: path;
+	const body =
+		method === HTTPMethod.POST ? JSON.stringify(requestData) : undefined;
 
-	// TODO(frontend): how does axios handle error response?
-	const response = await axios({
-		baseURL: API_BASE_URL,
+	const response = await fetch(apiPath, {
 		method,
-		url: path,
-		[method === HTTPMethod.GET ? "params" : "data"]: requestData,
+		body,
 		headers: {
 			"Content-Type": "application/json",
 			Accept: "application/json",
 		},
 	});
 
-	return response.data;
+	return await response.json();
 }

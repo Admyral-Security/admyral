@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Optional
 
 from admyral.models import (
+    User,
     PipLockfile,
     PythonAction,
     ActionMetadata,
@@ -21,17 +22,26 @@ from admyral.typings import JsonValue
 
 class StoreInterface(ABC):
     ########################################################
+    # User Management
+    ########################################################
+
+    @abstractmethod
+    async def get_user(self, user_id: str) -> User | None: ...
+
+    ########################################################
     # Python Action
     ########################################################
 
     @abstractmethod
-    async def list_actions(self) -> list[ActionMetadata]: ...
+    async def list_actions(self, user_id: str) -> list[ActionMetadata]: ...
 
     @abstractmethod
-    async def get_action(self, action_type: str) -> Optional[PythonAction]: ...
+    async def get_action(
+        self, user_id: str, action_type: str
+    ) -> Optional[PythonAction]: ...
 
     @abstractmethod
-    async def store_action(self, action: PythonAction) -> None: ...
+    async def store_action(self, user_id: str, action: PythonAction) -> None: ...
 
     ########################################################
     # Pip Lockfile Cache
@@ -51,66 +61,98 @@ class StoreInterface(ABC):
     ########################################################
 
     @abstractmethod
-    async def list_workflows(self) -> list[WorkflowMetadata]: ...
+    async def list_workflows(self, user_id: str) -> list[WorkflowMetadata]: ...
 
     @abstractmethod
-    async def get_workflow_by_name(self, workflow_name: str) -> Optional[Workflow]: ...
+    async def get_workflow_by_name(
+        self, user_id: str, workflow_name: str
+    ) -> Optional[Workflow]: ...
 
     @abstractmethod
-    async def get_workflow_by_id(self, workflow_id: str) -> Optional[Workflow]: ...
+    async def get_workflow_by_id(
+        self, user_id: str, workflow_id: str
+    ) -> Optional[Workflow]: ...
 
     @abstractmethod
-    async def store_workflow(self, workflow: Workflow) -> None: ...
+    async def store_workflow(self, user_id: str, workflow: Workflow) -> None: ...
 
     @abstractmethod
     async def set_workflow_active_state(
-        self, workflow_id: str, is_active: bool
+        self, user_id: str, workflow_id: str, is_active: bool
     ) -> None: ...
 
     @abstractmethod
-    async def remove_workflow(self, workflow_id: str) -> None: ...
+    async def remove_workflow(self, user_id: str, workflow_id: str) -> None: ...
+
+    @abstractmethod
+    async def get_workflow_for_webhook(
+        self, workflow_id: str
+    ) -> Optional[Workflow]: ...
 
     ########################################################
     # Workflow Webhooks
     ########################################################
 
     @abstractmethod
-    async def store_workflow_webhook(self, workflow_id: str) -> WorkflowWebhook: ...
+    async def store_workflow_webhook(
+        self, user_id: str, workflow_id: str
+    ) -> WorkflowWebhook: ...
 
     @abstractmethod
     async def get_webhook_for_workflow(
-        self, workflow_id: str
+        self, user_id: str, workflow_id: str
     ) -> Optional[WorkflowWebhook]: ...
 
     @abstractmethod
     async def get_webhook(self, webhook_id: str) -> Optional[WorkflowWebhook]: ...
 
     @abstractmethod
-    async def delete_webhook(self, webhook_id: str) -> None: ...
+    async def delete_webhook(self, user_id: str, webhook_id: str) -> None: ...
 
     ########################################################
     # Workflow Schedules
     ########################################################
 
     @abstractmethod
-    async def store_schedule(self, schedule: WorkflowSchedule) -> None: ...
+    async def store_schedule(
+        self, user_id: str, schedule: WorkflowSchedule
+    ) -> None: ...
 
     @abstractmethod
     async def list_schedules_for_workflow(
-        self, workflow_id: str
+        self, user_id: str, workflow_id: str
     ) -> list[WorkflowSchedule]: ...
 
     @abstractmethod
-    async def delete_schedule(self, schedule_id: str) -> None: ...
+    async def delete_schedule(self, user_id: str, schedule_id: str) -> None: ...
 
     ########################################################
-    # Workflow Runs
+    # Workflow Runs - User Facing
     ########################################################
 
     @abstractmethod
     async def list_workflow_runs(
-        self, workflow_id: str, limit: int = 100
+        self, user_id: str, workflow_id: str, limit: int = 100
     ) -> list[WorkflowRunMetadata]: ...
+
+    @abstractmethod
+    async def get_workflow_run(
+        self, workflow_id: str, run_id: str
+    ) -> Optional[WorkflowRun]: ...
+
+    @abstractmethod
+    async def list_workflow_run_steps(
+        self, user_id: str, workflow_id: str, run_id: str
+    ) -> list[WorkflowRunStepMetadata]: ...
+
+    @abstractmethod
+    async def get_workflow_run_step(
+        self, user_id: str, workflow_id: str, run_id: str, step_id: str
+    ) -> Optional[WorkflowRunStep]: ...
+
+    ########################################################
+    # Workflow Runs - State Updates during execution
+    ########################################################
 
     @abstractmethod
     async def init_workflow_run(
@@ -126,21 +168,6 @@ class StoreInterface(ABC):
     async def mark_workflow_run_as_completed(
         self, run_id: str, completed_at: str
     ) -> None: ...
-
-    @abstractmethod
-    async def get_workflow_run(
-        self, workflow_id: str, run_id: str
-    ) -> Optional[WorkflowRun]: ...
-
-    @abstractmethod
-    async def list_workflow_run_steps(
-        self, workflow_id: str, run_id: str
-    ) -> list[WorkflowRunStepMetadata]: ...
-
-    @abstractmethod
-    async def get_workflow_run_step(
-        self, workflow_id: str, run_id: str, step_id: str
-    ) -> Optional[WorkflowRunStep]: ...
 
     @abstractmethod
     async def append_logs(

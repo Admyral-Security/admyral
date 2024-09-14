@@ -30,7 +30,6 @@ class WorkflowRunSchema(BaseSchema, table=True):
     run_id: str = Field(sa_type=TEXT(), primary_key=True)
 
     # foreign keys
-    user_id: str = Field(sa_type=TEXT())
     workflow_id: str = Field(sa_type=TEXT())
 
     # other fields

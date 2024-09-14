@@ -1,4 +1,5 @@
 from admyral.models.action import Argument, PythonAction, ActionMetadata
+from admyral.models.auth import AuthenticatedUser, User
 from admyral.models.pip_lockfile import PipLockfile
 from admyral.models.schedule import Schedule, ScheduleType
 from admyral.models.workflow import (
@@ -118,4 +119,6 @@ __all__ = [
     "EditorScheduleTrigger",
     "EditorWebhookTrigger",
     "EditorScheduleType",
+    "AuthenticatedUser",
+    "User",
 ]

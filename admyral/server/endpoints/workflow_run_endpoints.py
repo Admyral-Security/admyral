@@ -1,6 +1,12 @@
-from fastapi import APIRouter, status, HTTPException
+from fastapi import APIRouter, status, HTTPException, Depends
 
-from admyral.models import WorkflowRunMetadata, WorkflowRunStepMetadata, WorkflowRunStep
+from admyral.server.auth import authenticate
+from admyral.models import (
+    AuthenticatedUser,
+    WorkflowRunMetadata,
+    WorkflowRunStepMetadata,
+    WorkflowRunStep,
+)
 from admyral.server.deps import get_admyral_store
 
 
@@ -8,7 +14,9 @@ router = APIRouter()
 
 
 @router.get("/{workflow_id}", status_code=status.HTTP_200_OK)
-async def list_workflow_runs(workflow_id: str) -> list[WorkflowRunMetadata]:
+async def list_workflow_runs(
+    workflow_id: str, authenticated_user: AuthenticatedUser = Depends(authenticate)
+) -> list[WorkflowRunMetadata]:
     """
     List all workflow runs.
 
@@ -18,12 +26,16 @@ async def list_workflow_runs(workflow_id: str) -> list[WorkflowRunMetadata]:
     Returns:
         A list of workflow runs.
     """
-    return await get_admyral_store().list_workflow_runs(workflow_id)
+    return await get_admyral_store().list_workflow_runs(
+        authenticated_user.user_id, workflow_id
+    )
 
 
 @router.get("/{workflow_id}/{workflow_run_id}", status_code=status.HTTP_200_OK)
 async def get_workflow_run_steps(
-    workflow_id: str, workflow_run_id: str
+    workflow_id: str,
+    workflow_run_id: str,
+    authenticated_user: AuthenticatedUser = Depends(authenticate),
 ) -> list[WorkflowRunStepMetadata]:
     """
     Get workflow runs by workflow id.
@@ -36,7 +48,7 @@ async def get_workflow_run_steps(
         A list of workflow run steps.
     """
     return await get_admyral_store().list_workflow_run_steps(
-        workflow_id, workflow_run_id
+        authenticated_user.user_id, workflow_id, workflow_run_id
     )
 
 
@@ -45,7 +57,10 @@ async def get_workflow_run_steps(
     status_code=status.HTTP_200_OK,
 )
 async def get_workflow_run_step(
-    workflow_id: str, workflow_run_id: str, workflow_run_step_id: str
+    workflow_id: str,
+    workflow_run_id: str,
+    workflow_run_step_id: str,
+    authenticated_user: AuthenticatedUser = Depends(authenticate),
 ) -> WorkflowRunStep:
     """
     Get workflow run step.
@@ -59,7 +74,7 @@ async def get_workflow_run_step(
         The workflow run step.
     """
     step = await get_admyral_store().get_workflow_run_step(
-        workflow_id, workflow_run_id, workflow_run_step_id
+        authenticated_user.user_id, workflow_id, workflow_run_id, workflow_run_step_id
     )
     if not step:
         raise HTTPException(status_code=404, detail="Step not found")
