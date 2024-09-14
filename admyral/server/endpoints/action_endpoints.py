@@ -1,7 +1,8 @@
 from typing import Optional
-from fastapi import APIRouter, status
+from fastapi import APIRouter, status, Depends
 
-from admyral.models import PythonAction
+from admyral.server.auth import authenticate
+from admyral.models import PythonAction, AuthenticatedUser
 from admyral.server.deps import get_admyral_store
 
 
@@ -9,7 +10,10 @@ router = APIRouter()
 
 
 @router.post("/push", status_code=status.HTTP_204_NO_CONTENT)
-async def push_action(python_action: PythonAction):
+async def push_action(
+    python_action: PythonAction,
+    authenticated_user: AuthenticatedUser = Depends(authenticate),
+):
     """
     Push a Python action to the store. If the action for the provided action type already exists for the user,
     it will be overwritten.
@@ -17,13 +21,15 @@ async def push_action(python_action: PythonAction):
     Args:
         python_action: The Python action object.
     """
-    await get_admyral_store().store_action(python_action)
+    await get_admyral_store().store_action(
+        user_id=authenticated_user.user_id, action=python_action
+    )
 
 
-@router.get(
-    "/{action_type}", status_code=status.HTTP_200_OK, response_model=PythonAction
-)
-async def get_action(action_type: str) -> Optional[PythonAction]:
+@router.get("/{action_type}", status_code=status.HTTP_200_OK)
+async def get_action(
+    action_type: str, authenticated_user: AuthenticatedUser = Depends(AuthenticatedUser)
+) -> Optional[PythonAction]:
     """
     Get a Python action by its action type.
 
@@ -33,4 +39,6 @@ async def get_action(action_type: str) -> Optional[PythonAction]:
     Returns:
         The Python action object.
     """
-    return await get_admyral_store().get_action(action_type)
+    return await get_admyral_store().get_action(
+        user_id=authenticated_user.user_id, action_type=action_type
+    )

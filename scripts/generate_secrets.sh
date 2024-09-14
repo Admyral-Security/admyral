@@ -24,6 +24,7 @@ generate_jwt () {
 echo "POSTGRES_PASSWORD=$(openssl rand -hex 32)"
 echo "ADMYRAL_SECRETS_ENCRYPTION_KEY=$(openssl rand -hex 32)"
 echo "ADMYRAL_WEBHOOK_SIGNING_SECRET=$(openssl rand -hex 32)"
+echo "NEXTAUTH_SECRET=$(openssl rand -base64 32)"
 # echo "JWT_SECRET=$secret_base64"
 # echo "ANON_KEY=$jwt_anon_key"
 # echo "SERVICE_ROLE_KEY=$service_role_key"

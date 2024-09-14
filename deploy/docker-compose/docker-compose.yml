@@ -47,7 +47,6 @@ services:
       - 8000:8000
     environment:
       # DB
-      - ADMYRAL_DATABASE_TYPE=postgres
       - ADMYRAL_DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-your-super-secret-and-long-postgres-password}@postgresql:5432/admyral
       - ADMYRAL_SECRETS_MANAGER_TYPE=sql
       # App Secrets
@@ -55,6 +54,10 @@ services:
       - ADMYRAL_SECRETS_ENCRYPTION_KEY=${ADMYRAL_SECRETS_ENCRYPTION_KEY:-834f01cf391c972f1e6def3d7f315f8194bb10048e5cf282aa4cba63b239d8fb}
       # Temporal
       - ADMYRAL_TEMPORAL_HOST=temporal:7233
+      # Authentication
+      - ADMYRAL_DISABLE_AUTH=${ADMYRAL_DISABLE_AUTH:-false}
+      - NEXT_AUTH_SECRET=${NEXTAUTH_SECRET:-QzkuVCn7OGfkpoX98aOxf2tc3kFX8pZs71N1wHPo8NM}
+      - NEXTAUTH_URL=http://web:3000
 
   web:
     container_name: admyral-web
@@ -71,6 +74,12 @@ services:
       - 3000:3000
     environment:
       - ADMYRAL_API_BASE_URL=http://api:8000
+      - ADMYRAL_DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-your-super-secret-and-long-postgres-password}@postgresql:5432/admyral
+      # Authentication
+      - ADMYRAL_DISABLE_AUTH=${ADMYRAL_DISABLE_AUTH:-false}
+      - NEXT_AUTH_SECRET=${NEXTAUTH_SECRET:-QzkuVCn7OGfkpoX98aOxf2tc3kFX8pZs71N1wHPo8NM}
+      - AUTH_GITHUB_ID=${AUTH_GITHUB_ID}
+      - AUTH_GITHUB_SECRET=${AUTH_GITHUB_SECRET}
 
   worker:
     container_name: admyral-worker
@@ -97,7 +106,6 @@ services:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - RESEND_API_KEY=${RESEND_API_KEY}
       # DB
-      - ADMYRAL_DATABASE_TYPE=postgres
       - ADMYRAL_DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-your-super-secret-and-long-postgres-password}@postgresql:5432/admyral
       - ADMYRAL_SECRETS_MANAGER_TYPE=sql
       # App Secrets

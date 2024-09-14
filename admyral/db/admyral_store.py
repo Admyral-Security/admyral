@@ -10,6 +10,7 @@ from uuid import uuid4
 import json
 
 from admyral.models import (
+    User,
     PipLockfile,
     PythonAction,
     Workflow,
@@ -34,6 +35,7 @@ from admyral.db.schemas import (
     WorkflowWebhookSchema,
     WorkflowScheduleSchema,
     SecretsSchema,
+    UserSchema,
 )
 from admyral.db.alembic.database_manager import DatabaseManager
 from admyral.config.config import GlobalConfig, CONFIG, DatabaseType
@@ -134,7 +136,6 @@ class AdmyralStore(StoreInterface):
     # Helpers
     ########################################################
 
-    # TODO: incompatability issue?
     @asynccontextmanager
     async def _get_async_session(self) -> AsyncGenerator[AdmyralDatabaseSession, None]:
         assert self.performed_setup, "Store has not been set up yet."
@@ -147,13 +148,19 @@ class AdmyralStore(StoreInterface):
             yield db
 
     ########################################################
+    # User Management
+    ########################################################
+
+    async def get_user(self, user_id: str) -> User | None:
+        async with self._get_async_session() as db:
+            result = await db.exec(select(UserSchema).where(UserSchema.id == user_id))
+            return result.one_or_none()
+
+    ########################################################
     # Python Action
     ########################################################
 
-    async def list_actions(self) -> list[ActionMetadata]:
-        # TODO: consider user id
-        user_id = self.config.default_user_id
-
+    async def list_actions(self, user_id: str) -> list[ActionMetadata]:
         async with self._get_async_session() as db:
             result = await db.exec(
                 select(PythonActionSchema).where(PythonActionSchema.user_id == user_id)
@@ -170,18 +177,14 @@ class AdmyralStore(StoreInterface):
         )
         return result.one_or_none()
 
-    async def get_action(self, action_type: str) -> Optional[PythonAction]:
-        # TODO: consider user id
-        user_id = self.config.default_user_id
-
+    async def get_action(
+        self, user_id: str, action_type: str
+    ) -> Optional[PythonAction]:
         async with self._get_async_session() as db:
             action = await self._get_action(db, user_id, action_type)
             return action.to_model() if action is not None else None
 
-    async def store_action(self, action: PythonAction) -> None:
-        # TODO: consider user id
-        user_id = self.config.default_user_id
-
+    async def store_action(self, user_id: str, action: PythonAction) -> None:
         async with self._get_async_session() as db:
             # if the action type already exists, we update the code and requirements.
             python_action_entry = await self._get_action(
@@ -305,10 +308,7 @@ class AdmyralStore(StoreInterface):
     # Workflows
     ########################################################
 
-    async def list_workflows(self) -> list[WorkflowMetadata]:
-        # TODO: consider user id
-        user_id = self.config.default_user_id
-
+    async def list_workflows(self, user_id: str) -> list[WorkflowMetadata]:
         async with self._get_async_session() as db:
             # TODO: loading all workflows just for the metadata
             # is not very efficient
@@ -327,10 +327,9 @@ class AdmyralStore(StoreInterface):
         )
         return result.one_or_none()
 
-    async def get_workflow_by_name(self, workflow_name: str) -> Optional[Workflow]:
-        # TODO: consider user id
-        user_id = self.config.default_user_id
-
+    async def get_workflow_by_name(
+        self, user_id: str, workflow_name: str
+    ) -> Optional[Workflow]:
         async with self._get_async_session() as db:
             wf = await self._get_workflow_by_name(db, user_id, workflow_name)
             return wf.to_model() if wf else None
@@ -345,18 +344,14 @@ class AdmyralStore(StoreInterface):
         )
         return result.one_or_none()
 
-    async def get_workflow_by_id(self, workflow_id: str) -> Optional[Workflow]:
-        # TODO: consider user id
-        user_id = self.config.default_user_id
-
+    async def get_workflow_by_id(
+        self, user_id: str, workflow_id: str
+    ) -> Optional[Workflow]:
         async with self._get_async_session() as db:
             wf = await self._get_workflow_by_id(db, user_id, workflow_id)
             return wf.to_model() if wf else None
 
-    async def store_workflow(self, workflow: Workflow) -> None:
-        # TODO: consider user_id
-        user_id = self.config.default_user_id
-
+    async def store_workflow(self, user_id: str, workflow: Workflow) -> None:
         async with self._get_async_session() as db:
             # if the workflow already exists, we update the workflow dag.
             stored_workflow = await self._get_workflow_by_id(
@@ -388,11 +383,8 @@ class AdmyralStore(StoreInterface):
             await db.commit()
 
     async def set_workflow_active_state(
-        self, workflow_id: str, is_active: bool
+        self, user_id: str, workflow_id: str, is_active: bool
     ) -> None:
-        # TODO: consider user_id
-        user_id = self.config.default_user_id
-
         async with self._get_async_session() as db:
             stored_workflow = await self._get_workflow_by_id(db, user_id, workflow_id)
             if not stored_workflow:
@@ -406,10 +398,7 @@ class AdmyralStore(StoreInterface):
             )
             await db.commit()
 
-    async def remove_workflow(self, workflow_id: str) -> None:
-        # TODO: consider user_id
-        user_id = self.config.default_user_id
-
+    async def remove_workflow(self, user_id: str, workflow_id: str) -> None:
         async with self._get_async_session() as db:
             await db.exec(
                 delete(WorkflowSchema)
@@ -418,15 +407,30 @@ class AdmyralStore(StoreInterface):
             )
             await db.commit()
 
+    async def get_workflow_for_webhook(self, workflow_id: str) -> Optional[Workflow]:
+        async with self._get_async_session() as db:
+            result = await db.exec(
+                select(WorkflowSchema).where(WorkflowSchema.workflow_id == workflow_id)
+            )
+            workflow = result.one_or_none()
+            return workflow.to_model() if workflow else None
+
     ########################################################
     # Workflow Webhooks
     ########################################################
 
-    async def store_workflow_webhook(self, workflow_id: str) -> WorkflowWebhook:
+    async def store_workflow_webhook(
+        self, user_id: str, workflow_id: str
+    ) -> WorkflowWebhook:
         webhook_id = str(uuid4())
         webhook_secret = generate_hs256(webhook_id)
 
         async with self._get_async_session() as db:
+            # verify that the user_id owns the workflow_id
+            workflow = await self._get_workflow_by_id(db, user_id, workflow_id)
+            if not workflow:
+                raise ValueError("Failed to store webhook. Workflow not found.")
+
             await db.exec(
                 insert(WorkflowWebhookSchema).values(
                     webhook_id=webhook_id,
@@ -443,13 +447,15 @@ class AdmyralStore(StoreInterface):
         )
 
     async def get_webhook_for_workflow(
-        self, workflow_id: str
+        self, user_id: str, workflow_id: str
     ) -> Optional[WorkflowWebhook]:
         async with self._get_async_session() as db:
             result = await db.exec(
-                select(WorkflowWebhookSchema).where(
-                    WorkflowWebhookSchema.workflow_id == workflow_id
-                )
+                select(WorkflowWebhookSchema)
+                .join(WorkflowSchema)
+                .where(WorkflowSchema.user_id == user_id)
+                .where(WorkflowSchema.workflow_id == workflow_id)
+                .where(WorkflowWebhookSchema.workflow_id == workflow_id)
             )
             webhooks = result.all()
 
@@ -461,18 +467,33 @@ class AdmyralStore(StoreInterface):
 
             return webhooks[0].to_model()
 
+    async def _get_webhook(
+        db: AdmyralDatabaseSession, webhook_id: str
+    ) -> Optional[WorkflowWebhook]:
+        result = await db.exec(
+            select(WorkflowWebhookSchema).where(
+                WorkflowWebhookSchema.webhook_id == webhook_id
+            )
+        )
+        return result.one_or_none()
+
     async def get_webhook(self, webhook_id: str) -> Optional[WorkflowWebhook]:
         async with self._get_async_session() as db:
-            result = await db.exec(
-                select(WorkflowWebhookSchema).where(
-                    WorkflowWebhookSchema.webhook_id == webhook_id
-                )
-            )
-            webhook = result.one_or_none()
+            webhook = await self._get_webhook(db, webhook_id)
             return webhook.to_model() if webhook else None
 
-    async def delete_webhook(self, webhook_id: str) -> None:
+    async def delete_webhook(self, user_id: str, webhook_id: str) -> None:
         async with self._get_async_session() as db:
+            # verify that user_id owns the webhook
+            workflow = await db.exec(
+                select(WorkflowSchema)
+                .join(WorkflowWebhookSchema)
+                .where(WorkflowSchema.user_id == user_id)
+                .where(WorkflowWebhookSchema.webhook_id == webhook_id)
+            )
+            if not workflow:
+                raise ValueError("Failed to delete webhook. Workflow not found.")
+
             await db.exec(
                 delete(WorkflowWebhookSchema).where(
                     WorkflowWebhookSchema.webhook_id == webhook_id
@@ -484,10 +505,7 @@ class AdmyralStore(StoreInterface):
     # Workflow Schedules
     ########################################################
 
-    async def store_schedule(self, schedule: WorkflowSchedule) -> None:
-        # TODO: consider user id
-        user_id = self.config.default_user_id
-
+    async def store_schedule(self, user_id: str, schedule: WorkflowSchedule) -> None:
         async with self._get_async_session() as db:
             await db.exec(
                 insert(WorkflowScheduleSchema).values(
@@ -505,11 +523,8 @@ class AdmyralStore(StoreInterface):
             await db.commit()
 
     async def list_schedules_for_workflow(
-        self, workflow_id: str
+        self, user_id: str, workflow_id: str
     ) -> list[WorkflowSchedule]:
-        # TODO: consider user id
-        user_id = self.config.default_user_id
-
         async with self._get_async_session() as db:
             result = await db.exec(
                 select(WorkflowScheduleSchema)
@@ -519,25 +534,22 @@ class AdmyralStore(StoreInterface):
             schedules = result.all()
             return [schedule.to_model() for schedule in schedules]
 
-    async def delete_schedule(self, schedule_id: str) -> None:
+    async def delete_schedule(self, user_id: str, schedule_id: str) -> None:
         async with self._get_async_session() as db:
             await db.exec(
-                delete(WorkflowScheduleSchema).where(
-                    WorkflowScheduleSchema.schedule_id == schedule_id
-                )
+                delete(WorkflowScheduleSchema)
+                .where(WorkflowScheduleSchema.user_id == user_id)
+                .where(WorkflowScheduleSchema.schedule_id == schedule_id)
             )
             await db.commit()
 
     ########################################################
-    # Workflow Runs
+    # Workflow Runs - User Facing
     ########################################################
 
     async def list_workflow_runs(
-        self, workflow_id: str, limit: int = 100
+        self, user_id: str, workflow_id: str, limit: int = 100
     ) -> list[WorkflowRunMetadata]:
-        # TODO: consider user_id
-        user_id = self.config.default_user_id
-
         async with self._get_async_session() as db:
             result = await db.exec(
                 select(WorkflowRunSchema)
@@ -548,6 +560,84 @@ class AdmyralStore(StoreInterface):
             )
             return [workflow_run.to_metadata() for workflow_run in result.all()]
 
+    async def _get_workflow_run(
+        self, db: AdmyralDatabaseSession, user_id: str, workflow_id: str, run_id: str
+    ) -> Optional[WorkflowRunSchema]:
+        result = await db.exec(
+            select(WorkflowRunSchema)
+            .where(WorkflowRunSchema.user_id == user_id)
+            .where(WorkflowRunSchema.workflow_id == workflow_id)
+            .where(WorkflowRunSchema.run_id == run_id)
+        )
+        return result.one_or_none()
+
+    async def get_workflow_run(
+        self, user_id: str, workflow_id: str, run_id: str
+    ) -> Optional[WorkflowRun]:
+        async with self._get_async_session() as db:
+            workflow_run = await self._get_workflow_run(
+                db, user_id, workflow_id, run_id
+            )
+            return workflow_run.to_model() if workflow_run else None
+
+    async def list_workflow_run_steps(
+        self, user_id: str, workflow_id: str, run_id: str
+    ) -> list[WorkflowRunStepMetadata]:
+        async with self._get_async_session() as db:
+            result = await db.exec(
+                select(
+                    WorkflowRunStepsSchema.step_id,
+                    WorkflowRunStepsSchema.action_type,
+                    WorkflowRunStepsSchema.error,
+                )
+                .join(WorkflowRunSchema)
+                .join(WorkflowSchema)
+                .where(WorkflowRunSchema.workflow_id == workflow_id)
+                .where(WorkflowSchema.user_id == user_id)
+                .where(WorkflowSchema.workflow_id == workflow_id)
+                .where(WorkflowRunStepsSchema.run_id == run_id)
+                .order_by(WorkflowRunStepsSchema.created_at)
+            )
+            return [
+                WorkflowRunStepMetadata.model_validate(
+                    {"step_id": row[0], "action_type": row[1], "error": row[2]}
+                )
+                for row in result.all()
+            ]
+
+    async def _get_workflow_run_step(
+        self,
+        db: AdmyralDatabaseSession,
+        user_id: str,
+        workflow_id: str,
+        run_id: str,
+        step_id: str,
+    ) -> Optional[WorkflowRunStepsSchema]:
+        result = await db.exec(
+            select(WorkflowRunStepsSchema)
+            .join(WorkflowRunSchema)
+            .join(WorkflowSchema)
+            .where(WorkflowRunSchema.run_id == run_id)
+            .where(WorkflowRunSchema.workflow_id == workflow_id)
+            .where(WorkflowSchema.workflow_id == workflow_id)
+            .where(WorkflowSchema.user_id == user_id)
+            .where(WorkflowRunStepsSchema.step_id == step_id)
+        )
+        return result.one_or_none()
+
+    async def get_workflow_run_step(
+        self, user_id: str, workflow_id: str, run_id: str, step_id: str
+    ) -> Optional[WorkflowRunStep]:
+        async with self._get_async_session() as db:
+            workflow_run_step = await self._get_workflow_run_step(
+                db, user_id, workflow_id, run_id, step_id
+            )
+            return workflow_run_step.to_model() if workflow_run_step else None
+
+    ########################################################
+    # Workflow Runs - State Updates during execution
+    ########################################################
+
     async def init_workflow_run(
         self,
         run_id: str,
@@ -556,14 +646,10 @@ class AdmyralStore(StoreInterface):
         source_name: str,
         payload: dict[str, JsonValue],
     ) -> None:
-        # TODO: consider user_id
-        user_id = self.config.default_user_id
-
         async with self._get_async_session() as db:
             await db.exec(
                 insert(WorkflowRunSchema).values(
                     run_id=run_id,
-                    user_id=user_id,
                     workflow_id=workflow_id,
                     source_name=source_name,
                 )
@@ -580,88 +666,15 @@ class AdmyralStore(StoreInterface):
     async def mark_workflow_run_as_completed(
         self, run_id: str, completed_at: datetime
     ) -> None:
-        # TODO: consider user_id
-        user_id = self.config.default_user_id
-
         async with self._get_async_session() as db:
             await db.exec(
                 update(WorkflowRunSchema)
                 .where(WorkflowRunSchema.run_id == run_id)
-                .where(WorkflowRunSchema.user_id == user_id)
                 .values(
                     completed_at=completed_at,
                 )
             )
             await db.commit()
-
-    async def _get_workflow_run(
-        self, db: AdmyralDatabaseSession, user_id: str, workflow_id: str, run_id: str
-    ) -> Optional[WorkflowRunSchema]:
-        result = await db.exec(
-            select(WorkflowRunSchema)
-            .where(WorkflowRunSchema.user_id == user_id)
-            .where(WorkflowRunSchema.workflow_id == workflow_id)
-            .where(WorkflowRunSchema.run_id == run_id)
-        )
-        return result.one_or_none()
-
-    async def get_workflow_run(
-        self, workflow_id: str, run_id: str
-    ) -> Optional[WorkflowRun]:
-        # TODO: consider user_id
-        user_id = self.config.default_user_id
-
-        async with self._get_async_session() as db:
-            workflow_run = await self._get_workflow_run(
-                db, user_id, workflow_id, run_id
-            )
-            return workflow_run.to_model() if workflow_run else None
-
-    async def list_workflow_run_steps(
-        self, workflow_id: str, run_id: str
-    ) -> list[WorkflowRunStepMetadata]:
-        # TODO: consider user_id and workflow_id
-        user_id = self.config.default_user_id  # noqa F841
-
-        async with self._get_async_session() as db:
-            result = await db.exec(
-                select(
-                    WorkflowRunStepsSchema.step_id,
-                    WorkflowRunStepsSchema.action_type,
-                    WorkflowRunStepsSchema.error,
-                )
-                .where(WorkflowRunStepsSchema.run_id == run_id)
-                .order_by(WorkflowRunStepsSchema.created_at)
-            )
-            return [
-                WorkflowRunStepMetadata.model_validate(
-                    {"step_id": row[0], "action_type": row[1], "error": row[2]}
-                )
-                for row in result.all()
-            ]
-
-    async def _get_workflow_run_step(
-        self,
-        db: AdmyralDatabaseSession,
-        step_id: str,
-    ) -> Optional[WorkflowRunStepsSchema]:
-        # TODO: consider user_id + check when loading step_id
-
-        result = await db.exec(
-            select(WorkflowRunStepsSchema).where(
-                WorkflowRunStepsSchema.step_id == step_id
-            )
-        )
-        return result.one_or_none()
-
-    async def get_workflow_run_step(
-        self, workflow_id: str, run_id: str, step_id: str
-    ) -> Optional[WorkflowRunStep]:
-        # TODO: consider user_id + check when loading step_id
-
-        async with self._get_async_session() as db:
-            workflow_run_step = await self._get_workflow_run_step(db, step_id)
-            return workflow_run_step.to_model() if workflow_run_step else None
 
     async def append_logs(
         self,

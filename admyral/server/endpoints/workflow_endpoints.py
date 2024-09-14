@@ -1,4 +1,4 @@
-from fastapi import APIRouter, status, BackgroundTasks, Body
+from fastapi import APIRouter, status, BackgroundTasks, Body, Depends
 from typing import Optional, Annotated, Callable, Coroutine
 from uuid import uuid4
 from pydantic import BaseModel
@@ -6,6 +6,7 @@ from pydantic import BaseModel
 from admyral.utils.collections import is_not_empty
 from admyral.server.deps import get_admyral_store, get_workers_client
 from admyral.models import (
+    AuthenticatedUser,
     Workflow,
     WorkflowTriggerType,
     WorkflowPushRequest,
@@ -16,6 +17,7 @@ from admyral.models import (
 )
 from admyral.logger import get_logger
 from admyral.typings import JsonValue
+from admyral.server.auth import authenticate
 
 
 logger = get_logger(__name__)
@@ -31,17 +33,19 @@ class WorkflowBody(BaseModel):
 
 
 async def _fetch_workflow(
-    workflow_name: str | None, workflow_id: str | None
+    user_id: str, workflow_name: str | None, workflow_id: str | None
 ) -> Workflow:
     if not workflow_name and not workflow_id:
         raise ValueError("Either workflow_name or workflow_id must be provided.")
 
     if workflow_id:
-        workflow = await get_admyral_store().get_workflow_by_id(workflow_id)
+        workflow = await get_admyral_store().get_workflow_by_id(user_id, workflow_id)
         if not workflow:
             raise ValueError(f"Workflow with id {workflow_id} not found.")
     else:
-        workflow = await get_admyral_store().get_workflow_by_name(workflow_name)
+        workflow = await get_admyral_store().get_workflow_by_name(
+            user_id, workflow_name
+        )
         if not workflow:
             raise ValueError(f"Workflow with name {workflow_name} not found.")
 
@@ -49,7 +53,10 @@ async def _fetch_workflow(
 
 
 async def push_workflow_impl(
-    workflow_name: str, workflow_id: str | None, request: WorkflowPushRequest
+    user_id: str,
+    workflow_name: str,
+    workflow_id: str | None,
+    request: WorkflowPushRequest,
 ) -> WorkflowPushResponse:
     """
     Push a workflow to the store. If the workflow for the provided workflow id already exists,
@@ -66,19 +73,21 @@ async def push_workflow_impl(
         raise ValueError("Workflow name must not contain spaces.")
 
     if workflow_id:
-        existing_workflow = await admyral_store.get_workflow_by_id(workflow_id)
+        existing_workflow = await admyral_store.get_workflow_by_id(user_id, workflow_id)
     else:
-        existing_workflow = await admyral_store.get_workflow_by_name(workflow_name)
+        existing_workflow = await admyral_store.get_workflow_by_name(
+            user_id, workflow_name
+        )
 
     # fetch workflow webhook and schedules if they exist
     existing_webhook = None
     existing_schedules = []
     if existing_workflow:
         existing_webhook = await admyral_store.get_webhook_for_workflow(
-            existing_workflow.workflow_id
+            user_id, existing_workflow.workflow_id
         )
         existing_schedules = await admyral_store.list_schedules_for_workflow(
-            existing_workflow.workflow_id
+            user_id, existing_workflow.workflow_id
         )
 
     if existing_workflow:
@@ -93,7 +102,7 @@ async def push_workflow_impl(
         is_active=request.activate,
     )
 
-    await admyral_store.store_workflow(workflow)
+    await admyral_store.store_workflow(user_id, workflow)
 
     # Handle schedule update
 
@@ -102,7 +111,7 @@ async def push_workflow_impl(
         if existing_workflow and existing_workflow.is_active:
             # the schedule only exists if we previously had an active workflow
             await workers_client.delete_schedule(schedule.schedule_id)
-        await admyral_store.delete_schedule(schedule.schedule_id)
+        await admyral_store.delete_schedule(user_id, schedule.schedule_id)
 
     new_schedules = list(
         filter(
@@ -122,7 +131,7 @@ async def push_workflow_impl(
                 interval_days=schedule.interval_days,
                 default_args=schedule.default_args_dict,
             )
-            await admyral_store.store_schedule(new_workflow_schedule)
+            await admyral_store.store_schedule(user_id, new_workflow_schedule)
 
             if request.activate:
                 await workers_client.schedule_workflow(workflow, new_workflow_schedule)
@@ -143,14 +152,14 @@ async def push_workflow_impl(
         if not existing_webhook:
             # Case: we didn't have a webhook and we have a webhook now
             webhook_response = await admyral_store.store_workflow_webhook(
-                workflow.workflow_id
+                user_id, workflow.workflow_id
             )
         else:
             # Case: we had a webhhok and we still have a webhook
             webhook_response = existing_webhook
     elif existing_webhook:
         # Case: we had a webhook but it was removed in the newest push
-        await admyral_store.delete_webhook(existing_webhook.webhook_id)
+        await admyral_store.delete_webhook(user_id, existing_webhook.webhook_id)
 
     # construct response
     response = WorkflowPushResponse()
@@ -165,7 +174,9 @@ router = APIRouter()
 
 @router.post("/{workflow_name}/push", status_code=status.HTTP_201_CREATED)
 async def push_workflow(
-    workflow_name: str, request: WorkflowPushRequest
+    workflow_name: str,
+    request: WorkflowPushRequest,
+    authenticated_user: AuthenticatedUser = Depends(authenticate),
 ) -> WorkflowPushResponse:
     """
     Push a workflow to the store. If the workflow for the provided workflow id already exists,
@@ -175,11 +186,15 @@ async def push_workflow(
         workflow_name: The workflow name.
         workflow: The workflow object.
     """
-    return await push_workflow_impl(workflow_name, None, request)
+    return await push_workflow_impl(
+        authenticated_user.user_id, workflow_name, None, request
+    )
 
 
 @router.get("/{workflow_name}", status_code=status.HTTP_200_OK)
-async def get_workflow(workflow_name: str) -> Optional[Workflow]:
+async def get_workflow(
+    workflow_name: str, authenticated_user: AuthenticatedUser = Depends(authenticate)
+) -> Optional[Workflow]:
     """
     Get a workflow by its workflow name.
 
@@ -189,18 +204,22 @@ async def get_workflow(workflow_name: str) -> Optional[Workflow]:
     Returns:
         The workflow object.
     """
-    return await get_admyral_store().get_workflow_by_name(workflow_name)
+    return await get_admyral_store().get_workflow_by_name(
+        authenticated_user.user_id, workflow_name
+    )
 
 
 @router.get("", status_code=status.HTTP_200_OK)
-async def list_workflows() -> list[WorkflowMetadata]:
+async def list_workflows(
+    authenticated_user: AuthenticatedUser = Depends(authenticate),
+) -> list[WorkflowMetadata]:
     """
     List all available workflows.
 
     Returns:
         List of workflow objects.
     """
-    return await get_admyral_store().list_workflows()
+    return await get_admyral_store().list_workflows(authenticated_user.user_id)
 
 
 # TODO: code duplication with webhook_endpoints.py
@@ -220,6 +239,7 @@ async def trigger_workflow(
     workflow_name: str,
     background_tasks: BackgroundTasks,
     payload: Annotated[dict[str, JsonValue], Body()] = {},
+    authenticated_user: AuthenticatedUser = Depends(authenticate),
 ) -> WorkflowTriggerResponse:
     """
     Trigger a workflow.
@@ -228,7 +248,9 @@ async def trigger_workflow(
         workflow_name: The workflow name.
         payload: The payload to pass to the workflow.
     """
-    workflow = await get_admyral_store().get_workflow_by_name(workflow_name)
+    workflow = await get_admyral_store().get_workflow_by_name(
+        authenticated_user.user_id, workflow_name
+    )
     if not workflow:
         raise ValueError(f"Workflow with name {workflow_name} not found.")
     if not workflow.is_active:
@@ -238,7 +260,9 @@ async def trigger_workflow(
 
 
 @router.post("/activate", status_code=status.HTTP_201_CREATED)
-async def activate_workflow(body: WorkflowBody) -> bool:
+async def activate_workflow(
+    body: WorkflowBody, authenticated_user: AuthenticatedUser = Depends(authenticate)
+) -> bool:
     """
     Activate a workflow.
 
@@ -251,15 +275,17 @@ async def activate_workflow(body: WorkflowBody) -> bool:
     # if already active, do nothing
     # else we update the state and schedule in temporal
 
-    workflow = await _fetch_workflow(body.workflow_name, body.workflow_id)
+    workflow = await _fetch_workflow(
+        authenticated_user.user_id, body.workflow_name, body.workflow_id
+    )
 
     if not workflow.is_active:
         await get_admyral_store().set_workflow_active_state(
-            workflow.workflow_id, is_active=True
+            authenticated_user.user_id, workflow.workflow_id, is_active=True
         )
 
         schedules = await get_admyral_store().list_schedules_for_workflow(
-            workflow.workflow_id
+            authenticated_user.user_id, workflow.workflow_id
         )
         for schedule in schedules:
             await get_workers_client().schedule_workflow(workflow, schedule)
@@ -268,7 +294,9 @@ async def activate_workflow(body: WorkflowBody) -> bool:
 
 
 @router.post("/deactivate", status_code=status.HTTP_201_CREATED)
-async def deactivate_workflow(body: WorkflowBody) -> bool:
+async def deactivate_workflow(
+    body: WorkflowBody, authenticated_user: AuthenticatedUser = Depends(authenticate)
+) -> bool:
     """
     Deactivate a workflow.
 
@@ -281,15 +309,17 @@ async def deactivate_workflow(body: WorkflowBody) -> bool:
     # if already inactive, do nothing
     # else we update the state and delete the schedule in temporal
 
-    workflow = await _fetch_workflow(body.workflow_name, body.workflow_id)
+    workflow = await _fetch_workflow(
+        authenticated_user.user_id, body.workflow_name, body.workflow_id
+    )
 
     if workflow.is_active:
         await get_admyral_store().set_workflow_active_state(
-            workflow.workflow_id, is_active=False
+            authenticated_user.user_id, workflow.workflow_id, is_active=False
         )
 
         schedules = await get_admyral_store().list_schedules_for_workflow(
-            workflow.workflow_id
+            authenticated_user.user_id, workflow.workflow_id
         )
         for schedule in schedules:
             await get_workers_client().delete_schedule(schedule.schedule_id)
@@ -298,22 +328,30 @@ async def deactivate_workflow(body: WorkflowBody) -> bool:
 
 
 @router.delete("", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_workflow(body: WorkflowBody) -> None:
+async def delete_workflow(
+    body: WorkflowBody, authenticated_user: AuthenticatedUser = Depends(authenticate)
+) -> None:
     """
     Delete a workflow by its workflow name.
 
     Args:
         workflow_name: The workflow name.
     """
-    workflow = await _fetch_workflow(body.workflow_name, body.workflow_id)
+    workflow = await _fetch_workflow(
+        authenticated_user.user_id, body.workflow_name, body.workflow_id
+    )
 
     # we must clean up the schedules in temporal if there are any
     schedules = await get_admyral_store().list_schedules_for_workflow(
-        workflow.workflow_id
+        authenticated_user.user_id, workflow.workflow_id
     )
     for schedule in schedules:
-        await get_admyral_store().delete_schedule(schedule.schedule_id)
+        await get_admyral_store().delete_schedule(
+            authenticated_user.user_id, schedule.schedule_id
+        )
         await get_workers_client().delete_schedule(schedule.schedule_id)
 
     # now, we can delete the workflow
-    await get_admyral_store().remove_workflow(workflow.workflow_id)
+    await get_admyral_store().remove_workflow(
+        authenticated_user.user_id, workflow.workflow_id
+    )

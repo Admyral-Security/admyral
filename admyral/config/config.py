@@ -117,14 +117,10 @@ class SecretsManagerType(str, Enum):
 
 SQLITE_DATABASE_NAME = "admyral.db"
 
-ENV_ADMYRAL_DATABASE_TYPE = "ADMYRAL_DATABASE_TYPE"
 ENV_ADMYRAL_DATABASE_URL = "ADMYRAL_DATABASE_URL"
 ENV_ADMYRAL_SECRETS_MANAGER_TYPE = "ADMYRAL_SECRETS_MANAGER"
 
 
-ADMYRAL_DATABASE_TYPE = DatabaseType(
-    os.getenv(ENV_ADMYRAL_DATABASE_TYPE, DatabaseType.SQLITE)
-)
 ADMYRAL_DATABASE_URL = os.getenv(
     ENV_ADMYRAL_DATABASE_URL,
     f"sqlite+aiosqlite:///{get_local_storage_path()}/{SQLITE_DATABASE_NAME}",
@@ -133,10 +129,12 @@ if ADMYRAL_DATABASE_URL.startswith("postgresql://"):
     ADMYRAL_DATABASE_URL = ADMYRAL_DATABASE_URL.replace(
         "postgresql://", "postgresql+asyncpg://"
     )
+    ADMYRAL_DATABASE_TYPE = DatabaseType.POSTGRES
 elif ADMYRAL_DATABASE_URL.startswith("sqlite://"):
     ADMYRAL_DATABASE_URL = ADMYRAL_DATABASE_URL.replace(
         "sqlite://", "sqlite+aiosqlite://"
     )
+    ADMYRAL_DATABASE_TYPE = DatabaseType.SQLITE
 
 ADMYRAL_SECRETS_MANAGER_TYPE = SecretsManagerType(
     os.getenv(ENV_ADMYRAL_SECRETS_MANAGER_TYPE, SecretsManagerType.SQL)
@@ -234,3 +232,17 @@ SECRETS_ENCRYPTION_KEY = bytes.fromhex(
 
 
 API_V1_STR = "/api/v1"
+
+
+ENV_ADMYRAL_DISABLE_AUTH = "ADMYRAL_DISABLE_AUTH"
+DISABLE_AUTH = os.getenv(ENV_ADMYRAL_DISABLE_AUTH, "false").lower() == "true"
+
+if DISABLE_AUTH:
+    # required for NextAuthJWT
+    os.environ["ENV"] = "dev"
+
+
+ENV_ADMYRAL_AUTH_SECRET = "NEXTAUTH_SECRET"
+AUTH_SECRET = os.getenv(
+    ENV_ADMYRAL_AUTH_SECRET, "QzkuVCn7OGfkpoX98aOxf2tc3kFX8pZs71N1wHPo8NM="
+)

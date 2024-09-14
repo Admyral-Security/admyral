@@ -1,10 +1,11 @@
-from fastapi import APIRouter, status, HTTPException
+from fastapi import APIRouter, status, HTTPException, Depends
 from collections import defaultdict
 from sqlalchemy.exc import IntegrityError
 
 from admyral.action_registry import ActionRegistry
 from admyral.server.deps import get_admyral_store
 from admyral.models import (
+    AuthenticatedUser,
     ActionMetadata,
     ActionNamespace,
     EditorActions,
@@ -17,18 +18,23 @@ from admyral.editor import (
     editor_workflow_graph_to_workflow,
 )
 from admyral.server.endpoints.workflow_endpoints import push_workflow_impl
+from admyral.server.auth import authenticate
 
 
 router = APIRouter()
 
 
 @router.get("/actions", status_code=status.HTTP_200_OK)
-async def load_workflow_actions() -> EditorActions:
+async def load_workflow_actions(
+    authenticated_user: AuthenticatedUser = Depends(authenticate),
+) -> EditorActions:
     """
     Load all available workflow actions.
     """
     actions = [action.to_metadata() for action in ActionRegistry.get_actions()]
-    custom_actions = await get_admyral_store().list_actions()
+    custom_actions = await get_admyral_store().list_actions(
+        user_id=authenticated_user.user_id
+    )
     actions.extend(custom_actions)
 
     actions_by_namespace = defaultdict(list)
@@ -70,17 +76,23 @@ async def load_workflow_actions() -> EditorActions:
 
 
 @router.get("/workflow", status_code=status.HTTP_200_OK)
-async def load_workflow_as_react_flow_graph(workflow_id: str) -> EditorWorkflowGraph:
+async def load_workflow_as_react_flow_graph(
+    workflow_id: str, authenticated_user: AuthenticatedUser = Depends(authenticate)
+) -> EditorWorkflowGraph:
     """
     Load a workflow as a ReactFlow graph.
     """
-    workflow = await get_admyral_store().get_workflow_by_id(workflow_id)
+    workflow = await get_admyral_store().get_workflow_by_id(
+        user_id=authenticated_user.user_id, workflow_id=workflow_id
+    )
     if not workflow:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f'Workflow with the ID "{workflow_id}" does not exist.',
         )
-    webhook = await get_admyral_store().get_webhook_for_workflow(workflow_id)
+    webhook = await get_admyral_store().get_webhook_for_workflow(
+        user_id=authenticated_user.user_id, workflow_id=workflow_id
+    )
     return workflow_to_editor_workflow_graph(
         workflow,
         webhook_id=webhook.webhook_id if webhook else None,
@@ -88,10 +100,10 @@ async def load_workflow_as_react_flow_graph(workflow_id: str) -> EditorWorkflowG
     )
 
 
-# TODO: TEST UNIQUENESS CONSTRAINT REGARDING WORKFLOW NAME
 @router.post("/workflow", status_code=status.HTTP_201_CREATED)
 async def save_workflow_from_react_flow_graph(
     editor_workflow_graph: EditorWorkflowGraph,
+    authenticated_user: AuthenticatedUser = Depends(authenticate),
 ) -> WorkflowPushResponse:
     """
     Save a workflow from a ReactFlow graph.
@@ -99,6 +111,7 @@ async def save_workflow_from_react_flow_graph(
     workflow = editor_workflow_graph_to_workflow(editor_workflow_graph)
     try:
         return await push_workflow_impl(
+            user_id=authenticated_user.user_id,
             workflow_name=workflow.workflow_name,
             workflow_id=workflow.workflow_id,
             request=WorkflowPushRequest(

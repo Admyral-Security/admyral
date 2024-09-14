@@ -9,6 +9,8 @@ from sqlmodel import (
 from sqlalchemy import TEXT, Column, TIMESTAMP, BOOLEAN
 from datetime import datetime
 
+from admyral.models.auth import User
+
 
 class UserSchema(SQLModel, table=True):
     """
@@ -48,6 +50,19 @@ class UserSchema(SQLModel, table=True):
     authenticators: list["AuthenticatorSchema"] = Relationship(
         back_populates="user", sa_relationship_kwargs=dict(cascade="all, delete")
     )
+
+    def to_model(self) -> User:
+        return User.model_validate(
+            {
+                "id": self.id,
+                "name": self.name,
+                "email": self.email,
+                "email_verified": self.email_verified,
+                "image": self.image,
+                "created_at": self.created_at,
+                "updated_at": self.updated_at,
+            }
+        )
 
 
 class AccountSchema(SQLModel, table=True):

@@ -20,7 +20,11 @@
 			"type": "debugpy",
 			"request": "launch",
 			"module": "admyral.main",
-			"args": ["api"]
+			"args": ["api"],
+			"justMyCode": false,
+			"env": {
+				"PYTHONPATH": "${cwd}/.venv/bin/python3.12"
+			}
 		}
 	]
 }
