@@ -553,7 +553,8 @@ class AdmyralStore(StoreInterface):
         async with self._get_async_session() as db:
             result = await db.exec(
                 select(WorkflowRunSchema)
-                .where(WorkflowRunSchema.user_id == user_id)
+                .join(WorkflowSchema)
+                .where(WorkflowSchema.user_id == user_id)
                 .where(WorkflowRunSchema.workflow_id == workflow_id)
                 .order_by(WorkflowRunSchema.created_at.desc())
                 .limit(limit)
@@ -565,7 +566,8 @@ class AdmyralStore(StoreInterface):
     ) -> Optional[WorkflowRunSchema]:
         result = await db.exec(
             select(WorkflowRunSchema)
-            .where(WorkflowRunSchema.user_id == user_id)
+            .join(WorkflowSchema)
+            .where(WorkflowSchema.user_id == user_id)
             .where(WorkflowRunSchema.workflow_id == workflow_id)
             .where(WorkflowRunSchema.run_id == run_id)
         )

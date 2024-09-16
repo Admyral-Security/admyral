@@ -36,16 +36,14 @@ class WorkersClient:
 
     async def execute_workflow(
         self,
-        workflow_id: str,
+        workflow: Workflow,
         source_name: str,
         payload: dict[str, JsonValue] = {},
         trigger_default_args: dict[str, JsonValue] = {},
     ) -> None:
-        logger.info(f"Executing workflow {workflow_id} from source {source_name}.")
-
-        workflow = await self.store.get_workflow_by_id(workflow_id)
-        if not workflow:
-            raise ValueError(f"Workflow with id {workflow_id} not found.")
+        logger.info(
+            f"Executing workflow {workflow.workflow_id} from source {source_name}."
+        )
 
         # TODO: should we unify the temporal_workflow_id across triggers?
         temmporal_workflow_id = str(uuid4())
