@@ -2,7 +2,7 @@ from fastapi import APIRouter, status, Header, BackgroundTasks, Request
 from typing import Optional, Annotated, Callable, Coroutine
 import json
 
-from admyral.models import WorkflowTriggerResponse, WorkflowTriggerType
+from admyral.models import WorkflowTriggerResponse, WorkflowTriggerType, Workflow
 from admyral.server.deps import get_admyral_store, get_workers_client
 from admyral.typings import JsonValue
 from admyral.utils.collections import is_not_empty
@@ -36,14 +36,14 @@ async def _extract_payload_from_request(request: Request) -> JsonValue:
 
 
 def _workflow_execution_task(
-    workflow_id: str,
+    workflow: Workflow,
     source_name: str,
     payload: dict[str, JsonValue],
     trigger_default_args: dict[str, JsonValue],
 ) -> Callable[[], Coroutine]:
     async def exec_task():
         await get_workers_client().execute_workflow(
-            workflow_id, source_name, payload, trigger_default_args=trigger_default_args
+            workflow, source_name, payload, trigger_default_args=trigger_default_args
         )
 
     return exec_task
@@ -88,7 +88,7 @@ async def _handle_webhook_trigger(
     # launch the workflow execution in the background
     background_tasks.add_task(
         _workflow_execution_task(
-            webhook.workflow_id,
+            workflow,
             WEBHOOK_SOURCE_NAME,
             payload,
             trigger_default_args=webhook_trigger.default_args_dict,

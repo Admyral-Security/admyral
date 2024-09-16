@@ -125,16 +125,18 @@ ADMYRAL_DATABASE_URL = os.getenv(
     ENV_ADMYRAL_DATABASE_URL,
     f"sqlite+aiosqlite:///{get_local_storage_path()}/{SQLITE_DATABASE_NAME}",
 )
-if ADMYRAL_DATABASE_URL.startswith("postgresql://"):
+if ADMYRAL_DATABASE_URL.startswith("postgresql"):
     ADMYRAL_DATABASE_URL = ADMYRAL_DATABASE_URL.replace(
         "postgresql://", "postgresql+asyncpg://"
     )
     ADMYRAL_DATABASE_TYPE = DatabaseType.POSTGRES
-elif ADMYRAL_DATABASE_URL.startswith("sqlite://"):
+elif ADMYRAL_DATABASE_URL.startswith("sqlite"):
     ADMYRAL_DATABASE_URL = ADMYRAL_DATABASE_URL.replace(
         "sqlite://", "sqlite+aiosqlite://"
     )
     ADMYRAL_DATABASE_TYPE = DatabaseType.SQLITE
+else:
+    raise NotImplementedError(f"Unsupported database type: {ADMYRAL_DATABASE_URL}")
 
 ADMYRAL_SECRETS_MANAGER_TYPE = SecretsManagerType(
     os.getenv(ENV_ADMYRAL_SECRETS_MANAGER_TYPE, SecretsManagerType.SQL)
@@ -241,7 +243,7 @@ if DISABLE_AUTH:
     os.environ["ENV"] = "dev"
 
 
-ENV_ADMYRAL_AUTH_SECRET = "NEXTAUTH_SECRET"
+ENV_ADMYRAL_AUTH_SECRET = "AUTH_SECRET"
 AUTH_SECRET = os.getenv(
     ENV_ADMYRAL_AUTH_SECRET, "QzkuVCn7OGfkpoX98aOxf2tc3kFX8pZs71N1wHPo8NM="
 )

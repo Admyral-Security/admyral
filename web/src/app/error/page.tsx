@@ -4,6 +4,7 @@ import LogoWithName from "@/components/icons/logo-with-name";
 import { Code, Flex, Text } from "@radix-ui/themes";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 
 enum Error {
 	Configuration = "Configuration",
@@ -23,7 +24,7 @@ const errorMap = {
 	[Error.Verification]: <Text>The verification failed.</Text>,
 };
 
-export default function AuthErrorPage() {
+function AuthError() {
 	const search = useSearchParams();
 	const error = search.get("error") as Error;
 
@@ -62,5 +63,13 @@ export default function AuthErrorPage() {
 				</Flex>
 			</Flex>
 		</Flex>
+	);
+}
+
+export default function AuthErrorPage() {
+	return (
+		<Suspense fallback={null}>
+			<AuthError />
+		</Suspense>
 	);
 }

@@ -27,10 +27,10 @@ services:
 
   api:
     container_name: admyral-api
-    # build:
-    #   context: ../..
-    #   dockerfile: ./docker/Dockerfile.api
-    image: admyralai/api:${ADMYRAL_VERSION}
+    build:
+      context: ../..
+      dockerfile: ./docker/Dockerfile.api
+    # image: admyralai/api:${ADMYRAL_VERSION}
     healthcheck:
       test: ["CMD", "curl", "-f", "http://0.0.0.0:8000/health"]
       timeout: 5s
@@ -45,6 +45,8 @@ services:
       - admyral-network
     ports:
       - 8000:8000
+    expose:
+      - 8000
     environment:
       # DB
       - ADMYRAL_DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-your-super-secret-and-long-postgres-password}@postgresql:5432/admyral
@@ -56,15 +58,15 @@ services:
       - ADMYRAL_TEMPORAL_HOST=temporal:7233
       # Authentication
       - ADMYRAL_DISABLE_AUTH=${ADMYRAL_DISABLE_AUTH:-false}
-      - NEXT_AUTH_SECRET=${NEXTAUTH_SECRET:-QzkuVCn7OGfkpoX98aOxf2tc3kFX8pZs71N1wHPo8NM}
+      - AUTH_SECRET=${AUTH_SECRET:-QzkuVCn7OGfkpoX98aOxf2tc3kFX8pZs71N1wHPo8NM}
       - NEXTAUTH_URL=http://web:3000
 
   web:
     container_name: admyral-web
-    # build:
-    #   context: ../../web
-    #   dockerfile: ../docker/Dockerfile.web
-    image: admyralai/web:${ADMYRAL_VERSION}
+    build:
+      context: ../../web
+      dockerfile: ../docker/Dockerfile.web
+    # image: admyralai/web:${ADMYRAL_VERSION}
     depends_on:
       api:
         condition: service_healthy
@@ -74,19 +76,21 @@ services:
       - 3000:3000
     environment:
       - ADMYRAL_API_BASE_URL=http://api:8000
-      - ADMYRAL_DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-your-super-secret-and-long-postgres-password}@postgresql:5432/admyral
+      - ADMYRAL_DATABASE_URL=postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-your-super-secret-and-long-postgres-password}@postgresql:5432/admyral
       # Authentication
+      - AUTH_TRUST_HOST=true
+      - AUTH_URL=http://localhost:3000
       - ADMYRAL_DISABLE_AUTH=${ADMYRAL_DISABLE_AUTH:-false}
-      - NEXT_AUTH_SECRET=${NEXTAUTH_SECRET:-QzkuVCn7OGfkpoX98aOxf2tc3kFX8pZs71N1wHPo8NM}
+      - AUTH_SECRET=${AUTH_SECRET:-QzkuVCn7OGfkpoX98aOxf2tc3kFX8pZs71N1wHPo8NM}
       - AUTH_GITHUB_ID=${AUTH_GITHUB_ID}
       - AUTH_GITHUB_SECRET=${AUTH_GITHUB_SECRET}
 
   worker:
     container_name: admyral-worker
-    # build:
-    #   context: ../..
-    #   dockerfile: ./docker/Dockerfile.worker
-    image: admyralai/worker:${ADMYRAL_VERSION}
+    build:
+      context: ../..
+      dockerfile: ./docker/Dockerfile.worker
+    # image: admyralai/worker:${ADMYRAL_VERSION}
     entrypoint: ["python", "admyral/main.py", "worker", "--docker"]
     privileged: true
     depends_on:

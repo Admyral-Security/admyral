@@ -1,8 +1,9 @@
 import GitHub from "next-auth/providers/github";
 import type { NextAuthConfig } from "next-auth";
 import type { Provider } from "next-auth/providers";
+import { GITHUB_CLIENT_ID, GITHUB_SECRET } from "./constants/env";
 
-const providers: Provider[] = [
+export const providers: Provider[] = [
 	// Credentials({
 	// 	// You can specify which fields should be submitted, by adding keys to the `credentials` object.
 	// 	// e.g. domain, username, password, 2FA token, etc.
@@ -32,7 +33,10 @@ const providers: Provider[] = [
 	// 		return user;
 	// 	},
 	// }),
-	GitHub,
+	GitHub({
+		clientId: GITHUB_CLIENT_ID,
+		clientSecret: GITHUB_SECRET,
+	}),
 ];
 
 export const providerMap = providers

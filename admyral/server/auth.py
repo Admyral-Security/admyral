@@ -32,9 +32,7 @@ async def authenticate(request: Request) -> AuthenticatedUser:
         # TODO: double-check whether user id exists in the database
         raise NotImplementedError("API key authentication is not yet implemented")
     else:
-        assert (
-            os.environ.get("NEXTAUTH_SECRET") is not None
-        ), "NEXTAUTH_SECRET must be set"
+        assert os.environ.get("AUTH_SECRET") is not None, "AUTH_SECRET must be set"
         decrypted_token = validate_and_decrypt_jwt(request)
         user_id = decrypted_token.get("sub")
 

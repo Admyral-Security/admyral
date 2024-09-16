@@ -5,5 +5,7 @@ export const DISABLE_AUTH =
 	(process.env.ADMYRAL_DISABLE_AUTH || "false") === "true";
 
 export const AUTH_SECRET =
-	process.env.NEXTAUTH_SECRET ||
-	"QzkuVCn7OGfkpoX98aOxf2tc3kFX8pZs71N1wHPo8NM=";
+	process.env.AUTH_SECRET || "QzkuVCn7OGfkpoX98aOxf2tc3kFX8pZs71N1wHPo8NM=";
+
+export const GITHUB_CLIENT_ID = process.env.AUTH_GITHUB_ID;
+export const GITHUB_SECRET = process.env.AUTH_GITHUB_SECRET;

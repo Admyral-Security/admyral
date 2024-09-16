@@ -224,11 +224,11 @@ async def list_workflows(
 
 # TODO: code duplication with webhook_endpoints.py
 def exec_task(
-    workflow_id: str, payload: dict[str, JsonValue]
+    workflow: Workflow, payload: dict[str, JsonValue]
 ) -> Callable[[], Coroutine]:
     async def task() -> None:
         await get_workers_client().execute_workflow(
-            workflow_id, MANUAL_TRIGGER_SOURCE_NAME, payload
+            workflow, MANUAL_TRIGGER_SOURCE_NAME, payload
         )
 
     return task
@@ -255,7 +255,7 @@ async def trigger_workflow(
         raise ValueError(f"Workflow with name {workflow_name} not found.")
     if not workflow.is_active:
         return WorkflowTriggerResponse.inactive()
-    background_tasks.add_task(exec_task(workflow.workflow_id, payload))
+    background_tasks.add_task(exec_task(workflow, payload))
     return WorkflowTriggerResponse.success()
 
 

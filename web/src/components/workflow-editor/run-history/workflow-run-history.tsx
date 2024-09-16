@@ -71,7 +71,7 @@ export default function WorkflowRunHistory({
 		if (error) {
 			errorToast("Failed to load workflow runs. Please reload the page.");
 		}
-	}, [data, error]);
+	}, [data, error, setRuns, setSelectedRunIdx]);
 
 	if (isPending) {
 		return <Text>Loading...</Text>;
