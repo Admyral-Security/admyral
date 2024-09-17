@@ -1,4 +1,4 @@
-from typing import Annotated
+from typing import Annotated, Literal
 from dateutil import parser
 
 from admyral.workflow import workflow, Webhook
@@ -47,6 +47,14 @@ def has_pr_unreviewed_commits(
             description="The name of the repository",
         ),
     ],
+    state: Annotated[
+        Literal["APPROVED", "CHANGES_REQUESTED", "COMMENTED", "DISMISSED"] | None,
+        ArgumentMetadata(
+            display_name="State",
+            description="The state of the review",
+            default="APPROVED",
+        ),
+    ],
 ) -> dict[str, JsonValue]:
     commit_history = list_commit_history_for_pull_request(
         repo_owner=repo_owner,
@@ -70,7 +78,7 @@ def has_pr_unreviewed_commits(
         repo_owner=repo_owner,
         repo_name=repo_name,
         pull_request_number=pull_request["number"],
-        state="APPROVED",
+        state=state,
     )
     approval_history = sorted(
         approval_history, key=lambda x: parser.parse(x["submitted_at"]), reverse=True
@@ -125,6 +133,7 @@ def handle_pr_with_unreviewed_commits(payload: dict[str, JsonValue]):
         pull_request=payload["pull_request"],
         repo_owner=payload["repo_owner"],
         repo_name=payload["repo_name"],
+        state="APPROVED",
         secrets={"GITHUB_SECRET": "github_secret"},
     )
 
@@ -241,15 +250,16 @@ def handle_pr_with_unreviewed_commits(payload: dict[str, JsonValue]):
             )  # TODO: configure your wait time here
 
             # check again whether there are still unreviewed commits
-            unreviewd_commits_result = has_pr_unreviewed_commits(
+            unreviewed_commits_result = has_pr_unreviewed_commits(
                 pull_request=payload["pull_request"],
                 repo_owner=payload["repo_owner"],
                 repo_name=payload["repo_name"],
                 secrets={"GITHUB_SECRET": "github_secret"},
+                state=None,
                 run_after=[wait_res],
             )
 
-            if unreviewd_commits_result["has_unreviewed_commits"]:
+            if unreviewed_commits_result["has_unreviewed_commits"]:
                 # Send message to compliance manager
                 send_slack_message_to_user_by_email(
                     email="daniel@admyral.dev",  # TODO: set your email here
