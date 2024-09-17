@@ -4,15 +4,18 @@ import { Callout } from "nextra/components";
 
 This method enables users to list all merged pull requests in a GitHub repository.
 
-<Callout type="info">
-	For more information on the GitHub API endpoint for pull requests, see
-	[Here](https://docs.github.com/en/rest/pulls/pulls?apiVersion=2022-11-28).
-</Callout>
+To use this API endpoint for a private repository, your GitHub token requires the following scopes:
 
-To use this API endpoint, your GitHub token requires the following scopes:
+For a Fine-grained token:
 
 ```
 - "Pull requests" repository permissions (read)
+```
+
+Alternatively, for a Token (classic):
+
+```
+- repo
 ```
 
 **SDK Import:**
@@ -26,14 +29,14 @@ from admyral.actions import list_merged_pull_requests
 | Argument Name                     | Description                                                                                                                                         | Required |
 | --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- | :------: |
 | **Repository Owner** `repo_owner` | The owner of the repository.                                                                                                                        |   yes    |
-| **Repository Name** `filter`      | The name of the repository.                                                                                                                         |   yes    |
+| **Repository Name** `repo_name`   | The name of the repository.                                                                                                                         |   yes    |
 | **Start Time** `start_time`       | The date and time to start retrieving events in ISO 8601 format (YYYY-MM-DDTHH:MM:SSZ). If not specified, all available Audit logs will be returned |    -     |
 | **End Time** `end_time`           | The date and time to stop retrieving events in ISO 8601 format (YYYY-MM-DDTHH:MM:SSZ).                                                              |    -     |
 | **Limit** `limit`                 | The maximum number of events to retrieve.                                                                                                           |    -     |
 
 ## Returns
 
-A JSON array of pull requests.
+A JSON array of merged pull requests.
 
 <Callout type="info">
 	For more information on the API response for listing pull requests, see
