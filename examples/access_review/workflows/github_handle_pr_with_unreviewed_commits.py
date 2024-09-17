@@ -54,7 +54,7 @@ def has_pr_unreviewed_commits(
             description="The state of the review",
             default="APPROVED",
         ),
-    ],
+    ] = "APPROVED",
 ) -> dict[str, JsonValue]:
     commit_history = list_commit_history_for_pull_request(
         repo_owner=repo_owner,
@@ -133,7 +133,6 @@ def handle_pr_with_unreviewed_commits(payload: dict[str, JsonValue]):
         pull_request=payload["pull_request"],
         repo_owner=payload["repo_owner"],
         repo_name=payload["repo_name"],
-        state="APPROVED",
         secrets={"GITHUB_SECRET": "github_secret"},
     )
 
@@ -255,7 +254,7 @@ def handle_pr_with_unreviewed_commits(payload: dict[str, JsonValue]):
                 repo_owner=payload["repo_owner"],
                 repo_name=payload["repo_name"],
                 secrets={"GITHUB_SECRET": "github_secret"},
-                state=None,
+                state="COMMENTED",
                 run_after=[wait_res],
             )
 
