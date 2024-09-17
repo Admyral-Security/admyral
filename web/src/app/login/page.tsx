@@ -16,7 +16,11 @@ import GoogleIcon from "@/components/icons/google-icon";
 import GithubIcon from "@/components/icons/github-icon";
 import LogoWithName from "@/components/icons/logo-with-name";
 import Image from "next/image";
-import { DiscordLogoIcon, InfoCircledIcon } from "@radix-ui/react-icons";
+import {
+	DiscordLogoIcon,
+	GitHubLogoIcon,
+	InfoCircledIcon,
+} from "@radix-ui/react-icons";
 import useSearchParameterError, {
 	SearchParameterErrorProvider,
 } from "@/providers/search-paramater-error-provider";
@@ -108,6 +112,22 @@ function LoginPageChild() {
 								We are working on a new version and will be back
 								online soon.
 							</Text>
+
+							<Text>
+								Check out our GitHub repository for our newest
+								version.
+							</Text>
+
+							<Link
+								href="https://github.com/admyral-Security/admyral"
+								target="_blank"
+								style={{ width: "100%" }}
+							>
+								<Button style={{ width: "100%" }}>
+									<GitHubLogoIcon />
+									<Text>GitHub</Text>
+								</Button>
+							</Link>
 
 							<Text>
 								Join our Discord for the latest updates.
