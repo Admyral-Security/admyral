@@ -50,7 +50,7 @@ export default function SaveWorkflowButton() {
 			return;
 		}
 		if (workflow.workflowName.includes(SPACE)) {
-			errorToast("Workflow name must contain empty spaces.");
+			errorToast("Workflow name must not contain empty spaces.");
 			return;
 		}
 		saveWorkflow.mutate(workflow);
