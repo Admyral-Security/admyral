@@ -26,3 +26,8 @@ async def getcwd() -> str:
 
 async def dirname(file: str) -> str:
     return await asyncio.to_thread(os.path.dirname, file)
+
+
+async def touch(file: str):
+    async with aiofiles.open(file, "a"):
+        pass

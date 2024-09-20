@@ -62,13 +62,14 @@ def get_local_postgres_volume() -> str:
 ADMYRAL_DISABLE_NSJAIL = (
     os.getenv(ENV_ADMYRAL_DISABLE_NSJAIL, "false").lower() == "true"
 )
+ADMYRAL_CACHE_DIRECOTRY = os.path.join(get_local_storage_path(), "cache")
 ADMYRAL_PIP_CACHE_DIRECTORY = os.getenv(
     ENV_ADMYRAL_PIP_CACHE_DIRECTORY,
-    os.path.join(get_local_storage_path(), "cache", "pip"),
+    os.path.join(ADMYRAL_CACHE_DIRECOTRY, "pip"),
 )
 ADMYRAL_PIP_LOCK_CACHE_DIRECTORY = os.getenv(
     ENV_ADMYRAL_PIP_LOCK_CACHE_DIRECTORY,
-    os.path.join(get_local_storage_path(), "cache", "pip-lock"),
+    os.path.join(ADMYRAL_CACHE_DIRECOTRY, "pip-lock"),
 )
 ADMYRAL_PIP_LOCKFILE_CACHE_TTL_IN_SECONDS = 3 * 24 * 60 * 60  # 3 days
 ADMYRAL_USE_LOCAL_ADMYRAL_PIP_PACKAGE = (

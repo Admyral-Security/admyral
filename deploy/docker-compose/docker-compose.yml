@@ -28,8 +28,8 @@ services:
   admyral-api:
     container_name: admyral-api
     # build:
-    #     context: ../..
-    #     dockerfile: ./docker/Dockerfile.api
+    #   context: ../..
+    #   dockerfile: ./docker/Dockerfile.api
     image: admyralai/api:${ADMYRAL_VERSION}
     healthcheck:
       test: ["CMD", "curl", "-f", "http://0.0.0.0:8000/health"]
@@ -59,8 +59,8 @@ services:
   web:
     container_name: admyral-web
     # build:
-    #     context: ../../web
-    #     dockerfile: ../docker/Dockerfile.web
+    #   context: ../../web
+    #   dockerfile: ../docker/Dockerfile.web
     image: admyralai/web:${ADMYRAL_VERSION}
     depends_on:
       admyral-api:
@@ -75,8 +75,8 @@ services:
   worker:
     container_name: admyral-worker
     # build:
-    #     context: ../..
-    #     dockerfile: ./docker/Dockerfile.worker
+    #   context: ../..
+    #   dockerfile: ./docker/Dockerfile.worker
     image: admyralai/worker:${ADMYRAL_VERSION}
     entrypoint: ["python", "admyral/main.py", "worker", "--docker"]
     privileged: true
@@ -92,6 +92,7 @@ services:
       mode: replicated
       replicas: ${ADMYRAL_WORKER_REPLICAS:-1}
     environment:
+      - ADMYRAL_DISABLE_NSJAIL=false
       # Integrations
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - RESEND_API_KEY=${RESEND_API_KEY}

@@ -11,6 +11,7 @@ import itertools
 
 from admyral.utils.aio import makedirs, dirname
 from admyral.config.config import (
+    ADMYRAL_CACHE_DIRECOTRY,
     ADMYRAL_PIP_CACHE_DIRECTORY,
     ADMYRAL_PIP_LOCK_CACHE_DIRECTORY,
     ADMYRAL_DISABLE_NSJAIL,
@@ -23,7 +24,7 @@ from admyral.models import PythonAction, PipLockfile
 from admyral.db.store_interface import StoreInterface
 from admyral.utils.hash import calculate_sha256
 from admyral.utils.time import utc_now_timestamp_seconds
-from admyral.utils.aio import path_exists, getcwd
+from admyral.utils.aio import path_exists, getcwd, touch
 from admyral.utils.subprocess import run_subprocess_with_log_flushing
 from admyral.context import ctx
 
@@ -47,6 +48,7 @@ async def get_nsjail_dir() -> str:
 
 async def python_action_worker_setup() -> None:
     if not ADMYRAL_DISABLE_NSJAIL:
+        await makedirs(ADMYRAL_CACHE_DIRECOTRY)
         await makedirs(ADMYRAL_PIP_CACHE_DIRECTORY)
         await makedirs(ADMYRAL_PIP_LOCK_CACHE_DIRECTORY)
 
@@ -318,6 +320,9 @@ async def _pip_install_requirement(
         ADMYRAL_PIP_LOCK_CACHE_DIRECTORY, f"pip-{lock_name}.lock"
     )
 
+    # generate flock file if not exists
+    await touch(req_lock_file)
+
     # generate nsjail config file
     async with aiofiles.open(
         os.path.join("admyral", "workers", "nsjail", "template.pip_install.cfg")
@@ -329,15 +334,16 @@ async def _pip_install_requirement(
         REQUIREMENT=requirement,
         TARGET=requirement_cache_path,
         INSTALL_REQUIREMENT_SCRIPT_PATH=install_requirement_script,
+        CACHE_PATH=ADMYRAL_CACHE_DIRECOTRY,
     )
-    nsjail_config_path = os.path.join(job_dir, f"nsjail_pip_install_{requirement}.cfg")
-    async with aiofiles.open(nsjail_config_path, "w") as f:
+    nsjail_pip_install_config_path = os.path.join(job_dir, f"nsjail_pip_install_{requirement}.cfg")
+    async with aiofiles.open(nsjail_pip_install_config_path, "w") as f:
         await f.write(nsjail_config)
 
     cmd = [
         "nsjail",
         "--config",
-        nsjail_config_path,
+        nsjail_pip_install_config_path,
     ]
     exit_code = await run_subprocess_with_log_flushing(
         cmd, lambda logs: ctx.get().append_logs_async(logs)
