@@ -17,6 +17,7 @@ from admyral.workers.workflow_run_completor import mark_workflow_as_completed
 from admyral.secret.secrets_manager import secrets_manager_factory
 from admyral.workers.if_condition_executor import execute_if_condition
 from admyral.utils.future_executor import capture_main_event_loop
+from admyral.workers.store_reference_error import store_reference_resolution_error
 
 logger = get_logger(__name__)
 
@@ -51,6 +52,7 @@ async def run_worker(
         action_executor("if_condition", execute_if_condition),
         init_workflow_run,
         mark_workflow_as_completed,
+        store_reference_resolution_error,
     ]
 
     logger.info(f"Starting worker {worker_name}...")

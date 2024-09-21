@@ -2,24 +2,24 @@ import re
 import json
 
 from admyral.typings import JsonValue
+from admyral.exceptions import AdmyralFailureError
 
 
 REFERENCE_REGEX = re.compile(r"{{((?!}}).)*}}")
 
 
-PATTERN1 = r"\[\"((?!\"\]).)*\"\]"
+PATTERN1 = r"\[\"((?!\"\]).)+\"\]"
 OBJECT_ACCESS_REGEX = re.compile(PATTERN1)
 
-PATTERN2 = r"\[\'((?!\'\]).)*\'\]"
+PATTERN2 = r"\[\'((?!\'\]).)+\'\]"
 OBJECT_ACCESS_2_REGEX = re.compile(PATTERN2)
 
-PATTERN3 = r"\[((?!\])[0-9])*\]"
+PATTERN3 = r"\[((?!\])[0-9])+\]"
 INDEX_ACCESS_REGEX = re.compile(PATTERN3)
 
-ACCESS_PATH_REGEX = re.compile(f"{PATTERN3}|{PATTERN2}|{PATTERN1}")
+ACCESS_PATH_REGEX = re.compile(r"\[((?!\]).)*\]")
 
 
-# TODO: Shoudl we fail for an invalid access path or return None?
 def _resolve_access_path(action_outputs: dict, input: str) -> JsonValue:
     input = input.strip()
     if not input.startswith("{{") or not input.endswith("}}"):
@@ -40,6 +40,7 @@ def _resolve_access_path(action_outputs: dict, input: str) -> JsonValue:
     if current_value is None:
         return None
 
+    # TODO: this needs to change
     for key in ACCESS_PATH_REGEX.finditer(access_path):
         raw_value = key.group()
 
@@ -48,16 +49,36 @@ def _resolve_access_path(action_outputs: dict, input: str) -> JsonValue:
         ):
             # Case - Object Access: ['key'] or ["key"]
             raw_value = raw_value[2:-2]
-        else:
-            # Case - Array Access: [index]
-            raw_value = int(raw_value[1:-1])
-
-        try:
+            if not isinstance(current_value, dict):
+                raise AdmyralFailureError(
+                    message=f"Invalid access path: {access_path}. Expected a dictionary, got {type(current_value).__name__}."
+                )
+            if raw_value not in current_value:
+                raise AdmyralFailureError(
+                    message=f"Invalid access path: {access_path}. Key '{raw_value}' not found."
+                )
             current_value = current_value[raw_value]
-            if current_value is None:
-                return None
-        except (KeyError, IndexError):
-            return None
+        elif INDEX_ACCESS_REGEX.match(raw_value):
+            # Case - Array Access: [index]
+            try:
+                raw_value = int(raw_value[1:-1])
+            except ValueError:
+                raise AdmyralFailureError(
+                    message=f"Invalid access path: {access_path}. Expected an integer, got {raw_value}."
+                )
+            if not isinstance(current_value, list):
+                raise AdmyralFailureError(
+                    message=f"Invalid access path: {access_path}. Expected a list, got {type(current_value).__name__}."
+                )
+            if raw_value >= len(current_value) or raw_value < 0:
+                raise AdmyralFailureError(
+                    message=f"Invalid access path: {access_path}. Index {raw_value} out of bounds."
+                )
+            current_value = current_value[raw_value]
+        else:
+            raise AdmyralFailureError(
+                message=f"Invalid access path segment: {access_path}. Must be either a string or integer."
+            )
 
     return current_value
 

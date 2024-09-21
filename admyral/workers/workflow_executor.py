@@ -12,6 +12,7 @@ from copy import deepcopy
 
 # Import activity, passing it through the sandbox without reloading the module
 with workflow.unsafe.imports_passed_through():
+    from admyral.exceptions import AdmyralFailureError
     from admyral.logger import get_logger
     from admyral.models import (
         ActionNode,
@@ -240,13 +241,17 @@ class WorkflowExecutor:
         self, node: ActionNode, execution_state: dict, ctx_dict: dict[str, Any]
     ) -> tuple[str, Any]:
         # evaluate the references of the action arguments
-        action_args = {}
-        for key, value in node.args.items():
-            key = str(
-                evaluate_references(key, execution_state)
-            )  # keys of JSON objects always must be strings!
-            value = evaluate_references(value, execution_state)
-            action_args[key] = value
+        try:
+            action_args = {}
+            for key, value in node.args.items():
+                key = str(
+                    evaluate_references(key, execution_state)
+                )  # keys of JSON objects always must be strings!
+                value = evaluate_references(value, execution_state)
+                action_args[key] = value
+        except AdmyralFailureError as e:
+            await _store_reference_resolution_error(ctx_dict, e.message)
+            raise e
 
         action_type = node.type
 
@@ -279,9 +284,15 @@ class WorkflowExecutor:
         # some reason. Doing a model dump on an if-node works fine, though.
         # TODO: we should probably try to fix this in the future because ugly
         dag_node_copy = deepcopy(dag_node)
-        dag_node_copy.condition = ConditionReferenceResolution(
-            execution_state
-        ).resolve_references(dag_node_copy.condition)
+
+        try:
+            dag_node_copy.condition = ConditionReferenceResolution(
+                execution_state
+            ).resolve_references(dag_node_copy.condition)
+        except AdmyralFailureError as e:
+            await _store_reference_resolution_error(ctx_dict, e.message)
+            raise e
+
         dag_node_copy_json = dag_node_copy.model_dump()
         condition_json = dag_node_copy_json["condition"]
 
@@ -302,6 +313,20 @@ class WorkflowExecutor:
             )
 
         return step_id, eliminated_nodes
+
+
+async def _store_reference_resolution_error(
+    ctx_dict: dict[str, Any], error: str
+) -> None:
+    await _execute_activity(
+        "store_reference_resolution_error",
+        args=[
+            ctx_dict["run_id"],
+            ctx_dict["prev_step_id"],
+            ctx_dict["action_type"],
+            f"Failed to evaluate reference. {error}",
+        ],
+    )
 
 
 def path_elimination(

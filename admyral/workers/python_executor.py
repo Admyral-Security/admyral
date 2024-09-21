@@ -336,7 +336,9 @@ async def _pip_install_requirement(
         INSTALL_REQUIREMENT_SCRIPT_PATH=install_requirement_script,
         CACHE_PATH=ADMYRAL_CACHE_DIRECOTRY,
     )
-    nsjail_pip_install_config_path = os.path.join(job_dir, f"nsjail_pip_install_{requirement}.cfg")
+    nsjail_pip_install_config_path = os.path.join(
+        job_dir, f"nsjail_pip_install_{requirement}.cfg"
+    )
     async with aiofiles.open(nsjail_pip_install_config_path, "w") as f:
         await f.write(nsjail_config)
 

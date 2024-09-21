@@ -21,6 +21,7 @@ from admyral.workers.workflow_run_completor import mark_workflow_as_completed
 from admyral.workers.python_executor import execute_python_action
 from admyral.workers.if_condition_executor import execute_if_condition
 from admyral.workers.action_executor import action_executor
+from admyral.workers.store_reference_error import store_reference_resolution_error
 from admyral.action_registry import ActionRegistry
 from admyral.action import Action
 
@@ -84,6 +85,7 @@ async def execute_test_workflow(
         action_executor("if_condition", execute_if_condition),
         init_workflow_run,
         mark_workflow_as_completed,
+        store_reference_resolution_error,
     ]
 
     # remove custom actions from the registry because
