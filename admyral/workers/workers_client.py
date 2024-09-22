@@ -5,6 +5,7 @@ from temporalio.client import (
     ScheduleSpec,
     ScheduleIntervalSpec,
 )
+from temporalio.common import RetryPolicy
 from uuid import uuid4
 from datetime import timedelta
 import temporalio
@@ -17,6 +18,9 @@ from admyral.typings import JsonValue
 
 
 logger = get_logger(__name__)
+
+
+RETRY_POLICY = RetryPolicy(maximum_attempts=1, non_retryable_error_types=["Exception"])
 
 
 class WorkersClient:
@@ -55,6 +59,7 @@ class WorkersClient:
             },
             id=temmporal_workflow_id,
             task_queue="workflow-queue",
+            retry_policy=RETRY_POLICY,
         )
 
     def _build_temporal_schedule_spec(self, schedule: WorkflowSchedule) -> ScheduleSpec:
@@ -95,6 +100,7 @@ class WorkersClient:
                     },
                     id=temmporal_workflow_id,
                     task_queue="workflow-queue",
+                    retry_policy=RETRY_POLICY,
                 ),
                 spec=self._build_temporal_schedule_spec(schedule),
             ),

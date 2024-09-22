@@ -213,7 +213,10 @@ class WorkflowExecutor:
                 tg.create_task(task(job.action_id, job.prev_step_id))
 
         if exception:
-            raise exception
+            logger.error(
+                f"An exception occurred during workflow execution. Error: {str(exception)}"
+            )
+            return
 
         await _execute_activity("mark_workflow_as_completed", args=[workflow_run_id])
 
