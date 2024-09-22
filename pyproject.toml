@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "admyral"
-version = "0.1.24"
+version = "0.1.25"
 description = ""
 authors = ["Daniel Grittner <danielgrittner@web.de>"]
 readme = "README.md"
