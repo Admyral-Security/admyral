@@ -104,10 +104,7 @@ def deserialize_json_with_reference(value: str) -> JsonValue:
         return None
 
     # handle string escaping for ints, floats, bools, dicts, and lists
-    if (
-        value.startswith('"')
-        and value.endswith('"')
-    ):
+    if value.startswith('"') and value.endswith('"'):
         return value[1:-1]
 
     # Handle pure reference
@@ -190,13 +187,17 @@ def deserialize_json_with_reference(value: str) -> JsonValue:
         if is_within_string[start]:
             # Already within a quote, however, we must still replace "
             replacements.append(
-                (start, end, match.group().replace('\\"', '\"').replace('\"', '\\"'))
+                (start, end, match.group().replace('\\"', '"').replace('"', '\\"'))
             )
         else:
             # We need to wrap the reference within quotes because it is currently not
             # within quotes
             replacements.append(
-                (start, end, f'"{match.group().replace('\\"', '\"').replace('\"', '\\"')}"')
+                (
+                    start,
+                    end,
+                    f'"{match.group().replace('\\"', '\"').replace('\"', '\\"')}"',
+                )
             )
 
     # Wrap references into qutoes which are not yet within quotes
