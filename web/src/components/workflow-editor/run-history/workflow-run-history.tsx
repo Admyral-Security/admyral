@@ -1,6 +1,6 @@
 import { useListWorkflowRunsApi } from "@/hooks/use-list-workflow-runs-api";
 import { errorToast } from "@/lib/toast";
-import { Box, Flex, Spinner, Text } from "@radix-ui/themes";
+import { Box, Flex, Spinner, ScrollArea, Text } from "@radix-ui/themes";
 import { useEffect, useState } from "react";
 import WorkflowRunTrace from "./workflow-run-trace";
 import Row from "./row";
@@ -102,15 +102,34 @@ export default function WorkflowRunHistory({
 					</Text>
 				</Box>
 
-				{runs.map((workflowRun, idx) => (
-					<Row
-						key={`workflow_run_row_${idx}`}
-						selected={idx === selectedRunIdx}
-						onClickOnUnselectedRow={() => handleClickRun(idx)}
+				<ScrollArea
+					type="hover"
+					scrollbars="vertical"
+					style={{ height: "100%", width: "100%" }}
+				>
+					<Flex
+						direction="column"
+						gap="2"
+						width="100%"
+						height="100%"
+						style={{
+							display: "flex",
+							flexDirection: "column",
+						}}
 					>
-						<WorkflowRunRow workflowRun={workflowRun} />
-					</Row>
-				))}
+						{runs.map((workflowRun, idx) => (
+							<Row
+								key={`workflow_run_row_${idx}`}
+								selected={idx === selectedRunIdx}
+								onClickOnUnselectedRow={() =>
+									handleClickRun(idx)
+								}
+							>
+								<WorkflowRunRow workflowRun={workflowRun} />
+							</Row>
+						))}
+					</Flex>
+				</ScrollArea>
 			</Box>
 
 			{selectedRunIdx !== null && (
