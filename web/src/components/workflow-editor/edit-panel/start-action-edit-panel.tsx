@@ -251,20 +251,9 @@ export default function StartActionEditPanel({
 							<CopyText
 								text={
 									actionData.webhook!.webhookId
-										? `${apiBaseUrl}/webhooks/${actionData.webhook!.webhookId}`
+										? `${apiBaseUrl}/webhooks/${actionData.webhook!.webhookId}/${actionData!.webhook.webhookSecret}`
 										: ""
 								}
-							/>
-						</Flex>
-					)}
-
-					{actionData.webhook && (
-						<Flex direction="column" gap="2">
-							<Text size="2" color="gray">
-								Secret
-							</Text>
-							<CopyText
-								text={actionData.webhook!.webhookSecret || ""}
 							/>
 							{actionData.webhook!.webhookSecret === null && (
 								<Text size="1" color="red">
