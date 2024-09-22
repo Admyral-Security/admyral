@@ -1,3 +1,4 @@
+import { successToast } from "@/lib/toast";
 import { CopyIcon } from "@radix-ui/react-icons";
 import { Button, Flex, TextField, Tooltip } from "@radix-ui/themes";
 
@@ -6,10 +7,15 @@ export interface CopyTextProps {
 }
 
 export default function CopyText({ text }: CopyTextProps) {
+	const copyToClipboard = () => {
+		navigator.clipboard.writeText(text);
+		successToast("Copied to clipboard.");
+	};
+
 	return (
 		<Flex gap="2">
 			<TextField.Root
-				onClick={() => navigator.clipboard.writeText(text)}
+				onClick={copyToClipboard}
 				style={{
 					cursor: "pointer",
 					width: "100%",
@@ -29,7 +35,7 @@ export default function CopyText({ text }: CopyTextProps) {
 						paddingLeft: 8,
 						paddingRight: 8,
 					}}
-					onClick={() => navigator.clipboard.writeText(text)}
+					onClick={copyToClipboard}
 				>
 					<CopyIcon width="16" height="16" />
 				</Button>
