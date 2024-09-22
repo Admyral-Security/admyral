@@ -28,7 +28,7 @@ def _resolve_access_path(action_outputs: dict, input: str) -> JsonValue:
 
     access_path = input.lstrip("{{").rstrip("}}").strip()
     if len(access_path) == 0:
-        raise ValueError("Invalid reference: Access path is empty")
+        raise AdmyralFailureError(message="Invalid reference: Access path is empty.")
     current_value = action_outputs
 
     # access the base variable and check if it exists
@@ -40,7 +40,6 @@ def _resolve_access_path(action_outputs: dict, input: str) -> JsonValue:
     if current_value is None:
         return None
 
-    # TODO: this needs to change
     for key in ACCESS_PATH_REGEX.finditer(access_path):
         raw_value = key.group()
 
@@ -115,4 +114,4 @@ def evaluate_references(value: JsonValue, execution_state: dict) -> JsonValue:
     if isinstance(value, list):
         return [evaluate_references(val, execution_state) for val in value]
 
-    raise ValueError(f"Unsupported type: {type(value)}")
+    raise AdmyralFailureError(message=f"Unsupported type: {type(value).__name__}")

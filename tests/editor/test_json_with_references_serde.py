@@ -192,7 +192,7 @@ def test_serde_pure_reference2():
     json_str = '"something {{ a[\'b\'][0][\\"c\\"] }} else"'
     assert (
         deserialize_json_with_reference(json_str)
-        == '"something {{ a[\'b\'][0][\\"c\\"] }} else"'
+        == "something {{ a['b'][0][\"c\"] }} else"
     )
 
 
@@ -209,7 +209,7 @@ def test_serde_pure_reference3():
     json_str = '"something {{ a[\'b\'][0]["c"] }} else"'
     assert (
         deserialize_json_with_reference(json_str)
-        == '"something {{ a[\'b\'][0]["c"] }} else"'
+        == "something {{ a['b'][0][\"c\"] }} else"
     )
 
 
@@ -224,11 +224,11 @@ def test_escaped_string_serialization():
     ```
     """
     input_json_obj = '"something before and after"'
-    json_str = serialize_json_with_reference(input_json_obj)
-    json_obj = deserialize_json_with_reference(json_str)
+    json_obj = deserialize_json_with_reference(input_json_obj)
+    json_str = serialize_json_with_reference(json_obj)
 
-    assert json_str == '"something before and after"'
-    assert input_json_obj == json_obj
+    assert json_obj == "something before and after"
+    assert json_str == "something before and after"
 
 
 #########################################################################################################
@@ -279,3 +279,57 @@ def test_empty_string_serialization():
 
     assert json_obj is None
     assert json_str == "null"
+
+
+#########################################################################################################
+
+
+def test_invalid_list():
+    """
+    Textfield Input in UI:
+    ```
+    [\n"]
+    ```
+    """
+    input_value = '[\\n"]'
+    json_obj = deserialize_json_with_reference(input_value)
+    json_str = serialize_json_with_reference(json_obj)
+
+    assert json_obj == '[\n"]'
+    assert json_str == '[\\n"]'
+
+
+#########################################################################################################
+
+
+def test_invalid_list_in_string():
+    """
+    Textfield Input in UI:
+    ```
+    "[\n]"
+    ```
+    """
+    input_value = '"[\\n"]"'
+    json_obj = deserialize_json_with_reference(input_value)
+    json_str = serialize_json_with_reference(json_obj)
+
+    assert json_obj == '[\n"]'
+    assert json_str == '[\\n"]'
+
+
+#########################################################################################################
+
+
+def test_empty_reference():
+    """
+    Textfield Input in UI:
+    ```
+    {{}}
+    ```
+    """
+    input_value = "{{}}"
+    json_obj = deserialize_json_with_reference(input_value)
+    json_str = serialize_json_with_reference(json_obj)
+
+    assert json_obj == "{{}}"
+    assert json_str == "{{}}"

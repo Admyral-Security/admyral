@@ -10,10 +10,16 @@ def test_multiple_references_in_a_single_string():
     assert evaluate_references(value, execution_state) == "abc def ghi"
 
 
+#########################################################################################################
+
+
 def test_deeply_nested_references():
     execution_state = {"a": {"b": {"c": [{"d": ["", "", "abc"]}]}}}
     value = "{{ a['b']['c'][0]['d'][2] }}"
     assert evaluate_references(value, execution_state) == "abc"
+
+
+#########################################################################################################
 
 
 def test_non_string_reference_int():
@@ -22,10 +28,16 @@ def test_non_string_reference_int():
     assert evaluate_references(value, execution_state) == 123
 
 
+#########################################################################################################
+
+
 def test_non_string_reference_bool():
     execution_state = {"a": True}
     value = "{{ a }}"
     assert evaluate_references(value, execution_state)
+
+
+#########################################################################################################
 
 
 def test_dict_with_references():
@@ -35,6 +47,9 @@ def test_dict_with_references():
         "a": "abc",
         "b": {"c": "def"},
     }
+
+
+#########################################################################################################
 
 
 def test_list_with_references():
@@ -49,6 +64,9 @@ def test_list_with_references():
     ]
 
 
+#########################################################################################################    
+
+
 def test_key_with_list():
     execution_state = {"a": ["abc", "def", "ghi"]}
     value = '{{ a["abc"] }}'
@@ -60,12 +78,18 @@ def test_key_with_list():
     )
 
 
+#########################################################################################################
+
+
 def test_key_not_in_dict():
     execution_state = {"a": {"b": "def"}}
     value = "{{ a['c'] }}"
     with pytest.raises(AdmyralFailureError) as e:
         evaluate_references(value, execution_state)
     assert e.value.message == "Invalid access path: a['c']. Key 'c' not found."
+
+
+#########################################################################################################
 
 
 def test_invalid_int_conversion():
@@ -79,6 +103,9 @@ def test_invalid_int_conversion():
     )
 
 
+#########################################################################################################
+
+
 def test_invalid_list_access():
     execution_state = {"a": {"b": "def"}}
     value = "{{ a[1] }}"
@@ -87,12 +114,18 @@ def test_invalid_list_access():
     assert e.value.message == "Invalid access path: a[1]. Expected a list, got dict."
 
 
+#########################################################################################################
+
+
 def test_index_out_of_bounds():
     execution_state = {"a": ["abc", "def", "ghi"]}
     value = "{{ a[3] }}"
     with pytest.raises(AdmyralFailureError) as e:
         evaluate_references(value, execution_state)
     assert e.value.message == "Invalid access path: a[3]. Index 3 out of bounds."
+
+
+#########################################################################################################
 
 
 def test_empty_access_path():
@@ -104,3 +137,30 @@ def test_empty_access_path():
         e.value.message
         == "Invalid access path segment: a[]. Must be either a string or integer."
     )
+
+
+#########################################################################################################
+
+
+def test_empty_reference():
+    execution_state = {"a": "abc"}
+    value = "{{}}"
+    with pytest.raises(AdmyralFailureError) as e:
+        evaluate_references(value, execution_state)
+    assert e.value.message == "Invalid reference: Access path is empty."
+
+
+#########################################################################################################
+
+
+def test_evaluate_references_unsupported_type():
+    execution_state = {"a": {"b": "def"}}
+
+    class Dummy:
+        def __init__(self, value):
+            self.value = value
+
+    value = Dummy("abc")
+    with pytest.raises(AdmyralFailureError) as e:
+        evaluate_references(value, execution_state)
+    assert e.value.message == "Unsupported type: Dummy"

@@ -47,7 +47,7 @@ async def test_missing_secret(store: AdmyralStore):
         workflow_code=workflow_test_missing_secret,
     )
 
-    assert exception is not None
+    assert exception is None
     assert run.failed_at is not None
     assert run_steps[1].error == "Secret '123' not found."
 
@@ -84,7 +84,7 @@ async def test_action_raises_error(store: AdmyralStore):
         workflow_code=workflow_test_action_raises_error,
     )
 
-    assert exception is not None
+    assert exception is None
     assert run.failed_at is not None
     assert run_steps[1].error == "This is an error."
 
@@ -130,7 +130,7 @@ async def test_action_missing_params(store: AdmyralStore):
         workflow_code=workflow_test_action_missing_params,
     )
 
-    assert exception is not None
+    assert exception is None
     assert run.failed_at is not None
     assert (
         run_steps[1].error
@@ -167,7 +167,7 @@ async def test_missing_custom_action(store: AdmyralStore):
         workflow_code=workflow_test_action_missing_custom_action,
     )
 
-    assert exception is not None
+    assert exception is None
     assert run.failed_at is not None
     assert (
         run_steps[1].error

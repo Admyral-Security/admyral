@@ -30,6 +30,14 @@ Types:
 """
 
 
+def _unescape_string(value: str) -> str:
+    return value.encode("utf-8").decode("unicode_escape")
+
+
+def _escape_string(value: str) -> str:
+    return value.encode("unicode_escape").decode("utf-8")
+
+
 def _is_float(value: str) -> bool:
     try:
         float(value)
@@ -71,8 +79,8 @@ def serialize_json_with_reference(value: JsonValue) -> str:
     if isinstance(value, str):
         # handle string escaping for ints, floats, bools, dicts, and lists
         if _is_string_escaped_json_value(value):
-            return f'"{value}"'
-        return value
+            return f'"{_escape_string(value)}"'
+        return _escape_string(value)
 
     if isinstance(value, list):
         content = ", ".join(_handle_value_inside_container(item) for item in value)
@@ -90,6 +98,7 @@ def serialize_json_with_reference(value: JsonValue) -> str:
 
 def deserialize_json_with_reference(value: str) -> JsonValue:
     value = value.strip().strip("\n")
+    value = _unescape_string(value)
 
     if value == "":
         return None
@@ -98,7 +107,6 @@ def deserialize_json_with_reference(value: str) -> JsonValue:
     if (
         value.startswith('"')
         and value.endswith('"')
-        and _is_string_escaped_json_value(value[1:-1])
     ):
         return value[1:-1]
 
@@ -180,12 +188,16 @@ def deserialize_json_with_reference(value: str) -> JsonValue:
     for match in REFERENCE_REGEX.finditer(value):
         start, end = match.span()
         if is_within_string[start]:
-            # Already within a quote
-            continue
-
-        replacements.append(
-            (start, end, f'"{match.group().replace('\\"', '\"').replace('\"', '\\"')}"')
-        )
+            # Already within a quote, however, we must still replace "
+            replacements.append(
+                (start, end, match.group().replace('\\"', '\"').replace('\"', '\\"'))
+            )
+        else:
+            # We need to wrap the reference within quotes because it is currently not
+            # within quotes
+            replacements.append(
+                (start, end, f'"{match.group().replace('\\"', '\"').replace('\"', '\\"')}"')
+            )
 
     # Wrap references into qutoes which are not yet within quotes
     # We can't simply just use regex replace because a reference might be used multiple times
@@ -201,4 +213,8 @@ def deserialize_json_with_reference(value: str) -> JsonValue:
 
     out = "".join(reversed(out))
 
-    return json.loads(out)
+    try:
+        return json.loads(out)
+    except json.JSONDecodeError:
+        # normal string
+        return value
