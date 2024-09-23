@@ -16,6 +16,7 @@ from admyral.models import (
     WorkflowRunMetadata,
     WorkflowRunStepMetadata,
     WorkflowRunStep,
+    ApiKey,
 )
 from admyral.typings import JsonValue
 
@@ -27,6 +28,22 @@ class StoreInterface(ABC):
 
     @abstractmethod
     async def get_user(self, user_id: str) -> User | None: ...
+
+    ########################################################
+    # API Key Management
+    ########################################################
+
+    @abstractmethod
+    async def store_api_key(self, user_id: str, name: str, key: str) -> ApiKey: ...
+
+    @abstractmethod
+    async def list_api_keys(self, user_id: str) -> list[ApiKey]: ...
+
+    @abstractmethod
+    async def search_api_key(self, key: str) -> Optional[ApiKey]: ...
+
+    @abstractmethod
+    async def delete_api_key(self, user_id: str, key_id: str) -> None: ...
 
     ########################################################
     # Python Action

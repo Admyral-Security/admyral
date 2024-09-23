@@ -14,6 +14,7 @@ from admyral.server.endpoints import (
     secret_router,
     editor_router,
     workflow_run_router,
+    api_key_router,
 )
 
 
@@ -48,6 +49,7 @@ app.include_router(secret_router, prefix=f"{API_V1_STR}/secrets")
 app.include_router(workflow_run_router, prefix=f"{API_V1_STR}/runs")
 app.include_router(editor_router, prefix=f"{API_V1_STR}/editor")
 app.include_router(webhook_router, prefix="/webhooks")
+app.include_router(api_key_router, prefix=f"{API_V1_STR}/api-keys")
 
 
 @app.exception_handler(NextAuthJWTException)

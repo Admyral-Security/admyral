@@ -23,6 +23,7 @@ from admyral.models import (
     WorkflowRunMetadata,
     WorkflowRunStepMetadata,
     WorkflowRunStep,
+    ApiKey,
 )
 from admyral.models.workflow_schedule import WorkflowSchedule
 from admyral.db.store_interface import StoreInterface
@@ -36,6 +37,7 @@ from admyral.db.schemas import (
     WorkflowScheduleSchema,
     SecretsSchema,
     UserSchema,
+    ApiKeySchema,
 )
 from admyral.db.alembic.database_manager import DatabaseManager
 from admyral.config.config import GlobalConfig, CONFIG, DatabaseType
@@ -155,6 +157,51 @@ class AdmyralStore(StoreInterface):
         async with self._get_async_session() as db:
             result = await db.exec(select(UserSchema).where(UserSchema.id == user_id))
             return result.one_or_none()
+
+    ########################################################
+    # API Key Management
+    ########################################################
+
+    async def store_api_key(self, user_id: str, name: str, key: str) -> ApiKey:
+        async with self._get_async_session() as db:
+            api_key = ApiKey(
+                id=str(uuid4()),
+                name=name,
+                user_id=user_id,
+            )
+            await db.exec(
+                insert(ApiKeySchema).values(
+                    id=api_key.id,
+                    user_id=user_id,
+                    name=name,
+                    key=key,
+                )
+            )
+            await db.commit()
+
+        return api_key
+
+    async def list_api_keys(self, user_id: str) -> list[ApiKey]:
+        async with self._get_async_session() as db:
+            result = await db.exec(
+                select(ApiKeySchema).where(ApiKeySchema.user_id == user_id)
+            )
+            return [api_key.to_model() for api_key in result.all()]
+
+    async def search_api_key(self, key: str) -> Optional[ApiKey]:
+        async with self._get_async_session() as db:
+            result = await db.exec(select(ApiKeySchema).where(ApiKeySchema.key == key))
+            api_key = result.one_or_none()
+            return api_key.to_model() if api_key else None
+
+    async def delete_api_key(self, user_id: str, key_id: str) -> None:
+        async with self._get_async_session() as db:
+            await db.exec(
+                delete(ApiKeySchema)
+                .where(ApiKeySchema.user_id == user_id)
+                .where(ApiKeySchema.id == key_id)
+            )
+            await db.commit()
 
     ########################################################
     # Python Action

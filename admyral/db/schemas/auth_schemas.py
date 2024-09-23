@@ -10,6 +10,8 @@ from sqlalchemy import TEXT, Column, TIMESTAMP, BOOLEAN
 from datetime import datetime
 
 from admyral.models.auth import User
+from admyral.db.schemas.api_key_schemas import ApiKeySchema
+from admyral.db.schemas.workflow_schemas import WorkflowSchema
 
 
 class UserSchema(SQLModel, table=True):
@@ -48,6 +50,12 @@ class UserSchema(SQLModel, table=True):
         back_populates="user", sa_relationship_kwargs=dict(cascade="all, delete")
     )
     authenticators: list["AuthenticatorSchema"] = Relationship(
+        back_populates="user", sa_relationship_kwargs=dict(cascade="all, delete")
+    )
+    workflows: list[WorkflowSchema] = Relationship(
+        back_populates="user", sa_relationship_kwargs=dict(cascade="all, delete")
+    )
+    api_keys: list[ApiKeySchema] = Relationship(
         back_populates="user", sa_relationship_kwargs=dict(cascade="all, delete")
     )
 

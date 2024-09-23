@@ -7,7 +7,7 @@ import { withSnakeCaseTransform } from "@/types/utils";
 import { TSecret } from "@/types/secrets";
 import { HTTPMethod } from "@/types/api";
 
-// GET /api/v1/secret/set
+// POST /api/v1/secret/set
 const SetSecretRequest = withSnakeCaseTransform(
 	z.object({
 		secretId: z.string(),
