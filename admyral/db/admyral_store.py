@@ -238,11 +238,8 @@ class AdmyralStore(StoreInterface):
     async def _get_cached_pip_lockfile(
         self, db: AdmyralDatabaseSession, hash: str
     ) -> Optional[PipLockfileCacheSchema]:
-        expiration_time = utc_now()
         result = await db.exec(
-            select(PipLockfileCacheSchema)
-            .where(PipLockfileCacheSchema.hash == hash)
-            .where(PipLockfileCacheSchema.expiration_time > expiration_time)
+            select(PipLockfileCacheSchema).where(PipLockfileCacheSchema.hash == hash)
         )
         return result.one_or_none()
 

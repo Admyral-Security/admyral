@@ -205,7 +205,7 @@ async def _pip_compile(
     """Generate lockfile using pip-compile"""
     hash_id = calculate_sha256(";".join(python_action.requirements))
     pip_lockfile = await store.get_cached_pip_lockfile(hash_id)
-    if pip_lockfile:
+    if pip_lockfile and pip_lockfile.expiration_time > utc_now_timestamp_seconds():
         # we still have a valid lockfile in our cache
         logger.info("Skipping pip-compile. Found cached lockfile.")
         return pip_lockfile.lockfile.split("\n")
