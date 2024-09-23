@@ -5,8 +5,7 @@ import IfConditionActionIcon from "@/components/icons/if-condition-action-icon";
 import { TEditorWorkflowIfNode } from "@/types/react-flow";
 import { produce } from "immer";
 
-const exampleCode =
-	'{{ result["message"] }} == "hello" or {{ result["count"] }} > 0';
+const exampleCode = 'result["message"] == "hello" or result["count"] > 0';
 
 export default function IfConditionEditPanel() {
 	const { nodes, selectedNodeIdx, updateNodeData } = useWorkflowStore();
