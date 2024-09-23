@@ -28,9 +28,10 @@ async def authenticate(request: Request) -> AuthenticatedUser:
 
     # extract user id from authentication method
     if "x-api-key" in request.headers:
-        # TODO: API key authentication
-        # TODO: double-check whether user id exists in the database
-        raise NotImplementedError("API key authentication is not yet implemented")
+        api_key = await get_admyral_store().search_api_key(request.headers["x-api-key"])
+        if not api_key:
+            raise HTTPException(status_code=401, detail="Invalid API Key")
+        user_id = api_key.user_id
     else:
         assert os.environ.get("AUTH_SECRET") is not None, "AUTH_SECRET must be set"
         decrypted_token = validate_and_decrypt_jwt(request)

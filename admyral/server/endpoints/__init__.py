@@ -6,6 +6,7 @@ from admyral.server.endpoints.editor_endpoints import router as editor_router
 from admyral.server.endpoints.workflow_run_endpoints import (
     router as workflow_run_router,
 )
+from admyral.server.endpoints.api_key_endpoints import router as api_key_router
 
 __all__ = [
     "action_router",
@@ -14,4 +15,5 @@ __all__ = [
     "workflow_router",
     "editor_router",
     "workflow_run_router",
+    "api_key_router",
 ]

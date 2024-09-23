@@ -1,4 +1,13 @@
-from sqlmodel import Field, Relationship, UniqueConstraint, JSON, TEXT, BOOLEAN
+from typing import TYPE_CHECKING
+from sqlmodel import (
+    Field,
+    Relationship,
+    UniqueConstraint,
+    JSON,
+    TEXT,
+    BOOLEAN,
+    ForeignKeyConstraint,
+)
 
 from admyral.db.schemas.base_schemas import BaseSchema
 from admyral.models import Workflow, WorkflowMetadata
@@ -6,6 +15,9 @@ from admyral.db.schemas.workflow_run_schemas import WorkflowRunSchema
 from admyral.db.schemas.workflow_webhook_schemas import WorkflowWebhookSchema
 from admyral.db.schemas.workflow_schedule_schemas import WorkflowScheduleSchema
 from admyral.typings import JsonValue
+
+if TYPE_CHECKING:
+    from admyral.db.schemas.auth_schemas import UserSchema
 
 
 class WorkflowSchema(BaseSchema, table=True):
@@ -17,13 +29,17 @@ class WorkflowSchema(BaseSchema, table=True):
     # workflow names must be unique per user!
     __table_args__ = (
         UniqueConstraint("user_id", "workflow_name", name="unique_workflow_name"),
+        ForeignKeyConstraint(
+            ["userId"],
+            ["User.id"],
+            ondelete="CASCADE",
+        ),
     )
 
     # primary keys
     workflow_id: str = Field(sa_type=TEXT(), primary_key=True)
 
     # foreign keys
-    # TODO: FK to users table
     user_id: str = Field(
         sa_type=TEXT(), index=True
     )  # index for faster workflow listing
@@ -33,6 +49,9 @@ class WorkflowSchema(BaseSchema, table=True):
         sa_type=TEXT(), index=True
     )  # index for faster workflow loading
     workflow_dag: JsonValue = Field(sa_type=JSON())
+
+    # relationship parent
+    user: "UserSchema" = Relationship(back_populates="workflows")
 
     # relationship children
     workflow_runs: list[WorkflowRunSchema] = Relationship(

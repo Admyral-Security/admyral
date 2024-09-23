@@ -15,6 +15,7 @@ from admyral.db.schemas.auth_schemas import (
     VerificationTokenSchema,
     AuthenticatorSchema,
 )
+from admyral.db.schemas.api_key_schemas import ApiKeySchema
 
 __all__ = [
     "PipLockfileCacheSchema",
@@ -30,4 +31,5 @@ __all__ = [
     "SessionSchema",
     "VerificationTokenSchema",
     "AuthenticatorSchema",
+    "ApiKeySchema",
 ]

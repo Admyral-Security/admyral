@@ -1,3 +1,4 @@
+import ApiKeys from "@/components/api-keys/api-keys";
 import SignOutButton from "@/components/auth/signout-button";
 import Secrets from "@/components/secrets/secrets";
 import { Box, Flex, Grid, Text } from "@radix-ui/themes";
@@ -38,6 +39,7 @@ export default async function SettingsPage() {
 				gap="5"
 			>
 				<Secrets />
+				<ApiKeys />
 				{/* <Account />
 				<Credentials />
 				<Usage />
