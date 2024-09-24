@@ -4,6 +4,8 @@ from enum import Enum
 import logging
 from dotenv import load_dotenv
 from pydantic import BaseModel
+import uuid
+import yaml
 
 load_dotenv()
 
@@ -24,6 +26,9 @@ ENV_ADMYRAL_PIP_CACHE_DIRECTORY = "ADMYRAL_PIP_CACHE_DIRECTORY"
 ENV_ADMYRAL_PIP_LOCK_CACHE_DIRECTORY = "ADMYRAL_PIP_LOCK_CACHE_DIRECTORY"
 ENV_ADMYRAL_USE_LOCAL_ADMYRAL_PIP_PACKAGE = "ADMYRAL_USE_LOCAL_ADMYRAL_PIP_PACKAGE"
 
+# PostHog
+ADMYRAL_POSTHOG_API_KEY = "phc_CxaYjH5kkQphijnmsLeP3JnV5YOR34oIbUgp3FkEtUM"
+ADMYRAL_POSTHOG_HOST = "https://eu.i.posthog.com"
 
 APP_NAME = "Admyral"
 
@@ -56,6 +61,23 @@ def get_local_storage_path() -> str:
 
 def get_local_postgres_volume() -> str:
     return os.path.join(get_local_storage_path(), "postgres")
+
+
+def get_user_config_file() -> str:
+    return os.path.join(get_global_project_directory(), GLOBAL_CONFIG_FILE)
+
+
+def get_user_id() -> str:
+    config_file = get_user_config_file()
+    if os.path.exists(config_file):
+        with open(config_file, "r") as f:
+            file_content = yaml.safe_load(f)
+            return file_content["user_id"]
+    else:
+        user_id = str(uuid.uuid4())
+        with open(config_file, "w") as f:
+            yaml.dump({"user_id": user_id, "posthog_disabled": False}, f)
+        return user_id
 
 
 # Constants for custom Python execution
@@ -128,15 +150,24 @@ class GlobalConfig(BaseModel):
     The global configuration for Admyral.
     """
 
-    user_id: str = "38815447-e272-4299-94c0-29a2d30435f9"
+    # user_id: str = "38815447-e272-4299-94c0-29a2d30435f9"
+    user_id: str = get_user_id()
     storage_directory: str = get_local_storage_path()
     database_type: DatabaseType = ADMYRAL_DATABASE_TYPE
     database_url: str = ADMYRAL_DATABASE_URL
     temporal_host: str = ADMYRAL_TEMPORAL_HOST
     secrets_manager_type: SecretsManagerType = ADMYRAL_SECRETS_MANAGER_TYPE
+    posthog_api_key: str = ADMYRAL_POSTHOG_API_KEY
+    posthog_host: str = ADMYRAL_POSTHOG_HOST
 
     pip_lockfile_cache_cleanup_interval: int = 60 * 60 * 24  # 1 day
 
+
+def load_local_config() -> GlobalConfig:
+    return GlobalConfig()
+
+
+CONFIG = load_local_config()
 
 ADMYRAL_DAEMON_PID_FILE = "admyral.pid"
 ADMYRAL_DAEMON_LOG_FILE = "admyral.log"

@@ -3,6 +3,7 @@ import click
 from admyral.cli.cli import cli
 from admyral.client import AdmyralClient
 from admyral.models import Secret
+from admyral.utils.posthog import send_event
 
 
 @cli.group()
@@ -33,6 +34,7 @@ KEY_VALUE = KeyValueType()
 @click.pass_context
 def set(ctx: click.Context, secret_id: str, value: list[tuple[str, str]]) -> None:
     """Create a secret in Admyral"""
+    send_event(event_name="Secret", command="set")
     client: AdmyralClient = ctx.obj
     client.set_secret(Secret(secret_id=secret_id, secret=dict(value)))
     click.echo(f"Secret {secret_id} set successfully.")
@@ -45,6 +47,7 @@ def set(ctx: click.Context, secret_id: str, value: list[tuple[str, str]]) -> Non
 @click.pass_context
 def list(ctx: click.Context) -> None:
     """List all secret ids stored in Admyral"""
+    send_event(event_name="Secret", command="list")
     client: AdmyralClient = ctx.obj
     secrets = client.list_secrets()
     click.echo("Secrets:")
@@ -57,6 +60,7 @@ def list(ctx: click.Context) -> None:
 @click.pass_context
 def delete(ctx: click.Context, secret_id: str) -> None:
     """Delete a secret in Admyral"""
+    send_event(event_name="Secret", command="delete")
     client: AdmyralClient = ctx.obj
     client.delete_secret(secret_id)
     click.echo(f"Secret {secret_id} deleted successfully.")
