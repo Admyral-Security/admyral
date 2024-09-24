@@ -1,4 +1,4 @@
-from sqlmodel import Field, Relationship
+from sqlmodel import Field, Relationship, ForeignKeyConstraint
 from sqlalchemy import TEXT
 from typing import TYPE_CHECKING
 
@@ -15,6 +15,13 @@ class ApiKeySchema(BaseSchema, table=True):
     """
 
     __tablename__ = "api_keys"
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["user_id"],
+            ["User.id"],
+            ondelete="CASCADE",
+        ),
+    )
 
     # primary keys
     id: str = Field(sa_type=TEXT(), primary_key=True)

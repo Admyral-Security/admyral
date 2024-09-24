@@ -7,12 +7,6 @@ from admyral.config.config import GlobalConfig, DISABLE_AUTH, AUTH_SECRET
 from admyral.server.deps import get_admyral_store
 
 
-"""
-Environment variables:
-- ENV
-- NEXTAUTH_SECRET => AUTH_SECRET as arg.
-- NEXTAUTH_URL
-"""
 JWT = NextAuthJWT(
     secret=AUTH_SECRET,
 )

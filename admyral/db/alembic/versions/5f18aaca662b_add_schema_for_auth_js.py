@@ -102,6 +102,12 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint("id"),
         sa.UniqueConstraint("sessionToken"),
     )
+
+    DEFAULT_USER_ID = "38815447-e272-4299-94c0-29a2d30435f9"
+    op.execute(
+        f"INSERT INTO \"User\" (id, email, \"updatedAt\") VALUES ('{DEFAULT_USER_ID}', 'random@email.com', CURRENT_TIMESTAMP)",
+    )
+
     # ### end Alembic commands ###
 
 
