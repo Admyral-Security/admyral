@@ -1,9 +1,26 @@
+import { auth } from "@/auth";
 import ApiKeys from "@/components/api-keys/api-keys";
 import SignOutButton from "@/components/auth/signout-button";
 import Secrets from "@/components/secrets/secrets";
+import { DISABLE_AUTH } from "@/constants/env";
 import { Box, Flex, Grid, Text } from "@radix-ui/themes";
 
 export default async function SettingsPage() {
+	const session = await auth();
+	console.log("SETTINGS PAGE SESSION: ", session);
+	try {
+		const response = await fetch("http://localhost:3000/api/user", {
+			method: "GET",
+			cache: "no-store",
+		}); // FIXME:
+		console.log("SETTNINGS PAGE RESPONSE: ", response); // FIXME:
+		const data = await response.text();
+		console.log("SETTINGS PAGE: ", data); // FIXME:
+	} catch (error) {
+		console.log("SETTINGS PAGE ERROR: ", error);
+		return <Text>Error</Text>;
+	}
+
 	return (
 		<Grid rows="50px 1fr" width="auto" height="100%">
 			<Box width="100%" height="100%">
@@ -38,8 +55,8 @@ export default async function SettingsPage() {
 				align="center"
 				gap="5"
 			>
-				<Secrets />
-				<ApiKeys />
+				{/* <Secrets /> */}
+				{/* {!DISABLE_AUTH && <ApiKeys />} */}
 				{/* <Account />
 				<Credentials />
 				<Usage />

@@ -5,6 +5,9 @@ import { Box, Grid } from "@radix-ui/themes";
 import { ReactNode } from "react";
 import { Slide, ToastContainer } from "react-toastify";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { auth, signOut } from "@/auth";
+import { redirect } from "next/navigation";
+import prisma from "@/lib/prisma";
 
 // const queryClient = new QueryClient({
 // 	defaultOptions: {

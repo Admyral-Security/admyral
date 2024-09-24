@@ -30,7 +30,7 @@ class WorkflowSchema(BaseSchema, table=True):
     __table_args__ = (
         UniqueConstraint("user_id", "workflow_name", name="unique_workflow_name"),
         ForeignKeyConstraint(
-            ["userId"],
+            ["user_id"],
             ["User.id"],
             ondelete="CASCADE",
         ),
