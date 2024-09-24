@@ -14,13 +14,6 @@ from admyral.context import ctx
     secrets_placeholders=["AZURE_OPENAI_SECRET"],
 )
 def azure_openai_chat_completion(
-    model: Annotated[
-        str,
-        ArgumentMetadata(
-            display_name="Model",
-            description="Deployment name of the model to use.",
-        ),
-    ],
     prompt: Annotated[
         str,
         ArgumentMetadata(
@@ -61,8 +54,9 @@ def azure_openai_chat_completion(
     secret = ctx.get().secrets.get("AZURE_OPENAI_SECRET")
     endpoint = secret["endpoint"]
     api_key = secret["api_key"]
+    model = secret["deployment_name"]
 
-    client = AzureOpenAI(api_version="2024-06-01", endpoint=endpoint, api_key=api_key)
+    client = AzureOpenAI(api_version="2024-06-01", azure_endpoint=endpoint, api_key=api_key)
     chat_completion = client.chat.completions.create(
         messages=[{"role": "user", "content": prompt}],
         model=model,
