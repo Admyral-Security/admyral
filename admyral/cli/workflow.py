@@ -6,6 +6,7 @@ from admyral.cli.cli import cli
 from admyral.compiler.workflow_compiler import WorkflowCompiler
 from admyral.models import TriggerStatus
 from admyral.client import AdmyralClient
+from admyral.utils.posthog import send_event
 
 
 @cli.group()
@@ -33,6 +34,7 @@ def workflow() -> None:
 @click.pass_context
 def push(ctx: click.Context, workflow_name: str, file: str, activate: bool) -> None:
     """Push workflow to Admyral"""
+    send_event(event_name="Workflow", command="push")
     client: AdmyralClient = ctx.obj
 
     # compile the workflow
@@ -69,6 +71,7 @@ def push(ctx: click.Context, workflow_name: str, file: str, activate: bool) -> N
 @click.pass_context
 def trigger(ctx: click.Context, workflow_name: str, payload: str | None) -> None:
     """Trigger workflow execution"""
+    send_event(event_name="Workflow", command="trigger")
     client: AdmyralClient = ctx.obj
     payload = json.loads(payload) if payload else None
     try:
@@ -94,6 +97,7 @@ def trigger(ctx: click.Context, workflow_name: str, payload: str | None) -> None
 @click.pass_context
 def activate_workflow(ctx: click.Context, workflow_name: str) -> None:
     """Activate a workflow"""
+    send_event(event_name="Workflow", command="activate")
     client: AdmyralClient = ctx.obj
     client.activate_workflow(workflow_name)
     click.echo(f"Activated workflow {workflow_name} successfully.")
@@ -107,6 +111,7 @@ def activate_workflow(ctx: click.Context, workflow_name: str) -> None:
 @click.pass_context
 def deactivate_workflow(ctx: click.Context, workflow_name: str) -> None:
     """Deactivate a workflow"""
+    send_event(event_name="Workflow", command="deactivate")
     client: AdmyralClient = ctx.obj
     client.deactivate_workflow(workflow_name)
     click.echo(f"Deactivated workflow {workflow_name} successfully.")

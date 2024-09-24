@@ -8,9 +8,9 @@ from admyral.utils.docker_utils import (
     get_docker_compose_cmd,
     list_running_docker_containers,
 )
+from admyral.utils.posthog import send_event
 from admyral.config.config import get_local_postgres_volume
 from admyral import __version__
-
 
 WELCOME_MESSAGE = """
 
@@ -46,6 +46,8 @@ def up() -> None:
     """
     Launches Admyral services locally.
     """
+    send_event(event_name="CLI", command="up")
+
     click.echo(WELCOME_MESSAGE)
 
     click.echo(f"Admyral Version: {__version__}\n")
@@ -124,6 +126,8 @@ def down() -> None:
     """
     Tears down Admyral services locally.
     """
+    send_event(event_name="CLI", command="down")
+
     if not is_docker_running():
         click.echo(
             "Docker daemon is not running. Please make sure that Docker is installed and running."

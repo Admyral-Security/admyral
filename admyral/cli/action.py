@@ -3,6 +3,7 @@ import click
 from admyral.cli.cli import cli
 from admyral.client import AdmyralClient
 from admyral.compiler.action_parser import parse_action
+from admyral.utils.posthog import send_event
 
 
 @cli.group()
@@ -21,6 +22,7 @@ def action() -> None:
 @click.pass_context
 def push(ctx: click.Context, action_type: str, action: str) -> None:
     """Push an action to Admyral"""
+    send_event(event_name="Action", command="push")
     client: AdmyralClient = ctx.obj
 
     with open(action, "r") as f:
