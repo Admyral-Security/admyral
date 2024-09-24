@@ -49,11 +49,7 @@ def has_pr_unreviewed_commits(
     ],
     state: Annotated[
         Literal["APPROVED", "CHANGES_REQUESTED", "COMMENTED", "DISMISSED"] | None,
-        ArgumentMetadata(
-            display_name="State",
-            description="The state of the review",
-            default="APPROVED",
-        ),
+        ArgumentMetadata(display_name="State", description="The state of the review"),
     ] = "APPROVED",
 ) -> dict[str, JsonValue]:
     commit_history = list_commit_history_for_pull_request(

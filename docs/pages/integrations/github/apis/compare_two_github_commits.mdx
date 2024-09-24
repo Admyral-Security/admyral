@@ -4,6 +4,11 @@ import { Callout } from "nextra/components";
 
 This method enables users to compare two commits in a GitHub repository. Events include who authored and committed the changes, and the changes made.
 
+<Callout type="info">
+	For more information on the API for comparing commits, see [Compare two
+	commits](https://docs.github.com/en/rest/commits/commits?apiVersion=2022-11-28#compare-two-commits).
+</Callout>
+
 To use this API endpoint for a private repository, your GitHub token requires the following scopes:
 
 For a Fine-grained token:
@@ -37,12 +42,6 @@ from admyral.actions import compare_two_github_commits
 ## Returns
 
 A JSON of the commit diff.
-
-<Callout type="info">
-	For more information on the API response for comparing commits, see [Compare
-	two
-	commits](https://docs.github.com/en/rest/commits/commits?apiVersion=2022-11-28#compare-two-commits).
-</Callout>
 
 ## Required Secrets
 
