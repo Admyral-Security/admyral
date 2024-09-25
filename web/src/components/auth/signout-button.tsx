@@ -1,24 +1,23 @@
+"use client";
+
 import { Button } from "@radix-ui/themes";
-import { signOut } from "@/auth";
+// import { signOut } from "@/auth";
+import { useSession, signIn, signOut } from "next-auth/react";
 
 export default function SignOutButton() {
 	return (
-		<form
-			action={async () => {
-				"use server";
-				await signOut({
-					redirectTo: "/login",
-				});
-			}}
+		<Button
+			onClick={() =>
+				signOut({
+					callbackUrl: "/login",
+				})
+			}
+			type="submit"
+			variant="solid"
+			color="red"
+			style={{ cursor: "pointer" }}
 		>
-			<Button
-				type="submit"
-				variant="solid"
-				color="red"
-				style={{ cursor: "pointer" }}
-			>
-				Sign Out
-			</Button>
-		</form>
+			Sign Out
+		</Button>
 	);
 }
