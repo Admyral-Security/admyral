@@ -25,10 +25,9 @@ ENV_ADMYRAL_FLOCK_PATH = "ADMYRAL_FLOCK_PATH"
 ENV_ADMYRAL_PIP_CACHE_DIRECTORY = "ADMYRAL_PIP_CACHE_DIRECTORY"
 ENV_ADMYRAL_PIP_LOCK_CACHE_DIRECTORY = "ADMYRAL_PIP_LOCK_CACHE_DIRECTORY"
 ENV_ADMYRAL_USE_LOCAL_ADMYRAL_PIP_PACKAGE = "ADMYRAL_USE_LOCAL_ADMYRAL_PIP_PACKAGE"
-
-# PostHog
-ADMYRAL_POSTHOG_API_KEY = "phc_CxaYjH5kkQphijnmsLeP3JnV5YOR34oIbUgp3FkEtUM"
-ADMYRAL_POSTHOG_HOST = "https://eu.i.posthog.com"
+ENV_ADMYRAL_ENV = "ADMYRAL_ENV"
+ENV_ADMYRAL_POSTHOG_API_KEY = "ADMYRAL_POSTHOG_API_KEY"
+ENV_ADMYRAL_POSTHOG_HOST = "ADMYRAL_POSTHOG_HOST"
 
 APP_NAME = "Admyral"
 
@@ -80,6 +79,13 @@ def get_user_id() -> str:
         return user_id
 
 
+def read_posthog_status() -> bool:
+    config_file = get_user_config_file()
+    with open(config_file, "r") as f:
+        file_content = yaml.safe_load(f)
+        return file_content["posthog_disabled"]
+
+
 # Constants for custom Python execution
 ADMYRAL_DISABLE_NSJAIL = (
     os.getenv(ENV_ADMYRAL_DISABLE_NSJAIL, "false").lower() == "true"
@@ -97,6 +103,11 @@ ADMYRAL_PIP_LOCKFILE_CACHE_TTL_IN_SECONDS = 3 * 24 * 60 * 60  # 3 days
 ADMYRAL_USE_LOCAL_ADMYRAL_PIP_PACKAGE = (
     os.getenv(ENV_ADMYRAL_USE_LOCAL_ADMYRAL_PIP_PACKAGE, "true").lower() == "true"
 )
+ADMYRAL_ENV = os.getenv(ENV_ADMYRAL_ENV, "prod")
+ADMYRAL_POSTHOG_API_KEY = os.getenv(
+    ENV_ADMYRAL_POSTHOG_API_KEY, "phc_RIpkRea4KLW6EONEDCSZVR1Td4YzeHf4ziUsGzmPnjD"
+)
+ADMYRAL_POSTHOG_HOST = os.getenv(ENV_ADMYRAL_POSTHOG_HOST, "https://eu.i.posthog.com")
 
 
 # DATABASE AND SECRETS MANAGER
@@ -150,7 +161,6 @@ class GlobalConfig(BaseModel):
     The global configuration for Admyral.
     """
 
-    # user_id: str = "38815447-e272-4299-94c0-29a2d30435f9"
     user_id: str = get_user_id()
     storage_directory: str = get_local_storage_path()
     database_type: DatabaseType = ADMYRAL_DATABASE_TYPE
@@ -159,6 +169,8 @@ class GlobalConfig(BaseModel):
     secrets_manager_type: SecretsManagerType = ADMYRAL_SECRETS_MANAGER_TYPE
     posthog_api_key: str = ADMYRAL_POSTHOG_API_KEY
     posthog_host: str = ADMYRAL_POSTHOG_HOST
+    environment: str = ADMYRAL_ENV
+    posthog_disabled: bool = read_posthog_status()
 
     pip_lockfile_cache_cleanup_interval: int = 60 * 60 * 24  # 1 day
 
