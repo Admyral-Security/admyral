@@ -25,6 +25,7 @@ export default function SignInButton({
 			onClick={() =>
 				signIn(providerId, {
 					callbackUrl: "/",
+					redirect: false,
 				})
 			}
 			type="submit"

@@ -1,14 +1,11 @@
 import { getToken } from "next-auth/jwt";
 import { withAuth } from "next-auth/middleware";
 import { NextResponse } from "next/server";
-import { getCurrentUser } from "./lib/session";
 
 export default withAuth(
 	async function middleware(req) {
 		const token = await getToken({ req });
 		const isAuthenticated = !!token;
-
-		// const session = await getCurrentUser(); // FIXME:
 
 		console.log("MIDDLEWARE: ", { req, token, isAuthenticated }); // FIXME:
 

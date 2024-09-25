@@ -50,30 +50,46 @@ export const authOptions: NextAuthOptions = {
 		// 	return result;
 		// },
 		async session({ token, session }) {
+			console.log("AUTH.TS SESSION: ", { token, session }); // FIXME:
+			if (!token.userExists) {
+				// If the user doesn't exist, we'll set a flag on the session
+				session.userExists = false;
+				// Clear user data from the session
+				session.user = { id: "", name: "", email: "", image: "" };
+				return session;
+			}
+
+			session.userExists = true;
 			if (token && session.user) {
-				session.user.id = token.id as string;
+				session.user.id = token.sub as string;
 				session.user.email = token.email;
 				session.user.name = token.name;
 				session.user.image = token.picture as string | null;
 			}
+			console.log("AUTH.TS SESSION RESULT: ", session); // FIXME:
 			return session;
 		},
 		async jwt({ token, user }) {
+			console.log("AUTH.TS JWT: ", { token, user }); // FIXME:
 			if (user) {
-				// This is only called on initial sign in
-				token.id = user.id;
+				// This is only called on initial sign in, i.e.,
+				// the user is only defined on initial sign in
+				// otherwise the user is undefined.
+				token.sub = user.id;
 			}
 			// On subsequent calls, token.sub will be defined
 			const dbUser = await prisma.user.findUnique({
 				where: {
-					id: token.sub || user.id,
+					id: token.sub,
 				},
 			});
 			if (dbUser) {
-				token.id = dbUser.id;
+				token.userExists = true;
 				token.email = dbUser.email;
 				token.name = dbUser.name;
 				token.picture = dbUser.image;
+			} else {
+				token.userExists = false;
 			}
 			return token;
 		},
