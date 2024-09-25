@@ -12,7 +12,7 @@
 
 ![Azure OAI Studio](/azure_oai_deploy_model.png)
 
-5. Deploy the model of your choice. The name of the model deployment is used as model parameter for the actions.
+5. Deploy the model of your choice. The **name of the model deployment** is a used when defining **Credentials** in **Admyral**.
 
 6. Next, go back to your [Azure Portal](https://portal.azure.com) and go to the subscription which contains the Azure OpenAI deployment.
 
@@ -30,15 +30,16 @@
 
 11. The following secrets structure is expected:
 
-| Key        | Value                                    |
-| ---------- | ---------------------------------------- |
-| `api_key`  | Paste the **API key** here               |
-| `endpoint` | Paste the **Azure OpenAI endpoint** here |
+| Key               | Value                                    |
+| ----------------- | ---------------------------------------- |
+| `api_key`         | Paste the **API key** here               |
+| `endpoint`        | Paste the **Azure OpenAI endpoint** here |
+| `deployment_name` | Paste the **model deployment name** here |
 
 12. Click on the **Save** button.
 
 Alternatively, you can use the following CLI command structure:
 
 ```bash
-admyral secret set azure_openai_secret --value api_key=your_key_value --value endpoint=your_endpoint
+admyral secret set azure_openai_secret --value api_key=your_key_value --value endpoint=your_endpoint --value deployment_name=your_deployment_name
 ```
