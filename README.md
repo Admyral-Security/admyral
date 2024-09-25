@@ -3,15 +3,18 @@
 </p>
 
 <div align="center">
-  <h3>
-      <a href="https://docs.admyral.dev/"><strong>Docs</strong></a> ·
-      <a href="https://discord.gg/GqbJZT9Hbf"><strong>Discord</strong></a> ·
-      <a href="https://github.com/Admyral-Security/admyral-quickstart"><strong>Quickstart</strong></a>
-  </h3>
-  </br>
   <div>
-  ![Commit Activity](https://img.shields.io/github/commit-activity/m/Admyral-Security/admyral?style=flat-square&logo=github)
-  ![License](https://img.shields.io/badge/License-Apache%202.0-blue?style=flat-square&logo=apache)
+    <h3>
+        <a href="https://docs.admyral.dev/"><strong>Docs</strong></a> ·
+        <a href="https://discord.gg/GqbJZT9Hbf"><strong>Discord</strong></a> ·
+        <a href="https://github.com/Admyral-Security/admyral-quickstart"><strong>Quickstart</strong></a>
+    </h3>
+  </div>
+  <div>
+
+![Commit Activity](https://img.shields.io/github/commit-activity/m/Admyral-Security/admyral?style=flat-square&logo=github)
+![License](https://img.shields.io/badge/License-Apache%202.0-blue?style=flat-square&logo=apache)
+
   </div>
 </div>
 
