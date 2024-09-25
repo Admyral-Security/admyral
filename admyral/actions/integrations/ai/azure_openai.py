@@ -56,7 +56,9 @@ def azure_openai_chat_completion(
     api_key = secret["api_key"]
     model = secret["deployment_name"]
 
-    client = AzureOpenAI(api_version="2024-06-01", azure_endpoint=endpoint, api_key=api_key)
+    client = AzureOpenAI(
+        api_version="2024-06-01", azure_endpoint=endpoint, api_key=api_key
+    )
     chat_completion = client.chat.completions.create(
         messages=[{"role": "user", "content": prompt}],
         model=model,
