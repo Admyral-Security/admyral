@@ -79,11 +79,14 @@ def get_user_id() -> str:
         return user_id
 
 
-def read_posthog_status() -> bool:
+def read_posthog_disabled() -> bool:
     config_file = get_user_config_file()
-    with open(config_file, "r") as f:
-        file_content = yaml.safe_load(f)
-        return file_content["posthog_disabled"]
+    if os.path.exists(config_file):
+        with open(config_file, "r") as f:
+            file_content = yaml.safe_load(f)
+            return file_content["posthog_disabled"]
+
+    return True
 
 
 # Constants for custom Python execution
@@ -170,7 +173,7 @@ class GlobalConfig(BaseModel):
     posthog_api_key: str = ADMYRAL_POSTHOG_API_KEY
     posthog_host: str = ADMYRAL_POSTHOG_HOST
     environment: str = ADMYRAL_ENV
-    posthog_disabled: bool = read_posthog_status()
+    posthog_disabled: bool = read_posthog_disabled()
 
     pip_lockfile_cache_cleanup_interval: int = 60 * 60 * 24  # 1 day
 
