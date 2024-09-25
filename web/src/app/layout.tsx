@@ -4,6 +4,7 @@ import "./globals.css";
 import "@radix-ui/themes/styles.css";
 import { Theme } from "@radix-ui/themes";
 import { inter } from "./fonts";
+import { SessionProvider } from "@/providers/session";
 
 export const metadata: Metadata = {
 	title: "Admyral",
@@ -24,7 +25,7 @@ export const metadata: Metadata = {
 	],
 };
 
-export default function RootLayout({
+export default async function RootLayout({
 	children,
 }: Readonly<{
 	children: React.ReactNode;
@@ -32,7 +33,9 @@ export default function RootLayout({
 	return (
 		<html lang="en" className="h-full">
 			<body className={`${inter.className} h-full`}>
-				<Theme>{children}</Theme>
+				<SessionProvider>
+					<Theme>{children}</Theme>
+				</SessionProvider>
 			</body>
 		</html>
 	);

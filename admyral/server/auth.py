@@ -1,5 +1,5 @@
 from fastapi import Request, HTTPException
-from fastapi_nextauth_jwt import NextAuthJWT
+from fastapi_nextauth_jwt import NextAuthJWTv4
 import os
 
 from admyral.models.auth import AuthenticatedUser
@@ -7,7 +7,7 @@ from admyral.config.config import GlobalConfig, DISABLE_AUTH, AUTH_SECRET
 from admyral.server.deps import get_admyral_store
 
 
-JWT = NextAuthJWT(
+JWT = NextAuthJWTv4(
     secret=AUTH_SECRET,
 )
 
@@ -29,7 +29,7 @@ async def authenticate(request: Request) -> AuthenticatedUser:
     else:
         assert os.environ.get("AUTH_SECRET") is not None, "AUTH_SECRET must be set"
         decrypted_token = validate_and_decrypt_jwt(request)
-        user_id = decrypted_token.get("sub")
+        user_id = decrypted_token.get("sub") or decrypted_token.get("id")
 
     if not user_id:
         # Missing user id

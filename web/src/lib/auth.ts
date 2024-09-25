@@ -1,40 +1,81 @@
-import { hash, compare } from "bcryptjs";
+import { AUTH_SECRET, GITHUB_CLIENT_ID, GITHUB_SECRET } from "@/constants/env";
+import { NextAuthOptions } from "next-auth";
+import GitHub from "next-auth/providers/github";
+import { PrismaAdapter } from "@next-auth/prisma-adapter";
+import prisma from "@/lib/prisma";
 
-// TODO: https://github.com/langfuse/langfuse/blob/main/web/src/features/auth-credentials/lib/credentialsServerUtils.ts
+export const authOptions: NextAuthOptions = {
+	// Configure one or more authentication providers
+	adapter: PrismaAdapter(prisma),
+	providers: [
+		GitHub({
+			clientId: GITHUB_CLIENT_ID!,
+			clientSecret: GITHUB_SECRET!,
+		}),
+	],
+	pages: {
+		signIn: "/login",
+	},
+	session: {
+		strategy: "jwt",
+		maxAge: 30 * 24 * 60 * 60, // 30 days
+	},
+	secret: AUTH_SECRET,
+	callbacks: {
+		// async session({ token, session }) {
+		// 	console.log("AUTH.TS SESSION:", { token, session }); // FIXME:
 
-export async function createUserEmailPassword(
-	email: string,
-	password: string,
-	name: string,
-): Promise<string> {
-	// TODO:
-	return "";
-}
+		// 	const dbUser = await prisma.user.findUnique({
+		// 		where: {
+		// 			id: token.email!.toLowerCase(),
+		// 		},
+		// 	});
+		// 	console.log("AUTH.TS SESSION: ", { dbUser }); // FIXME:
 
-export async function updateUserPassword(userId: string, password: string) {
-	// TODO:
-}
+		// 	const result = {
+		// 		...session,
+		// 		user:
+		// 			dbUser !== null
+		// 				? {
+		// 						id: dbUser.id,
+		// 						name: dbUser.name,
+		// 						email: dbUser.email,
+		// 						image: dbUser.image,
+		// 					}
+		// 				: null,
+		// 	};
 
-export async function hashPassword(password: string) {
-	return await hash(password, 12);
-}
+		// 	console.log("AUTH.TS SESSION: ", { result }); // FIXME:
 
-export async function verifyPassword(password: string, hashedPassword: string) {
-	return await compare(password, hashedPassword);
-}
-
-function containsNonAlphaNumericChar(s: string): boolean {
-	return s.match(/\W/g) !== null;
-}
-
-function containsAlphaNumericChar(s: string): boolean {
-	return s.match(/[a-zA-Z0-9]/g) !== null;
-}
-
-export function isValidPassword(password: string) {
-	return (
-		password.length >= 8 &&
-		containsAlphaNumericChar(password) &&
-		containsNonAlphaNumericChar(password)
-	);
-}
+		// 	return result;
+		// },
+		async session({ token, session }) {
+			if (token && session.user) {
+				session.user.id = token.id as string;
+				session.user.email = token.email;
+				session.user.name = token.name;
+				session.user.image = token.picture as string | null;
+			}
+			return session;
+		},
+		async jwt({ token, user }) {
+			if (user) {
+				// This is only called on initial sign in
+				token.id = user.id;
+			}
+			// On subsequent calls, token.sub will be defined
+			const dbUser = await prisma.user.findUnique({
+				where: {
+					id: token.sub || user.id,
+				},
+			});
+			if (dbUser) {
+				token.id = dbUser.id;
+				token.email = dbUser.email;
+				token.name = dbUser.name;
+				token.picture = dbUser.image;
+			}
+			return token;
+		},
+	},
+};
