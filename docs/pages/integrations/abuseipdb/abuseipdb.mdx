@@ -1,0 +1,25 @@
+# AbuseIPDB
+
+1. In **AbuseIPDB**, click on your name in the top right corner. Next, click on **Account**.
+
+2. Click on the **API** tab and then create a new API key.
+
+3. Copy the API Key.
+
+4. Go to the **Settings** page in **Admyral**. Click on **Create New Secret** in the **Secrets** section.
+
+5. Give your credential a name, e.g. `AbuseIPDB`.
+
+6. The following secrets structure is expected:
+
+| Key       | Value                       |
+| --------- | --------------------------- |
+| `api_key` | Paste your **API Key** here |
+
+Alternatively, you can use the following CLI command structure:
+
+6. Click on the **Save** button.
+
+```bash
+admyral secret set abuseipdb_secret --value api_key=your_key_value
+```
