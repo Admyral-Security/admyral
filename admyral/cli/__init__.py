@@ -2,10 +2,10 @@ from admyral.cli.action import (
     action,
     push as action_push,
 )
-from admyral.cli.posthog import (
-    enable as posthog_enable,
-    disable as posthog_disable,
-    status as posthog_status,
+from admyral.cli.telemetry import (
+    enable as enable_telemetry,
+    disable as disable_telemetry,
+    status as telemetry_status,
 )
 from admyral.cli.server import up, down
 from admyral.cli.setup import init
@@ -25,7 +25,7 @@ __all__ = [
     "set",
     "delete",
     "list",
-    "posthog_enable",
-    "posthog_disable",
-    "posthog_status",
+    "enable_telemetry",
+    "disable_telemetry",
+    "telemetry_status",
 ]

@@ -9,7 +9,7 @@ from admyral.utils.docker_utils import (
     list_running_docker_containers,
     clean_up_old_images,
 )
-from admyral.utils.posthog import capture
+from admyral.utils.telemetry import capture
 from admyral.config.config import get_local_postgres_volume
 from admyral import __version__
 
@@ -47,7 +47,7 @@ def up() -> None:
     """
     Launches Admyral services locally.
     """
-    capture(event_name="Server:up")
+    capture(event_name="server:up")
 
     click.echo(WELCOME_MESSAGE)
 
@@ -135,7 +135,7 @@ def down() -> None:
     """
     Tears down Admyral services locally.
     """
-    capture(event_name="Server:down")
+    capture(event_name="server:down")
 
     if not is_docker_running():
         click.echo(
