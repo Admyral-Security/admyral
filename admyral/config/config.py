@@ -28,6 +28,7 @@ ENV_ADMYRAL_USE_LOCAL_ADMYRAL_PIP_PACKAGE = "ADMYRAL_USE_LOCAL_ADMYRAL_PIP_PACKA
 ENV_ADMYRAL_ENV = "ADMYRAL_ENV"
 ENV_ADMYRAL_POSTHOG_API_KEY = "ADMYRAL_POSTHOG_API_KEY"
 ENV_ADMYRAL_POSTHOG_HOST = "ADMYRAL_POSTHOG_HOST"
+ENV_ADMYRAL_DISABLE_TELEMETRY = "ADMYRAL_DISABLE_TELEMETRY"
 
 APP_NAME = "Admyral"
 
@@ -66,29 +67,6 @@ def get_user_config_file() -> str:
     return os.path.join(get_global_project_directory(), GLOBAL_CONFIG_FILE)
 
 
-def get_user_id() -> str:
-    config_file = get_user_config_file()
-    if os.path.exists(config_file):
-        with open(config_file, "r") as f:
-            file_content = yaml.safe_load(f)
-            return file_content["user_id"]
-    else:
-        user_id = str(uuid.uuid4())
-        with open(config_file, "w") as f:
-            yaml.dump({"user_id": user_id, "posthog_disabled": False}, f)
-        return user_id
-
-
-def read_posthog_disabled() -> bool:
-    config_file = get_user_config_file()
-    if os.path.exists(config_file):
-        with open(config_file, "r") as f:
-            file_content = yaml.safe_load(f)
-            return file_content["posthog_disabled"]
-
-    return True
-
-
 # Constants for custom Python execution
 ADMYRAL_DISABLE_NSJAIL = (
     os.getenv(ENV_ADMYRAL_DISABLE_NSJAIL, "false").lower() == "true"
@@ -112,6 +90,9 @@ ADMYRAL_POSTHOG_API_KEY = os.getenv(
 )
 ADMYRAL_POSTHOG_HOST = os.getenv(ENV_ADMYRAL_POSTHOG_HOST, "https://eu.i.posthog.com")
 
+ADMYRAL_DISABLE_TELEMETRY = (
+    os.getenv(ENV_ADMYRAL_DISABLE_TELEMETRY, "false").lower() == "true"
+)
 
 # DATABASE AND SECRETS MANAGER
 
@@ -164,7 +145,7 @@ class GlobalConfig(BaseModel):
     The global configuration for Admyral.
     """
 
-    user_id: str = get_user_id()
+    user_id: str = ""
     storage_directory: str = get_local_storage_path()
     database_type: DatabaseType = ADMYRAL_DATABASE_TYPE
     database_url: str = ADMYRAL_DATABASE_URL
@@ -173,13 +154,34 @@ class GlobalConfig(BaseModel):
     posthog_api_key: str = ADMYRAL_POSTHOG_API_KEY
     posthog_host: str = ADMYRAL_POSTHOG_HOST
     environment: str = ADMYRAL_ENV
-    posthog_disabled: bool = read_posthog_disabled()
+    telemetry_disabled: bool = False
 
     pip_lockfile_cache_cleanup_interval: int = 60 * 60 * 24  # 1 day
 
 
 def load_local_config() -> GlobalConfig:
-    return GlobalConfig()
+    """
+    Load the global configuration for Admyral.
+    """
+
+    user_config = GlobalConfig()
+    config_file = get_user_config_file()
+
+    if os.path.exists(config_file):
+        with open(config_file, "r") as f:
+            file_content = yaml.safe_load(f)
+    else:
+        user_id = str(uuid.uuid4())
+        file_content = {"user_id": user_id, "telemetry_disabled": False}
+        with open(config_file, "w") as f:
+            yaml.dump(file_content, f)
+
+    user_config.user_id = file_content["user_id"]
+    user_config.telemetry_disabled = ADMYRAL_DISABLE_TELEMETRY or file_content.get(
+        "telemetry_disabled", False
+    )
+
+    return user_config
 
 
 CONFIG = load_local_config()
