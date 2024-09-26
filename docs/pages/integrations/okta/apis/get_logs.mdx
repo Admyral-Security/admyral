@@ -1,0 +1,44 @@
+import { Callout } from "nextra/components";
+
+# Get Logs (Okta)
+
+Retrieve a list of system log events events from Okta.
+
+<Callout type="info">
+	For more information on the API for listing system log events, see [List all
+	System Log
+	Events](https://developer.okta.com/docs/api/openapi/okta-management/management/tag/SystemLog/#tag/SystemLog/operation/listLogEvents).
+</Callout>
+
+**SDK Import:**
+
+```python
+from admyral.actions import get_okta_logs
+```
+
+## Arguments:
+
+| Argument Name               | Description                                                                               | Required |
+| --------------------------- | ----------------------------------------------------------------------------------------- | :------: |
+| **Query** `query`           | Filter log events by specified keywords.                                                  |    -     |
+| **Start Time** `start_time` | The start time for the events to list. Must be in ISO 8601 format (YYYY-MM-DDTHH:MM:SSZ). |    -     |
+| **End Time** `end_time`     | The end time for the events to list. Must be in ISO 8601 format (YYYY-MM-DDTHH:MM:SSZ).   |    -     |
+| **Limit** `limit`           | The maximum number of events to retrieve. Default: 1000                                   |    -     |
+
+## Returns
+
+A JSON array of events.
+
+## Required Secrets
+
+| Secret Placeholder | Description                                            |
+| ------------------ | ------------------------------------------------------ |
+| `OKTA_SECRET`      | Okta secret. See [Okta setup](/integrations/okta/okta) |
+
+## SDK Example
+
+```python
+events = get_okta_logs(
+	secrets={"OKTA_SECRET": "my_stored_okta_secret"}
+)
+```
