@@ -25,6 +25,7 @@ const NAMESPACE_ICON_MAPPING: Record<string, string> = {
 	Retool: "/retool_logo.png",
 	"1Password": "/1password_logo.svg",
 	GitHub: "/github_logo.svg",
+	AbuseIPDB: "/abuseipdb-logo.svg",
 };
 
 export default function NamespaceIcon({ namespace }: { namespace: string }) {
