@@ -11,7 +11,7 @@ from sqlalchemy.engine import Connection
 from functools import partial
 
 from admyral.utils.aio import makedirs, path_exists
-from admyral.config.config import CONFIG, DatabaseType, SQLITE_DATABASE_NAME
+from admyral.config.config import GlobalConfig, DatabaseType, SQLITE_DATABASE_NAME
 
 
 # TODO: why are we filtering out the alembic_version table?
@@ -26,7 +26,7 @@ def get_admyral_dir() -> str:
 
 
 class DatabaseManager:
-    def __init__(self, engine: AsyncEngine, config: CONFIG) -> None:
+    def __init__(self, engine: AsyncEngine, config: GlobalConfig) -> None:
         self.engine = engine
         self.config = config
 
