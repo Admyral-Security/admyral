@@ -55,6 +55,7 @@ def openai_chat_completion(
         ),
     ] = None,
 ) -> str:
+    # https://platform.openai.com/docs/api-reference/chat/create
     # TODO: error handling
     secret = ctx.get().secrets.get("OPENAI_SECRET")
     api_key = secret["api_key"]

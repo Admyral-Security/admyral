@@ -55,6 +55,7 @@ def mistralai_chat_completion(
         ),
     ] = None,
 ) -> str:
+    # https://docs.mistral.ai/api/#tag/chat
     # TODO: error handling
     secret = ctx.get().secrets.get("MISTRALAI_SECRET")
     api_key = secret["api_key"]

@@ -32,6 +32,7 @@ def alienvault_otx_analyze_domain(
         ),
     ],
 ) -> JsonValue:
+    # https://otx.alienvault.com/assets/static/external_api.html
     secret = ctx.get().secrets.get("ALIENVAULT_OTX_SECRET")
     api_key = secret["api_key"]
 

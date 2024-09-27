@@ -73,7 +73,7 @@ def list_okta_events(
     ] = 1000,
 ) -> list[dict[str, JsonValue]]:
     # Note: Bounded Request - Polling Request use case not supported
-    # https://developer.okta.com/docs/reference/api/system-log/
+    # https://developer.okta.com/docs/reference/api/system-log/#list-events
 
     secret = ctx.get().secrets.get("OKTA_SECRET")
     okta_domain = secret["domain"]
@@ -129,6 +129,7 @@ def okta_search_users(
         ),
     ] = 1000,
 ) -> list[dict[str, JsonValue]]:
+    # https://developer.okta.com/docs/api/openapi/okta-management/management/tag/User/#tag/User/operation/listUsers
     secret = ctx.get().secrets.get("OKTA_SECRET")
     okta_domain = secret["domain"]
     api_key = secret["api_key"]
@@ -165,6 +166,7 @@ def okta_search_users(
     secrets_placeholders=["OKTA_SECRET"],
 )
 def okta_get_all_user_types() -> list[dict[str, JsonValue]]:
+    # https://developer.okta.com/docs/api/openapi/okta-management/management/tag/UserType/#tag/UserType/operation/listUserTypes
     secret = ctx.get().secrets.get("OKTA_SECRET")
     okta_domain = secret["domain"]
     api_key = secret["api_key"]

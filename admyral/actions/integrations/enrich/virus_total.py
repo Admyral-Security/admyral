@@ -33,6 +33,7 @@ def virus_total_analyze_hash(
         ),
     ],
 ) -> JsonValue:
+    # https://docs.virustotal.com/reference/file-info
     secret = ctx.get().secrets.get("VIRUS_TOTAL_SECRET")
     api_key = secret["api_key"]
     with get_virus_total_client(api_key) as client:
@@ -56,6 +57,7 @@ def virus_total_analyze_domain(
         ),
     ],
 ) -> JsonValue:
+    # https://docs.virustotal.com/reference/domain-info
     secret = ctx.get().secrets.get("VIRUS_TOTAL_SECRET")
     api_key = secret["api_key"]
     with get_virus_total_client(api_key) as client:
@@ -78,6 +80,7 @@ def virus_total_analyze_ip(
         ),
     ],
 ) -> JsonValue:
+    # https://developers.virustotal.com/reference/ip-addresses
     secret = ctx.get().secrets.get("VIRUS_TOTAL_SECRET")
     api_key = secret["api_key"]
     with get_virus_total_client(api_key) as client:
@@ -101,6 +104,7 @@ def virus_total_analyze_url(
         ),
     ],
 ) -> JsonValue:
+    # https://docs.virustotal.com/reference/url-info
     secret = ctx.get().secrets.get("VIRUS_TOTAL_SECRET")
     api_key = secret["api_key"]
     with get_virus_total_client(api_key) as client:

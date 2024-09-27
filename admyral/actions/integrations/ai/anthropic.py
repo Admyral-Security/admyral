@@ -63,6 +63,7 @@ def anthropic_chat_completion(
         ),
     ] = None,
 ) -> str:
+    # https://docs.anthropic.com/en/api/messages
     # TODO: error handling
     secret = ctx.get().secrets.get("ANTHROPIC_SECRET")
     api_key = secret["api_key"]

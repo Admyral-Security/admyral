@@ -53,6 +53,7 @@ def send_slack_message(
         ),
     ] = None,
 ) -> JsonValue:
+    # https://api.slack.com/methods/chat.postMessage
     secret = ctx.get().secrets.get("SLACK_SECRET")
     api_key = secret["api_key"]
 
@@ -93,6 +94,7 @@ def lookup_slack_user_by_email(
         ),
     ],
 ) -> str:
+    # https://api.slack.com/methods/users.lookupByEmail
     secret = ctx.get().secrets.get("SLACK_SECRET")
     api_key = secret["api_key"]
 
@@ -132,6 +134,7 @@ def send_slack_message_to_user_by_email(
         ),
     ] = None,
 ) -> JsonValue:
+    # https://api.slack.com/methods/chat.postMessage
     # https://api.slack.com/methods/users.lookupByEmail
 
     secret = ctx.get().secrets.get("SLACK_SECRET")
@@ -168,6 +171,8 @@ def batched_send_slack_message_to_user_by_email(
         ),
     ],
 ) -> JsonValue:
+    # https://api.slack.com/methods/chat.postMessage
+    # https://api.slack.com/methods/users.lookupByEmail
     for email, text, blocks in messages:
         try:
             send_slack_message_to_user_by_email(email=email, text=text, blocks=blocks)

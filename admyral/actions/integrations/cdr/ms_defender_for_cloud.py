@@ -39,6 +39,7 @@ def list_ms_defender_for_cloud_alerts(
         ),
     ] = 1000,
 ) -> list[dict[str, JsonValue]]:
+    # https://learn.microsoft.com/en-us/rest/api/defenderforcloud/alerts/list?view=rest-defenderforcloud-2022-01-01&tabs=HTTP
     secret = ctx.get().secrets.get("AZURE_SECRET")
     return ms_graph_list_alerts_v2(
         tenant_id=secret["tenant_id"],
