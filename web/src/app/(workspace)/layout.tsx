@@ -17,14 +17,13 @@ import { signOut, useSession } from "next-auth/react";
 const queryClient = new QueryClient();
 
 export default function Layout({ children }: { children: ReactNode }) {
+	// We automatically sign out the user and clear the cookies if the user
+	// does not exist anymore in the database.
 	const { data: session, status } = useSession();
-
 	useEffect(() => {
-		console.log("SESSION: ", { session, status }); // FIXME:
 		if (status === "loading") {
 			return;
 		}
-
 		if (!session?.userExists) {
 			signOut({
 				callbackUrl: "/login",
