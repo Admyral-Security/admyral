@@ -27,3 +27,14 @@ def list_running_docker_containers() -> list[str]:
     docker_client = DockerClient.from_env()
     containers = docker_client.containers.list()
     return [container.name for container in containers]
+
+
+def clean_up_old_images(
+    repository_name: str, current_version: str | None = None
+) -> None:
+    docker_client = DockerClient.from_env()
+    images = docker_client.images.list(name=repository_name)
+    for image in images:
+        if current_version and current_version in image.tags:
+            continue
+        image.remove()

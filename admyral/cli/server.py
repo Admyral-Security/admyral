@@ -7,6 +7,7 @@ from admyral.utils.docker_utils import (
     is_docker_running,
     get_docker_compose_cmd,
     list_running_docker_containers,
+    clean_up_old_images,
 )
 from admyral.config.config import get_local_postgres_volume
 from admyral import __version__
@@ -77,6 +78,14 @@ def up() -> None:
 
     # figure out the path of the docker-compose directory
     docker_compose_dir_path = _get_docker_compose_dir_path()
+
+    # clean up old images
+    click.echo("\nCleaning up old images...")
+    for repository_name in ["admyralai/web", "admyralai/api", "admyralai/worker"]:
+        clean_up_old_images(
+            repository_name=repository_name, current_version=__version__
+        )
+    click.echo("Done.")
 
     command = get_docker_compose_cmd()
     command.append("up")

@@ -25,7 +25,7 @@ services:
     volumes:
       - ${POSTGRES_VOLUME_PATH}:/var/lib/postgresql/data
 
-  admyral-api:
+  api:
     container_name: admyral-api
     # build:
     #   context: ../..
@@ -63,14 +63,14 @@ services:
     #   dockerfile: ../docker/Dockerfile.web
     image: admyralai/web:${ADMYRAL_VERSION}
     depends_on:
-      admyral-api:
+      api:
         condition: service_healthy
     networks:
       - admyral-network
     ports:
       - 3000:3000
     environment:
-      - ADMYRAL_API_BASE_URL=http://admyral-api:8000
+      - ADMYRAL_API_BASE_URL=http://api:8000
 
   worker:
     container_name: admyral-worker
