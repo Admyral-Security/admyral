@@ -214,6 +214,7 @@ def get_okta_logs(
         ),
     ] = 1000,
 ) -> list[dict[str, JsonValue]]:
+    # https://developer.okta.com/docs/api/openapi/okta-management/management/tag/SystemLog/#tag/SystemLog/operation/listLogEvents
     secret = ctx.get().secrets.get("OKTA_SECRET")
     okta_domain = secret["domain"]
     api_key = secret["api_key"]
