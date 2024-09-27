@@ -1,7 +1,7 @@
 from admyral.db.admyral_store import AdmyralStore
 from admyral.workers.workers_client import WorkersClient
 from admyral.secret.secrets_manager import SecretsManager, secrets_manager_factory
-from admyral.config.config import GlobalConfig
+from admyral.config.config import CONFIG
 
 
 _admyral_store: AdmyralStore = None
@@ -23,7 +23,7 @@ def get_admyral_store() -> AdmyralStore:
 
 async def setup_workers_client() -> None:
     global _workers_client
-    config = GlobalConfig()
+    config = CONFIG
     _workers_client = await WorkersClient.connect(
         get_admyral_store(), config.temporal_host
     )

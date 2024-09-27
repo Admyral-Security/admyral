@@ -36,7 +36,7 @@ from admyral.db.schemas import (
     SecretsSchema,
 )
 from admyral.db.alembic.database_manager import DatabaseManager
-from admyral.config.config import GlobalConfig, DatabaseType
+from admyral.config.config import CONFIG, DatabaseType
 from admyral.logger import get_logger
 from admyral.utils.time import utc_now
 from admyral.utils.crypto import generate_hs256
@@ -73,7 +73,7 @@ class AdmyralDatabaseSession:
 
 
 class AdmyralStore(StoreInterface):
-    def __init__(self, config: GlobalConfig) -> None:
+    def __init__(self, config: CONFIG) -> None:
         self.config = config
 
         self.engine = create_async_engine(
@@ -90,7 +90,7 @@ class AdmyralStore(StoreInterface):
     # TODO: pass down config
     @classmethod
     async def create_store(cls, skip_setup: bool = False) -> "AdmyralStore":
-        store = cls(GlobalConfig())
+        store = cls(CONFIG)
         if not skip_setup:
             await store.setup()
         store.performed_setup = True
@@ -99,7 +99,7 @@ class AdmyralStore(StoreInterface):
 
     @classmethod
     async def create_test_store(cls) -> "AdmyralStore":
-        config = GlobalConfig()
+        config = CONFIG
         config.database_type = DatabaseType.SQLITE
         config.database_url = "sqlite+aiosqlite:///:memory:"
 

@@ -12,7 +12,7 @@ from admyral.config.config import (
     get_admyral_daemon_pid_file,
     get_temporal_daemon_log_file,
     get_temporal_daemon_pid_file,
-    GlobalConfig,
+    CONFIG,
 )
 from admyral.utils.io import file_tail
 
@@ -30,7 +30,7 @@ async def launch_admyral_blocking():
     await asyncio.gather(
         run_temporal(),
         start_after_temporal(
-            [launch_worker({"docker": False}), run_api()], GlobalConfig().temporal_host
+            [launch_worker({"docker": False}), run_api()], CONFIG.temporal_host
         ),
     )
 
@@ -48,7 +48,7 @@ def launch_admyral_daemon():
         asyncio.run(
             start_after_temporal(
                 [launch_worker({"docker": False}), run_api()],
-                GlobalConfig().temporal_host,
+                CONFIG.temporal_host,
             )
         )
 

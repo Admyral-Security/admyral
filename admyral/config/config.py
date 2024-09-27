@@ -145,8 +145,8 @@ class GlobalConfig(BaseModel):
     The global configuration for Admyral.
     """
 
-    user_id: str = "38815447-e272-4299-94c0-29a2d30435f9"
-    telemetry_disabled: bool = False
+    user_id: str
+    telemetry_disabled: bool
     storage_directory: str = get_local_storage_path()
     database_type: DatabaseType = ADMYRAL_DATABASE_TYPE
     database_url: str = ADMYRAL_DATABASE_URL

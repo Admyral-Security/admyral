@@ -5,7 +5,7 @@ import json
 from admyral.db.store_interface import StoreInterface
 from admyral.utils.crypto import decrypt_secret, encrypt_secret
 from admyral.models import Secret, SecretMetadata
-from admyral.config.config import GlobalConfig, SecretsManagerType
+from admyral.config.config import CONFIG, SecretsManagerType
 
 
 class SecretsManager:
@@ -85,7 +85,7 @@ class SQLSecretsManager(SecretsManager):
 
 
 def secrets_manager_factory(db: StoreInterface) -> SecretsManager:
-    secrets_manager_type = GlobalConfig().secrets_manager_type
+    secrets_manager_type = CONFIG.secrets_manager_type
     match secrets_manager_type:
         case SecretsManagerType.SQL:
             return SQLSecretsManager(db)
