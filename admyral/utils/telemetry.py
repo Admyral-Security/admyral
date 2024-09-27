@@ -1,11 +1,11 @@
 import platform
 from admyral.config.config import CONFIG
 from admyral import __version__
-from posthog import Posthog
 from datetime import UTC, datetime
+from httpx import Client
 
 
-_posthog_client: Posthog = None
+_posthog_client: Client = None
 
 
 def _get_os() -> str:
@@ -20,12 +20,16 @@ def _get_python_version() -> str:
     return platform.python_version()
 
 
-def get_posthog_client() -> Posthog:
+def get_posthog_client() -> Client:
     global _posthog_client
     if not _posthog_client:
-        _posthog_client = Posthog(
-            api_key=CONFIG.posthog_api_key, host=CONFIG.posthog_host
+        _posthog_client = Client(
+            base_url=CONFIG.posthog_host,
+            headers={
+                "Content-Type": "application/json",
+            },
         )
+
     return _posthog_client
 
 
@@ -40,9 +44,13 @@ def capture(event_name: str, properties: dict = {}) -> None:
         "user_os_detail": _get_detailed_platform(),
     }
 
-    get_posthog_client().capture(
-        distinct_id=CONFIG.user_id,
-        event=f"{event_name}",
-        properties=default_properties | properties,
-        timestamp=datetime.now(UTC),
+    get_posthog_client().post(
+        url="/capture",
+        json={
+            "api_key": CONFIG.posthog_api_key,
+            "distinct_id": CONFIG.user_id,
+            "event": f"{event_name}",
+            "properties": default_properties | properties,
+            "timestamp": str(datetime.now(UTC)),
+        },
     )
