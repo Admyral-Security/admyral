@@ -25,7 +25,6 @@ def evaluate(expr: Condition, execution_state: dict[str, any]) -> bool:
 def test_constant_condition():
     execution_state = {"a": True}
     expr = ConstantConditionExpression(value="{{ a }}")
-    # assert ConditionEvaluator(execution_state).evaluate(expr)
     assert evaluate(expr, execution_state)
 
 
@@ -35,7 +34,6 @@ def test_unary_condition():
     expr = UnaryConditionExpression(
         op=UnaryOperator.NOT, expr=ConstantConditionExpression(value="{{ a }}")
     )
-    # assert not ConditionEvaluator(execution_state).evaluate(expr)
     assert not evaluate(expr, execution_state)
 
 
@@ -45,7 +43,6 @@ def test_is_none():
     expr = UnaryConditionExpression(
         op=UnaryOperator.IS_NONE, expr=ConstantConditionExpression(value="{{ a }}")
     )
-    # assert ConditionEvaluator(execution_state).evaluate(expr)
     assert evaluate(expr, execution_state)
 
 
@@ -55,7 +52,6 @@ def test_is_not_none():
     expr = UnaryConditionExpression(
         op=UnaryOperator.IS_NOT_NONE, expr=ConstantConditionExpression(value="{{ a }}")
     )
-    # assert ConditionEvaluator(execution_state).evaluate(expr)
     assert evaluate(expr, execution_state)
 
 
@@ -76,7 +72,6 @@ def test_and():
             ),
         ]
     )
-    # assert ConditionEvaluator(execution_state).evaluate(expr)
     assert evaluate(expr, execution_state)
 
 
@@ -97,7 +92,6 @@ def test_or():
             ),
         ]
     )
-    # assert ConditionEvaluator(execution_state).evaluate(expr)
     assert evaluate(expr, execution_state)
 
 
@@ -109,7 +103,6 @@ def test_in_list():
         op=BinaryOperator.IN,
         rhs=ConstantConditionExpression(value=["a", "b", "c"]),
     )
-    # assert ConditionEvaluator(execution_state).evaluate(expr)
     assert evaluate(expr, execution_state)
 
 
@@ -121,7 +114,6 @@ def test_in_dict():
         op=BinaryOperator.IN,
         rhs=ConstantConditionExpression(value={"abc": "defg"}),
     )
-    # assert ConditionEvaluator(execution_state).evaluate(expr)
     assert evaluate(expr, execution_state)
 
 
@@ -152,5 +144,4 @@ def test_complex():
             ),
         ]
     )
-    # assert ConditionEvaluator(execution_state).evaluate(expr)
     assert evaluate(expr, execution_state)
