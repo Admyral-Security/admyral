@@ -1,6 +1,5 @@
 import platform
-from yaml import safe_load, dump
-from admyral.config.config import CONFIG, get_user_config_file
+from admyral.config.config import CONFIG
 from admyral import __version__
 from posthog import Posthog
 from datetime import UTC, datetime
@@ -47,16 +46,3 @@ def capture(event_name: str, properties: dict = {}) -> None:
         properties=default_properties | properties,
         timestamp=datetime.now(UTC),
     )
-
-
-def change_telemetry_status(disable_telemetry: bool) -> None:
-    config_file = get_user_config_file()
-    with open(config_file, "r") as f:
-        file_content = safe_load(f)
-    file_content["posthog_disabled"] = disable_telemetry
-    with open(config_file, "w") as f:
-        dump(file_content, f)
-
-
-def get_telemetry_status() -> str:
-    return "disabled" if CONFIG.telemetry_disabled else "enabled"

@@ -145,7 +145,8 @@ class GlobalConfig(BaseModel):
     The global configuration for Admyral.
     """
 
-    user_id: str = ""
+    user_id: str
+    telemetry_disabled: bool
     storage_directory: str = get_local_storage_path()
     database_type: DatabaseType = ADMYRAL_DATABASE_TYPE
     database_url: str = ADMYRAL_DATABASE_URL
@@ -154,7 +155,6 @@ class GlobalConfig(BaseModel):
     posthog_api_key: str = ADMYRAL_POSTHOG_API_KEY
     posthog_host: str = ADMYRAL_POSTHOG_HOST
     environment: str = ADMYRAL_ENV
-    telemetry_disabled: bool = False
 
     pip_lockfile_cache_cleanup_interval: int = 60 * 60 * 24  # 1 day
 
@@ -163,25 +163,21 @@ def load_local_config() -> GlobalConfig:
     """
     Load the global configuration for Admyral.
     """
-
-    user_config = GlobalConfig()
     config_file = get_user_config_file()
 
     if os.path.exists(config_file):
         with open(config_file, "r") as f:
             file_content = yaml.safe_load(f)
     else:
+        os.makedirs(get_local_storage_path(), exist_ok=True)
         user_id = str(uuid.uuid4())
-        file_content = {"user_id": user_id, "telemetry_disabled": False}
+        file_content = {"user_id": user_id}
         with open(config_file, "w") as f:
             yaml.dump(file_content, f)
 
-    user_config.user_id = file_content["user_id"]
-    user_config.telemetry_disabled = ADMYRAL_DISABLE_TELEMETRY or file_content.get(
-        "telemetry_disabled", False
+    return GlobalConfig(
+        user_id=file_content["user_id"], telemetry_disabled=ADMYRAL_DISABLE_TELEMETRY
     )
-
-    return user_config
 
 
 CONFIG = load_local_config()
