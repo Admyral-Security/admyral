@@ -7,17 +7,19 @@ export default withAuth(
 		const token = await getToken({ req });
 		const isAuthenticated = !!token;
 
-		console.log("MIDDLEWARE: ", { req, token, isAuthenticated }); // FIXME:
-
 		const isAuthPage = req.nextUrl.pathname.startsWith("/login");
-
 		if (isAuthPage) {
+			// If the user is already authenticated and wants to access the login page,
+			// we redirect the user to the workflow overview.
+			// Otherwise we let the user pass.
 			if (isAuthenticated) {
 				return NextResponse.redirect(new URL("/", req.url));
 			}
 			return null;
 		}
 
+		// If the user is not authenticated, the user gets automatically redirected
+		// to the login page.
 		if (!isAuthenticated) {
 			return NextResponse.redirect(new URL(`/login`, req.url));
 		}

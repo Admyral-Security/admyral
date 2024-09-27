@@ -58,7 +58,7 @@ services:
       - ADMYRAL_TEMPORAL_HOST=temporal:7233
       # Authentication
       - ADMYRAL_DISABLE_AUTH=${ADMYRAL_DISABLE_AUTH:-false}
-      - AUTH_SECRET=${AUTH_SECRET:-QzkuVCn7OGfkpoX98aOxf2tc3kFX8pZs71N1wHPo8NM}
+      - NEXTAUTH_SECRET=${NEXTAUTH_SECRET:-QzkuVCn7OGfkpoX98aOxf2tc3kFX8pZs71N1wHPo8NM}
       - NEXTAUTH_URL=http://web:3000
 
   web:
@@ -79,9 +79,9 @@ services:
       - ADMYRAL_DATABASE_URL=postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-your-super-secret-and-long-postgres-password}@postgresql:5432/admyral
       # Authentication
       - AUTH_TRUST_HOST=true
-      - AUTH_URL=http://localhost:3000
       - ADMYRAL_DISABLE_AUTH=${ADMYRAL_DISABLE_AUTH:-false}
-      - AUTH_SECRET=${AUTH_SECRET:-QzkuVCn7OGfkpoX98aOxf2tc3kFX8pZs71N1wHPo8NM}
+      - NEXTAUTH_SECRET=${NEXTAUTH_SECRET:-QzkuVCn7OGfkpoX98aOxf2tc3kFX8pZs71N1wHPo8NM}
+      - NEXTAUTH_URL=${NEXTAUTH_URL:-http://localhost:3000}
       - AUTH_GITHUB_ID=${AUTH_GITHUB_ID}
       - AUTH_GITHUB_SECRET=${AUTH_GITHUB_SECRET}
 
