@@ -12,7 +12,7 @@ Retrieve detailed information about the reputation of a specific IP address.
 **SDK Import:**
 
 ```python
-from admyral.actions import abuseipdb_check_ip
+from admyral.actions import abuseipdb_analyze_ip
 ```
 
 ## Arguments:
@@ -36,7 +36,7 @@ A JSON object.
 ## SDK Example
 
 ```python
-result = abuseipdb_check_ip(
+result = abuseipdb_analyze_ip(
 	ip_address="118.25.6.39",
 	verbose="yes",
 	max_age_in_days=90
@@ -52,32 +52,30 @@ Typical successful response:
 
 ```json
 {
-	"data": {
-		"ipAddress": "118.25.6.39",
-		"isPublic": true,
-		"ipVersion": 4,
-		"isWhitelisted": false,
-		"abuseConfidenceScore": 100,
-		"countryCode": "CN",
-		"countryName": "China",
-		"usageType": "Data Center/Web Hosting/Transit",
-		"isp": "Tencent Cloud Computing (Beijing) Co. Ltd",
-		"domain": "tencent.com",
-		"hostnames": [],
-		"isTor": false,
-		"totalReports": 1,
-		"numDistinctUsers": 1,
-		"lastReportedAt": "2018-12-20T20:55:14+00:00",
-		"reports": [
-			{
-				"reportedAt": "2018-12-20T20:55:14+00:00",
-				"comment": "Dec 20 20:55:14 srv206 sshd[13937]: Invalid user oracle from 118.25.6.39",
-				"categories": [18, 22],
-				"reporterId": 1,
-				"reporterCountryCode": "US",
-				"reporterCountryName": "United States"
-			}
-		]
-	}
+	"ipAddress": "118.25.6.39",
+	"isPublic": true,
+	"ipVersion": 4,
+	"isWhitelisted": false,
+	"abuseConfidenceScore": 100,
+	"countryCode": "CN",
+	"countryName": "China",
+	"usageType": "Data Center/Web Hosting/Transit",
+	"isp": "Tencent Cloud Computing (Beijing) Co. Ltd",
+	"domain": "tencent.com",
+	"hostnames": [],
+	"isTor": false,
+	"totalReports": 1,
+	"numDistinctUsers": 1,
+	"lastReportedAt": "2018-12-20T20:55:14+00:00",
+	"reports": [
+		{
+			"reportedAt": "2018-12-20T20:55:14+00:00",
+			"comment": "Dec 20 20:55:14 srv206 sshd[13937]: Invalid user oracle from 118.25.6.39",
+			"categories": [18, 22],
+			"reporterId": 1,
+			"reporterCountryCode": "US",
+			"reporterCountryName": "United States"
+		}
+	]
 }
 ```

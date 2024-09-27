@@ -19,7 +19,7 @@ from admyral.actions.integrations.enrich import (
     virus_total_analyze_domain,
     virus_total_analyze_ip,
     virus_total_analyze_url,
-    abuseipdb_check_ip,
+    abuseipdb_analyze_ip,
 )
 from admyral.actions.integrations.cases import (
     create_jira_issue,
@@ -116,5 +116,5 @@ __all__ = [
     "list_commit_history_for_pull_request",
     "list_review_history_for_pull_request",
     "compare_two_github_commits",
-    "abuseipdb_check_ip",
+    "abuseipdb_analyze_ip",
 ]

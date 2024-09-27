@@ -22,7 +22,7 @@ def get_abuseipdb_client(api_key: str) -> Client:
     description="Check an IP address using AbuseIPDB",
     secrets_placeholders=["ABUSEIPDB_SECRET"],
 )
-def abuseipdb_check_ip(
+def abuseipdb_analyze_ip(
     ip_address: Annotated[
         str,
         ArgumentMetadata(
@@ -45,6 +45,8 @@ def abuseipdb_check_ip(
         ),
     ] = 30,
 ) -> JsonValue:
+    # https://docs.abuseipdb.com/#check-endpoint
+
     secret = ctx.get().secrets.get("ABUSEIPDB_SECRET")
     api_key = secret["api_key"]
     with get_abuseipdb_client(api_key) as client:
@@ -57,4 +59,4 @@ def abuseipdb_check_ip(
             params["maxAgeInDays"] = max_age_in_days
         response = client.get("/check", params=params)
         response.raise_for_status()
-        return response.json()
+        return response.json().get("data", {})

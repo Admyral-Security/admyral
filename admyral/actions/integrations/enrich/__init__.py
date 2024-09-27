@@ -8,7 +8,7 @@ from admyral.actions.integrations.enrich.virus_total import (
     virus_total_analyze_ip,
     virus_total_analyze_url,
 )
-from admyral.actions.integrations.enrich.abuseipdb import abuseipdb_check_ip
+from admyral.actions.integrations.enrich.abuseipdb import abuseipdb_analyze_ip
 
 __all__ = [
     "alienvault_otx_analyze_domain",
@@ -17,5 +17,5 @@ __all__ = [
     "virus_total_analyze_domain",
     "virus_total_analyze_ip",
     "virus_total_analyze_url",
-    "abuseipdb_check_ip",
+    "abuseipdb_analyze_ip",
 ]
