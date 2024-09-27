@@ -1,9 +1,14 @@
 import { getToken } from "next-auth/jwt";
 import { withAuth } from "next-auth/middleware";
 import { NextResponse } from "next/server";
+import { DISABLE_AUTH } from "./constants/env";
 
 export default withAuth(
 	async function middleware(req) {
+		if (DISABLE_AUTH) {
+			return null;
+		}
+
 		const token = await getToken({ req });
 		const isAuthenticated = !!token;
 

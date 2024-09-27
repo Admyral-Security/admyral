@@ -57,7 +57,8 @@ export default function WorkflowRunHistory({
 				// TODO: a selected run could get lost because we only return the last 100 runs
 				// calculate shift for selectedRunIdx
 				const shiftedSelectedRunIdx = data.findIndex(
-					(run) => run.runId === runs[selectedRunIdx!].runId,
+					(run: TWorkflowRunMetadata) =>
+						run.runId === runs[selectedRunIdx!].runId,
 				);
 				setRuns(data);
 				setSelectedRunIdx(
@@ -71,7 +72,7 @@ export default function WorkflowRunHistory({
 		if (error) {
 			errorToast("Failed to load workflow runs. Please reload the page.");
 		}
-	}, [data, error, setRuns, setSelectedRunIdx]);
+	}, [data, error, setRuns, setSelectedRunIdx, runs, selectedRunIdx]);
 
 	if (isPending) {
 		return <Text>Loading...</Text>;

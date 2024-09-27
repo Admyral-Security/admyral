@@ -9,8 +9,10 @@ import { Flex, IconButton, Text, TextField } from "@radix-ui/themes";
 import { useEffect } from "react";
 
 export default function ExistingApiKey({
+	key,
 	apiKey,
 }: {
+	key?: string;
 	apiKey: TApiKeyMetadata;
 }) {
 	const { removeApiKey } = useApiKeysStore();
@@ -32,7 +34,7 @@ export default function ExistingApiKey({
 	}, [deleteApiKey, removeApiKey, apiKey]);
 
 	return (
-		<Flex justify="between" align="center">
+		<Flex key={key} justify="between" align="center">
 			<Flex direction="column" gap="1" width="100%">
 				<Text>API Key Name</Text>
 				<TextField.Root disabled value={apiKey.name} />

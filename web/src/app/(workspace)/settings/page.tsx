@@ -38,7 +38,7 @@ export default async function SettingsPage() {
 				align="center"
 				gap="5"
 			>
-				{/* <Secrets /> */}
+				<Secrets />
 				{/* {!DISABLE_AUTH && <ApiKeys />} */}
 				{/* <Account />
 				<Credentials />
@@ -47,10 +47,12 @@ export default async function SettingsPage() {
 					<LogoutButton />
 					<DeleteAccountButton />
 				</Flex> */}
-				<Flex width="50%" justify="start" gap="5">
-					<SignOutButton />
-					{/* <DeleteAccountButton /> */}
-				</Flex>
+				{!DISABLE_AUTH && (
+					<Flex width="50%" justify="start" gap="5">
+						<SignOutButton />
+						{/* <DeleteAccountButton /> */}
+					</Flex>
+				)}
 			</Flex>
 		</Grid>
 	);
