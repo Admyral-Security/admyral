@@ -1,5 +1,6 @@
 from typing import Optional, Any, AsyncGenerator
 from sqlalchemy.ext.asyncio import create_async_engine
+from sqlalchemy.exc import IntegrityError
 from sqlmodel import select, delete, insert, update, text
 from datetime import datetime
 from sqlmodel.ext.asyncio.session import AsyncSession
@@ -252,36 +253,43 @@ class AdmyralStore(StoreInterface):
         self,
         pip_lockfile: PipLockfile,
     ) -> None:
-        async with self._get_async_session() as db:
-            # check whether the lockfile is already cached. if yes, then we update
-            # its expiration time. otherwise, we create a new cache entry.
-            cached_pip_lockfile = await self._get_cached_pip_lockfile(
-                db, pip_lockfile.hash
+        try:
+            async with self._get_async_session() as db:
+                # check whether the lockfile is already cached. if yes, then we update
+                # its expiration time. otherwise, we create a new cache entry.
+                cached_pip_lockfile = await self._get_cached_pip_lockfile(
+                    db, pip_lockfile.hash
+                )
+
+                if cached_pip_lockfile:
+                    await db.exec(
+                        update(PipLockfileCacheSchema)
+                        .where(PipLockfileCacheSchema.hash == pip_lockfile.hash)
+                        .values(
+                            expiration_time=datetime.fromtimestamp(
+                                pip_lockfile.expiration_time
+                            ),
+                            updated_at=utc_now(),
+                        )
+                    )
+                else:
+                    await db.exec(
+                        insert(PipLockfileCacheSchema).values(
+                            hash=pip_lockfile.hash,
+                            lockfile=pip_lockfile.lockfile,
+                            expiration_time=datetime.fromtimestamp(
+                                pip_lockfile.expiration_time
+                            ),
+                        )
+                    )
+
+                await db.commit()
+        except IntegrityError:
+            # In case of a race condition, we might receive a unique constraint violation.
+            # We can safely ignore this error.
+            logger.warning(
+                f"Non-critical race condition detected during caching lockfile with hash {pip_lockfile.hash}. Ignoring."
             )
-
-            if cached_pip_lockfile:
-                await db.exec(
-                    update(PipLockfileCacheSchema)
-                    .where(PipLockfileCacheSchema.hash == pip_lockfile.hash)
-                    .values(
-                        expiration_time=datetime.fromtimestamp(
-                            pip_lockfile.expiration_time
-                        ),
-                        updated_at=utc_now(),
-                    )
-                )
-            else:
-                await db.exec(
-                    insert(PipLockfileCacheSchema).values(
-                        hash=pip_lockfile.hash,
-                        lockfile=pip_lockfile.lockfile,
-                        expiration_time=datetime.fromtimestamp(
-                            pip_lockfile.expiration_time
-                        ),
-                    )
-                )
-
-            await db.commit()
 
     async def delete_expired_cached_pip_lockfile(self) -> None:
         async with self._get_async_session() as db:

@@ -1,7 +1,6 @@
 import time
 import aiofiles
 import aiofiles.os
-import asyncio
 from typing import Any
 import tempfile
 import json
@@ -180,9 +179,14 @@ async def _run_python_action_without_nsjail(
         "-u",  # unbuffered binary stdout and stderr
         os.path.join(job_dir, "python_action_executor.py"),
     ]
-    exit_code = await run_subprocess_with_log_flushing(
-        cmd, lambda logs: ctx.get().append_logs_async(logs), env=env
-    )
+
+    async def _append_logs(logs: list[str]) -> None:
+        logger.info(
+            f"workflow_id={ctx.get().workflow_id}  run_id={ctx.get().run_id}  step_id={ctx.get().step_id} [_run_python_action_without_nsjail]: {''.join(logs)}"
+        )
+        await ctx.get().append_logs_async(logs)
+
+    exit_code = await run_subprocess_with_log_flushing(cmd, _append_logs, env=env)
 
     _handle_exit_code(exit_code, cmd, python_action.action_type)
 
@@ -223,9 +227,14 @@ async def _pip_compile(
         "--resolver=backtracking",
         "--strip-extras",
     ]
-    exit_code = await run_subprocess_with_log_flushing(
-        cmd, lambda logs: ctx.get().append_logs_async(logs)
-    )
+
+    async def _append_logs(logs: list[str]) -> None:
+        logger.info(
+            f"workflow_id={ctx.get().workflow_id}  run_id={ctx.get().run_id}  step_id={ctx.get().step_id} [_pip_compile]: {''.join(logs)}"
+        )
+        await ctx.get().append_logs_async(logs)
+
+    exit_code = await run_subprocess_with_log_flushing(cmd, _append_logs)
 
     _handle_exit_code(exit_code, cmd, python_action.action_type)
 
@@ -263,42 +272,36 @@ async def _pip_install_requirements(
 ) -> list[str]:
     pip_install_start = time.monotonic_ns()
 
+    cwd = await getcwd()
+
     installed_requirements_paths = []
+
+    # TODO: I think we can default to always using the local package
     if ADMYRAL_USE_LOCAL_ADMYRAL_PIP_PACKAGE:
         # add the app directory to the installed requirements, such that
         # the action can access the local package
         logger.info("Using local Admyral package")
-        cwd = await getcwd()
         installed_requirements_paths.append(cwd)
     else:
         logger.info("Using PyPi Admyral package")
 
-    missing_requirements = []
-    for requirement in lockfile:
-        requirement_cache_path = os.path.join(ADMYRAL_PIP_CACHE_DIRECTORY, requirement)
-
-        if await path_exists(requirement_cache_path):
-            installed_requirements_paths.append(requirement_cache_path)
-        else:
-            missing_requirements.append((requirement, requirement_cache_path))
-
-    cwd = await getcwd()
     install_requirement_script = os.path.join(
         cwd, "admyral", "workers", "nsjail", "install_requirement.sh"
     )
 
-    installed_requirements_paths += await asyncio.gather(
-        *[
-            _pip_install_requirement(
+    for requirement in lockfile:
+        requirement_cache_path = os.path.join(ADMYRAL_PIP_CACHE_DIRECTORY, requirement)
+        installed_requirements_paths.append(requirement_cache_path)
+
+        if not await path_exists(requirement_cache_path):
+            # requirement is not yet installed - pip install it
+            await _pip_install_requirement(
                 action_type,
                 requirement,
                 requirement_cache_path,
                 job_dir,
                 install_requirement_script,
             )
-            for requirement, requirement_cache_path in missing_requirements
-        ]
-    )
 
     pip_install_end = time.monotonic_ns()
     logger.info(
@@ -314,7 +317,7 @@ async def _pip_install_requirement(
     requirement_cache_path: str,
     job_dir: str,
     install_requirement_script: str,
-) -> str:
+) -> None:
     lock_name = requirement.replace("==", "_").replace(".", "_").replace("-", "_")
     req_lock_file = os.path.join(
         ADMYRAL_PIP_LOCK_CACHE_DIRECTORY, f"pip-{lock_name}.lock"
@@ -347,13 +350,16 @@ async def _pip_install_requirement(
         "--config",
         nsjail_pip_install_config_path,
     ]
-    exit_code = await run_subprocess_with_log_flushing(
-        cmd, lambda logs: ctx.get().append_logs_async(logs)
-    )
+
+    async def _append_logs(logs: list[str]) -> None:
+        logger.info(
+            f"workflow_id={ctx.get().workflow_id}  run_id={ctx.get().run_id}  step_id={ctx.get().step_id} [_pip_install_requirement]: {''.join(logs)}"
+        )
+        await ctx.get().append_logs_async(logs)
+
+    exit_code = await run_subprocess_with_log_flushing(cmd, _append_logs)
 
     _handle_exit_code(exit_code, cmd, action_type)
-
-    return requirement_cache_path
 
 
 async def _jailed_python_execution(
@@ -409,10 +415,14 @@ async def _jailed_python_execution(
             [["-s", f"'{len(key)}|{key}{value}'"] for key, value in env.items()]
         )
     )
-    exit_code = await run_subprocess_with_log_flushing(
-        cmd_with_secrets,
-        lambda logs: ctx.get().append_logs_async(logs),
-    )
+
+    async def _append_logs(logs: list[str]) -> None:
+        logger.info(
+            f"workflow_id={ctx.get().workflow_id}  run_id={ctx.get().run_id}  step_id={ctx.get().step_id} [_jailed_python_execution]: {''.join(logs)}"
+        )
+        await ctx.get().append_logs_async(logs)
+
+    exit_code = await run_subprocess_with_log_flushing(cmd_with_secrets, _append_logs)
 
     _handle_exit_code(exit_code, cmd, python_action.action_type)
 
