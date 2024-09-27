@@ -47,6 +47,7 @@ def ai_action(
         ),
     ] = None,
 ) -> str:
+    # # https://platform.openai.com/docs/api-reference/chat/create
     api_key = os.environ.get("OPENAI_API_KEY")
     if not api_key:
         raise ValueError(

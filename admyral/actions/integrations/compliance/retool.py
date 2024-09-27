@@ -74,6 +74,7 @@ def list_retool_inactive_users(
 )
 def list_groups_per_user() -> dict[str, JsonValue]:
     # Get all permission groups for an organization or space. The API token must have the "Groups > Read" scope.
+    # https://docs.retool.com/reference/api/#tag/Users/paths/~1users~1%7BuserId%7D/patch
     # https://docs.retool.com/reference/api/v2/#tag/Groups/paths/~1groups~1%7BgroupId%7D/put
 
     secret = ctx.get().secrets.get("RETOOL_SECRET")

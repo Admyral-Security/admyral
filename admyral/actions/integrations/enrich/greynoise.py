@@ -31,6 +31,7 @@ def grey_noise_ip_lookup(
         ),
     ],
 ) -> JsonValue:
+    # https://docs.greynoise.io/reference/get_v3-community-ip
     secret = ctx.get().secrets.get("GREY_NOISE_SECRET")
     api_key = secret["api_key"]
     with get_grey_noise_client(api_key) as client:

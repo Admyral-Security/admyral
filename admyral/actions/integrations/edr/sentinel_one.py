@@ -46,7 +46,7 @@ def list_sentinel_one_alerts(
         ),
     ] = 1000,
 ) -> list[dict[str, JsonValue]]:
-    # https://github.com/fragtastic/sentinelone-api-python/blob/main/sentineloneapi/client.py
+    # https://github.com/fragtastic/sentinelone-api-python/blob/67f8005576a6613f925edca93e22c8da7d6c3010/sentineloneapi/client.py#L98
 
     secret = ctx.get().secrets.get("SENTINEL_ONE_SECRET")
     base_url = secret["base_url"]

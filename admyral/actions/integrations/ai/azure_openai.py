@@ -49,6 +49,7 @@ def azure_openai_chat_completion(
         ),
     ] = None,
 ) -> str:
+    # https://learn.microsoft.com/en-us/azure/ai-services/openai/how-to/chatgpt?tabs=python-new#work-with-chat-completion-models
     # TODO: add authentication via Entra ID: https://github.com/openai/openai-python/blob/main/examples/azure_ad.py
     # TODO: error handling
     secret = ctx.get().secrets.get("AZURE_OPENAI_SECRET")

@@ -44,6 +44,7 @@ def send_email(
         ),
     ],
 ) -> JsonValue:
+    # https://resend.com/docs/api-reference/emails/send-email
     RESEND_EMAIL = os.getenv("RESEND_EMAIL")
 
     if not resend.api_key:
