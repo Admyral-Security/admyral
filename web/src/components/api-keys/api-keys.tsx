@@ -40,7 +40,10 @@ export default function ApiKeys() {
 					</Flex>
 
 					{apiKeys.map((apiKey) => (
-						<ExistingApiKey apiKey={apiKey} />
+						<ExistingApiKey
+							key={`api_keys_${apiKey.id}`}
+							apiKey={apiKey}
+						/>
 					))}
 				</Flex>
 			</Card>
