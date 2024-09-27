@@ -8,11 +8,16 @@ logger = get_logger(__name__)
 
 
 async def _read_stream(stream: StreamReader, callback: Callable[[str], None]) -> None:
-    while True:
-        line = await stream.readline()
-        if not line:
-            break
-        callback(line.decode("utf-8"))
+    try:
+        while True:
+            line = await stream.readline()
+            if not line:
+                break
+            callback(line.decode("utf-8"))
+    except ValueError:
+        # ValueError: Separator is not found, and chunk exceed the limit
+        # https://stackoverflow.com/questions/55457370/how-to-avoid-valueerror-separator-is-not-found-and-chunk-exceed-the-limit
+        callback("Truncated log stream because chunks are too large to be read.")
 
 
 async def run_subprocess_with_streamed_stdout_and_stderr(
