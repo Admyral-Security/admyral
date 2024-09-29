@@ -1,6 +1,5 @@
 from fastapi import Request, HTTPException
 from fastapi_nextauth_jwt import NextAuthJWTv4
-import os
 
 from admyral.models.auth import AuthenticatedUser
 from admyral.config.config import GlobalConfig, DISABLE_AUTH, AUTH_SECRET
@@ -27,7 +26,6 @@ async def authenticate(request: Request) -> AuthenticatedUser:
             raise HTTPException(status_code=401, detail="Invalid API Key")
         user_id = api_key.user_id
     else:
-        assert os.environ.get("AUTH_SECRET") is not None, "AUTH_SECRET must be set"
         decrypted_token = validate_and_decrypt_jwt(request)
         user_id = decrypted_token.get("sub") or decrypted_token.get("id")
 
