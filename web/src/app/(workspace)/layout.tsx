@@ -13,7 +13,6 @@ export default async function Layout({ children }: { children: ReactNode }) {
 	return (
 		<ClientSessionValidator isAuthDisabled={disableAuth}>
 			<ReactQueryProvider>
-				<Text>DISABLE AUTH: {JSON.stringify(disableAuth)}</Text>
 				<Grid columns="56px 1fr" width="auto" height="100vh">
 					<Box>
 						<Nav />
