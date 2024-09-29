@@ -1,7 +1,7 @@
 // import { providerMap } from "@/auth.config";
 import SignInButton from "@/components/auth/sign-in-button";
 import LogoWithName from "@/components/icons/logo-with-name";
-import { DISABLE_AUTH } from "@/constants/env";
+import { isAuthDisabled } from "@/lib/env";
 import { InfoCircledIcon } from "@radix-ui/react-icons";
 import { Box, Callout, Flex, Text } from "@radix-ui/themes";
 import Link from "next/link";
@@ -92,8 +92,9 @@ export default async function LoginPage({
 }: {
 	searchParams?: { [key: string]: string | string[] | undefined };
 }) {
-	if (DISABLE_AUTH) {
-		// TODO:
+	const disableAuth = await isAuthDisabled();
+
+	if (disableAuth) {
 		redirect("/");
 	}
 
