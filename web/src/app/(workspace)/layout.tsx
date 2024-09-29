@@ -1,15 +1,19 @@
+"use server";
+
 import Nav from "@/components/navbar/navbar";
-import { Box, Grid } from "@radix-ui/themes";
+import { Box, Grid, Text } from "@radix-ui/themes";
 import { ReactNode } from "react";
 import { Slide, ToastContainer } from "react-toastify";
-import { DISABLE_AUTH } from "@/constants/env";
 import ReactQueryProvider from "@/providers/react-query";
 import ClientSessionValidator from "@/providers/client-session-validator";
+import { isAuthDisabled } from "@/lib/env";
 
 export default async function Layout({ children }: { children: ReactNode }) {
+	const disableAuth = await isAuthDisabled();
 	return (
-		<ClientSessionValidator isAuthDisabled={DISABLE_AUTH}>
+		<ClientSessionValidator isAuthDisabled={disableAuth}>
 			<ReactQueryProvider>
+				<Text>DISABLE AUTH: {JSON.stringify(disableAuth)}</Text>
 				<Grid columns="56px 1fr" width="auto" height="100vh">
 					<Box>
 						<Nav />
