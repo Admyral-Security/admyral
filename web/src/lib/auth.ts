@@ -3,16 +3,31 @@ import { NextAuthOptions } from "next-auth";
 import GitHub from "next-auth/providers/github";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import prisma from "@/lib/prisma";
+import { type Provider } from "next-auth/providers/index";
+
+export const providers: Provider[] = [
+	GitHub({
+		clientId: GITHUB_CLIENT_ID!,
+		clientSecret: GITHUB_SECRET!,
+	}),
+];
+
+export const providerMap = providers
+	.map((provider) => {
+		// if (typeof provider === "function") {
+		// 	const providerData = provider();
+		// 	return { id: providerData.id, name: providerData.name };
+		// } else {
+		// 	return { id: provider.id, name: provider.name };
+		// }
+		return { id: provider.id, name: provider.name };
+	})
+	.filter((provider) => provider.id !== "credentials");
 
 export const authOptions: NextAuthOptions = {
 	// Configure one or more authentication providers
 	adapter: PrismaAdapter(prisma),
-	providers: [
-		GitHub({
-			clientId: GITHUB_CLIENT_ID!,
-			clientSecret: GITHUB_SECRET!,
-		}),
-	],
+	providers,
 	pages: {
 		signIn: "/login",
 	},

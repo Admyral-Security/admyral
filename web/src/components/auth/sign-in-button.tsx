@@ -1,11 +1,8 @@
 "use client";
 
 import { Button, Text } from "@radix-ui/themes";
-// import { signIn } from "@/auth";
 import GithubIcon from "../icons/github-icon";
-// import { AuthError } from "next-auth";
-import { redirect } from "next/navigation";
-import { useSession, signIn, signOut } from "next-auth/react";
+import { signIn } from "next-auth/react";
 
 function ProviderIconMapping({ providerId: string }: { providerId: string }) {
 	return <GithubIcon />;
