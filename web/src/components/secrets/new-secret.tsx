@@ -88,7 +88,7 @@ export default function NewSecret({ idx }: { idx: number }) {
 
 	return (
 		<Flex direction="column" gap="1">
-			<Flex width="100%" gap="4" align="end">
+			<Flex width="100%" gap="2" align="end">
 				<Flex direction="column" gap="1" width="100%">
 					<Text>Secret Name</Text>
 					<TextField.Root

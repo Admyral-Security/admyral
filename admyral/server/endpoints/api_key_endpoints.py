@@ -14,7 +14,7 @@ router = APIRouter()
 async def list_api_keys(
     authenticated_user: AuthenticatedUser = Depends(authenticate),
 ) -> list[ApiKey]:
-    await get_admyral_store().list_api_keys(authenticated_user.user_id)
+    return await get_admyral_store().list_api_keys(authenticated_user.user_id)
 
 
 class CreateApiKeyRequest(BaseModel):

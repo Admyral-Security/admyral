@@ -188,11 +188,11 @@ class AdmyralStore(StoreInterface):
             )
             return [api_key.to_model() for api_key in result.all()]
 
-    async def search_api_key(self, key: str) -> Optional[ApiKey]:
+    async def search_api_key_owner(self, key: str) -> Optional[str]:
         async with self._get_async_session() as db:
             result = await db.exec(select(ApiKeySchema).where(ApiKeySchema.key == key))
             api_key = result.one_or_none()
-            return api_key.to_model() if api_key else None
+            return api_key.user_id if api_key else None
 
     async def delete_api_key(self, user_id: str, key_id: str) -> None:
         async with self._get_async_session() as db:

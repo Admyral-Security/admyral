@@ -12,9 +12,9 @@ import {
 import SettingsIcon from "../icons/settings-icon";
 import WorkflowEditorRightPanelBase from "./right-panel-base";
 import { useWorkflowStore } from "@/stores/workflow-store";
-import TrashIcon from "../icons/trash-icon";
 import { useDeleteWorkflowApi } from "@/hooks/use-delete-workflow-api";
 import { useRouter } from "next/navigation";
+import { TrashIcon } from "@radix-ui/react-icons";
 
 export default function WorkflowSettingsEditPanel() {
 	const {

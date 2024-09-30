@@ -39,7 +39,6 @@ export default function CreateApiKey() {
 			setSecretKey(createApiKey.data.secret);
 			setState(State.SHOW_KEY);
 			createApiKey.reset();
-			return () => setSecretKey("");
 		}
 		if (createApiKey.isError) {
 			errorToast(`Failed to create API key. Please try again.`);
@@ -105,7 +104,7 @@ export default function CreateApiKey() {
 				)}
 
 				{state === State.SHOW_KEY && (
-					<Flex direction="column">
+					<Flex direction="column" gap="4">
 						<Callout.Root color="blue">
 							<Flex align="center" gap="5">
 								<Callout.Icon>

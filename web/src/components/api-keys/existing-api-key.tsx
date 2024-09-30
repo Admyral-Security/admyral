@@ -34,7 +34,7 @@ export default function ExistingApiKey({
 	}, [deleteApiKey, removeApiKey, apiKey]);
 
 	return (
-		<Flex key={key} justify="between" align="center">
+		<Flex key={key} justify="between" align="end" gap="2">
 			<Flex direction="column" gap="1" width="100%">
 				<Text>API Key Name</Text>
 				<TextField.Root disabled value={apiKey.name} />

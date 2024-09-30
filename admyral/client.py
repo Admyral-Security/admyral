@@ -14,10 +14,12 @@ from admyral.models import (
 from admyral.config.config import API_V1_STR
 
 
-# TODO: add delete workflow endpoint
 class AdmyralClient:
-    def __init__(self, base_url: str = "http://localhost:8000") -> None:
+    def __init__(
+        self, base_url: str = "http://localhost:8000", api_key: str | None = None
+    ) -> None:
         self.base_url = base_url
+        self.api_key = api_key
 
     def _request(
         self,
@@ -25,16 +27,15 @@ class AdmyralClient:
         path: str,
         params: dict | None = None,
         json: JsonValue | None = None,
-        api_key: str | None = None,
         webhook_secret: str | None = None,
     ) -> None | JsonValue:
         headers = {
             "Content-Type": "application/json",
         }
-        if api_key:
-            headers["Authorization"] = f"Bearer {api_key}"
         if webhook_secret:
             headers["Authorization"] = webhook_secret
+        elif self.api_key:
+            headers["x-api-key"] = self.api_key
 
         response = None
         if method == "GET":
@@ -53,6 +54,9 @@ class AdmyralClient:
             )
         else:
             raise NotImplementedError(f"Missing implementation for method: {method}")
+
+        if response.status_code == 401:
+            raise RuntimeError("Unauthorized. Please check your API key.")
 
         if not response.ok:
             error_message = response.text

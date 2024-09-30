@@ -1,9 +1,9 @@
 import { Card, Flex, Text, Tooltip } from "@radix-ui/themes";
 import { NodeToolbar, Position } from "reactflow";
 import * as Toolbar from "@radix-ui/react-toolbar";
-import TrashIcon from "../icons/trash-icon";
 import DuplicateIcon from "../icons/duplicate-icon";
 import { useWorkflowStore } from "@/stores/workflow-store";
+import { TrashIcon } from "@radix-ui/react-icons";
 
 export interface NodeBaseProps {
 	nodeId: string;

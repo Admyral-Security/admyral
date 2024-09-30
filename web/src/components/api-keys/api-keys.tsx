@@ -33,7 +33,7 @@ export default function ApiKeys() {
 				<Flex direction="column" gap="5">
 					<Flex justify="between">
 						<Text size="4" weight="medium">
-							Secrets
+							API Keys
 						</Text>
 
 						<CreateApiKey />

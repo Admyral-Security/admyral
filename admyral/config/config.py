@@ -153,7 +153,8 @@ class GlobalConfig(BaseModel):
     The global configuration for Admyral.
     """
 
-    user_id: str
+    id: str
+    default_user_id: str = "38815447-e272-4299-94c0-29a2d30435f9"
     telemetry_disabled: bool = ADMYRAL_DISABLE_TELEMETRY
     storage_directory: str = get_local_storage_path()
     database_type: DatabaseType = ADMYRAL_DATABASE_TYPE
@@ -163,6 +164,9 @@ class GlobalConfig(BaseModel):
     posthog_api_key: str = ADMYRAL_POSTHOG_API_KEY
     posthog_host: str = ADMYRAL_POSTHOG_HOST
     environment: str = ADMYRAL_ENV
+
+    cli_target: str = "http://localhost:8000"
+    api_key: str | None = None
 
     pip_lockfile_cache_cleanup_interval: int = 60 * 60 * 24  # 1 day
 
@@ -174,16 +178,20 @@ def load_local_config() -> GlobalConfig:
     config_file = get_user_config_file()
 
     if os.path.exists(config_file):
-        with open(config_file, "r") as f:
+        with open(config_file, "r+") as f:
             file_content = yaml.safe_load(f)
+            f.seek(0)
+            if "id" not in file_content:
+                file_content["id"] = str(uuid.uuid4())
+                yaml.dump(file_content, f)
     else:
         os.makedirs(get_local_storage_path(), exist_ok=True)
-        user_id = str(uuid.uuid4())
-        file_content = {"user_id": user_id}
+        id = str(uuid.uuid4())
+        file_content = {"id": id}
         with open(config_file, "w") as f:
             yaml.dump(file_content, f)
 
-    return GlobalConfig(user_id=file_content["user_id"])
+    return GlobalConfig(**file_content)
 
 
 CONFIG = load_local_config()

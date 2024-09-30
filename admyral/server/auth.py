@@ -2,7 +2,7 @@ from fastapi import Request, HTTPException
 from fastapi_nextauth_jwt import NextAuthJWTv4
 
 from admyral.models.auth import AuthenticatedUser
-from admyral.config.config import GlobalConfig, DISABLE_AUTH, AUTH_SECRET
+from admyral.config.config import CONFIG, DISABLE_AUTH, AUTH_SECRET
 from admyral.server.deps import get_admyral_store
 
 
@@ -17,16 +17,20 @@ def validate_and_decrypt_jwt(request: Request) -> dict:
 
 async def authenticate(request: Request) -> AuthenticatedUser:
     if DISABLE_AUTH:
-        return AuthenticatedUser(user_id=GlobalConfig().user_id)
+        return AuthenticatedUser(user_id=CONFIG.default_user_id)
 
     # extract user id from authentication method
     if "x-api-key" in request.headers:
-        api_key = await get_admyral_store().search_api_key(request.headers["x-api-key"])
-        if not api_key:
+        user_id = await get_admyral_store().search_api_key_owner(
+            request.headers["x-api-key"]
+        )
+        if not user_id:
             raise HTTPException(status_code=401, detail="Invalid API Key")
-        user_id = api_key.user_id
     else:
-        decrypted_token = validate_and_decrypt_jwt(request)
+        try:
+            decrypted_token = validate_and_decrypt_jwt(request)
+        except Exception:
+            raise HTTPException(status_code=401, detail="Invalid or missing token")
         user_id = decrypted_token.get("sub") or decrypted_token.get("id")
 
     if not user_id:

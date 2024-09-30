@@ -46,9 +46,14 @@ def push(ctx: click.Context, workflow_name: str, file: str, activate: bool) -> N
     workflow_dag = WorkflowCompiler().compile_from_module(workflow_code, workflow_name)
 
     # Push workflow to Admyral
-    workflow_push_response = client.push_workflow(
-        workflow_name=workflow_name, workflow_dag=workflow_dag, is_active=activate
-    )
+    try:
+        workflow_push_response = client.push_workflow(
+            workflow_name=workflow_name, workflow_dag=workflow_dag, is_active=activate
+        )
+    except Exception as e:
+        click.echo(f"Failed to push workflow {workflow_name}.")
+        click.echo(f"Error: {e}")
+        return
 
     click.echo(f"Workflow {workflow_name} pushed successfully.")
 
@@ -86,7 +91,8 @@ def trigger(ctx: click.Context, workflow_name: str, payload: str | None) -> None
         if "is not active" in str(e):
             click.echo(f"Workflow {workflow_name} is not active.")
         else:
-            raise e
+            click.echo(f"Failed to trigger workflow {workflow_name}.")
+            click.echo(f"Error: {e}")
 
 
 @workflow.command(
@@ -99,7 +105,12 @@ def activate_workflow(ctx: click.Context, workflow_name: str) -> None:
     """Activate a workflow"""
     capture(event_name="workflow:activate")
     client: AdmyralClient = ctx.obj
-    client.activate_workflow(workflow_name)
+    try:
+        client.activate_workflow(workflow_name)
+    except Exception as e:
+        click.echo(f"Failed to activate workflow {workflow_name}.")
+        click.echo(f"Error: {e}")
+        return
     click.echo(f"Activated workflow {workflow_name} successfully.")
 
 
@@ -113,5 +124,10 @@ def deactivate_workflow(ctx: click.Context, workflow_name: str) -> None:
     """Deactivate a workflow"""
     capture(event_name="workflow:deactivate")
     client: AdmyralClient = ctx.obj
-    client.deactivate_workflow(workflow_name)
+    try:
+        client.deactivate_workflow(workflow_name)
+    except Exception as e:
+        click.echo(f"Failed to deactivate workflow {workflow_name}.")
+        click.echo(f"Error: {e}")
+        return
     click.echo(f"Deactivated workflow {workflow_name} successfully.")

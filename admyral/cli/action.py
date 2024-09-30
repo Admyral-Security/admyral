@@ -29,6 +29,12 @@ def push(ctx: click.Context, action_type: str, action: str) -> None:
         action_str = f.read()
 
     python_action = parse_action(action_str, action_type)
-    client.push_action(python_action)
+
+    try:
+        client.push_action(python_action)
+    except Exception as e:
+        click.echo("Failed to push action.")
+        click.echo(f"Error: {e}")
+        return
 
     click.echo(f"Action {action_type} pushed successfully.")
