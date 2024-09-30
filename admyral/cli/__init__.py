@@ -6,6 +6,7 @@ from admyral.cli.server import up, down
 from admyral.cli.setup import init
 from admyral.cli.workflow import workflow, push as workflow_push, trigger
 from admyral.cli.secret import secret, set, delete, list
+from admyral.cli.connect import connect, disconnect
 
 __all__ = [
     "action",
@@ -20,4 +21,6 @@ __all__ = [
     "set",
     "delete",
     "list",
+    "connect",
+    "disconnect",
 ]

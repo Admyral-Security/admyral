@@ -17,17 +17,23 @@ export const useApiKeysStore = create<ApiKeysStore>((set, get) => ({
 			apiKeys: [],
 		}),
 	setApiKeys: (keys) =>
-		produce((draft) => {
-			draft.apiKeys = keys;
-		}),
+		set(
+			produce((draft) => {
+				draft.apiKeys = keys;
+			}),
+		),
 	addApiKey: (key) =>
-		produce((draft) => {
-			draft.apiKeys.push(key);
-		}),
+		set(
+			produce((draft) => {
+				draft.apiKeys.push(key);
+			}),
+		),
 	removeApiKey: (id) =>
-		produce((draft) => {
-			draft.apiKeys = draft.apiKeys.filter(
-				(apiKey: TApiKeyMetadata) => apiKey.id !== id,
-			);
-		}),
+		set(
+			produce((draft) => {
+				draft.apiKeys = draft.apiKeys.filter(
+					(apiKey: TApiKeyMetadata) => apiKey.id !== id,
+				);
+			}),
+		),
 }));

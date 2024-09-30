@@ -1,3 +1,4 @@
+import ApiKeys from "@/components/api-keys/api-keys";
 import SignOutButton from "@/components/auth/signout-button";
 import Secrets from "@/components/secrets/secrets";
 import { DISABLE_AUTH } from "@/constants/env";
@@ -39,14 +40,7 @@ export default async function SettingsPage() {
 				gap="5"
 			>
 				<Secrets />
-				{/* {!DISABLE_AUTH && <ApiKeys />} */}
-				{/* <Account />
-				<Credentials />
-				<Usage />
-				<Flex width="50%" justify="start" gap="5">
-					<LogoutButton />
-					<DeleteAccountButton />
-				</Flex> */}
+				{!DISABLE_AUTH && <ApiKeys />}
 				{!DISABLE_AUTH && (
 					<Flex width="50%" justify="start" gap="5">
 						<SignOutButton />

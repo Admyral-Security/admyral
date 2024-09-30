@@ -2,11 +2,11 @@
 
 import { TSecretMetadata } from "@/types/secrets";
 import { Flex, IconButton, Text, TextField } from "@radix-ui/themes";
-import TrashIcon from "../icons/trash-icon";
 import { useSecretsStore } from "@/stores/secrets-store";
 import { useDeleteSecretApi } from "@/hooks/use-delete-secret-api";
 import { useEffect } from "react";
 import { errorToast } from "@/lib/toast";
+import { TrashIcon } from "@radix-ui/react-icons";
 
 export default function EncryptedSecret({ idx }: { idx: number }) {
 	const { secrets, removeSecret } = useSecretsStore();
@@ -33,7 +33,7 @@ export default function EncryptedSecret({ idx }: { idx: number }) {
 
 	return (
 		<Flex direction="column" gap="1">
-			<Flex width="100%" gap="4" align="end">
+			<Flex width="100%" gap="2" align="end">
 				<Flex direction="column" gap="1" width="100%">
 					<Text>Secret Name</Text>
 					<TextField.Root disabled value={secret.secretId} />

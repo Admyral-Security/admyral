@@ -39,7 +39,7 @@ class ApiKeySchema(BaseSchema, table=True):
     def to_model(self, include_resources: bool = False) -> ApiKey:
         return ApiKey.model_validate(
             {
-                "id": self.secret_id,
+                "id": self.id,
                 "name": self.name,
             }
         )

@@ -165,6 +165,9 @@ class GlobalConfig(BaseModel):
     posthog_host: str = ADMYRAL_POSTHOG_HOST
     environment: str = ADMYRAL_ENV
 
+    cli_target: str = "http://localhost:8000"
+    api_key: str | None = None
+
     pip_lockfile_cache_cleanup_interval: int = 60 * 60 * 24  # 1 day
 
 
@@ -175,8 +178,12 @@ def load_local_config() -> GlobalConfig:
     config_file = get_user_config_file()
 
     if os.path.exists(config_file):
-        with open(config_file, "r") as f:
+        with open(config_file, "r+") as f:
             file_content = yaml.safe_load(f)
+            f.seek(0)
+            if "id" not in file_content:
+                file_content["id"] = str(uuid.uuid4())
+                yaml.dump(file_content, f)
     else:
         os.makedirs(get_local_storage_path(), exist_ok=True)
         id = str(uuid.uuid4())
@@ -184,7 +191,7 @@ def load_local_config() -> GlobalConfig:
         with open(config_file, "w") as f:
             yaml.dump(file_content, f)
 
-    return GlobalConfig(id=file_content["id"])
+    return GlobalConfig(**file_content)
 
 
 CONFIG = load_local_config()

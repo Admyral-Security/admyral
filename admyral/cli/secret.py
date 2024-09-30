@@ -36,7 +36,12 @@ def set(ctx: click.Context, secret_id: str, value: list[tuple[str, str]]) -> Non
     """Create a secret in Admyral"""
     capture(event_name="secret:set")
     client: AdmyralClient = ctx.obj
-    client.set_secret(Secret(secret_id=secret_id, secret=dict(value)))
+    try:
+        client.set_secret(Secret(secret_id=secret_id, secret=dict(value)))
+    except Exception as e:
+        click.echo("Failed to set secret.")
+        click.echo(f"Error: {e}")
+        return
     click.echo(f"Secret {secret_id} set successfully.")
 
 
@@ -49,7 +54,12 @@ def list(ctx: click.Context) -> None:
     """List all secret ids stored in Admyral"""
     capture(event_name="secret:list")
     client: AdmyralClient = ctx.obj
-    secrets = client.list_secrets()
+    try:
+        secrets = client.list_secrets()
+    except Exception as e:
+        click.echo("Failed to list secrets.")
+        click.echo(f"Error: {e}")
+        return
     click.echo("Secrets:")
     for secret in secrets:
         click.echo(secret.secret_id)
@@ -62,5 +72,10 @@ def delete(ctx: click.Context, secret_id: str) -> None:
     """Delete a secret in Admyral"""
     capture(event_name="secret:delete")
     client: AdmyralClient = ctx.obj
-    client.delete_secret(secret_id)
+    try:
+        client.delete_secret(secret_id)
+    except Exception as e:
+        click.echo("Failed to delete secret.")
+        click.echo(f"Error: {e}")
+        return
     click.echo(f"Secret {secret_id} deleted successfully.")

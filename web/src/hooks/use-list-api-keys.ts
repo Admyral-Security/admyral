@@ -14,7 +14,7 @@ const listApiKeysApi = api<
 	z.input<typeof ListApiKeyRequest>,
 	z.infer<typeof ListApiKeyResponse>
 >({
-	method: HTTPMethod.POST,
+	method: HTTPMethod.GET,
 	path: "/api/v1/api-keys",
 	requestSchema: ListApiKeyRequest,
 	responseSchema: ListApiKeyResponse,
