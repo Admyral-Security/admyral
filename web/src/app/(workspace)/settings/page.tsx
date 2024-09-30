@@ -1,5 +1,5 @@
 import ApiKeys from "@/components/api-keys/api-keys";
-import SignOutButton from "@/components/auth/signout-button";
+import SignOutButton from "@/components/auth/sign-out-button";
 import Secrets from "@/components/secrets/secrets";
 import { DISABLE_AUTH } from "@/constants/env";
 import { Box, Flex, Grid, Text } from "@radix-ui/themes";

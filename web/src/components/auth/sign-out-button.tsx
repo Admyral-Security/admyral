@@ -1,8 +1,7 @@
 "use client";
 
 import { Button } from "@radix-ui/themes";
-// import { signOut } from "@/auth";
-import { useSession, signIn, signOut } from "next-auth/react";
+import { signOut } from "next-auth/react";
 
 export default function SignOutButton() {
 	return (
