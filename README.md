@@ -88,4 +88,4 @@ Admyral automatically collects telemetry data using PostHog with hosting in the 
 
 None of data is shared with third parties and does not include any sensitive information. If you would like to opt-out of telemetry or have questions, please reach out to us via [chris@admyral.dev](mailto:chris@admyral.dev) or contact us on Discord, as we want to be transparent and respect your privacy.
 
-For self-hosting, you can opt-out by simply removing `NEXT_PUBLIC_POSTHOG_KEY` and `NEXT_PUBLIC_POSTHOG_HOST` from the environment variables.
+You can opt-out by simply setting `ADMYRAL_DISABLE_TELEMETRY` to `true` in your environment variables.

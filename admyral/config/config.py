@@ -139,14 +139,13 @@ ENV_TEMPORAL_HOST = "ADMYRAL_TEMPORAL_HOST"
 ADMYRAL_TEMPORAL_HOST = os.getenv(ENV_TEMPORAL_HOST, "localhost:7233")
 
 
-# TODO: read from and persist to disk
 class GlobalConfig(BaseModel):
     """
     The global configuration for Admyral.
     """
 
     user_id: str
-    telemetry_disabled: bool
+    telemetry_disabled: bool = ADMYRAL_DISABLE_TELEMETRY
     storage_directory: str = get_local_storage_path()
     database_type: DatabaseType = ADMYRAL_DATABASE_TYPE
     database_url: str = ADMYRAL_DATABASE_URL
@@ -175,9 +174,7 @@ def load_local_config() -> GlobalConfig:
         with open(config_file, "w") as f:
             yaml.dump(file_content, f)
 
-    return GlobalConfig(
-        user_id=file_content["user_id"], telemetry_disabled=ADMYRAL_DISABLE_TELEMETRY
-    )
+    return GlobalConfig(user_id=file_content["user_id"])
 
 
 CONFIG = load_local_config()
