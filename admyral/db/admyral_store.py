@@ -152,7 +152,7 @@ class AdmyralStore(StoreInterface):
 
     async def list_actions(self) -> list[ActionMetadata]:
         # TODO: consider user id
-        user_id = self.config.user_id
+        user_id = self.config.default_user_id
 
         async with self._get_async_session() as db:
             result = await db.exec(
@@ -172,7 +172,7 @@ class AdmyralStore(StoreInterface):
 
     async def get_action(self, action_type: str) -> Optional[PythonAction]:
         # TODO: consider user id
-        user_id = self.config.user_id
+        user_id = self.config.default_user_id
 
         async with self._get_async_session() as db:
             action = await self._get_action(db, user_id, action_type)
@@ -180,7 +180,7 @@ class AdmyralStore(StoreInterface):
 
     async def store_action(self, action: PythonAction) -> None:
         # TODO: consider user id
-        user_id = self.config.user_id
+        user_id = self.config.default_user_id
 
         async with self._get_async_session() as db:
             # if the action type already exists, we update the code and requirements.
@@ -307,7 +307,7 @@ class AdmyralStore(StoreInterface):
 
     async def list_workflows(self) -> list[WorkflowMetadata]:
         # TODO: consider user id
-        user_id = self.config.user_id
+        user_id = self.config.default_user_id
 
         async with self._get_async_session() as db:
             # TODO: loading all workflows just for the metadata
@@ -329,7 +329,7 @@ class AdmyralStore(StoreInterface):
 
     async def get_workflow_by_name(self, workflow_name: str) -> Optional[Workflow]:
         # TODO: consider user id
-        user_id = self.config.user_id
+        user_id = self.config.default_user_id
 
         async with self._get_async_session() as db:
             wf = await self._get_workflow_by_name(db, user_id, workflow_name)
@@ -347,7 +347,7 @@ class AdmyralStore(StoreInterface):
 
     async def get_workflow_by_id(self, workflow_id: str) -> Optional[Workflow]:
         # TODO: consider user id
-        user_id = self.config.user_id
+        user_id = self.config.default_user_id
 
         async with self._get_async_session() as db:
             wf = await self._get_workflow_by_id(db, user_id, workflow_id)
@@ -355,7 +355,7 @@ class AdmyralStore(StoreInterface):
 
     async def store_workflow(self, workflow: Workflow) -> None:
         # TODO: consider user_id
-        user_id = self.config.user_id
+        user_id = self.config.default_user_id
 
         async with self._get_async_session() as db:
             # if the workflow already exists, we update the workflow dag.
@@ -391,7 +391,7 @@ class AdmyralStore(StoreInterface):
         self, workflow_id: str, is_active: bool
     ) -> None:
         # TODO: consider user_id
-        user_id = self.config.user_id
+        user_id = self.config.default_user_id
 
         async with self._get_async_session() as db:
             stored_workflow = await self._get_workflow_by_id(db, user_id, workflow_id)
@@ -408,7 +408,7 @@ class AdmyralStore(StoreInterface):
 
     async def remove_workflow(self, workflow_id: str) -> None:
         # TODO: consider user_id
-        user_id = self.config.user_id
+        user_id = self.config.default_user_id
 
         async with self._get_async_session() as db:
             await db.exec(
@@ -486,7 +486,7 @@ class AdmyralStore(StoreInterface):
 
     async def store_schedule(self, schedule: WorkflowSchedule) -> None:
         # TODO: consider user id
-        user_id = self.config.user_id
+        user_id = self.config.default_user_id
 
         async with self._get_async_session() as db:
             await db.exec(
@@ -508,7 +508,7 @@ class AdmyralStore(StoreInterface):
         self, workflow_id: str
     ) -> list[WorkflowSchedule]:
         # TODO: consider user id
-        user_id = self.config.user_id
+        user_id = self.config.default_user_id
 
         async with self._get_async_session() as db:
             result = await db.exec(
@@ -536,7 +536,7 @@ class AdmyralStore(StoreInterface):
         self, workflow_id: str, limit: int = 100
     ) -> list[WorkflowRunMetadata]:
         # TODO: consider user_id
-        user_id = self.config.user_id
+        user_id = self.config.default_user_id
 
         async with self._get_async_session() as db:
             result = await db.exec(
@@ -557,7 +557,7 @@ class AdmyralStore(StoreInterface):
         payload: dict[str, JsonValue],
     ) -> None:
         # TODO: consider user_id
-        user_id = self.config.user_id
+        user_id = self.config.default_user_id
 
         async with self._get_async_session() as db:
             await db.exec(
@@ -581,7 +581,7 @@ class AdmyralStore(StoreInterface):
         self, run_id: str, completed_at: datetime
     ) -> None:
         # TODO: consider user_id
-        user_id = self.config.user_id
+        user_id = self.config.default_user_id
 
         async with self._get_async_session() as db:
             await db.exec(
@@ -609,7 +609,7 @@ class AdmyralStore(StoreInterface):
         self, workflow_id: str, run_id: str
     ) -> Optional[WorkflowRun]:
         # TODO: consider user_id
-        user_id = self.config.user_id
+        user_id = self.config.default_user_id
 
         async with self._get_async_session() as db:
             workflow_run = await self._get_workflow_run(
@@ -621,7 +621,7 @@ class AdmyralStore(StoreInterface):
         self, workflow_id: str, run_id: str
     ) -> list[WorkflowRunStepMetadata]:
         # TODO: consider user_id and workflow_id
-        user_id = self.config.user_id  # noqa F841
+        user_id = self.config.default_user_id  # noqa F841
 
         async with self._get_async_session() as db:
             result = await db.exec(
@@ -736,7 +736,7 @@ class AdmyralStore(StoreInterface):
         input_args: dict[str, JsonValue],
     ) -> None:
         # TODO: consider user_id
-        user_id = self.config.user_id
+        user_id = self.config.default_user_id
 
         async with self._get_async_session() as db:
             workflow_run_step = await self._get_workflow_run_step(db, step_id)
