@@ -170,12 +170,12 @@ def load_local_config() -> GlobalConfig:
             file_content = yaml.safe_load(f)
     else:
         os.makedirs(get_local_storage_path(), exist_ok=True)
-        user_id = str(uuid.uuid4())
-        file_content = {"user_id": user_id}
+        id = str(uuid.uuid4())
+        file_content = {"id": id}
         with open(config_file, "w") as f:
             yaml.dump(file_content, f)
 
-    return GlobalConfig(id=file_content["user_id"])
+    return GlobalConfig(id=file_content["id"])
 
 
 CONFIG = load_local_config()
