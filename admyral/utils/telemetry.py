@@ -32,7 +32,7 @@ def capture(event_name: str, properties: dict = {}) -> None:
         url=f"{CONFIG.posthog_host}/capture",
         json={
             "api_key": CONFIG.posthog_api_key,
-            "distinct_id": CONFIG.user_id,
+            "distinct_id": CONFIG.id,
             "event": f"{event_name}",
             "properties": default_properties | properties,
             "timestamp": str(datetime.now(UTC)),

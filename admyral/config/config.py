@@ -144,7 +144,8 @@ class GlobalConfig(BaseModel):
     The global configuration for Admyral.
     """
 
-    user_id: str
+    id: str
+    default_user_id: str = "38815447-e272-4299-94c0-29a2d30435f9"
     telemetry_disabled: bool = ADMYRAL_DISABLE_TELEMETRY
     storage_directory: str = get_local_storage_path()
     database_type: DatabaseType = ADMYRAL_DATABASE_TYPE
@@ -174,7 +175,7 @@ def load_local_config() -> GlobalConfig:
         with open(config_file, "w") as f:
             yaml.dump(file_content, f)
 
-    return GlobalConfig(user_id=file_content["user_id"])
+    return GlobalConfig(id=file_content["user_id"])
 
 
 CONFIG = load_local_config()
