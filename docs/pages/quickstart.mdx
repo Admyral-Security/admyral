@@ -61,13 +61,31 @@ To install Admyral, simply install the Admyral pip package using your favorite d
 
 </Tabs>
 
+<details>
+    <summary> Optionally, specify custom ports for the needed services </summary>
+    
+    Copy the content of `.env.example` file to a new file called `.env`:    
+    ```bash
+    cp .env.example .env
+    ```
+
+    Open the `.env` file and adjust the ports as needed.
+
+    Source the `.env` file to load the environment variables:
+
+    ```bash
+    source .env
+    ```
+
+</details>
+
 To launch Admyral use the following command:
 
 ```bash
 admyral up
 ```
 
-You can open the Admyral UI by visiting `http://localhost:3000` in your browser.
+You can open the Admyral UI by visiting `http://localhost:3000` (if no custom port was specified for `ADMYRAL_WEB_PORT`) in your browser.
 
 ### Step 2: Tool and Secret Setup
 
@@ -89,7 +107,7 @@ With Admyral offering a _CLI_ as well as a _web UI_, you can decide how you'd li
 
     </Tabs.Tab>
     <Tabs.Tab>
-        Go to Admyral running on [localhost:3000](localhost:3000). On the bottom left, click on settings and add your VirusTotal API key:
+        Go to Admyral running on [localhost:3000](localhost:3000) (if no custom port was specified for `ADMYRAL_WEB_PORT`). On the bottom left, click on settings and add your VirusTotal API key:
         1. Select "Add new secret"
         2. Secret name: `virus_total` (*any other name works as well*)
         3. Key: `api_key`
@@ -201,13 +219,13 @@ With Admyral, you can decide whether you want to build your workflows with `Code
         admyral workflow push virus_total_workflow -f workflows/virus_total_workflow.py
         ```
 
-        You can now go visit Admyral running on `http://localhost:3000`. There, you should find the workflow and can inspect the workflow inside the No-Code editor.
+        You can now go visit Admyral running on `http://localhost:3000` (if no custom port was specified for `ADMYRAL_WEB_PORT`). There, you should find the workflow and can inspect the workflow inside the No-Code editor.
 
     </Tabs.Tab>
 
     <Tabs.Tab>
 
-        1. Visit `http://localhost:3000` in your favorite browser.
+        1. Visit `http://localhost:3000` (if no custom port was specified for `ADMYRAL_WEB_PORT`) in your favorite browser.
         2. Click on `Create New Workflow` on the top right.
         3. In Workflow Settings, give the workflow a name, e.g. `virus_total_workflow`. The workflow name must be in `snake_case`.
         4. Save the workflow by clicking on the `Save` button.
