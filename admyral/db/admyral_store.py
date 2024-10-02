@@ -1,7 +1,7 @@
 from typing import Optional, Any, AsyncGenerator
 from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy.exc import IntegrityError
-from sqlmodel import select, delete, insert, update, text
+from sqlmodel import select, delete, insert, update
 from datetime import datetime
 from sqlmodel.ext.asyncio.session import AsyncSession
 from sqlalchemy.orm import sessionmaker
@@ -40,7 +40,7 @@ from admyral.db.schemas import (
     ApiKeySchema,
 )
 from admyral.db.alembic.database_manager import DatabaseManager
-from admyral.config.config import GlobalConfig, CONFIG, DatabaseType
+from admyral.config.config import GlobalConfig, CONFIG
 from admyral.logger import get_logger
 from admyral.utils.time import utc_now
 from admyral.utils.crypto import generate_hs256
@@ -60,12 +60,8 @@ class AdmyralDatabaseSession:
         cls,
         session: AsyncSession,
         execution_options: dict = {},
-        is_sqlite: bool = False,
     ) -> "AdmyralDatabaseSession":
-        db = cls(session, execution_options)
-        if is_sqlite:
-            await db.exec(text("PRAGMA foreign_keys = ON"))
-        return db
+        return cls(session, execution_options)
 
     async def exec(self, statement: Any) -> Any:
         return await self.session.exec(
@@ -97,18 +93,6 @@ class AdmyralStore(StoreInterface):
         store = cls(CONFIG)
         if not skip_setup:
             await store.setup()
-        store.performed_setup = True
-
-        return store
-
-    @classmethod
-    async def create_test_store(cls) -> "AdmyralStore":
-        config = CONFIG
-        config.database_type = DatabaseType.SQLITE
-        config.database_url = "sqlite+aiosqlite:///:memory:"
-
-        store = cls(config)
-        await store.setup()
         store.performed_setup = True
 
         return store
@@ -145,7 +129,6 @@ class AdmyralStore(StoreInterface):
             db = await AdmyralDatabaseSession.from_session(
                 session,
                 self.execution_options,
-                self.config.database_type == DatabaseType.SQLITE,
             )
             yield db
 
@@ -157,6 +140,11 @@ class AdmyralStore(StoreInterface):
         async with self._get_async_session() as db:
             result = await db.exec(select(UserSchema).where(UserSchema.id == user_id))
             return result.one_or_none()
+
+    async def clean_up_workflow_data_of(self, user_id: str) -> None:
+        async with self._get_async_session() as db:
+            await db.exec(delete(UserSchema).where(UserSchema.id == user_id))
+            await db.commit()
 
     ########################################################
     # API Key Management
@@ -454,13 +442,15 @@ class AdmyralStore(StoreInterface):
             )
             await db.commit()
 
-    async def get_workflow_for_webhook(self, workflow_id: str) -> Optional[Workflow]:
+    async def get_workflow_for_webhook(
+        self, workflow_id: str
+    ) -> Optional[tuple[str, Workflow]]:
         async with self._get_async_session() as db:
             result = await db.exec(
                 select(WorkflowSchema).where(WorkflowSchema.workflow_id == workflow_id)
             )
             workflow = result.one_or_none()
-            return workflow.to_model() if workflow else None
+            return (workflow.user_id, workflow.to_model()) if workflow else None
 
     ########################################################
     # Workflow Webhooks
@@ -725,6 +715,19 @@ class AdmyralStore(StoreInterface):
             )
             await db.commit()
 
+    async def _get_workflow_step_without_user_id(
+        self,
+        db: AdmyralDatabaseSession,
+        run_id: str,
+        step_id: str,
+    ) -> Optional[WorkflowRunStepsSchema]:
+        result = await db.exec(
+            select(WorkflowRunStepsSchema)
+            .where(WorkflowRunStepsSchema.step_id == step_id)
+            .where(WorkflowRunStepsSchema.run_id == run_id)
+        )
+        return result.one_or_none()
+
     async def append_logs(
         self,
         step_id: str,
@@ -734,7 +737,9 @@ class AdmyralStore(StoreInterface):
         lines: list[str],
     ) -> None:
         async with self._get_async_session() as db:
-            workflow_run_step = await self._get_workflow_run_step(db, step_id)
+            workflow_run_step = await self._get_workflow_step_without_user_id(
+                db, run_id, step_id
+            )
 
             if not workflow_run_step:
                 await db.exec(
@@ -764,7 +769,9 @@ class AdmyralStore(StoreInterface):
         input_args: dict[str, JsonValue],
     ) -> None:
         async with self._get_async_session() as db:
-            workflow_run_step = await self._get_workflow_run_step(db, step_id)
+            workflow_run_step = await self._get_workflow_step_without_user_id(
+                db, run_id, step_id
+            )
 
             if not workflow_run_step:
                 await db.exec(
@@ -797,11 +804,10 @@ class AdmyralStore(StoreInterface):
         error: str,
         input_args: dict[str, JsonValue],
     ) -> None:
-        # TODO: consider user_id
-        user_id = self.config.default_user_id
-
         async with self._get_async_session() as db:
-            workflow_run_step = await self._get_workflow_run_step(db, step_id)
+            workflow_run_step = await self._get_workflow_step_without_user_id(
+                db, run_id, step_id
+            )
 
             if not workflow_run_step:
                 await db.exec(
@@ -827,7 +833,6 @@ class AdmyralStore(StoreInterface):
             await db.exec(
                 update(WorkflowRunSchema)
                 .where(WorkflowRunSchema.run_id == run_id)
-                .where(WorkflowRunSchema.user_id == user_id)
                 .values(failed_at=utc_now())
             )
 

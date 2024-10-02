@@ -36,6 +36,7 @@ class WorkersClient:
 
     async def execute_workflow(
         self,
+        user_id: str,
         workflow: Workflow,
         source_name: str,
         payload: dict[str, JsonValue] = {},
@@ -50,6 +51,7 @@ class WorkersClient:
         await self.client.execute_workflow(
             WorkflowExecutor.run,
             {
+                "user_id": user_id,
                 "workflow": workflow,
                 "source_name": source_name,
                 "payload": payload,
@@ -81,7 +83,7 @@ class WorkersClient:
         return ScheduleSpec(intervals=[ScheduleIntervalSpec(every=interval)])
 
     async def schedule_workflow(
-        self, workflow: Workflow, schedule: WorkflowSchedule
+        self, user_id: str, workflow: Workflow, schedule: WorkflowSchedule
     ) -> None:
         # TODO: should we unify the temporal_workflow_id across triggers?
         temmporal_workflow_id = str(uuid4())
@@ -91,6 +93,7 @@ class WorkersClient:
                 action=ScheduleActionStartWorkflow(
                     WorkflowExecutor.run,
                     {
+                        "user_id": user_id,
                         "workflow": workflow,
                         "source_name": "schedule",
                         "payload": {},

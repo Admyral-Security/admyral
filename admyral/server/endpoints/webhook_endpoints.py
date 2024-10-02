@@ -36,6 +36,7 @@ async def _extract_payload_from_request(request: Request) -> JsonValue:
 
 
 def _workflow_execution_task(
+    user_id: str,
     workflow: Workflow,
     source_name: str,
     payload: dict[str, JsonValue],
@@ -43,7 +44,11 @@ def _workflow_execution_task(
 ) -> Callable[[], Coroutine]:
     async def exec_task():
         await get_workers_client().execute_workflow(
-            workflow, source_name, payload, trigger_default_args=trigger_default_args
+            user_id,
+            workflow,
+            source_name,
+            payload,
+            trigger_default_args=trigger_default_args,
         )
 
     return exec_task
@@ -71,7 +76,12 @@ async def _handle_webhook_trigger(
     if webhook.webhook_secret != webhook_secret:
         raise ValueError("Invalid webhook secret.")
     # check whether the workflow is active
-    workflow = await get_admyral_store().get_workflow_for_webhook(webhook.workflow_id)
+    user_id_and_workflow = await get_admyral_store().get_workflow_for_webhook(
+        webhook.workflow_id
+    )
+    if not user_id_and_workflow:
+        raise ValueError(f"Invalid webhook with id {webhook_id}. Workflow not found.")
+    user_id, workflow = user_id_and_workflow
     if not workflow.is_active:
         return WorkflowTriggerResponse.inactive()
 
@@ -88,6 +98,7 @@ async def _handle_webhook_trigger(
     # launch the workflow execution in the background
     background_tasks.add_task(
         _workflow_execution_task(
+            user_id,
             workflow,
             WEBHOOK_SOURCE_NAME,
             payload,

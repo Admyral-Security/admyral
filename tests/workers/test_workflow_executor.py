@@ -1,6 +1,7 @@
 import pytest
 from typing import Annotated
 import time
+from uuid import uuid4
 
 from tests.workers.utils import execute_test_workflow
 
@@ -33,12 +34,13 @@ def workflow_test_missing_secret(payload: dict[str, JsonValue]):
 
 @pytest.mark.asyncio
 async def test_missing_secret(store: AdmyralStore):
-    workflow_id = workflow_test_missing_secret.func.__name__
+    workflow_id = str(uuid4())
+    workflow_name = workflow_test_missing_secret.func.__name__ + workflow_id
 
     run, run_steps, exception = await execute_test_workflow(
         store=store,
         workflow_id=workflow_id,
-        workflow_name=workflow_id,
+        workflow_name=workflow_name,
         workflow_actions=[
             action_executor(
                 action_test_missing_secret.action_type, action_test_missing_secret.func
@@ -70,12 +72,13 @@ def workflow_test_action_raises_error(payload: dict[str, JsonValue]):
 
 @pytest.mark.asyncio
 async def test_action_raises_error(store: AdmyralStore):
-    workflow_id = workflow_test_action_raises_error.func.__name__
+    workflow_id = str(uuid4())
+    workflow_name = workflow_test_action_raises_error.func.__name__ + workflow_id
 
     run, run_steps, exception = await execute_test_workflow(
         store=store,
         workflow_id=workflow_id,
-        workflow_name=workflow_id,
+        workflow_name=workflow_name,
         workflow_actions=[
             action_executor(
                 action_test_raise_error.action_type, action_test_raise_error.func
@@ -116,12 +119,13 @@ def workflow_test_action_missing_params(payload: dict[str, JsonValue]):
 
 @pytest.mark.asyncio
 async def test_action_missing_params(store: AdmyralStore):
-    workflow_id = workflow_test_action_missing_params.func.__name__
+    workflow_id = str(uuid4())
+    workflow_name = workflow_test_action_missing_params.func.__name__ + workflow_id
 
     run, run_steps, exception = await execute_test_workflow(
         store=store,
         workflow_id=workflow_id,
-        workflow_name=workflow_id,
+        workflow_name=workflow_name,
         workflow_actions=[
             action_executor(
                 action_test_missing_params.action_type, action_test_missing_params.func
@@ -156,12 +160,15 @@ def workflow_test_action_missing_custom_action(payload: dict[str, JsonValue]):
 
 @pytest.mark.asyncio
 async def test_missing_custom_action(store: AdmyralStore):
-    workflow_id = workflow_test_action_missing_custom_action.func.__name__
+    workflow_id = str(uuid4())
+    workflow_name = (
+        workflow_test_action_missing_custom_action.func.__name__ + workflow_id
+    )
 
     run, run_steps, exception = await execute_test_workflow(
         store=store,
         workflow_id=workflow_id,
-        workflow_name=workflow_id,
+        workflow_name=workflow_name,
         workflow_actions=[],
         custom_actions=[action_test_missing_custom_action.action_type],
         workflow_code=workflow_test_action_missing_custom_action,
@@ -185,14 +192,15 @@ def workflow_test_wait_action(payload: dict[str, JsonValue]):
 
 @pytest.mark.asyncio
 async def test_wait_action(store: AdmyralStore):
-    workflow_id = workflow_test_wait_action.func.__name__
+    workflow_id = str(uuid4())
+    workflow_name = workflow_test_wait_action.func.__name__ + workflow_id
 
     start = time.time()
 
     run, run_steps, exception = await execute_test_workflow(
         store=store,
         workflow_id=workflow_id,
-        workflow_name=workflow_id,
+        workflow_name=workflow_name,
         workflow_actions=[action_executor(wait.action_type, wait.func)],
         workflow_code=workflow_test_wait_action,
     )

@@ -10,8 +10,7 @@ from typing import Callable, Optional, Iterable, Any
 from sqlalchemy.engine import Connection
 from functools import partial
 
-from admyral.utils.aio import makedirs, path_exists
-from admyral.config.config import GlobalConfig, DatabaseType, SQLITE_DATABASE_NAME
+from admyral.config.config import GlobalConfig, DatabaseType
 
 
 # TODO: why are we filtering out the alembic_version table?
@@ -48,11 +47,6 @@ class DatabaseManager:
         return create_async_engine(db_url, echo=True, future=True, pool_pre_ping=True)
 
     async def database_exists(self) -> bool:
-        if self.config.database_type == DatabaseType.SQLITE:
-            return await path_exists(
-                os.path.join(self.config.storage_directory, SQLITE_DATABASE_NAME)
-            )
-
         if self.config.database_type == DatabaseType.POSTGRES:
             engine = self._get_postgres_setup_engine()
             try:
@@ -71,11 +65,6 @@ class DatabaseManager:
         )
 
     async def create_database(self) -> None:
-        if self.config.database_type == DatabaseType.SQLITE:
-            # we only need to make sure the parent directory of the SQLite file exists
-            await makedirs(self.config.storage_directory)
-            return
-
         if self.config.database_type == DatabaseType.POSTGRES:
             engine = self._get_postgres_setup_engine()
             async with engine.connect() as conn:

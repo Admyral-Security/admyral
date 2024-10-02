@@ -23,20 +23,6 @@ jobs:
           repository: ${{ github.repository }}
           ref: ${{ github.event.pull_request.head.sha }}
 
-      - name: Install Temporal CLI
-        run: sudo snap install temporal
-
-      - name: Start Temporal Dev Server
-        run: |
-          nohup temporal server start-dev > temporal.log 2>&1 &
-
-      - name: Wait for Temporal server to be ready
-        run: |
-          while ! nc -z localhost 7233; do   
-            sleep 5
-            echo "Waiting for Temporal to be ready..."
-          done
-
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
@@ -57,8 +43,19 @@ jobs:
       - name: Run linter
         run: poetry run ruff check
 
+      - name: Set up Docker Compose
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y docker-compose
+
+      - name: Start Docker Compose services
+        run: docker compose -f docker-compose-dev-deps.yml up -d
+
       - name: Run unit tests
         run: poetry run pytest tests/
+
+      - name: Stop Docker Compose services
+        run: docker compose -f docker-compose-dev-deps.yml down
 
   web-unit-test:
     name: Web Unit Tests

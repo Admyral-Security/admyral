@@ -134,7 +134,9 @@ async def push_workflow_impl(
             await admyral_store.store_schedule(user_id, new_workflow_schedule)
 
             if request.activate:
-                await workers_client.schedule_workflow(workflow, new_workflow_schedule)
+                await workers_client.schedule_workflow(
+                    user_id, workflow, new_workflow_schedule
+                )
 
     # Handle webhook update
     filtered_webhooks = list(
@@ -222,13 +224,12 @@ async def list_workflows(
     return await get_admyral_store().list_workflows(authenticated_user.user_id)
 
 
-# TODO: code duplication with webhook_endpoints.py
 def exec_task(
-    workflow: Workflow, payload: dict[str, JsonValue]
+    user_id: str, workflow: Workflow, payload: dict[str, JsonValue]
 ) -> Callable[[], Coroutine]:
     async def task() -> None:
         await get_workers_client().execute_workflow(
-            workflow, MANUAL_TRIGGER_SOURCE_NAME, payload
+            user_id, workflow, MANUAL_TRIGGER_SOURCE_NAME, payload
         )
 
     return task
@@ -255,7 +256,7 @@ async def trigger_workflow(
         raise ValueError(f"Workflow with name {workflow_name} not found.")
     if not workflow.is_active:
         return WorkflowTriggerResponse.inactive()
-    background_tasks.add_task(exec_task(workflow, payload))
+    background_tasks.add_task(exec_task(authenticated_user.user_id, workflow, payload))
     return WorkflowTriggerResponse.success()
 
 

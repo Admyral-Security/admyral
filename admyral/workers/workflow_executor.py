@@ -40,6 +40,7 @@ ACTION_RETRY_POLICY = RetryPolicy(
 # see https://docs.temporal.io/develop/python/core-application#workflow-parameters
 @dataclass
 class WorkflowParams:
+    user_id: str
     workflow: Workflow
     source_name: str
     payload: dict[str, Any]
@@ -122,6 +123,7 @@ class WorkflowExecutor:
 
                 # TODO: strong type?
                 ctx_dict = {
+                    "user_id": params.user_id,
                     "workflow_id": params.workflow.workflow_id,
                     "run_id": workflow_run_id,
                     "action_type": node.type,

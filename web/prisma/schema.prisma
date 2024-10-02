@@ -1,5 +1,5 @@
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
   previewFeatures = ["driverAdapters"]
 }
 
@@ -9,6 +9,8 @@ datasource db {
 }
 
 model Account {
+  createdAt         DateTime @default(now()) @db.Timestamp(6) @map("created_at")
+  updatedAt         DateTime @default(now()) @db.Timestamp(6) @map("updated_at")
   userId            String
   type              String
   provider          String
@@ -20,8 +22,6 @@ model Account {
   scope             String?
   id_token          String?
   session_state     String?
-  createdAt         DateTime @default(now()) @db.Timestamp(6)
-  updatedAt         DateTime @updatedAt @db.Timestamp(6)
   user              User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@id([provider, providerAccountId])
@@ -42,26 +42,29 @@ model Authenticator {
 }
 
 model Session {
+  createdAt    DateTime @default(now()) @db.Timestamp(6) @map("created_at")
+  updatedAt    DateTime @default(now()) @db.Timestamp(6) @map("updated_at")
   id           String   @id @default(cuid())
   sessionToken String   @unique
   userId       String
   expires      DateTime @db.Timestamp(6)
-  createdAt    DateTime @default(now()) @db.Timestamp(6)
-  updatedAt    DateTime @updatedAt @db.Timestamp(6)
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 }
 
 model User {
-  id            String          @id @default(cuid())
-  name          String?
-  email         String          @unique
-  emailVerified DateTime?       @db.Timestamp(6)
-  image         String?
-  createdAt     DateTime        @default(now()) @db.Timestamp(6)
-  updatedAt     DateTime        @updatedAt @db.Timestamp(6)
-  accounts      Account[]
-  sessions      Session[]
-  Authenticator Authenticator[]
+  createdAt      DateTime @default(now()) @db.Timestamp(6) @map("created_at")
+  updatedAt      DateTime @default(now()) @db.Timestamp(6) @map("updated_at")
+  id             String          @id @default(cuid())
+  name           String?
+  email          String          @unique
+  emailVerified  DateTime?       @db.Timestamp(6) @map("email_verified")
+  image          String?
+  accounts       Account[]
+  Authenticator  Authenticator[]
+  sessions       Session[]
+  api_keys       api_keys[]
+  secrets        secrets[]
+  workflows      workflows[]
 }
 
 model VerificationToken {
@@ -108,6 +111,7 @@ model secrets {
   user_id                String
   encrypted_secret       String?
   schema_json_serialized String
+  User                   User     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@index([user_id], map: "ix_secrets_user_id")
 }
@@ -130,7 +134,6 @@ model workflow_runs {
   created_at         DateTime             @default(now()) @db.Timestamp(6)
   updated_at         DateTime             @default(now()) @db.Timestamp(6)
   run_id             String               @id
-  user_id            String
   workflow_id        String
   source_name        String
   completed_at       DateTime?            @db.Timestamp(6)
@@ -180,8 +183,22 @@ model workflows {
   workflow_runs      workflow_runs[]
   workflow_schedules workflow_schedules[]
   workflow_webhooks  workflow_webhooks[]
+  User               User                 @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@unique([user_id, workflow_name], map: "unique_workflow_name")
   @@index([user_id], map: "ix_workflows_user_id")
   @@index([workflow_name], map: "ix_workflows_workflow_name")
+}
+
+model api_keys {
+  created_at DateTime @default(now()) @db.Timestamp(6)
+  updated_at DateTime @default(now()) @db.Timestamp(6)
+  id         String   @id
+  user_id    String
+  name       String
+  key        String
+  User       User     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([key], map: "ix_api_keys_key")
+  @@index([user_id], map: "ix_api_keys_user_id")
 }
