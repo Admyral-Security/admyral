@@ -272,6 +272,15 @@ class AdmyralStore(StoreInterface):
 
             await db.commit()
 
+    async def delete_action(self, action_type: str) -> None:
+        async with self._get_async_session() as db:
+            await db.exec(
+                delete(PythonActionSchema).where(
+                    PythonActionSchema.action_type == action_type
+                )
+            )
+            await db.commit()
+
     ########################################################
     # Pip Lockfile Cache
     ########################################################

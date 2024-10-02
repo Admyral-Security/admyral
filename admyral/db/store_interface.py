@@ -63,6 +63,9 @@ class StoreInterface(ABC):
     @abstractmethod
     async def store_action(self, user_id: str, action: PythonAction) -> None: ...
 
+    @abstractmethod
+    async def delete_action(self, action_type: str) -> None: ...
+
     ########################################################
     # Pip Lockfile Cache
     ########################################################

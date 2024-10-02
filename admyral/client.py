@@ -204,6 +204,15 @@ class AdmyralClient:
         result = self._get(f"{API_V1_STR}/actions")
         return [ActionMetadata.model_validate(r) for r in result]
 
+    def delete_action(self, action_type: str) -> None:
+        """
+        Deletes the action with the given type.
+
+        Args:
+            action_type: The action type.
+        """
+        self._delete(f"{API_V1_STR}/actions/{action_type}")
+
     ########################################################
     # Secrets
     ########################################################
