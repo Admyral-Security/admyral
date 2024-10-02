@@ -37,6 +37,17 @@ async def list_actions() -> list[ActionMetadata]:
     return await get_admyral_store().list_actions()
 
 
+@router.delete("/{action_type}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_action(action_type: str) -> None:
+    """
+    Delete a Python action by its action type.
+
+    Args:
+        action_type: The action type.
+    """
+    await get_admyral_store().delete_action(action_type)
+
+
 @router.get("/{action_type}", status_code=status.HTTP_200_OK)
 async def get_action(
     action_type: str, authenticated_user: AuthenticatedUser = Depends(AuthenticatedUser)

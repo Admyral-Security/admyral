@@ -50,6 +50,17 @@ def list(ctx: click.Context) -> None:
     capture(event_name="action:list")
     client: AdmyralClient = ctx.obj
     actions = client.list_actions()
-    click.echo("Actions:")
+    click.echo("Pushed actions:")
     for action in actions:
         click.echo(action.action_type)
+
+
+@action.command("delete", help="Delete a pushed action")
+@click.argument("action_type", type=str)
+@click.pass_context
+def delete(ctx: click.Context, action_type: str) -> None:
+    """Delete an action"""
+    capture(event_name="action:delete")
+    client: AdmyralClient = ctx.obj
+    client.delete_action(action_type)
+    click.echo(f"Action {action_type} deleted successfully.")
