@@ -38,3 +38,18 @@ def push(ctx: click.Context, action_type: str, action: str) -> None:
         return
 
     click.echo(f"Action {action_type} pushed successfully.")
+
+
+@action.command(
+    "list",
+    help="List all pushed actions",
+)
+@click.pass_context
+def list(ctx: click.Context) -> None:
+    """List all custom actions"""
+    capture(event_name="action:list")
+    client: AdmyralClient = ctx.obj
+    actions = client.list_actions()
+    click.echo("Actions:")
+    for action in actions:
+        click.echo(action.action_type)

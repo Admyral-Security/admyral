@@ -1,7 +1,4 @@
-from admyral.cli.action import (
-    action,
-    push as action_push,
-)
+from admyral.cli.action import action, push as action_push, list as action_list
 from admyral.cli.server import up, down
 from admyral.cli.setup import init
 from admyral.cli.workflow import workflow, push as workflow_push, trigger
@@ -11,6 +8,7 @@ from admyral.cli.connect import connect, disconnect
 __all__ = [
     "action",
     "action_push",
+    "action_list",
     "up",
     "down",
     "init",
