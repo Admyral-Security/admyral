@@ -143,7 +143,9 @@ class AdmyralStore(StoreInterface):
 
     async def clean_up_workflow_data_of(self, user_id: str) -> None:
         async with self._get_async_session() as db:
-            await db.exec(delete(UserSchema).where(UserSchema.id == user_id))
+            await db.exec(
+                delete(WorkflowSchema).where(WorkflowSchema.user_id == user_id)
+            )
             await db.commit()
 
     ########################################################
