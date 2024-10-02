@@ -2,12 +2,11 @@ from logging.config import fileConfig
 
 import asyncio
 import os
-from sqlalchemy.engine import Connection
-from sqlalchemy.ext.asyncio import async_engine_from_config
+from sqlalchemy.engine import Connection, create_engine
+from sqlalchemy.ext.asyncio import async_engine_from_config, create_async_engine
 from sqlalchemy import pool
-from sqlmodel import SQLModel
+from sqlmodel import SQLModel, text
 from dotenv import load_dotenv
-import aiofiles.os
 
 from alembic import context
 
@@ -49,17 +48,28 @@ def run_migrations_offline() -> None:
     script output.
 
     """
-    url = config.get_main_option("sqlalchemy.url", os.environ["MIGRATION_DATABASE_URL"])
+    db_url = config.get_main_option(
+        "sqlalchemy.url", os.environ["ADMYRAL_DATABASE_URL"]
+    )
+    # if url.startswith("postgresql://"):
+    #     url = url.replace("postgresql://", "postgresql+asyncpg://")
 
-    # if we have a SQLite database, we need to make sure that its parent directory exists.
-    if url.startswith("sqlite"):
-        db_parent_path = os.path.dirname(url.split("///")[1])
-        path_exists = os.path.exists(db_parent_path)
-        if not path_exists:
-            os.makedirs(db_parent_path, exist_ok=True)
+    # create database
+    orig_db_name = db_url.split("/")[-1]
+    postgres_db_url = db_url[: -len(orig_db_name)] + "postgres"
+    engine = create_engine(postgres_db_url, echo=True, future=True, pool_pre_ping=True)
+    with engine.connect() as conn:
+        result = conn.execute(
+            text(
+                f"select exists (select 1 from pg_database where datname = '{orig_db_name}')"
+            )
+        )
+        if not result.scalar():
+            conn.execute(text("commit"))
+            conn.execute(text(f"create database {orig_db_name}"))
 
     context.configure(
-        url=url,
+        url=db_url,
         target_metadata=target_metadata,
         version_table_schema=target_metadata.schema,
         literal_binds=True,
@@ -72,11 +82,6 @@ def run_migrations_offline() -> None:
 
 
 def do_run_migrations(connection: Connection) -> None:
-    cfg = config.get_section(config.config_ini_section)
-    cfg["sqlalchemy.url"] = cfg.get(
-        "sqlalchemy.url", os.environ.get("MIGRATION_DATABASE_URL")
-    )
-
     context.configure(
         connection=connection,
         target_metadata=target_metadata,
@@ -96,16 +101,29 @@ async def run_async_migrations() -> None:
 
     cfg = config.get_section(config.config_ini_section, {})
     cfg["sqlalchemy.url"] = cfg.get(
-        "sqlalchemy.url", os.environ.get("MIGRATION_DATABASE_URL")
+        "sqlalchemy.url", os.environ.get("ADMYRAL_DATABASE_URL")
     )
+    if cfg["sqlalchemy.url"].startswith("postgresql://"):
+        cfg["sqlalchemy.url"] = cfg["sqlalchemy.url"].replace(
+            "postgresql://", "postgresql+asyncpg://"
+        )
 
-    # if we have a SQLite database, we need to make sure that its parent directory exists.
+    # create database
     db_url = cfg["sqlalchemy.url"]
-    if db_url.startswith("sqlite"):
-        db_parent_path = os.path.dirname(db_url.split("///")[1])
-        path_exists = await aiofiles.os.path.exists(db_parent_path)
-        if not path_exists:
-            await aiofiles.os.makedirs(db_parent_path, exist_ok=True)
+    orig_db_name = db_url.split("/")[-1]
+    postgres_db_url = db_url[: -len(orig_db_name)] + "postgres"
+    engine = create_async_engine(
+        postgres_db_url, echo=True, future=True, pool_pre_ping=True
+    )
+    async with engine.connect() as conn:
+        result = await conn.execute(
+            text(
+                f"select exists (select 1 from pg_database where datname = '{orig_db_name}')"
+            )
+        )
+        if not result.scalar():
+            await conn.execute(text("commit"))
+            await conn.execute(text(f"create database {orig_db_name}"))
 
     connectable = async_engine_from_config(
         cfg,

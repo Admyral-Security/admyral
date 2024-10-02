@@ -29,6 +29,9 @@ class StoreInterface(ABC):
     @abstractmethod
     async def get_user(self, user_id: str) -> User | None: ...
 
+    @abstractmethod
+    async def clean_up_workflow_data_of(self, user_id: str) -> None: ...
+
     ########################################################
     # API Key Management
     ########################################################
@@ -104,7 +107,7 @@ class StoreInterface(ABC):
     @abstractmethod
     async def get_workflow_for_webhook(
         self, workflow_id: str
-    ) -> Optional[Workflow]: ...
+    ) -> Optional[tuple[str, Workflow]]: ...
 
     ########################################################
     # Workflow Webhooks

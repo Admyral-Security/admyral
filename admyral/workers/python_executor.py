@@ -60,7 +60,7 @@ async def execute_python_action(action_type: str, action_args: dict[str, Any]) -
     store = SharedWorkerState.get_store()
 
     # Load the action from the store
-    python_action = await store.get_action(action_type)
+    python_action = await store.get_action(ctx.get().user_id, action_type)
     if not python_action:
         raise RuntimeError(
             f"Action with type '{action_type}' not found. Did you push your action?"

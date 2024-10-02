@@ -4,18 +4,18 @@ from sqlmodel import (
     UniqueConstraint,
     ForeignKeyConstraint,
     Relationship,
-    func,
 )
-from sqlalchemy import TEXT, Column, TIMESTAMP, BOOLEAN
+from sqlalchemy import TEXT, TIMESTAMP, BOOLEAN, Column
 from datetime import datetime
 
 from admyral.models.auth import User
 from admyral.db.schemas.api_key_schemas import ApiKeySchema
 from admyral.db.schemas.workflow_schemas import WorkflowSchema
 from admyral.db.schemas.secrets_schemas import SecretsSchema
+from admyral.db.schemas.base_schemas import BaseSchema
 
 
-class UserSchema(SQLModel, table=True):
+class UserSchema(BaseSchema, table=True):
     """
     Schema for Users
 
@@ -29,19 +29,8 @@ class UserSchema(SQLModel, table=True):
     id: str = Field(sa_type=TEXT(), primary_key=True)
     name: str | None = Field(sa_type=TEXT(), nullable=True)
     email: str = Field(sa_type=TEXT())
-    email_verified: datetime | None = Field(
-        sa_column=Column("emailVerified", TIMESTAMP(), nullable=True)
-    )
+    email_verified: datetime | None = Field(sa_type=TIMESTAMP(), nullable=True)
     image: str | None = Field(sa_type=TEXT(), nullable=True)
-
-    created_at: datetime = Field(
-        sa_column=Column(
-            "createdAt", TIMESTAMP(), nullable=False, server_default=func.now()
-        )
-    )
-    updated_at: datetime = Field(
-        sa_column=Column("updatedAt", TIMESTAMP(), nullable=False)
-    )
 
     # relationship children
     accounts: list["AccountSchema"] = Relationship(
@@ -77,7 +66,7 @@ class UserSchema(SQLModel, table=True):
         )
 
 
-class AccountSchema(SQLModel, table=True):
+class AccountSchema(BaseSchema, table=True):
     """
     Schema for Accounts
 
@@ -109,20 +98,11 @@ class AccountSchema(SQLModel, table=True):
     id_token: str | None = Field(sa_type=TEXT(), nullable=True)
     session_state: str | None = Field(sa_type=TEXT(), nullable=True)
 
-    created_at: datetime = Field(
-        sa_column=Column(
-            "createdAt", TIMESTAMP(), nullable=False, server_default=func.now()
-        )
-    )
-    updated_at: datetime = Field(
-        sa_column=Column("updatedAt", TIMESTAMP(), nullable=False)
-    )
-
     # relationship parents
     user: "UserSchema" = Relationship(back_populates="accounts")
 
 
-class SessionSchema(SQLModel, table=True):
+class SessionSchema(BaseSchema, table=True):
     """
     Schema for Session
 
@@ -144,15 +124,6 @@ class SessionSchema(SQLModel, table=True):
     session_token: str = Field(sa_column=Column("sessionToken", TEXT(), nullable=False))
     user_id: str = Field(sa_column=Column("userId", TEXT(), nullable=False))
     expires: datetime
-
-    created_at: datetime = Field(
-        sa_column=Column(
-            "createdAt", TIMESTAMP(), nullable=False, server_default=func.now()
-        )
-    )
-    updated_at: datetime = Field(
-        sa_column=Column("updatedAt", TIMESTAMP(), nullable=False)
-    )
 
     # relationship parents
     user: "UserSchema" = Relationship(back_populates="sessions")

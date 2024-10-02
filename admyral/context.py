@@ -4,6 +4,7 @@ import contextvars
 from admyral.workers.shared_worker_state import SharedWorkerState
 from admyral.utils.future_executor import execute_future
 from admyral.secret.secrets_access import Secrets
+from admyral.config.config import CONFIG
 
 
 class ExecutionContext:
@@ -12,9 +13,9 @@ class ExecutionContext:
         workflow_id: str,
         run_id: str,
         action_type: str,
+        user_id: str,
         step_id: Optional[str] = None,
         prev_step_id: Optional[str] = None,
-        user_id: str = "38815447-e272-4299-94c0-29a2d30435f9",  # TODO: properly handle user id
         secrets: Secrets = Secrets.default(),
         _is_placeholder: bool = False,
     ) -> None:
@@ -30,9 +31,7 @@ class ExecutionContext:
     @classmethod
     def placeholder(cls) -> "ExecutionContext":
         return ExecutionContext(
-            workflow_id="",
-            run_id="",
-            action_type="",
+            workflow_id="", run_id="", action_type="", user_id=CONFIG.default_user_id
         )
 
     async def append_logs_async(self, lines: list[str]) -> None:

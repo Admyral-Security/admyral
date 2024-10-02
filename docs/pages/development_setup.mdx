@@ -5,8 +5,8 @@ import { Callout } from "nextra/components";
 ## Prerequisites
 
 -   Python 3.12
+-   Docker
 -   Poetry (For installation please refer to [Poetry Installation](https://python-poetry.org/docs/#installation))
--   Temporal CLI (For installation please refer to [Temporal CLI Installation](https://docs.temporal.io/cli))
 -   Node.js 20 (For installation please refer to [Node.js Installation](https://nodejs.org/en/download/))
 -   pnpm (For installation please refer to [pnpm Installation](https://pnpm.io/installation))
 
@@ -39,12 +39,12 @@ source .env
 	`Resend` API key in the `.env` file.
 </Callout>
 
-### Temporal
+### Temporal + Postgres
 
-Start the Temporal development server:
+Start the Temporal and Postgres development server:
 
 ```bash
-temporal server start-dev
+docker compose -f docker-compose-dev-deps.yml up -d
 ```
 
 ### API Backend
@@ -80,5 +80,3 @@ pnpm i
 # 2. Start the development server:
 pnpm dev
 ```
-
-###

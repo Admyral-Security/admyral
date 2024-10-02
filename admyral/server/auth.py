@@ -2,12 +2,16 @@ from fastapi import Request, HTTPException
 from fastapi_nextauth_jwt import NextAuthJWTv4
 
 from admyral.models.auth import AuthenticatedUser
-from admyral.config.config import CONFIG, DISABLE_AUTH, AUTH_SECRET
+from admyral.config.config import CONFIG, DISABLE_AUTH, AUTH_SECRET, ADMYRAL_ENV
 from admyral.server.deps import get_admyral_store
+from admyral.logger import get_logger
+
+
+logger = get_logger(__name__)
 
 
 JWT = NextAuthJWTv4(
-    secret=AUTH_SECRET,
+    secret=AUTH_SECRET, csrf_prevention_enabled=False if ADMYRAL_ENV == "dev" else True
 )
 
 
@@ -29,7 +33,8 @@ async def authenticate(request: Request) -> AuthenticatedUser:
     else:
         try:
             decrypted_token = validate_and_decrypt_jwt(request)
-        except Exception:
+        except Exception as e:
+            logger.error(f"Failed to validate token: {e}")
             raise HTTPException(status_code=401, detail="Invalid or missing token")
         user_id = decrypted_token.get("sub") or decrypted_token.get("id")
 

@@ -10,10 +10,8 @@
 		"prettier": "prettier --write .",
 		"prettier:check": "prettier --check .",
 		"test": "jest",
-		"prisma:sqlite:pull": "pnpm dlx prisma db pull --schema=prisma/schema.sqlite.prisma",
-		"prisma:sqlite:generate": "pnpm dlx prisma generate --schema=prisma/schema.sqlite.prisma",
-		"prisma:postgres:pull": "pnpm dlx prisma db pull --schema=prisma/schema.postgres.prisma",
-		"prisma:postgres:generate": "pnpm dlx prisma generate --schema=prisma/schema.postgres.prisma"
+		"prisma:pull": "pnpm dlx prisma db pull",
+		"prisma:generate": "pnpm dlx prisma generate"
 	},
 	"dependencies": {
 		"@next-auth/prisma-adapter": "^1.0.7",

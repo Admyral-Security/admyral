@@ -24,6 +24,7 @@ from admyral.workers.action_executor import action_executor
 from admyral.workers.store_reference_error import store_reference_resolution_error
 from admyral.action_registry import ActionRegistry
 from admyral.action import Action
+from admyral.config.config import TEST_USER_ID
 
 
 async def _setup_shared_worker_state_for_testing(store: AdmyralStore) -> AdmyralStore:
@@ -74,7 +75,7 @@ async def execute_test_workflow(
         workflow_dag=workflow_code.compile(),
         is_active=True,
     )
-    await store.store_workflow(compiled_workflow)
+    await store.store_workflow(TEST_USER_ID, compiled_workflow)
 
     task_queue_name = "test_queue"
 
@@ -106,6 +107,7 @@ async def execute_test_workflow(
             await client.execute_workflow(
                 WorkflowExecutor.run,
                 {
+                    "user_id": TEST_USER_ID,
                     "workflow": compiled_workflow,
                     "source_name": "test",
                     "payload": payload,
@@ -121,16 +123,20 @@ async def execute_test_workflow(
     except Exception as e:
         exception = e
 
-    runs = await store.list_workflow_runs(workflow_id)
+    runs = await store.list_workflow_runs(TEST_USER_ID, workflow_id)
     assert len(runs) == 1
 
     run = runs[0]
 
-    run_steps_metadata = await store.list_workflow_run_steps(workflow_id, run.run_id)
+    run_steps_metadata = await store.list_workflow_run_steps(
+        TEST_USER_ID, workflow_id, run.run_id
+    )
     run_steps = []
     for run_step_metadata in run_steps_metadata:
         step_id = run_step_metadata.step_id
-        run_step = await store.get_workflow_run_step(workflow_id, run.run_id, step_id)
+        run_step = await store.get_workflow_run_step(
+            TEST_USER_ID, workflow_id, run.run_id, step_id
+        )
         run_steps.append(run_step)
 
     return run, run_steps, exception
