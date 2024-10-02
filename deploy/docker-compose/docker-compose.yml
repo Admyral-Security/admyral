@@ -19,7 +19,7 @@ services:
     networks:
       - admyral-network
     ports:
-      - 5432:5432
+      - "${POSTGRES_PORT:-5432}:5432"
     expose:
       - 5432
     volumes:
@@ -44,7 +44,7 @@ services:
     networks:
       - admyral-network
     ports:
-      - 8000:8000
+      - "${ADMYRAL_API_PORT:-8000}:8000"
     expose:
       - 8000
     environment:
@@ -73,7 +73,9 @@ services:
     networks:
       - admyral-network
     ports:
-      - 3000:3000
+      - "${ADMYRAL_WEB_PORT:-3000}:3000"
+    expose:
+      - 3000
     environment:
       - ADMYRAL_API_BASE_URL=http://api:8000
       - ADMYRAL_DATABASE_URL=postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-your-super-secret-and-long-postgres-password}@postgresql:5432/admyral
@@ -141,6 +143,8 @@ services:
       retries: 50
     networks:
       - admyral-network
+    ports:
+      - "${ELASTICSEARCH_PORT:-9200}:9200"
     expose:
       - 9200
     volumes:
@@ -172,7 +176,7 @@ services:
     networks:
       - admyral-network
     ports:
-      - 7233:7233
+      - "${TEMPORAL_PORT:-7233}:7233"
     expose:
       - 7233
     volumes:
@@ -204,7 +208,9 @@ services:
     networks:
       - admyral-network
     ports:
-      - 8080:8080
+      - "${TEMPORAL_UI_PORT:-8088}:8088"
+    expose:
+      - 8088
 
 networks:
   admyral-network:

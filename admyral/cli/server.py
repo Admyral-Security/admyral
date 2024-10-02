@@ -59,6 +59,9 @@ def up() -> None:
         )
         return
 
+    env = os.environ.copy()
+    admyral_web_port = os.environ.get("ADMYRAL_WEB_PORT", "3000")
+
     # check if container is already running
     running_containers = list_running_docker_containers()
     all_services = {
@@ -74,7 +77,7 @@ def up() -> None:
     if len(set(running_containers) & all_services) == len(all_services):
         click.echo("Admyral is already running.")
         click.echo(
-            "You can access the Admyral UI at http://localhost:3000 or use the Admyral CLI.\n"
+            f"You can access the Admyral UI at http://localhost:{admyral_web_port} or use the Admyral CLI.\n"
         )
         return
 
@@ -93,7 +96,6 @@ def up() -> None:
     command.append("up")
     command.append("-d")
 
-    env = os.environ.copy()
     if openai_api_key := os.environ.get("OPENAI_API_KEY"):
         env["OPENAI_API_KEY"] = openai_api_key
     else:
@@ -127,7 +129,7 @@ def up() -> None:
 
     click.echo("\nAdmyral is up and running.")
     click.echo(
-        "You can access the Admyral UI at http://localhost:3000 or use the Admyral CLI.\n"
+        f"You can access the Admyral UI at http://localhost:{admyral_web_port} or use the Admyral CLI.\n"
     )
 
 
