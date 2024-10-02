@@ -33,6 +33,20 @@ admyral action push your_custom_action -a path/to/your/action.py
 
 where `your_custom_action` is the Python function name and `file_path` is the path to the Python file where the action is defined.
 
+List all pushed actions:
+
+```bash
+admyral action list
+```
+
+Delete a pushed action:
+
+```bash
+admyral action delete your_custom_action
+```
+
+where `your_custom_action` is the Python function name.
+
 ## Secrets Management
 
 Manages secrets in Admyral. Secrets are encrypted values, such as API keys or passwords. See [Secrets Management](/secrets) for more information.
