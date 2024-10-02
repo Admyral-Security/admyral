@@ -165,24 +165,6 @@ files = [
 frozenlist = ">=1.1.0"
 
 [[package]]
-name = "aiosqlite"
-version = "0.20.0"
-description = "asyncio bridge to the standard sqlite3 module"
-optional = false
-python-versions = ">=3.8"
-files = [
-    {file = "aiosqlite-0.20.0-py3-none-any.whl", hash = "sha256:36a1deaca0cac40ebe32aac9977a6e2bbc7f5189f23f4a54d5908986729e5bd6"},
-    {file = "aiosqlite-0.20.0.tar.gz", hash = "sha256:6d35c8c256637f4672f843c31021464090805bf925385ac39473fb16eaaca3d7"},
-]
-
-[package.dependencies]
-typing_extensions = ">=4.0"
-
-[package.extras]
-dev = ["attribution (==1.7.0)", "black (==24.2.0)", "coverage[toml] (==7.4.1)", "flake8 (==7.0.0)", "flake8-bugbear (==24.2.6)", "flit (==3.9.0)", "mypy (==1.8.0)", "ufmt (==2.3.0)", "usort (==1.0.8.post1)"]
-docs = ["sphinx (==7.2.6)", "sphinx-mdinclude (==0.5.3)"]
-
-[[package]]
 name = "alembic"
 version = "1.13.3"
 description = "A database migration tool for SQLAlchemy."
@@ -1884,13 +1866,13 @@ portalocker = ">=1.4,<3"
 
 [[package]]
 name = "msgraph-core"
-version = "1.1.4"
+version = "1.1.5"
 description = "Core component of the Microsoft Graph Python SDK"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "msgraph_core-1.1.4-py3-none-any.whl", hash = "sha256:6ae70abec758b3d3e6aec3a59cd946f71f9042c7cc1e84f5028fe52f512ad256"},
-    {file = "msgraph_core-1.1.4.tar.gz", hash = "sha256:ce8e1df0450600949a64a4a64e8c4a67e20de8d29203f1fd63a69e369035d0b0"},
+    {file = "msgraph_core-1.1.5-py3-none-any.whl", hash = "sha256:c6f2ba5c2d8ae31e7a2aec5161ec695a79066be5c7584845d4057cb4e785ed0d"},
+    {file = "msgraph_core-1.1.5.tar.gz", hash = "sha256:0af2e6fe0d802bea8fe7e4d74381a4299e900d4b3886f148e88db2fff24e3926"},
 ]
 
 [package.dependencies]
@@ -4031,4 +4013,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "b7010d38fb53b28f96289ae7dcbd0541261ce617089e2c0fa6f2f79d4212363d"
+content-hash = "b933242920c3bcf4d2848abb4b7ab15d59ab6ca3705d89f216c792f0b7cc668a"
