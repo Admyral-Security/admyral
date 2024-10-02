@@ -2,7 +2,7 @@ from typing import Optional
 from fastapi import APIRouter, status, Depends
 
 from admyral.server.auth import authenticate
-from admyral.models import PythonAction, AuthenticatedUser
+from admyral.models import PythonAction, AuthenticatedUser, ActionMetadata
 from admyral.server.deps import get_admyral_store
 
 
@@ -13,7 +13,7 @@ router = APIRouter()
 async def push_action(
     python_action: PythonAction,
     authenticated_user: AuthenticatedUser = Depends(authenticate),
-):
+) -> None:
     """
     Push a Python action to the store. If the action for the provided action type already exists for the user,
     it will be overwritten.
@@ -24,6 +24,17 @@ async def push_action(
     await get_admyral_store().store_action(
         user_id=authenticated_user.user_id, action=python_action
     )
+
+
+@router.get("", status_code=status.HTTP_200_OK)
+async def list_actions() -> list[ActionMetadata]:
+    """
+    List all stored Python actions.
+
+    Returns:
+        A list of Python action objects.
+    """
+    return await get_admyral_store().list_actions()
 
 
 @router.get("/{action_type}", status_code=status.HTTP_200_OK)

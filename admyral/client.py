@@ -10,6 +10,7 @@ from admyral.models import (
     WorkflowPushRequest,
     WorkflowTriggerResponse,
     SecretMetadata,
+    ActionMetadata,
 )
 from admyral.config.config import API_V1_STR
 
@@ -191,6 +192,17 @@ class AdmyralClient:
         """
         result = self._get(f"{API_V1_STR}/actions/{action_type}")
         return PythonAction.model_validate(result) if result else None
+
+    def list_actions(self) -> list[ActionMetadata]:
+        """
+        Returns a list of action names.
+
+        Returns:
+            A list of action names.
+        """
+
+        result = self._get(f"{API_V1_STR}/actions")
+        return [ActionMetadata.model_validate(r) for r in result]
 
     ########################################################
     # Secrets
