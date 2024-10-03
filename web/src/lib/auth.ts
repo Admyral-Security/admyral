@@ -1,16 +1,36 @@
-import { AUTH_SECRET, GITHUB_CLIENT_ID, GITHUB_SECRET } from "@/constants/env";
+import {
+	AUTH_SECRET,
+	GITHUB_CLIENT_ID,
+	GITHUB_SECRET,
+	GOOGLE_CLIENT_ID,
+	GOOGLE_CLIENT_SECRET,
+} from "@/constants/env";
 import { NextAuthOptions } from "next-auth";
 import GitHub from "next-auth/providers/github";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import prisma from "@/lib/prisma";
 import { type Provider } from "next-auth/providers/index";
+import Google from "next-auth/providers/google";
 
-export const providers: Provider[] = [
-	GitHub({
-		clientId: GITHUB_CLIENT_ID!,
-		clientSecret: GITHUB_SECRET!,
-	}),
-];
+export const providers: Provider[] = [];
+
+if (GITHUB_CLIENT_ID && GITHUB_SECRET) {
+	providers.push(
+		GitHub({
+			clientId: GITHUB_CLIENT_ID,
+			clientSecret: GITHUB_SECRET,
+		}),
+	);
+}
+
+if (GOOGLE_CLIENT_ID && GOOGLE_CLIENT_SECRET) {
+	providers.push(
+		Google({
+			clientId: GOOGLE_CLIENT_ID,
+			clientSecret: GOOGLE_CLIENT_SECRET,
+		}),
+	);
+}
 
 export const providerMap = providers
 	.map((provider) => {

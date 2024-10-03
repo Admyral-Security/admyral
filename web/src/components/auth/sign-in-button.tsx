@@ -3,9 +3,17 @@
 import { Button, Text } from "@radix-ui/themes";
 import GithubIcon from "../icons/github-icon";
 import { signIn } from "next-auth/react";
+import GoogleIcon from "../icons/google-icon";
 
-function ProviderIconMapping({ providerId: string }: { providerId: string }) {
-	return <GithubIcon />;
+function ProviderIconMapping({ providerId }: { providerId: string }) {
+	switch (providerId) {
+		case "github":
+			return <GithubIcon />;
+		case "google":
+			return <GoogleIcon />;
+		default:
+			return null;
+	}
 }
 
 export interface SignInButtonProps {

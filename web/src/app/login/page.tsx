@@ -25,7 +25,7 @@ export default async function LoginPage() {
 				minHeight="95vh"
 				justify="center"
 				align="center"
-				gap="8"
+				gap="4"
 			>
 				<LogoWithName />
 
