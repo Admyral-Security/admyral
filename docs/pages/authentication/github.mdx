@@ -1,0 +1,26 @@
+# GitHub
+
+1.  Ensure that authentication is enabled by setting the following environment variable: `ADMYRAL_DISABLE_AUTH=false`
+2.  Go to GitHub **Developer Settings**
+3.  Click on **OAuth Apps**
+4.  Click on **New OAuth App**
+
+![GitHub OAuth](/github_oauth.png)
+
+5.  Configure your OAuth app
+6.  Set the following **Authorization callback URL**:
+
+    -   For production: `https://{YOUR_DOMAIN}/api/auth/callback/github`
+    -   For development (local): `http://localhost:3000/api/auth/callback/github`
+
+7.  Click on **Register application**
+8.  Copy the **Client ID** and generate a new **Client Secret**
+9.  Copy the in your environment file:
+
+    ```bash
+    # .env
+    ADMYRAL_DISABLE_AUTH=false
+
+    AUTH_GTIHUB_ID=your_github_client_id
+    AUTH_GITHUB_SECRET=your_github_client_secret
+    ```
