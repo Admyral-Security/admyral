@@ -272,12 +272,12 @@ class AdmyralStore(StoreInterface):
 
             await db.commit()
 
-    async def delete_action(self, action_type: str) -> None:
+    async def delete_action(self, user_id: str, action_type: str) -> None:
         async with self._get_async_session() as db:
             await db.exec(
-                delete(PythonActionSchema).where(
-                    PythonActionSchema.action_type == action_type
-                )
+                delete(PythonActionSchema)
+                .where(PythonActionSchema.action_type == action_type)
+                .where(PythonActionSchema.user_id == user_id)
             )
             await db.commit()
 
