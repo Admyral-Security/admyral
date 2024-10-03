@@ -1,0 +1,26 @@
+# Google
+
+1.  Ensure authentication is enabled by setting the following environment variable: `ADMYRAL_DISABLE_AUTH=false`
+2.  Go to Google Cloud console
+3.  Go to **APIs & Services**
+4.  Set up your **OAuth Consent Screen**
+5.  Click on **Credentials** tab
+6.  Click **Create Credentials** button and select **OAuth client id**
+
+![Google Cloud APIs & Services](/google_oauth2_console.png)
+
+7.  select as application type: **Web application**
+8.  add the following **"Authorized redirect URIs"**:
+
+    -   For production: `https://{YOUR_DOMAIN}/api/auth/callback/google`
+    -   For development: `http://localhost:3000/api/auth/callback/google`
+
+9.  Save the **Client ID** and **Client Secret** in your environment file:
+
+    ```bash
+    # .env
+    ADMYRAL_DISABLE_AUTH=false
+
+    AUTH_GOOGLE_ID=your_google_client_id
+    AUTH_GOOGLE_SECRET=your_google_client_secret
+    ```
