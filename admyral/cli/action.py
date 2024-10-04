@@ -59,7 +59,7 @@ def list(ctx: click.Context) -> None:
 @click.argument("action_type", type=str)
 @click.pass_context
 def delete(ctx: click.Context, action_type: str) -> None:
-    """Delete an action"""
+    """Delete a pushed custom action"""
     capture(event_name="action:delete")
     client: AdmyralClient = ctx.obj
     client.delete_action(action_type)
