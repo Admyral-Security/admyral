@@ -49,13 +49,13 @@ jobs:
           sudo apt-get install -y docker-compose
 
       - name: Start Docker Compose services
-        run: docker compose -f docker-compose-dev-deps.yml up -d
+        run: docker compose -f docker-compose.dev.yml up -d
 
       - name: Run unit tests
         run: poetry run pytest tests/
 
       - name: Stop Docker Compose services
-        run: docker compose -f docker-compose-dev-deps.yml down
+        run: docker compose -f docker-compose.dev.yml down
 
   web-unit-test:
     name: Web Unit Tests
