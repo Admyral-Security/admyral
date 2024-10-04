@@ -4,6 +4,7 @@ import { Button, Text } from "@radix-ui/themes";
 import GithubIcon from "../icons/github-icon";
 import { signIn } from "next-auth/react";
 import GoogleIcon from "../icons/google-icon";
+import { useState } from "react";
 
 function ProviderIconMapping({ providerId }: { providerId: string }) {
 	switch (providerId) {
@@ -25,15 +26,22 @@ export default function SignInButton({
 	providerId,
 	providerName,
 }: SignInButtonProps) {
+	const [isSigningIn, setIsSigningIn] = useState<boolean>(false);
+
+	const handleSignIn = () => {
+		setIsSigningIn(true);
+		signIn(providerId, {
+			callbackUrl: "/",
+			redirect: false,
+		}).catch((error) => {
+			console.error(error);
+			setIsSigningIn(false);
+		});
+	};
+
 	return (
 		<Button
-			onClick={() =>
-				signIn(providerId, {
-					callbackUrl: "/",
-					redirect: false,
-				})
-			}
-			type="submit"
+			onClick={handleSignIn}
 			style={{
 				width: "100%",
 				height: "auto",
@@ -50,6 +58,7 @@ export default function SignInButton({
 					"0px 0px 3px 0px rgba(0, 0, 0, 0.08), 0px 2px 3px 0px rgba(0, 0, 0, 0.17)",
 				cursor: "pointer",
 			}}
+			loading={isSigningIn}
 		>
 			<ProviderIconMapping providerId={providerId} />
 			<Text

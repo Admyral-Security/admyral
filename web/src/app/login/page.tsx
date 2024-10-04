@@ -1,3 +1,4 @@
+import AuthError from "@/components/auth/error-handler";
 import SignInButton from "@/components/auth/sign-in-button";
 import LogoWithName from "@/components/icons/logo-with-name";
 import { providerMap } from "@/lib/auth";
@@ -37,6 +38,8 @@ export default async function LoginPage() {
 						/>
 					</Box>
 				))}
+
+				<AuthError />
 
 				<Box width="365px">
 					<Text size="2">
