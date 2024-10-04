@@ -74,8 +74,6 @@ services:
       - admyral-network
     ports:
       - "${ADMYRAL_WEB_PORT:-3000}:3000"
-    expose:
-      - 3000
     environment:
       - ADMYRAL_API_BASE_URL=http://api:8000
       - ADMYRAL_DATABASE_URL=postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-your-super-secret-and-long-postgres-password}@postgresql:5432/admyral
@@ -208,9 +206,7 @@ services:
     networks:
       - admyral-network
     ports:
-      - "${TEMPORAL_UI_PORT:-8088}:8088"
-    expose:
-      - 8088
+      - "${TEMPORAL_UI_PORT:-8080}:8080"
 
 networks:
   admyral-network:
