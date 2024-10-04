@@ -42,11 +42,11 @@ def push(ctx: click.Context, action_type: str, action: str) -> None:
 
 @action.command(
     "list",
-    help="List all pushed actions",
+    help="List all pushed custom actions",
 )
 @click.pass_context
 def list(ctx: click.Context) -> None:
-    """List all custom actions"""
+    """List all pushed custom actions"""
     capture(event_name="action:list")
     client: AdmyralClient = ctx.obj
     actions = client.list_actions()
@@ -55,7 +55,7 @@ def list(ctx: click.Context) -> None:
         click.echo(action.action_type)
 
 
-@action.command("delete", help="Delete a pushed action")
+@action.command("delete", help="Delete a pushed custom action")
 @click.argument("action_type", type=str)
 @click.pass_context
 def delete(ctx: click.Context, action_type: str) -> None:
