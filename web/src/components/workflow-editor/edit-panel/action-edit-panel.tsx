@@ -139,11 +139,7 @@ export default function ActionEditPanel() {
 								</Text>
 								<TextArea
 									variant="surface"
-									value={
-										actionData.args[argument.argName] ||
-										argument.defaultValue ||
-										""
-									}
+									value={actionData.args[argument.argName]}
 									resize="vertical"
 									onChange={(event) =>
 										onChangeActionArgument(
