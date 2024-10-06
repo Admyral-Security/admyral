@@ -5,7 +5,22 @@ import { useWorkflowStore } from "@/stores/workflow-store";
 import { useEditorActionStore } from "@/stores/editor-action-store";
 import { TEditorWorkflowActionNode } from "@/types/react-flow";
 import { produce } from "immer";
-import { ChangeEvent } from "react";
+import { ChangeEvent, useEffect } from "react";
+import { useImmer } from "use-immer";
+import { TActionMetadata } from "@/types/editor-actions";
+
+function buildInitialArgs(
+	action: TEditorWorkflowActionNode,
+	actionDefinition: TActionMetadata,
+) {
+	return actionDefinition.arguments.map((arg) => {
+		const value =
+			arg.argName in action.args
+				? action.args[arg.argName]
+				: arg.defaultValue || "";
+		return value === "null" ? "" : value;
+	});
+}
 
 export default function ActionEditPanel() {
 	const { nodes, selectedNodeIdx, updateNodeData } = useWorkflowStore();
@@ -18,6 +33,14 @@ export default function ActionEditPanel() {
 	const action = nodes[selectedNodeIdx];
 	const actionData = action.data as TEditorWorkflowActionNode;
 	const actionDefinition = actionsIndex[action.data.actionType];
+
+	const [args, updateArgs] = useImmer(
+		buildInitialArgs(actionData, actionDefinition),
+	);
+
+	useEffect(() => {
+		updateArgs(buildInitialArgs(actionData, actionDefinition));
+	}, [selectedNodeIdx]);
 
 	const onChangeResultName = (event: ChangeEvent<HTMLInputElement>) => {
 		updateNodeData(
@@ -42,8 +65,12 @@ export default function ActionEditPanel() {
 
 	const onChangeActionArgument = (
 		argument: string,
+		argIdx: number,
 		event: ChangeEvent<HTMLTextAreaElement>,
 	) => {
+		updateArgs((draft) => {
+			draft[argIdx] = event.target.value;
+		});
 		updateNodeData(
 			selectedNodeIdx,
 			produce(actionData, (draft) => {
@@ -124,7 +151,7 @@ export default function ActionEditPanel() {
 						<Text weight="medium" size="4">
 							Action Arguments
 						</Text>
-						{actionDefinition.arguments.map((argument) => (
+						{actionDefinition.arguments.map((argument, argIdx) => (
 							<Flex
 								key={`${action.id}_action_edit_${argument.argName}`}
 								direction="column"
@@ -139,11 +166,12 @@ export default function ActionEditPanel() {
 								</Text>
 								<TextArea
 									variant="surface"
-									value={actionData.args[argument.argName]}
+									value={args[argIdx]}
 									resize="vertical"
 									onChange={(event) =>
 										onChangeActionArgument(
 											argument.argName,
+											argIdx,
 											event,
 										)
 									}

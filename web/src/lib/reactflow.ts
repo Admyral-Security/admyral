@@ -99,10 +99,6 @@ export function buildReactFlowActionNode(
 	actionType: string,
 	actionMetadata: TActionMetadata,
 ): TReactFlowNode {
-	const args: Record<string, any> = {};
-	actionMetadata.arguments.forEach((argument) => {
-		args[argument.argName] = argument.defaultValue || "";
-	});
 	return {
 		id,
 		type: EditorWorkflowNodeType.ACTION,
@@ -114,7 +110,7 @@ export function buildReactFlowActionNode(
 			resultName: null,
 			// TODO: How to initialize secrets mapping and args?
 			secretsMapping: {},
-			args,
+			args: {},
 		},
 		selected: false,
 	};

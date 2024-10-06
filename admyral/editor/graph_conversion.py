@@ -23,7 +23,6 @@ from admyral.editor.json_with_references_serde import (
     serialize_json_with_reference,
     deserialize_json_with_reference,
 )
-from admyral.utils.collections import is_not_empty
 
 
 def workflow_to_editor_workflow_graph(
@@ -161,9 +160,6 @@ def editor_workflow_graph_to_workflow(
                                 name=k, value=deserialize_json_with_reference(v)
                             )
                             for k, v in node.webhook.default_args
-                            # If value is an empty string, then there is no value
-                            # and we can skip it.
-                            if is_not_empty(v)
                         ]
                     )
                 )
@@ -180,11 +176,7 @@ def editor_workflow_graph_to_workflow(
                 result_name=node.result_name,
                 secrets_mapping=node.secrets_mapping,
                 args={
-                    k: deserialize_json_with_reference(v)
-                    for k, v in node.args.items()
-                    # If value is an empty string, then there is no value
-                    # and we can skip it.
-                    if is_not_empty(v)
+                    k: deserialize_json_with_reference(v) for k, v in node.args.items()
                 },
             )
             continue
