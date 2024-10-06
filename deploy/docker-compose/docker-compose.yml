@@ -27,10 +27,10 @@ services:
 
   api:
     container_name: admyral-api
-    build:
-      context: ../..
-      dockerfile: ./docker/Dockerfile.api
-    # image: admyralai/api:${ADMYRAL_VERSION}
+    # build:
+    #   context: ../..
+    #   dockerfile: ./docker/Dockerfile.api
+    image: admyralai/api:${ADMYRAL_VERSION}
     healthcheck:
       test: ["CMD", "curl", "-f", "http://0.0.0.0:8000/health"]
       timeout: 5s
@@ -63,10 +63,10 @@ services:
 
   web:
     container_name: admyral-web
-    build:
-      context: ../../web
-      dockerfile: ../docker/Dockerfile.web
-    # image: admyralai/web:${ADMYRAL_VERSION}
+    # build:
+    #   context: ../../web
+    #   dockerfile: ../docker/Dockerfile.web
+    image: admyralai/web:${ADMYRAL_VERSION}
     depends_on:
       api:
         condition: service_healthy
@@ -89,10 +89,10 @@ services:
 
   worker:
     container_name: admyral-worker
-    build:
-      context: ../..
-      dockerfile: ./docker/Dockerfile.worker
-    # image: admyralai/worker:${ADMYRAL_VERSION}
+    # build:
+    #   context: ../..
+    #   dockerfile: ./docker/Dockerfile.worker
+    image: admyralai/worker:${ADMYRAL_VERSION}
     entrypoint: ["python", "admyral/main.py", "worker", "--docker"]
     privileged: true
     depends_on:
