@@ -65,7 +65,7 @@ While Admyral is Code-First, there is No-Code functionality as well. Visualize y
 
 ### Reliable and Scalable Workflow Infrastructure Out-of-the-box 📦
 
-Built on [Temporal](temporal.io) (used by Netflix, Retool, and co.), Admyral ensures reliable, scalable workflows -- incl. secrets management for integrations.
+Built on [Temporal](https://temporal.io/) (used by Netflix, Retool, and co.), Admyral ensures reliable, scalable workflows -- incl. secrets management for integrations.
 Deploy in under 5 minutes without infrastructure or scalability worries.
 
 ### Start Automating Any Workflow - SecOps or GRC 🎬
