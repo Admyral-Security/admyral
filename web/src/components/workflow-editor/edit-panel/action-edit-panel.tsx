@@ -26,6 +26,17 @@ export default function ActionEditPanel() {
 	const { nodes, selectedNodeIdx, updateNodeData } = useWorkflowStore();
 	const { actionsIndex } = useEditorActionStore();
 
+	const [args, updateArgs] = useImmer<string[]>([]);
+
+	useEffect(() => {
+		if (selectedNodeIdx !== null) {
+			const action = nodes[selectedNodeIdx];
+			const actionData = action.data as TEditorWorkflowActionNode;
+			const actionDefinition = actionsIndex[action.data.actionType];
+			updateArgs(buildInitialArgs(actionData, actionDefinition));
+		}
+	}, [selectedNodeIdx, nodes, actionsIndex]);
+
 	if (selectedNodeIdx === null) {
 		return null;
 	}
@@ -33,14 +44,6 @@ export default function ActionEditPanel() {
 	const action = nodes[selectedNodeIdx];
 	const actionData = action.data as TEditorWorkflowActionNode;
 	const actionDefinition = actionsIndex[action.data.actionType];
-
-	const [args, updateArgs] = useImmer(
-		buildInitialArgs(actionData, actionDefinition),
-	);
-
-	useEffect(() => {
-		updateArgs(buildInitialArgs(actionData, actionDefinition));
-	}, [selectedNodeIdx]);
 
 	const onChangeResultName = (event: ChangeEvent<HTMLInputElement>) => {
 		updateNodeData(
