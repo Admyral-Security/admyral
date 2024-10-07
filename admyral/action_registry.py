@@ -38,6 +38,10 @@ class ActionRegistry(metaclass=Singleton):
         return cls._actions[type_name]
 
     @classmethod
+    def get_or_none(cls, type_name: str) -> Action | None:
+        return cls._actions.get(type_name)
+
+    @classmethod
     def is_registered(cls, type_name: str) -> bool:
         return type_name in cls._actions
 

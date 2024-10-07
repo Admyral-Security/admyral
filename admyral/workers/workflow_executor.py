@@ -260,8 +260,11 @@ class WorkflowExecutor:
 
         action_type = node.type
 
-        if action_type not in ActionRegistry.get_action_types():
+        action = ActionRegistry.get_or_none(action_type)
+        if not action:
             # Custom Python action
+            # Note: we filter the action_args in execute_python_action
+            # because first need to fetch the custom action.
             return await _execute_activity(
                 "execute_python_action",
                 args=[
@@ -270,6 +273,15 @@ class WorkflowExecutor:
                     {"action_type": action_type, "action_args": action_args},
                 ],
             )
+
+        # filter action_args based on action arguments
+        # Why filter action_args? Because an action might have been updated,
+        # i.e., an argument might have been removed. This would cause the
+        # function call to fail. Hence, we filter the arguments to only include
+        # the ones that are actually defined by the action.
+        defined_args = set(map(lambda arg: arg.arg_name, action.arguments))
+        action_args = {k: v for k, v in action_args.items() if k in defined_args}
+
         return await _execute_activity(
             action_type,
             args=[ctx_dict, node.secrets_mapping, action_args],

@@ -66,6 +66,14 @@ async def execute_python_action(action_type: str, action_args: dict[str, Any]) -
             f"Action with type '{action_type}' not found. Did you push your action?"
         )
 
+    # filter action_args based on action arguments
+    # Why filter action_args? Because an action might have been updated,
+    # i.e., an argument might have been removed. This would cause the
+    # function call to fail. Hence, we filter the arguments to only include
+    # the ones that are actually defined by the action.
+    defined_args = set(map(lambda arg: arg.arg_name, python_action.arguments))
+    action_args = {k: v for k, v in action_args.items() if k in defined_args}
+
     with tempfile.TemporaryDirectory() as job_dir:
         logger.info(f"Job directory: {job_dir}")
 
