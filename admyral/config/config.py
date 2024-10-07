@@ -173,9 +173,10 @@ def load_local_config() -> GlobalConfig:
     if os.path.exists(config_file):
         with open(config_file, "r+") as f:
             file_content = yaml.safe_load(f)
-            f.seek(0)
             if "id" not in file_content:
                 file_content["id"] = str(uuid.uuid4())
+                # Reset the file content and overwrite with new config
+                f.truncate(0)
                 yaml.dump(file_content, f)
     else:
         os.makedirs(get_local_storage_path(), exist_ok=True)

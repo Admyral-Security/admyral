@@ -12,9 +12,9 @@ def connect(base_url: str, api_key: str):
     """Connect to the Admyral server."""
     with open(get_user_config_file(), "r+") as f:
         config = yaml.safe_load(f)
-        f.seek(0)
         config["cli_target"] = base_url
         config["api_key"] = api_key
+        f.truncate(0)
         yaml.dump(config, f)
 
 
@@ -23,9 +23,9 @@ def disconnect():
     """Disconnect from the Admyral server."""
     with open(get_user_config_file(), "r+") as f:
         config = yaml.safe_load(f)
-        f.seek(0)
         if "cli_target" in config:
             del config["cli_target"]
         if "api_key" in config:
             del config["api_key"]
+        f.truncate(0)
         yaml.dump(config, f)
