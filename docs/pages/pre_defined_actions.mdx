@@ -83,7 +83,7 @@ You can construct condition expressions of the following types:
     Example: `not payload["some_value"]`
 -   Binary Expression: `Expression Binary Operator Expression` <br/>
     Example: `payload["url"] == "https://admyral.dev"`
--   Combine conidtion expressions using `and`, `or` together with parenthesis `(...)` for ensuring correct precedence: <br/>
+-   Combine condition expressions using `and`, `or` together with parenthesis `(...)` for ensuring correct precedence: <br/>
     Example: `payload["url"] == "https://admyral.dev" or (payload["values"][0] > 0 and payload["values"][1] <= 10)`
 
 <Callout type="info">
