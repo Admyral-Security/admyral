@@ -1,0 +1,50 @@
+# AWS
+
+## Connect via AWS Access Key
+
+1. Go to your AWS Console
+
+2. Under **Access management**, click **User**
+
+3. Click on **Create User**
+
+![AWS Access Key Create User](/aws_access_key_1.png)
+
+4. Give the user a name (e.g. `admyral`). Click **Next**.
+
+5. Configure user permissions. **Note:** It is highly recommended to create a new group and only attach policies which are needed. Click **Next**.
+
+6. Click **Create user**.
+
+7. Click on the created user and go to the **Security credentials** tab.
+
+![AWS Access Key Create User 2](/aws_access_key_2.png)
+
+8. Click on **Create access key**.
+
+![AWS Access Key Create User 3](/aws_access_key_3.png)
+
+9. Click on **Third-party service**, check the acknowledgement, and click **Next**.
+
+![AWS Access Key Create User 4](/aws_access_key_4.png)
+
+10. Copy the **Access Key** and **Secret Access Key** values.
+
+11. Go to the **Settings** page in **Admyral** and click on **Add New Credential** in the **Credentials** section.
+
+12. Give your credential a name, e.g. `aws_secret`.
+
+13. The following secrets structure is expected:
+
+| Key                     | Value                                       |
+| ----------------------- | ------------------------------------------- |
+| `aws_access_key_id`     | Paste the **Access Key** value here.        |
+| `aws_secret_access_key` | Paste the **Secret Access Key** value here. |
+
+14. Click on the **Save** button.
+
+Alternatively, you can use the following CLI command structure:
+
+```bash
+admyral secret set aws_secret --value aws_access_key_id=your_access_key --value aws_secret_access_key=your_secret_access_key
+```

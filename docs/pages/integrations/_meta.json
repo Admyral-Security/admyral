@@ -6,6 +6,7 @@
 	"alien_vault": "AlienVault OTX",
 	"amazon_inspector2": "Amazon Inspector 2",
 	"anthropic": "Anthropic",
+	"aws": "AWS",
 	"azure_openai": "Azure OpenAI",
 	"github": "GitHub",
 	"greynoise": "GreyNoise",

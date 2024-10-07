@@ -66,6 +66,7 @@ from admyral.actions.integrations.compliance import (
     list_review_history_for_pull_request,
     compare_two_github_commits,
 )
+from admyral.actions.integrations.cloud import steampipe_query_aws
 
 
 __all__ = [
@@ -117,4 +118,5 @@ __all__ = [
     "list_review_history_for_pull_request",
     "compare_two_github_commits",
     "abuseipdb_analyze_ip",
+    "steampipe_query_aws",
 ]

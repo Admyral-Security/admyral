@@ -32,7 +32,6 @@ RUN poetry config virtualenvs.create false && \
     poetry export -f requirements.txt --output requirements.txt --without-hashes
 
 
-
 # Build the final image
 FROM python:3.12-slim-bookworm
 
@@ -68,4 +67,19 @@ COPY --from=nsjail /bin/nsjail /bin/nsjail
 COPY . .
 RUN pip install -e .
 
-EXPOSE 8000
+# Install steampipe and plugins
+RUN /bin/sh -c "$(curl -fsSL https://steampipe.io/install/steampipe.sh)"
+# Add a non-root 'steampipe' user and group
+RUN groupadd -r steampipe && \
+    useradd -r -g steampipe -d /home/steampipe -m -s /bin/bash -u 9193 steampipe
+# RUN adduser --system --disabled-password --gecos "steampipe user" --shell /bin/bash --uid 9193 steampipe
+# add a non-root 'steampipe' user
+RUN mkdir -p /home/steampipe/.steampipe && \
+    chown -R steampipe:steampipe /home/steampipe/.steampipe
+# Change user to non-root
+USER steampipe
+# run steampipe once to initialize it
+RUN steampipe service start && \
+    # install steampipe dependencies
+    steampipe plugin install aws && \
+    steampipe service stop

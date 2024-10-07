@@ -1,0 +1,112 @@
+import { Callout } from "nextra/components";
+
+# Steampipe Query for AWS
+
+Query your AWS cloud using SQL (dialect: Postgres).
+
+<Callout type="info">
+	For more information on the table schema, see [AWS
+	Schema](https://hub.steampipe.io/plugins/turbot/aws/tables).
+</Callout>
+
+### Example Queries
+
+-   AWS S3 bucket logging enabled:
+
+    ```sql
+    select
+        arn as resource,
+        case
+          when logging->'TargetBucket' is null then 'alarm'
+          else 'ok'
+        end as status,
+        case
+          when logging->'TargetBucket' is null then title || ' logging disabled.'
+          else title || ' logging enabled.'
+        end as reason
+    from
+        aws_s3_bucket;
+    ```
+
+-   AWS EC2 instance is not publicly accessible:
+
+    ```sql
+    select
+        arn as resource,
+        case
+          when public_ip_address is null then 'ok'
+          else 'alarm'
+        end as status,
+        case
+          when public_ip_address is null then instance_id || ' not publicly accessible.'
+          else instance_id || ' publicly accessible.'
+        end as reason
+    from
+        aws_ec2_instance;
+    ```
+
+**SDK Import:**
+
+```python
+from admyral.actions import steampipe_query_aws
+```
+
+## Arguments:
+
+| Argument Name     | Description                       | Required |
+| ----------------- | --------------------------------- | :------: |
+| **Query** `query` | The SQL query for your AWS cloud. |   Yes    |
+
+## Returns
+
+A JSON object with two keys: `columns` and `rows`. The `columns` value is a JSON array containing more information about the columns of the result table. The `rows` JSON array contains the rows of the query result.
+
+## Required Secrets
+
+| Secret Placeholder | Description                                        |
+| ------------------ | -------------------------------------------------- |
+| `AWS_SECRET`       | AWS secret. See [AWS setup](/integrations/aws/aws) |
+
+## SDK Example
+
+```python
+response = steampipe_query_aws(
+	query="select * from aws_s3_bucket;",
+	secrets={
+		"AWS_SECRET": "my_stored_aws_secret"
+	}
+)
+```
+
+## Example Output:
+
+```json
+{
+	"columns": [
+		{
+			"name": "resource",
+			"data_type": "text"
+		},
+		{
+			"name": "status",
+			"data_type": "text"
+		},
+		{
+			"name": "reason",
+			"data_type": "text"
+		}
+	],
+	"rows": [
+		{
+			"reason": "mydummyawsbucket2 not enabled for: block_public_acls, block_public_policy, ignore_public_acls, restrict_public_buckets.",
+			"resource": "arn:aws:s3:::mydummyawsbucket2",
+			"status": "alarm"
+		},
+		{
+			"reason": "mydummyawsbucket all public access blocks enabled.",
+			"resource": "arn:aws:s3:::mydummyawsbucket",
+			"status": "ok"
+		}
+	]
+}
+```
