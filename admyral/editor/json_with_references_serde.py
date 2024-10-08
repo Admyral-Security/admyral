@@ -27,6 +27,11 @@ Types:
   - Note if it is a string within a string (e.g. `"... {{ a['b'] }} ..."`), it will not wrap the referenced value in quotes.
     Example: `"... {{ a['b'] }} ..."` with `a['b'] = "abc"` will be resolved to `"... abc ..."`.
 
+
+Note:
+- we handle \n and \\n exactly the same way in the UI
+- empty UI field equals None
+
 """
 
 
@@ -77,10 +82,15 @@ def serialize_json_with_reference(value: JsonValue) -> str:
         return json.dumps(value)
 
     if isinstance(value, str):
+        if value == "":
+            return '""'
         # handle string escaping for ints, floats, bools, dicts, and lists
+        # if _is_string_escaped_json_value(value):
+        #     return f'"{_escape_string(value)}"'
+        # return _escape_string(value)
         if _is_string_escaped_json_value(value):
-            return f'"{_escape_string(value)}"'
-        return _escape_string(value)
+            return f'"{value}"'
+        return value
 
     if isinstance(value, list):
         content = ", ".join(_handle_value_inside_container(item) for item in value)
@@ -97,7 +107,7 @@ def serialize_json_with_reference(value: JsonValue) -> str:
 
 
 def deserialize_json_with_reference(value: str) -> JsonValue:
-    value = value.strip().strip("\n")
+    value = value.replace("\\n", "\n")
     value = _unescape_string(value)
 
     if value == "":

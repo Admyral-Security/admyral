@@ -296,7 +296,7 @@ def test_invalid_list():
     json_str = serialize_json_with_reference(json_obj)
 
     assert json_obj == '[\n"]'
-    assert json_str == '[\\n"]'
+    assert json_str == '[\n"]'
 
 
 #########################################################################################################
@@ -314,7 +314,7 @@ def test_invalid_list_in_string():
     json_str = serialize_json_with_reference(json_obj)
 
     assert json_obj == '[\n"]'
-    assert json_str == '[\\n"]'
+    assert json_str == '[\n"]'
 
 
 #########################################################################################################
@@ -333,3 +333,58 @@ def test_empty_reference():
 
     assert json_obj == "{{}}"
     assert json_str == "{{}}"
+
+
+#########################################################################################################
+
+
+def test_linebreak():
+    """
+    Textfield Input in UI:
+    ```
+
+
+    ```
+    """
+    input_value = "\n"
+    json_obj = deserialize_json_with_reference(input_value)
+    json_str = serialize_json_with_reference(json_obj)
+
+    assert json_obj == "\n"
+    assert json_str == "\n"
+
+
+#########################################################################################################
+
+
+def test_escaped_quotes():
+    """
+    Textfield Input in UI:
+    ```
+
+
+    ```
+    """
+    input_value = '""'
+    json_obj = deserialize_json_with_reference(input_value)
+    json_str = serialize_json_with_reference(json_obj)
+
+    assert json_obj == ""
+    assert json_str == '""'
+
+
+#########################################################################################################
+
+
+def test_empty():
+    """
+    Textfield Input in UI:
+    ```
+    ```
+    """
+    input_value = ""
+    json_obj = deserialize_json_with_reference(input_value)
+    json_str = serialize_json_with_reference(json_obj)
+
+    assert json_obj is None
+    assert json_str == "null"
