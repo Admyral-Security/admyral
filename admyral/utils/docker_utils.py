@@ -37,4 +37,4 @@ def clean_up_old_images(
     for image in images:
         if current_version and current_version in image.tags:
             continue
-        image.remove()
+        image.remove(force=True)
