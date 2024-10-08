@@ -140,13 +140,6 @@ def upgrade() -> None:
     )
     op.create_index(op.f("ix_api_keys_key"), "api_keys", ["key"], unique=False)
     op.create_index(op.f("ix_api_keys_user_id"), "api_keys", ["user_id"], unique=False)
-    op.create_foreign_key(
-        None, "secrets", "User", ["user_id"], ["id"], ondelete="CASCADE"
-    )
-    op.drop_column("workflow_runs", "user_id")
-    op.create_foreign_key(
-        None, "workflows", "User", ["user_id"], ["id"], ondelete="CASCADE"
-    )
 
     DEFAULT_USER_ID = "38815447-e272-4299-94c0-29a2d30435f9"
     op.execute(
@@ -155,6 +148,17 @@ def upgrade() -> None:
     TEST_USER_ID = "a2f038f1-e35b-4509-bcc4-c08bd0e481a6"
     op.execute(
         f"INSERT INTO \"User\" (id, email) VALUES ('{TEST_USER_ID}', 'test@admyral.ai')",
+    )
+
+    op.execute(f"UPDATE secrets SET user_id = '{DEFAULT_USER_ID}'")
+    op.create_foreign_key(
+        None, "secrets", "User", ["user_id"], ["id"], ondelete="CASCADE"
+    )
+    op.drop_column("workflow_runs", "user_id")
+
+    op.execute(f"UPDATE workflows SET user_id = '{DEFAULT_USER_ID}'")
+    op.create_foreign_key(
+        None, "workflows", "User", ["user_id"], ["id"], ondelete="CASCADE"
     )
 
     # ### end Alembic commands ###
