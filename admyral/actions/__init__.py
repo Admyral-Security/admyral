@@ -66,7 +66,14 @@ from admyral.actions.integrations.compliance import (
     list_review_history_for_pull_request,
     compare_two_github_commits,
 )
-from admyral.actions.integrations.cloud import steampipe_query_aws
+from admyral.actions.integrations.cloud import (
+    steampipe_query_aws,
+    aws_s3_bucket_logging_enabled,
+    aws_s3_bucket_enforce_ssl,
+    aws_s3_restrict_public_write_access,
+    aws_s3_restrict_public_read_access,
+    aws_s3_default_encryption_enabled,
+)
 
 
 __all__ = [
@@ -119,4 +126,9 @@ __all__ = [
     "compare_two_github_commits",
     "abuseipdb_analyze_ip",
     "steampipe_query_aws",
+    "aws_s3_bucket_logging_enabled",
+    "aws_s3_bucket_enforce_ssl",
+    "aws_s3_restrict_public_write_access",
+    "aws_s3_restrict_public_read_access",
+    "aws_s3_default_encryption_enabled",
 ]
