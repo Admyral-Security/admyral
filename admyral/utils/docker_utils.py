@@ -35,6 +35,6 @@ def clean_up_old_images(
     docker_client = DockerClient.from_env()
     images = docker_client.images.list(name=repository_name)
     for image in images:
-        if current_version and current_version in image.tags:
+        if current_version and f"{repository_name}:{current_version}" in image.tags:
             continue
         image.remove(force=True)
