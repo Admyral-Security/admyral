@@ -55,6 +55,7 @@ type WorkflowStoreState = TReactFlowGraph & {
 	webhookId: string | null;
 	webhookSecret: string | null;
 	lastDeletedEdges: TReactFlowEdge[];
+	payloadCache: string;
 	// Operations
 	clearWorkflowStore: () => void;
 	initWorkflow: (workflowId: string, windowInnerWidth: number) => void;
@@ -89,12 +90,14 @@ type WorkflowStoreState = TReactFlowGraph & {
 	clickWorkflowSettings: () => void;
 	setSelectedNode: (selectedNodeIdx: number) => void;
 	closeSettingsSidePanel: () => void;
+	setPayloadCache: (payloadCache: string) => void;
 };
 
 export const useWorkflowStore = create<WorkflowStoreState>((set, get) => ({
 	// ReactFlow graph
 	workflowId: "",
 	workflowName: "",
+	payloadCache: "",
 	description: null,
 	isActive: false,
 	nodes: [],
@@ -110,6 +113,7 @@ export const useWorkflowStore = create<WorkflowStoreState>((set, get) => ({
 		set({
 			workflowId: "",
 			workflowName: "",
+			payloadCache: "",
 			description: null,
 			isActive: false,
 			nodes: [],
@@ -126,6 +130,7 @@ export const useWorkflowStore = create<WorkflowStoreState>((set, get) => ({
 		set({
 			workflowId,
 			workflowName: "",
+			payloadCache: "",
 			description: null,
 			isActive: false,
 			nodes: [buildStartNode(windowInnerWidth)],
@@ -161,6 +166,12 @@ export const useWorkflowStore = create<WorkflowStoreState>((set, get) => ({
 							startNodeData.webhook.webhookSecret;
 					}
 				}
+			}),
+		),
+	setPayloadCache: (payloadCache: string) =>
+		set(
+			produce((draft) => {
+				draft.payloadCache = payloadCache;
 			}),
 		),
 	setIsActive: (newIsActive: boolean) => set({ isActive: newIsActive }),

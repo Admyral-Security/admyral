@@ -10,10 +10,9 @@ export default function RunWorkflowDialog({
 }: {
 	closeDialog: () => void;
 }) {
-	const { workflowName, isActive } = useWorkflowStore();
+	const { workflowName, isActive, payloadCache, setPayloadCache } =
+		useWorkflowStore();
 	const triggerWorkflow = useTriggerWorkflowApi();
-
-	const [payload, setPayload] = useState<string>("");
 
 	useEffect(() => {
 		if (triggerWorkflow.isSuccess) {
@@ -36,10 +35,10 @@ export default function RunWorkflowDialog({
 
 		let parsedPayload = undefined;
 		try {
-			if (payload === "") {
+			if (payloadCache === "") {
 				parsedPayload = null;
 			} else {
-				parsedPayload = JSON.parse(payload);
+				parsedPayload = JSON.parse(payloadCache);
 			}
 		} catch (e) {
 			errorToast("Failed to parse payload into JSON. Is it valid JSON?");
@@ -75,8 +74,8 @@ export default function RunWorkflowDialog({
 			<Flex direction="column" gap="2">
 				<Text weight="medium">Test Payload</Text>
 				<TextArea
-					value={payload}
-					onChange={(event) => setPayload(event.target.value)}
+					value={payloadCache}
+					onChange={(event) => setPayloadCache(event.target.value)}
 					variant="surface"
 					style={{
 						width: "100%",
