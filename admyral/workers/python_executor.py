@@ -396,9 +396,10 @@ async def _jailed_python_execution(
     nsjail_config = nsjail_config_template.format(
         EXECUTOR_PATH=os.path.join(job_dir, "python_action_executor.py"),
         ACTION_PATH=os.path.join(job_dir, "action.py"),
-        PYTHON_DEPENDENCIES=":".join(requirements_paths),
+        PYTHON_DEPENDENCIES=":".join([ADMYRAL_PYTHON_PATH] + requirements_paths),
         PYTHON_DEPENDENCIES_MOUNT=requirements_mounts,
         JOB_DIR=job_dir,
+        PATH=os.environ.get("PATH", ""),
     )
 
     nsjail_config_path = os.path.join(job_dir, "action.cfg")
