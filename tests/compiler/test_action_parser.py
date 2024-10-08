@@ -226,15 +226,13 @@ CODE_TEST_4 = """def custom_action1(arg: int) ->str:
 
 
 def test_missing_argument_annotation():
-    try:
+    with pytest.raises(ValueError) as e:
         parse_action(CODE_TEST_4, "custom_action1")
-    except ValueError as e:
-        assert (
-            str(e)
-            == "Arguments must be annotated using Annotated[<type>, ArgumentMetadata(...)]."
-        )
-    else:
-        assert False, "Should raise an error"
+
+    assert (
+        str(e.value.args[0])
+        == "Arguments must be annotated using Annotated[<type>, ArgumentMetadata(...)]."
+    )
 
 
 #########################################################################################################
@@ -255,15 +253,13 @@ def custom_action1(arg: Annotated[int, ArgumentMetadata(display_name="Arg", desc
 
 
 def test_duplicate_parameter_in_argument_metadata():
-    try:
+    with pytest.raises(ValueError) as e:
         parse_action(CODE_TEST_5, "custom_action1")
-    except ValueError as e:
-        assert (
-            str(e)
-            == "Found duplicate ArgumentMetadata parameter: description. ArgumentMetadata parameters must be unique."
-        )
-    else:
-        assert False, "Should raise an error"
+
+    assert (
+        str(e.value.args[0])
+        == "Found duplicate ArgumentMetadata parameter: description. ArgumentMetadata parameters must be unique."
+    )
 
 
 #########################################################################################################
