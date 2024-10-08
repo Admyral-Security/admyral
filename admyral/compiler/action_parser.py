@@ -274,6 +274,11 @@ def collect_action_arguments(action_node: ast.FunctionDef) -> list[Argument]:
     """
     action_def_args = action_node.args
 
+    if action_def_args.vararg:
+        raise ValueError("Varargs parameter is not supported for actions.")
+    if action_def_args.kwarg:
+        raise ValueError("Kwargs parameter is not supported for actions.")
+
     # Note: the last #defaults elements of args in the args list, are the corresponding default values
     num_of_args_without_default_value = len(action_def_args.args) - len(
         action_def_args.defaults

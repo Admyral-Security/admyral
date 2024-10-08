@@ -1,3 +1,5 @@
+import pytest
+
 from admyral.compiler.action_parser import parse_action
 from admyral.models import PythonAction, Argument
 
@@ -262,3 +264,51 @@ def test_duplicate_parameter_in_argument_metadata():
         )
     else:
         assert False, "Should raise an error"
+
+
+#########################################################################################################
+
+
+CODE_TEST_6 = """from typing import Annotated
+from admyral.action import action, ArgumentMetadata
+
+@action(
+    display_name="Custom Action 1",
+    display_namespace="Test",
+    description="Test 123"
+)
+def custom_action1(*args) ->str:
+    print('Hey! This is my Custom Action 1')
+    return 'Custom Action 1'
+"""
+
+
+def test_varargs_parameter():
+    with pytest.raises(ValueError) as e:
+        parse_action(CODE_TEST_6, "custom_action1")
+
+    assert str(e.value.args[0]) == "Varargs parameter is not supported for actions."
+
+
+#########################################################################################################
+
+
+CODE_TEST_7 = """from typing import Annotated
+from admyral.action import action, ArgumentMetadata
+
+@action(
+    display_name="Custom Action 1",
+    display_namespace="Test",
+    description="Test 123"
+)
+def custom_action1(**kwargs) ->str:
+    print('Hey! This is my Custom Action 1')
+    return 'Custom Action 1'
+"""
+
+
+def test_kwargs_parameter():
+    with pytest.raises(ValueError) as e:
+        parse_action(CODE_TEST_7, "custom_action1")
+
+    assert str(e.value.args[0]) == "Kwargs parameter is not supported for actions."
