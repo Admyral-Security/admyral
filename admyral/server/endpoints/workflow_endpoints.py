@@ -289,7 +289,9 @@ async def activate_workflow(
             authenticated_user.user_id, workflow.workflow_id
         )
         for schedule in schedules:
-            await get_workers_client().schedule_workflow(workflow, schedule)
+            await get_workers_client().schedule_workflow(
+                authenticated_user.user_id, workflow, schedule
+            )
 
     return True
 
