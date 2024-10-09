@@ -11,6 +11,7 @@ from admyral.actions.integrations.compliance.github import (
     list_commit_history_for_pull_request,
     list_review_history_for_pull_request,
     compare_two_github_commits,
+    list_unreviewed_pull_requests,
 )
 
 __all__ = [
@@ -22,4 +23,5 @@ __all__ = [
     "list_commit_history_for_pull_request",
     "list_review_history_for_pull_request",
     "compare_two_github_commits",
+    "list_unreviewed_pull_requests",
 ]

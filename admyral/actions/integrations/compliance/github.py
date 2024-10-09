@@ -11,7 +11,7 @@ from dateutil import parser
 from admyral.action import action, ArgumentMetadata
 from admyral.context import ctx
 from admyral.typings import JsonValue
-from admyral.utils.collections import is_not_empty
+from admyral.utils.collections import is_not_empty, is_empty
 
 
 def get_github_enterprise_client(access_token: str, enterprise: str) -> Client:
@@ -393,3 +393,108 @@ def list_review_history_for_pull_request(
         )
 
         return events
+
+
+@action(
+    display_name="List Unreviewed Pull Requests",
+    display_namespace="GitHub",
+    description="List all pull requests of a repository that contain unreviewed commits, i.e., PRs which were never approved or commits after an approval.",
+    secrets_placeholders=["GITHUB_SECRET"],
+)
+def list_unreviewed_pull_requests(
+    repo_owner: Annotated[
+        str,
+        ArgumentMetadata(
+            display_name="Repository Owner",
+            description="The owner of the repository",
+        ),
+    ],
+    repo_name: Annotated[
+        str,
+        ArgumentMetadata(
+            display_name="Repository Name",
+            description="The name of the repository",
+        ),
+    ],
+    start_time: Annotated[
+        str | None,
+        ArgumentMetadata(
+            display_name="Start Time",
+            description="The start time for the cases to list. Must be in ISO 8601 format (YYYY-MM-DDTHH:MM:SSZ).",
+        ),
+    ] = None,
+    end_time: Annotated[
+        str | None,
+        ArgumentMetadata(
+            display_name="End Time",
+            description="The end time for the cases to list. Must be in ISO 8601 format (YYYY-MM-DDTHH:MM:SSZ).",
+        ),
+    ] = None,
+    limit: Annotated[
+        str | None,
+        ArgumentMetadata(
+            display_name="Limit",
+            description="The maximum number of cases to list.",
+        ),
+    ] = None,
+) -> list[dict[str, JsonValue]]:
+    merged_prs = list_merged_pull_requests(
+        repo_owner=repo_owner,
+        repo_name=repo_name,
+        start_time=start_time,
+        end_time=end_time,
+        limit=limit,
+    )
+
+    unreviewed_prs = []
+    for pr in merged_prs:
+        commit_history = list_commit_history_for_pull_request(
+            repo_owner=repo_owner, repo_name=repo_name, pull_request_number=pr["number"]
+        )
+        if is_empty(commit_history):
+            continue
+
+        # Identify the latest commit
+        last_commit = sorted(
+            commit_history,
+            key=lambda commit: parser.parse(commit["commit"]["committer"]["date"]),
+            reverse=True,
+        )[0]
+        last_commit_id = last_commit["sha"]
+
+        # Identify the last approved commit
+        approval_history = list_review_history_for_pull_request(
+            repo_owner=repo_owner,
+            repo_name=repo_name,
+            pull_request_number=pr["number"],
+            state="APPROVED",
+        )
+        if is_empty(approval_history):
+            unreviewed_prs.append(
+                {
+                    "number": pr["number"],
+                    "title": pr["title"],
+                    "html_url": pr["html_url"],
+                    "user": pr["user"]["login"],
+                }
+            )
+            continue
+
+        approval_history = sorted(
+            approval_history,
+            key=lambda approval: parser.parse(approval["submitted_at"]),
+            reverse=True,
+        )
+
+        last_approved_commit_id = approval_history[0]["commit_id"]
+        if last_commit_id != last_approved_commit_id:
+            unreviewed_prs.append(
+                {
+                    "number": pr["number"],
+                    "title": pr["title"],
+                    "html_url": pr["html_url"],
+                    "user": pr["user"]["login"],
+                }
+            )
+
+    return unreviewed_prs
