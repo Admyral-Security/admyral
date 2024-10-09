@@ -1,0 +1,59 @@
+# Microsoft Intune
+
+## App Registration Connection
+
+Permissions Needed:
+
+-   Managed Devices: DeviceManagementManagedDevices.Read.All
+
+Admin Consent Needed
+
+1. Go to your [Azure Portal](https://portal.azure.com/) and login.
+
+2. Go to **Microsoft Entra ID**.
+
+3. In the left menu, click on **App registrations**.
+
+4. Click on **New registration**.
+
+5. Name your app, e.g. `admyral-azure-integration` and click on **Register**.
+
+6. Copy your **Client ID** and **Tenant ID**.
+
+<img src="/ms_defender_for_cloud1.png" />
+
+7. In the left menu, click on **Certificates & secrets** and then on **New client secret**.
+
+8. Copy the **Value** of the secret.
+
+9. In the left menu, click on **API permissions** and then on **Add a permission**.
+
+10. Click on **Microsoft Graph** and then on **Application Permissions**.
+
+11. Select the following permissions:
+
+    - `SecurityAlert.ReadWrite.All`
+
+12. Click on **Grant admin consent**.
+
+<img src="/ms_defender_admin_consent.png" />
+
+13. Go to the **Settings** page in **Admyral**. Click on **Create New Secret** in the **Secrets** section.
+
+14. Give your credential a name, e.g. `MS Intune`.
+
+15. The following secrets structure is expected:
+
+| Key             | Value                             |
+| --------------- | --------------------------------- |
+| `tenant_id`     | Paste your **Tenant ID** here     |
+| `client_id`     | Paste your **Client ID** here     |
+| `client_secret` | Paste your **Client Secret** here |
+
+16. Click on the **Save** button.
+
+Alternatively, you can use the following CLI command structure:
+
+```bash
+admyral secret set azure_secret --value tenant_id=your_tenant_id --value client_id=your_client_id --value client_secret=your_client_secret
+```
