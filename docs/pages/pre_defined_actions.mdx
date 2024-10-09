@@ -279,3 +279,63 @@ Serializes JSON into a string.
       _No-Code Editor - Serialization Action Example_
   </Tabs.Tab>
 </Tabs>
+
+## Get Time Interval of Last N Hours
+
+Get the time interval of the last N hours. A list of length 2 containing the start and end time in ISO8601 format is returned.
+For example, if the action is executed at 14:06PM with `n_hours=1`, then the result is a list with
+the first timestamp representing 13:00AM and the second timestamp representing 14:00AM.
+
+| Parameter | Type | Description                 | Required/Optional |
+| --------- | ---- | --------------------------- | ----------------- |
+| `n_hours` | int  | Number of hours to go back. | -                 |
+
+Example Output when executed at `2024-10-09T14:35:00Z`:
+
+```json
+["2024-10-09T13:00:00Z", "2024-10-09T14:00:00Z"]
+```
+
+## Get Time Interval of Last N Days
+
+Get the time interval of the last N days. A list of length 2 containing the start and end time in ISO8601 is returned.
+For example, if the action is executed on Wednesday at 13:02PM with `n_days=2`, then the result is a list with
+the first timestamp representing Monday 00:00AM and the second timestamp Wednesday at 00:00AM.
+
+| Parameter | Type | Description                | Required/Optional |
+| --------- | ---- | -------------------------- | ----------------- |
+| `n_days`  | int  | Number of days to go back. | -                 |
+
+Example Output when executed at `2024-10-09T14:35:00Z`:
+
+```json
+["2024-10-08T00:00:00Z", "2024-10-09T00:00:00Z"]
+```
+
+## Format JSON to List View String
+
+Formats a JSON object into a list view string. For example, the following JSON object
+
+```json
+{
+	"abc": {
+		"def": [1, 2, 3]
+	},
+	"ghi": "jkl"
+}
+```
+
+is transformed into the following string:
+
+```
+abc:
+  def:
+  - 1
+  - 2
+  - 3
+ghi: jkl
+```
+
+| Parameter    | Type | Description                  | Required/Optional |
+| ------------ | ---- | ---------------------------- | ----------------- |
+| `json_value` | str  | The object to be serialized. | Required          |

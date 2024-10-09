@@ -117,11 +117,11 @@ def get_time_interval_of_last_n_days(
 
 
 @action(
-    display_name="JSON to List View String",
+    display_name="Format JSON to List View String",
     display_namespace="Admyral",
     description="Converts a JSON value to a list view string (YAML format).",
 )
-def json_to_list_view_string(
+def format_json_to_list_view_string(
     json_value: Annotated[
         JsonValue,
         ArgumentMetadata(

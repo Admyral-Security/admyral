@@ -7,7 +7,7 @@ from admyral.actions.utilities import (
     transform,
     get_time_interval_of_last_n_days,
     get_time_interval_of_last_n_hours,
-    json_to_list_view_string,
+    format_json_to_list_view_string,
 )
 from admyral.actions.integrations.communication import (
     send_slack_message,
@@ -68,7 +68,7 @@ from admyral.actions.integrations.compliance import (
     list_commit_history_for_pull_request,
     list_review_history_for_pull_request,
     compare_two_github_commits,
-    list_unreviewed_pull_requests,
+    list_merged_pull_requests_without_approval,
 )
 from admyral.actions.integrations.cloud import (
     steampipe_query_aws,
@@ -127,7 +127,7 @@ __all__ = [
     "list_merged_pull_requests",
     "list_commit_history_for_pull_request",
     "list_review_history_for_pull_request",
-    "list_unreviewed_pull_requests",
+    "list_merged_pull_requests_without_approval",
     "compare_two_github_commits",
     "abuseipdb_analyze_ip",
     "steampipe_query_aws",
@@ -138,5 +138,5 @@ __all__ = [
     "aws_s3_default_encryption_enabled",
     "get_time_interval_of_last_n_days",
     "get_time_interval_of_last_n_hours",
-    "json_to_list_view_string",
+    "format_json_to_list_view_string",
 ]

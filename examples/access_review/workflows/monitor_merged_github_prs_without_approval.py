@@ -1,21 +1,21 @@
 from admyral.workflow import workflow, Schedule
 from admyral.typings import JsonValue
 from admyral.actions import (
-    list_unreviewed_pull_requests,
+    list_merged_pull_requests_without_approval,
     get_time_interval_of_last_n_days,
     send_slack_message,
-    json_to_list_view_string,
+    format_json_to_list_view_string,
 )
 
 
 @workflow(
-    description="Monitor unreviewed GitHub PRs merged",
+    description="Monitor Merged GitHub PRs Without Approval",
     triggers=[Schedule(interval_days=1)],
 )
-def monitor_unreviewed_github_prs_merged(payload: dict[str, JsonValue]):
+def monitor_merged_github_prs_without_approval(payload: dict[str, JsonValue]):
     last_day_time_interval = get_time_interval_of_last_n_days(n_days=1)
 
-    unreviewed_prs = list_unreviewed_pull_requests(
+    unreviewed_prs = list_merged_pull_requests_without_approval(
         repo_owner="Admyral-Security",  # TODO: set your repo owner here
         repo_name="Admyral_Github_Integration_Test",  # TODO: set your repo name here
         start_time=last_day_time_interval[0],
@@ -24,7 +24,9 @@ def monitor_unreviewed_github_prs_merged(payload: dict[str, JsonValue]):
     )
 
     if unreviewed_prs:
-        formatted_unreviewed_prs = json_to_list_view_string(json_value=unreviewed_prs)
+        formatted_unreviewed_prs = format_json_to_list_view_string(
+            json_value=unreviewed_prs
+        )
         send_slack_message(
             channel_id="C06QP0KV1L2",  # TODO: set your slack channel here
             text=f"Merged PRs with unreviewed commits identified:\n{formatted_unreviewed_prs}",

@@ -396,12 +396,12 @@ def list_review_history_for_pull_request(
 
 
 @action(
-    display_name="List Unreviewed Pull Requests",
+    display_name="List Merged Pull Requests Without Approval",
     display_namespace="GitHub",
-    description="List all pull requests of a repository that contain unreviewed commits, i.e., PRs which were never approved or commits after an approval.",
+    description="List all pull requests of a repository that contain unapproved commits, i.e., PRs which were never approved or commits after an approval.",
     secrets_placeholders=["GITHUB_SECRET"],
 )
-def list_unreviewed_pull_requests(
+def list_merged_pull_requests_without_approval(
     repo_owner: Annotated[
         str,
         ArgumentMetadata(
@@ -430,20 +430,12 @@ def list_unreviewed_pull_requests(
             description="The end time for the cases to list. Must be in ISO 8601 format (YYYY-MM-DDTHH:MM:SSZ).",
         ),
     ] = None,
-    limit: Annotated[
-        str | None,
-        ArgumentMetadata(
-            display_name="Limit",
-            description="The maximum number of cases to list.",
-        ),
-    ] = None,
 ) -> list[dict[str, JsonValue]]:
     merged_prs = list_merged_pull_requests(
         repo_owner=repo_owner,
         repo_name=repo_name,
         start_time=start_time,
         end_time=end_time,
-        limit=limit,
     )
 
     unreviewed_prs = []

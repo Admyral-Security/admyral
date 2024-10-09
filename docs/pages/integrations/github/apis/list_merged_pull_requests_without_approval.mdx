@@ -1,0 +1,79 @@
+import { Callout } from "nextra/components";
+
+# List Merged Pull Requests Without Approval
+
+This action lists merged pull requests containing unreviewed commmits, i.e., either the pull request was never approved or additional commits after an approval were pushed but not re-approved.
+
+To use this API endpoint for a private repository, your GitHub token requires the following scopes:
+
+For a Fine-grained token:
+
+```
+- "Pull requests" repository permissions (read)
+```
+
+Alternatively, for a Token (classic):
+
+```
+- repo
+```
+
+**SDK Import:**
+
+```python
+from admyral.actions import list_merged_pull_requests_without_approval
+```
+
+## Arguments
+
+| Argument Name                     | Description                                                                                                                                         | Required |
+| --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- | :------: |
+| **Repository Owner** `repo_owner` | The owner of the repository.                                                                                                                        |   yes    |
+| **Repository Name** `repo_name`   | The name of the repository.                                                                                                                         |   yes    |
+| **Start Time** `start_time`       | The date and time to start retrieving events in ISO 8601 format (YYYY-MM-DDTHH:MM:SSZ). If not specified, all available Audit logs will be returned |    -     |
+| **End Time** `end_time`           | The date and time to stop retrieving events in ISO 8601 format (YYYY-MM-DDTHH:MM:SSZ).                                                              |    -     |
+| **Limit** `limit`                 | The maximum number of events to retrieve.                                                                                                           |    -     |
+
+## Returns
+
+A JSON array of pull request information. Each pull request contains the following fields:
+
+-   `number`: Pull request number
+-   `title`: Title of the pull request
+-   `html_url`: HTML URL to the pull request
+-   `user`: GitHub username of the pull request creator
+
+## Required Secrets
+
+| Secret Placeholder | Description                                                    |
+| ------------------ | -------------------------------------------------------------- |
+| `GITHUB_SECRET`    | GitHub secret. See [GitHub setup](/integrations/github/github) |
+
+## SDK Example
+
+```python
+audit_log_entries = list_merged_pull_requests_without_approval(
+	repo_owner="Admyral-Security",
+	repo_name="admyral",
+	secrets={"GITHUB_SECRET": "my_github_secret"}
+)
+```
+
+## Example Output
+
+```json
+[
+	{
+		"number": 7,
+		"title": "new extreme functions and extreme tests",
+		"html_url": "https://github.com/Admyral-Security/admyral/pull/7",
+		"user": "user1"
+	},
+	{
+		"number": 5,
+		"title": "added brand new feature",
+		"html_url": "https://github.com/Admyral-Security/admyral/pull/5",
+		"user": "user2"
+	}
+]
+```
