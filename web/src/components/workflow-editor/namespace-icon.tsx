@@ -29,6 +29,7 @@ const NAMESPACE_ICON_MAPPING: Record<string, string> = {
 	AWS: "/aws_logo.svg",
 	Database: "/database_icon.svg",
 	"Google Drive": "/google_drive_icon.svg",
+	"Microsoft Intune": "/ms_intunes_logo.svg",
 };
 
 export default function NamespaceIcon({ namespace }: { namespace: string }) {
