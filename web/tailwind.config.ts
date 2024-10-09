@@ -1,4 +1,5 @@
 import type { Config } from "tailwindcss";
+import plugin from "tailwindcss/plugin";
 
 const config: Config = {
 	content: [
@@ -24,6 +25,18 @@ const config: Config = {
 			},
 		},
 	},
-	plugins: [],
+	plugins: [
+		plugin(function ({ addComponents }) {
+			addComponents({
+				".editor-wrapper .monaco-editor": {
+					borderRadius: "10px",
+				},
+				".editor-wrapper .overflow-guard": {
+					borderRadius: "10px",
+					border: "1px solid #d9d9d9",
+				},
+			});
+		}),
+	],
 };
 export default config;
