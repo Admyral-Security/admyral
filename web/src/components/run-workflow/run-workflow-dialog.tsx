@@ -2,8 +2,9 @@ import { useTriggerWorkflowApi } from "@/hooks/use-trigger-workflow-api";
 import { errorToast, infoToast } from "@/lib/toast";
 import { useWorkflowStore } from "@/stores/workflow-store";
 import { Cross1Icon } from "@radix-ui/react-icons";
-import { Button, Dialog, Flex, Text, TextArea } from "@radix-ui/themes";
+import { Button, Dialog, Flex, Text } from "@radix-ui/themes";
 import { useEffect, useState } from "react";
+import { CustomEditor } from "@/components/editor/editor";
 
 export default function RunWorkflowDialog({
 	closeDialog,
@@ -48,6 +49,10 @@ export default function RunWorkflowDialog({
 		triggerWorkflow.mutate({ workflowName, payload: parsedPayload });
 	};
 
+	const handleEditorChange = (value: string | undefined) => {
+		setPayload(value || "");
+	};
+
 	return (
 		<Flex direction="column" gap="4">
 			<Flex justify="between" align="center">
@@ -72,16 +77,12 @@ export default function RunWorkflowDialog({
 			</Flex>
 
 			<Flex direction="column" gap="2">
-				<Text weight="medium">Test Payload</Text>
-				<TextArea
-					value={payloadCache}
-					onChange={(event) => setPayloadCache(event.target.value)}
-					variant="surface"
-					style={{
-						width: "100%",
-						height: "256px",
-					}}
-					placeholder={`Enter your payload in JSON format, e.g.: { "hash": "8d3f68b16f0710f858d8c1d2c699260e6f43161a5510abb0e7ba567bd72c965b" }`}
+				<Text weight="medium">Test Payload (JSON)</Text>
+				<CustomEditor
+					className="h-72 w-full"
+					value={payload}
+					language="json"
+					onChange={handleEditorChange}
 				/>
 			</Flex>
 
