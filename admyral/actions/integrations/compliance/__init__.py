@@ -14,6 +14,10 @@ from admyral.actions.integrations.compliance.github import (
     list_unreviewed_pull_requests,
 )
 
+from admyral.actions.integrations.compliance.ms_intune import (
+    list_ms_intune_unencrypted_devices,
+)
+
 __all__ = [
     "list_retool_inactive_users",
     "list_groups_per_user",
@@ -24,4 +28,5 @@ __all__ = [
     "list_review_history_for_pull_request",
     "compare_two_github_commits",
     "list_unreviewed_pull_requests",
+    "list_ms_intune_unencrypted_devices",
 ]

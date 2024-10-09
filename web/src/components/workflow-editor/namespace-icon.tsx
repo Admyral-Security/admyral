@@ -27,6 +27,7 @@ const NAMESPACE_ICON_MAPPING: Record<string, string> = {
 	GitHub: "/github_logo.svg",
 	AbuseIPDB: "/abuseipdb-logo.svg",
 	AWS: "/aws_logo.svg",
+	"Microsoft Intune": "/ms_intunes_logo.svg",
 };
 
 export default function NamespaceIcon({ namespace }: { namespace: string }) {

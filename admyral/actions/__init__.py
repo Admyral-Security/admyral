@@ -69,6 +69,7 @@ from admyral.actions.integrations.compliance import (
     list_review_history_for_pull_request,
     compare_two_github_commits,
     list_unreviewed_pull_requests,
+    list_ms_intune_unencrypted_devices,
 )
 from admyral.actions.integrations.cloud import (
     steampipe_query_aws,
@@ -139,4 +140,5 @@ __all__ = [
     "get_time_interval_of_last_n_days",
     "get_time_interval_of_last_n_hours",
     "json_to_list_view_string",
+    "list_ms_intune_unencrypted_devices",
 ]
