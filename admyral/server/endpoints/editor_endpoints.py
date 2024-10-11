@@ -66,12 +66,17 @@ async def load_workflow_actions(
         # ),
     ]
 
+    admyral_namespace_actions = actions_by_namespace.pop("Admyral", [])
+    namespaces = [
+        ActionNamespace(namespace=namespace, actions=actions)
+        for namespace, actions in actions_by_namespace.items()
+    ]
+    namespaces = [
+        ActionNamespace(namespace="Admyral", actions=admyral_namespace_actions)
+    ] + sorted(namespaces, key=lambda namespace: namespace.namespace)
+
     return EditorActions(
-        control_flow_actions=control_flow_actions,
-        namespaces=[
-            ActionNamespace(namespace=namespace, actions=actions)
-            for namespace, actions in actions_by_namespace.items()
-        ],
+        control_flow_actions=control_flow_actions, namespaces=namespaces
     )
 
 
