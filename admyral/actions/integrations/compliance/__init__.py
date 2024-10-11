@@ -13,6 +13,9 @@ from admyral.actions.integrations.compliance.github import (
     compare_two_github_commits,
     list_merged_pull_requests_without_approval,
 )
+from admyral.actions.integrations.compliance.google_drive import (
+    list_google_docs_revisions,
+)
 
 __all__ = [
     "list_retool_inactive_users",
@@ -24,4 +27,5 @@ __all__ = [
     "list_review_history_for_pull_request",
     "compare_two_github_commits",
     "list_merged_pull_requests_without_approval",
+    "list_google_docs_revisions",
 ]

@@ -28,6 +28,7 @@ const NAMESPACE_ICON_MAPPING: Record<string, string> = {
 	AbuseIPDB: "/abuseipdb-logo.svg",
 	AWS: "/aws_logo.svg",
 	Database: "/database_icon.svg",
+	"Google Drive": "/google_drive_icon.svg",
 };
 
 export default function NamespaceIcon({ namespace }: { namespace: string }) {

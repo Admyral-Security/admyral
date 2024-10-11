@@ -1,0 +1,67 @@
+# Connect Google Drive
+
+1. First, you need to create a service account. For this, go to your Google Cloud console.
+
+2. Go to **APIs & Services** > **Library**.
+
+3. Search for **Google Drive API** and enable the API.
+
+4. Go to **APIs & Services** > **Credentials**.
+
+5. Click **CREATE CREDENTIALS** > **Service account** and create a service account.
+
+![Google Create Service Account](/google_create_service_account.png)
+
+6. Click on your newly created service account. This should forward you to **IAM & Admin** > **Service Accounts** > your service account.
+
+7. Click on **KEYS** and then on **ADD KEY** > **Create new key**. Select `JSON` as Key type. Click on the create button. This should start the download of a JSON file.
+
+![Google Service Account Create Key](/google_service_account_create_key.png)
+
+8. Go to **IAM & Admin** > **Service Accounts** > **your service account**. In the **Details** page, you should see **Advanced settings**. Open the settings.
+
+9. Below **Domain-wide Delegation**, there is a **Client ID**. Copy it.
+
+![Google Service Account Client ID](/google_service_accounts_client_id.png)
+
+10. Next, click on **VIEW GOOGLE WORKSPACE ADMIN CONSOLE**.
+
+11. Log in to your **Google Admin Workspace**.
+
+12. Inside **Google Admin Workspace**, go to **Security** > **Access and data control** > **API controls**.
+
+![Google Admin Workspace](/google_admin_workspace.png)
+
+13. Click on **MANAGE DOMAIN WIDE DELEGATION**.
+
+14. Click on **Add new** to add your new service account. Use the previously copied **Client ID** (Step 9) and paste it here. Additionally, define your required scopes depending on which APIs you want to use (e.g., `List Google Docs Revisions` requires `https://www.googleapis.com/auth/drive.readonly`).
+
+15. Open the previously downloaded JSON file.
+
+16. Go to the **Settings** page in **Admyral**. Click on **Create New Secret** in the **Secrets** section.
+
+17. Give your credential a name, e.g. `Google Drive`.
+
+18. The following secrets structure is expected:
+
+| Key                           | Value                                                           |
+| ----------------------------- | --------------------------------------------------------------- |
+| `type`                        | Paste the `type` from the JSON file here                        |
+| `project_id`                  | Paste the `project_id` from the JSON file here                  |
+| `private_key_id`              | Paste the `private_key_id` from the JSON file here              |
+| `private_key`                 | Paste the `private_key` from the JSON file here                 |
+| `client_email`                | Paste the `client_email` from the JSON file here                |
+| `auth_uri`                    | Paste the `auth_uri` from the JSON file here                    |
+| `token_uri`                   | Paste the `token_uri` from the JSON file here                   |
+| `auth_provider_x509_cert_url` | Paste the `auth_provider_x509_cert_url` from the JSON file here |
+| `client_x509_cert_url`        | Paste the `client_x509_cert_url` from the JSON file here        |
+| `universe_domain`             | Paste the `universe_domain` from the JSON file here             |
+
+19. Click on the **Save** button.
+
+Alternatively, you can use the following CLI command structure:
+
+```bash
+admyral secret set google_secret --value type=your_type --value project_id=your_project_id --value private_key_id=your_private_key_id --value private_key=your_private_key --value client_email=your_client_email --value auth_uri=your_auth_uri --value token_uri=your_token_uri
+--value auth_provider_x509_cert_url=your_auth_provider_x509_cert_url --value client_x509_cert_url=your_client_x509_cert_url --value universe_domain=your_universe_domain
+```

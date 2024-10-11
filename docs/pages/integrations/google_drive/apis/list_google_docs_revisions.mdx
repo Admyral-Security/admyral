@@ -1,0 +1,87 @@
+import { Callout } from "nextra/components";
+
+# List Google Docs Revisions
+
+List Google Docs revisions of a document.
+
+<Callout type="info">
+	For more information on the API for listing revisions, see [Drive API v3
+	revisions.list](https://developers.google.com/drive/api/reference/rest/v3/revisions/list?hl=de).
+</Callout>
+
+The following scopes are required:
+
+-   `https://www.googleapis.com/auth/drive.readonly`
+
+<Callout type="warning">
+	**IMPORTANT:** In order to make the API work, you need to invite to invite
+	your service account as a collaborator to your Google document. You need to
+	use the email of the service account.
+</Callout>
+
+**SDK Import:**
+
+```python
+from admyral.actions import list_google_docs_revisions
+```
+
+## Arguments:
+
+| Argument Name               | Description                                                                                  | Required |
+| --------------------------- | -------------------------------------------------------------------------------------------- | :------: |
+| **File ID** `file_id`       | The file ID of the Google Doc.                                                               |   Yes    |
+| **Start Time** `start_time` | The start time for the revisions to list. Must be in ISO 8601 format (YYYY-MM-DDTHH:MM:SSZ). |    -     |
+| **End Time** `end_time`     | The end time for the revisions to list. Must be in ISO 8601 format (YYYY-MM-DDTHH:MM:SSZ).   |    -     |
+
+## Returns
+
+A list of revision objects. Each revision object has the following fields:
+
+-   `id`: The ID of the revision.
+-   `lastModifyingUser`: The email of the user who last modified the document.
+-   `modifiedTime`: The timestamp when the modification happened.
+-   `content`: The content of the revision.
+-   `diff`: The diff between the content of the current and the previous revision.
+
+## Required Secrets
+
+| Secret Placeholder    | Description                                                                            |
+| --------------------- | -------------------------------------------------------------------------------------- |
+| `GOOGLE_DRIVE_SECRET` | Google Drive secret. See [Google Drive setup](/integrations/google_drive/google_drive) |
+
+## SDK Example
+
+```python
+result = list_google_docs_revisions(
+	file_id="1ItOTzHcEaa2ZMOqaQq3jnNtvlfXOk5M",
+	secrets={
+		"GOOGLE_DRIVE_SECRET": "my_stored_google_drive_secret"
+	}
+)
+```
+
+## Example Output
+
+```json
+[
+	{
+		"id": "7",
+		"lastModifyingUser": "daniel@admyral.ai",
+		"exportLink": {
+			"application/rtf": "https://docs.google.com/feeds/download/documents/export/Export?id=1ItOTzHcEaa2ZMOqaQq3jnNtvlfXOk5M-HWYo89Id2vQ&revision=7&exportFormat=rtf",
+			"application/vnd.oasis.opendocument.text": "https://docs.google.com/feeds/download/documents/export/Export?id=1ItOTzHcEaa2ZMOqaQq3jnNtvlfXOk5M-HWYo89Id2vQ&revision=7&exportFormat=odt",
+			"text/html": "https://docs.google.com/feeds/download/documents/export/Export?id=1ItOTzHcEaa2ZMOqaQq3jnNtvlfXOk5M-HWYo89Id2vQ&revision=7&exportFormat=html",
+			"application/pdf": "https://docs.google.com/feeds/download/documents/export/Export?id=1ItOTzHcEaa2ZMOqaQq3jnNtvlfXOk5M-HWYo89Id2vQ&revision=7&exportFormat=pdf",
+			"text/x-markdown": "https://docs.google.com/feeds/download/documents/export/Export?id=1ItOTzHcEaa2ZMOqaQq3jnNtvlfXOk5M-HWYo89Id2vQ&revision=7&exportFormat=markdown",
+			"text/markdown": "https://docs.google.com/feeds/download/documents/export/Export?id=1ItOTzHcEaa2ZMOqaQq3jnNtvlfXOk5M-HWYo89Id2vQ&revision=7&exportFormat=markdown",
+			"application/epub+zip": "https://docs.google.com/feeds/download/documents/export/Export?id=1ItOTzHcEaa2ZMOqaQq3jnNtvlfXOk5M-HWYo89Id2vQ&revision=7&exportFormat=epub",
+			"application/zip": "https://docs.google.com/feeds/download/documents/export/Export?id=1ItOTzHcEaa2ZMOqaQq3jnNtvlfXOk5M-HWYo89Id2vQ&revision=7&exportFormat=zip",
+			"application/vnd.openxmlformats-officedocument.wordprocessingml.document": "https://docs.google.com/feeds/download/documents/export/Export?id=1ItOTzHcEaa2ZMOqaQq3jnNtvlfXOk5M-HWYo89Id2vQ&revision=7&exportFormat=docx",
+			"text/plain": "https://docs.google.com/feeds/download/documents/export/Export?id=1ItOTzHcEaa2ZMOqaQq3jnNtvlfXOk5M-HWYo89Id2vQ&revision=7&exportFormat=txt"
+		},
+		"modifiedTime": "2024-10-11T11:14:08.607Z",
+		"content": "﻿test test test",
+		"diff": "--- Before\n+++ After\n@@ -1 +1 @@\n-﻿\n+﻿test test test"
+	}
+]
+```

@@ -69,6 +69,7 @@ from admyral.actions.integrations.compliance import (
     list_review_history_for_pull_request,
     compare_two_github_commits,
     list_merged_pull_requests_without_approval,
+    list_google_docs_revisions,
 )
 from admyral.actions.integrations.cloud import (
     steampipe_query_aws,
@@ -141,4 +142,5 @@ __all__ = [
     "get_time_interval_of_last_n_hours",
     "format_json_to_list_view_string",
     "run_sql_query",
+    "list_google_docs_revisions",
 ]
