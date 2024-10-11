@@ -1,0 +1,66 @@
+# Database
+
+Connect to an external database and run SQL queries.
+
+The following databases are supported:
+
+-   PostgreSQL
+-   MySQL
+-   MariaDB
+
+**SDK Import:**
+
+```python
+from admyral.actions import run_sql_query
+```
+
+## Connect your Database
+
+In order to connect your database, you need to store the database URI as a secret.
+
+Go to your **Settings** page in **Admyral** and click on **Add New Secret** in the **Secrets** section. Give your credential a name. The following secret structure is expected:
+
+| Key   | Value                                      |
+| ----- | ------------------------------------------ |
+| `uri` | Paste your database connection string here |
+
+Then, click on **Save**.
+
+Alternatively, you can use the following CLI command structure:
+
+```bash
+admyral secret set database_connection --value uri=postgresql://postgres:your-super-secret-and-long-postgres-password@localhost:5432/admyral
+```
+
+Example connection strings:
+
+-   PostgreSQL: `postgresql://postgres:your-super-secret-and-long-postgres-password@localhost:5432/admyral`
+-   MySQL: `mysql://testuser:testpassword@localhost:3306/testdb`
+-   MariaDB: `mysql://testuser:testpassword@localhost:3307/testdb`
+
+## Arguments:
+
+| Argument Name             | Description                           | Required |
+| ------------------------- | ------------------------------------- | :------: |
+| **SQL Query** `sql_query` | The SQL query to run on the database. |   Yes    |
+
+## Returns
+
+A list of rows.
+
+## Required Secrets
+
+| Secret Placeholder | Description                      |
+| ------------------ | -------------------------------- |
+| `DB_URI`           | Database URI stored as a secret. |
+
+## SDK Example
+
+```python
+response = run_sql_query(
+	sql_query="select count(*) from students;",
+	secrets={
+		"DB_URI": "my_database_connection"
+	}
+)
+```

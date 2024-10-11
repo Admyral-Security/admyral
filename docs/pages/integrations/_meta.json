@@ -8,6 +8,7 @@
 	"anthropic": "Anthropic",
 	"aws": "AWS",
 	"azure_openai": "Azure OpenAI",
+	"database": "Database",
 	"github": "GitHub",
 	"greynoise": "GreyNoise",
 	"jira": "Jira",

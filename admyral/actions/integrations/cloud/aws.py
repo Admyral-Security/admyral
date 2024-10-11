@@ -7,7 +7,7 @@ from admyral.actions.integrations.shared.steampipe import run_steampipe_query
 
 
 @action(
-    display_name="AWS Steampipe Query",
+    display_name="Steampipe Query",
     display_namespace="AWS",
     description="Query AWS using Steampipe",
     secrets_placeholders=["AWS_SECRET"],

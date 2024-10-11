@@ -78,6 +78,7 @@ from admyral.actions.integrations.cloud import (
     aws_s3_restrict_public_read_access,
     aws_s3_default_encryption_enabled,
 )
+from admyral.actions.integrations.database import run_sql_query
 
 
 __all__ = [
@@ -139,4 +140,5 @@ __all__ = [
     "get_time_interval_of_last_n_days",
     "get_time_interval_of_last_n_hours",
     "format_json_to_list_view_string",
+    "run_sql_query",
 ]
