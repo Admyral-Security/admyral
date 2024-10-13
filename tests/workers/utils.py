@@ -29,7 +29,7 @@ from admyral.config.config import TEST_USER_ID
 
 async def _setup_shared_worker_state_for_testing(store: AdmyralStore) -> AdmyralStore:
     secrets_manager = secrets_manager_factory(store)
-    SharedWorkerState.init(store, secrets_manager)
+    await SharedWorkerState.init(store, secrets_manager)
 
     capture_main_event_loop()
 

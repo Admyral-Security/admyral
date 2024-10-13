@@ -8,6 +8,9 @@ from admyral.actions.utilities import (
     get_time_interval_of_last_n_days,
     get_time_interval_of_last_n_hours,
     format_json_to_list_view_string,
+    send_to_workflow,
+    send_list_elements_to_workflow,
+    split_text,
 )
 from admyral.actions.integrations.communication import (
     send_slack_message,
@@ -147,4 +150,7 @@ __all__ = [
     "list_google_docs_revisions",
     "list_ms_intune_unencrypted_managed_devices",
     "list_ms_intune_managed_devices",
+    "send_to_workflow",
+    "send_list_elements_to_workflow",
+    "split_text",
 ]

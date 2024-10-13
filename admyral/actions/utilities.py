@@ -6,6 +6,7 @@ import yaml
 
 from admyral.action import action, ArgumentMetadata
 from admyral.typings import JsonValue
+from admyral.context import ctx
 
 
 @action(
@@ -131,3 +132,85 @@ def format_json_to_list_view_string(
     ],
 ) -> str:
     return yaml.dump(json_value, default_flow_style=False)
+
+
+@action(
+    display_name="Send to Workflow",
+    display_namespace="Admyral",
+    description="Sends data to a workflow.",
+)
+def send_to_workflow(
+    workflow_name: Annotated[
+        str,
+        ArgumentMetadata(
+            display_name="Workflow Name",
+            description="The name of the workflow to send the data to.",
+        ),
+    ],
+    payload: Annotated[
+        JsonValue,
+        ArgumentMetadata(
+            display_name="Payload",
+            description="Payload to send to the workflow.",
+        ),
+    ],
+) -> None:
+    ctx.get().send_to_workflow_sync(workflow_name, payload)
+
+
+# TODO: remove with the introduction of for-loops
+@action(
+    display_name="Send List Elements to a Workflow",
+    display_namespace="Admyral",
+    description="WARNING: This action is temporary and will be deprecated as soon as For Loops are released. Sends a list of elements to a workflow.",
+)
+def send_list_elements_to_workflow(
+    workflow_name: Annotated[
+        str,
+        ArgumentMetadata(
+            display_name="Workflow Name",
+            description="The name of the workflow to send the elements to.",
+        ),
+    ],
+    elements: Annotated[
+        list[JsonValue],
+        ArgumentMetadata(
+            display_name="Elements",
+            description="A list of elements to send to the workflow.",
+        ),
+    ],
+    shared_data: Annotated[
+        JsonValue | None,
+        ArgumentMetadata(
+            display_name="Shared Data",
+            description="Shared data to send to the workflow.",
+        ),
+    ] = None,
+) -> None:
+    for element in elements:
+        send_to_workflow(
+            workflow_name=workflow_name,
+            payload={
+                "element": element,
+                "shared": shared_data,
+            },
+        )
+
+
+@action(
+    display_name="Split Text",
+    display_namespace="Admyral",
+    description="Splits a text into a list of strings.",
+)
+def split_text(
+    text: Annotated[
+        str, ArgumentMetadata(display_name="Text", description="The text to split.")
+    ],
+    pattern: Annotated[
+        str,
+        ArgumentMetadata(
+            display_name="Pattern", description="The pattern to split by."
+        ),
+    ],
+) -> list[str]:
+    return text.split(pattern)

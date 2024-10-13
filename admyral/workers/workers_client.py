@@ -11,7 +11,6 @@ from datetime import timedelta
 import temporalio
 
 from admyral.logger import get_logger
-from admyral.workers.workflow_executor import WorkflowExecutor
 from admyral.db.store_interface import StoreInterface
 from admyral.models import WorkflowSchedule, Workflow
 from admyral.typings import JsonValue
@@ -45,6 +44,8 @@ class WorkersClient:
         logger.info(
             f"Executing workflow {workflow.workflow_id} from source {source_name}."
         )
+
+        from admyral.workers.workflow_executor import WorkflowExecutor
 
         # TODO: should we unify the temporal_workflow_id across triggers?
         temmporal_workflow_id = str(uuid4())
@@ -85,6 +86,8 @@ class WorkersClient:
     async def schedule_workflow(
         self, user_id: str, workflow: Workflow, schedule: WorkflowSchedule
     ) -> None:
+        from admyral.workers.workflow_executor import WorkflowExecutor
+
         # TODO: should we unify the temporal_workflow_id across triggers?
         temmporal_workflow_id = str(uuid4())
         await self.client.create_schedule(

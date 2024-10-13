@@ -21,6 +21,17 @@ export default function ActionIcon({ actionType }: { actionType: string }) {
 		case "if_condition":
 			return <IfConditionActionIcon />;
 
+		case "send_to_workflow":
+		case "send_list_elements_to_workflow":
+			return (
+				<Image
+					src="/send_to_workflow_icon.svg"
+					alt="Send to workflow"
+					height={24}
+					width={24}
+				/>
+			);
+
 		case "python":
 		case "for_loop":
 			return (

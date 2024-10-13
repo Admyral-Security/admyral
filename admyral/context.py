@@ -5,6 +5,7 @@ from admyral.workers.shared_worker_state import SharedWorkerState
 from admyral.utils.future_executor import execute_future
 from admyral.secret.secrets_access import Secrets
 from admyral.config.config import CONFIG
+from admyral.exceptions import NonRetryableActionError
 
 
 class ExecutionContext:
@@ -43,6 +44,28 @@ class ExecutionContext:
     def append_logs_sync(self, lines: list[str]) -> None:
         if not self._is_placeholder:
             execute_future(self.append_logs_async(lines))
+
+    async def send_to_workflow_async(
+        self, workflow_name: str, data: dict[str, str]
+    ) -> None:
+        if self._is_placeholder:
+            return
+
+        workflow = await SharedWorkerState.get_store().get_workflow_by_name(
+            self.user_id, workflow_name
+        )
+        if not workflow:
+            raise NonRetryableActionError(
+                f'Failed to send to workflow "{workflow_name}". Workflow not found.'
+            )
+
+        await SharedWorkerState.get_workers_client().execute_workflow(
+            self.user_id, workflow, self.action_type, payload=data
+        )
+
+    def send_to_workflow_sync(self, workflow_name: str, data: dict[str, str]) -> None:
+        if not self._is_placeholder:
+            execute_future(self.send_to_workflow_async(workflow_name, data))
 
 
 ctx = contextvars.ContextVar(

@@ -27,7 +27,7 @@ async def _setup():
 
     admyral_store = await AdmyralStore.create_store(skip_setup=True)
     secrets_manager = secrets_manager_factory(admyral_store)
-    SharedWorkerState.init(admyral_store, secrets_manager)
+    await SharedWorkerState.init(admyral_store, secrets_manager)
 
     capture_main_event_loop()
 
