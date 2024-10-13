@@ -1,13 +1,14 @@
 from typing import Annotated
 from googleapiclient.discovery import build
 from google.oauth2.service_account import Credentials as ServiceAccountCredentials
-from difflib import unified_diff
+from difflib import ndiff
 import requests
 from dateutil import parser
 
 from admyral.action import action, ArgumentMetadata
 from admyral.context import ctx
 from admyral.typings import JsonValue
+from admyral.utils.collections import is_empty
 
 
 @action(
@@ -81,15 +82,16 @@ def list_google_docs_revisions(
             )
             export_response.raise_for_status()
 
-            prev_text = "" if len(result) == 0 else result[-1]["content"]
+            prev_text = "" if is_empty(result) else result[-1]["content"]
             diff = "\n".join(
-                unified_diff(
-                    prev_text,
+                line
+                for line in ndiff(
+                    prev_text.splitlines(),
                     export_response.text.splitlines(),
-                    fromfile="Before",
-                    tofile="After",
-                    lineterm="",
                 )
+                if line.startswith("+ ")
+                or line.startswith("- ")
+                or line.startswith("? ")
             )
 
             result.append(
