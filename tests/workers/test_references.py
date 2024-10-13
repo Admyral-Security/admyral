@@ -164,3 +164,12 @@ def test_evaluate_references_unsupported_type():
     with pytest.raises(AdmyralFailureError) as e:
         evaluate_references(value, execution_state)
     assert e.value.message == "Unsupported type: Dummy"
+
+
+#########################################################################################################
+
+
+def test_reverse_list_access():
+    execution_state = {"a": [0, 1]}
+    value = "{{ a[-1] }}"
+    assert evaluate_references(value, execution_state) == 1

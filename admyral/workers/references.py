@@ -14,7 +14,7 @@ OBJECT_ACCESS_REGEX = re.compile(PATTERN1)
 PATTERN2 = r"\[\'((?!\'\]).)+\'\]"
 OBJECT_ACCESS_2_REGEX = re.compile(PATTERN2)
 
-PATTERN3 = r"\[((?!\])[0-9])+\]"
+PATTERN3 = r"\[((?!\])-?[0-9])+\]"
 INDEX_ACCESS_REGEX = re.compile(PATTERN3)
 
 ACCESS_PATH_REGEX = re.compile(r"\[((?!\]).)*\]")
@@ -69,7 +69,7 @@ def _resolve_access_path(action_outputs: dict, input: str) -> JsonValue:
                 raise AdmyralFailureError(
                     message=f"Invalid access path: {access_path}. Expected a list, got {type(current_value).__name__}."
                 )
-            if raw_value >= len(current_value) or raw_value < 0:
+            if raw_value >= len(current_value) or raw_value < -len(current_value):
                 raise AdmyralFailureError(
                     message=f"Invalid access path: {access_path}. Index {raw_value} out of bounds."
                 )
