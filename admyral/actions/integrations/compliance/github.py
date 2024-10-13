@@ -468,6 +468,9 @@ def list_github_merged_pull_requests_without_approval(
                     "title": pr["title"],
                     "html_url": pr["html_url"],
                     "user": pr["user"]["login"],
+                    "closed_at": pr["closed_at"],
+                    "last_commit_id": last_commit_id,
+                    "last_approved_commit_id": pr["base"]["sha"],
                 }
             )
             continue
@@ -486,6 +489,9 @@ def list_github_merged_pull_requests_without_approval(
                     "title": pr["title"],
                     "html_url": pr["html_url"],
                     "user": pr["user"]["login"],
+                    "closed_at": pr["closed_at"],
+                    "last_commit_id": last_commit_id,
+                    "last_approved_commit_id": last_approved_commit_id,
                 }
             )
 
