@@ -1,0 +1,98 @@
+import { Callout } from "nextra/components";
+
+# List Managed Devices
+
+Get a list of managed devices in an organization from Microsoft Intune.
+
+<Callout type="info">
+	For more information on the API for listing managed devices, see [List
+	managedDevices](https://learn.microsoft.com/en-us/graph/api/intune-devices-manageddevice-list?view=graph-rest-1.0).
+</Callout>
+
+**SDK Import:**
+
+```python
+from admyral.actions import list_ms_intune_managed_devices
+```
+
+## Returns
+
+A JSON array of managed devices.
+
+## Required Secrets
+
+| Secret Placeholder | Description                                                                |
+| ------------------ | -------------------------------------------------------------------------- |
+| `AZURE_SECRET`     | MS Intune secret. See [MS Intune setup](/integrations/ms_intune/ms_intune) |
+
+## SDK Example
+
+```python
+unencrypted_devices = list_ms_intune_managed_devices(
+	secrets={"AZURE_SECRET": "my_azure_secret"}
+)
+```
+
+## Example Output:
+
+```json
+[
+	{
+		"id": "4587320a-9432-1243-87e7-d6f7fd5a77e8",
+		"userId": "659a751c-208d-4469-97b0-1233km13mk",
+		"deviceName": "MacBook Pro",
+		"managedDeviceOwnerType": "work",
+		"enrolledDateTime": "2024-10-13T12:10:14Z",
+		"lastSyncDateTime": "2024-10-13T13:05:28Z",
+		"operatingSystem": "macOS",
+		"complianceState": "compliant",
+		"jailBroken": "Unknown",
+		"managementAgent": "mdm",
+		"osVersion": "14.1 (23B2073)",
+		"easActivated": true,
+		"easDeviceId": "ApplDSASWWVPDS",
+		"easActivationDateTime": "0001-01-01T00:00:00Z",
+		"azureADRegistered": true,
+		"deviceEnrollmentType": "userEnrollment",
+		"activationLockBypassCode": null,
+		"emailAddress": "",
+		"azureADDeviceId": "b55fa1fe-89ee-54g1-g34f-dssdsd9d0f1d",
+		"deviceRegistrationState": "registered",
+		"deviceCategoryDisplayName": "Unknown",
+		"isSupervised": true,
+		"exchangeLastSuccessfulSyncDateTime": "0001-01-01T00:00:00Z",
+		"exchangeAccessState": "none",
+		"exchangeAccessStateReason": "none",
+		"remoteAssistanceSessionUrl": null,
+		"remoteAssistanceSessionErrorDetails": null,
+		"isEncrypted": false,
+		"userPrincipalName": "macbook@test.com",
+		"model": "MacBook Pro (14-inch, Nov 2023)",
+		"manufacturer": "Apple",
+		"imei": "",
+		"complianceGracePeriodExpirationDateTime": "9999-12-31T23:59:59Z",
+		"serialNumber": "DSASWWVPDS",
+		"phoneNumber": "",
+		"androidSecurityPatchLevel": "",
+		"userDisplayName": "macbook test",
+		"configurationManagerClientEnabledFeatures": null,
+		"wiFiMacAddress": "603e5f7c76a7",
+		"deviceHealthAttestationState": null,
+		"subscriberCarrier": "",
+		"meid": "",
+		"totalStorageSpaceInBytes": 530428461056,
+		"freeStorageSpaceInBytes": 497142464512,
+		"managedDeviceName": "macbook_MacOS_10/13/2024_12:10 PM",
+		"partnerReportedThreatState": "unknown",
+		"requireUserEnrollmentApproval": true,
+		"managementCertificateExpirationDate": "2025-10-12T05:43:11Z",
+		"iccid": null,
+		"udid": null,
+		"notes": null,
+		"ethernetMacAddress": null,
+		"physicalMemoryInBytes": 0,
+		"enrollmentProfileName": null,
+		"deviceActionResults": []
+	}
+]
+```
