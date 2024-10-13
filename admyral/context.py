@@ -59,7 +59,7 @@ class ExecutionContext:
                 f'Failed to send to workflow "{workflow_name}". Workflow not found.'
             )
 
-        await SharedWorkerState.get_workers_client().execute_workflow(
+        await SharedWorkerState.get_workers_client().start_workflow(
             self.user_id, workflow, self.action_type, payload=data
         )
 

@@ -104,7 +104,7 @@ async def execute_test_workflow(
             activity_executor=ThreadPoolExecutor(thread_pool_size),
             debug_mode=worker_debug_mode,
         ):
-            await client.execute_workflow(
+            await client.start_workflow(
                 WorkflowExecutor.run,
                 {
                     "user_id": TEST_USER_ID,

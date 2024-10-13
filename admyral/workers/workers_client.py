@@ -33,7 +33,7 @@ class WorkersClient:
         client = await Client.connect(host)
         return cls(store, client)
 
-    async def execute_workflow(
+    async def start_workflow(
         self,
         user_id: str,
         workflow: Workflow,
@@ -48,8 +48,8 @@ class WorkersClient:
         from admyral.workers.workflow_executor import WorkflowExecutor
 
         # TODO: should we unify the temporal_workflow_id across triggers?
-        temmporal_workflow_id = str(uuid4())
-        await self.client.execute_workflow(
+        temporal_workflow_id = str(uuid4())
+        await self.client.start_workflow(
             WorkflowExecutor.run,
             {
                 "user_id": user_id,
@@ -58,7 +58,7 @@ class WorkersClient:
                 "payload": payload,
                 "trigger_default_args": trigger_default_args,
             },
-            id=temmporal_workflow_id,
+            id=temporal_workflow_id,
             task_queue="workflow-queue",
             retry_policy=RETRY_POLICY,
         )

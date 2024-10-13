@@ -77,12 +77,12 @@ def create_jira_issue(
         ),
     ] = None,
     custom_fields: Annotated[
-        dict[str, JsonValue],
+        dict[str, JsonValue] | None,
         ArgumentMetadata(
             display_name="Custom Fields",
             description="The custom fields to add to the issue as a JSON object",
         ),
-    ] = {},
+    ] = None,
 ) -> JsonValue:
     """
     How to find the project id?

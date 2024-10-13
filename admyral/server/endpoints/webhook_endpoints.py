@@ -1,8 +1,8 @@
-from fastapi import APIRouter, status, Header, BackgroundTasks, Request
-from typing import Optional, Annotated, Callable, Coroutine
+from fastapi import APIRouter, status, Header, Request
+from typing import Optional, Annotated
 import json
 
-from admyral.models import WorkflowTriggerResponse, WorkflowTriggerType, Workflow
+from admyral.models import WorkflowTriggerResponse, WorkflowTriggerType
 from admyral.server.deps import get_admyral_store, get_workers_client
 from admyral.typings import JsonValue
 from admyral.utils.collections import is_not_empty
@@ -35,30 +35,10 @@ async def _extract_payload_from_request(request: Request) -> JsonValue:
     return payload
 
 
-def _workflow_execution_task(
-    user_id: str,
-    workflow: Workflow,
-    source_name: str,
-    payload: dict[str, JsonValue],
-    trigger_default_args: dict[str, JsonValue],
-) -> Callable[[], Coroutine]:
-    async def exec_task():
-        await get_workers_client().execute_workflow(
-            user_id,
-            workflow,
-            source_name,
-            payload,
-            trigger_default_args=trigger_default_args,
-        )
-
-    return exec_task
-
-
 async def _handle_webhook_trigger(
     webhook_id: str,
     webhook_secret: str,
     payload: Optional[JsonValue],
-    background_tasks: BackgroundTasks,
 ) -> WorkflowTriggerResponse:
     """
     Handle the webhook trigger.
@@ -96,14 +76,12 @@ async def _handle_webhook_trigger(
     webhook_trigger = webhook_triggers[0]
 
     # launch the workflow execution in the background
-    background_tasks.add_task(
-        _workflow_execution_task(
-            user_id,
-            workflow,
-            WEBHOOK_SOURCE_NAME,
-            payload,
-            trigger_default_args=webhook_trigger.default_args_dict,
-        )
+    await get_workers_client().start_workflow(
+        user_id,
+        workflow,
+        WEBHOOK_SOURCE_NAME,
+        payload,
+        trigger_default_args=webhook_trigger.default_args_dict,
     )
 
     return WorkflowTriggerResponse.success()
@@ -112,7 +90,6 @@ async def _handle_webhook_trigger(
 @router.post("/{webhook_id}", status_code=status.HTTP_200_OK)
 async def trigger_webhook_post(
     webhook_id: str,
-    background_tasks: BackgroundTasks,
     request: Request,
     authorization: Annotated[str | None, Header()] = None,
 ) -> WorkflowTriggerResponse:
@@ -123,16 +100,13 @@ async def trigger_webhook_post(
         webhook_id: The webhook id.
     """
     payload = await _extract_payload_from_request(request)
-    return await _handle_webhook_trigger(
-        webhook_id, authorization, payload, background_tasks
-    )
+    return await _handle_webhook_trigger(webhook_id, authorization, payload)
 
 
 @router.post("/{webhook_id}/{webhook_secret}", status_code=status.HTTP_200_OK)
 async def trigger_webhook_post_with_secret_path(
     webhook_id: str,
     webhook_secret: str,
-    background_tasks: BackgroundTasks,
     request: Request,
     # payload: Annotated[JsonValue, Body()] = None,
 ) -> WorkflowTriggerResponse:
@@ -143,14 +117,12 @@ async def trigger_webhook_post_with_secret_path(
         webhook_id: The webhook id.
     """
     payload = await _extract_payload_from_request(request)
-    return await _handle_webhook_trigger(
-        webhook_id, webhook_secret, payload, background_tasks
-    )
+    return await _handle_webhook_trigger(webhook_id, webhook_secret, payload)
 
 
 @router.get("/{webhook_id}", status_code=status.HTTP_200_OK)
 async def trigger_webhook_get(
-    webhook_id: str, background_tasks: BackgroundTasks, request: Request
+    webhook_id: str, request: Request
 ) -> WorkflowTriggerResponse:
     """
     Trigger the webhook with the given id.
@@ -160,16 +132,13 @@ async def trigger_webhook_get(
     """
     params = dict(request.query_params.items())
     authorization = request.headers.get("Authorization")
-    return await _handle_webhook_trigger(
-        webhook_id, authorization, params, background_tasks
-    )
+    return await _handle_webhook_trigger(webhook_id, authorization, params)
 
 
 @router.get("/{webhook_id}/{webhook_secret}", status_code=status.HTTP_200_OK)
 async def trigger_webhook_get_with_secret_path(
     webhook_id: str,
     webhook_secret: str,
-    background_tasks: BackgroundTasks,
     request: Request,
 ) -> WorkflowTriggerResponse:
     """
@@ -179,6 +148,4 @@ async def trigger_webhook_get_with_secret_path(
         webhook_id: The webhook id.
     """
     params = dict(request.query_params.items())
-    return await _handle_webhook_trigger(
-        webhook_id, webhook_secret, params, background_tasks
-    )
+    return await _handle_webhook_trigger(webhook_id, webhook_secret, params)

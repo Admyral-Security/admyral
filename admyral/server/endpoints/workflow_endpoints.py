@@ -1,5 +1,5 @@
-from fastapi import APIRouter, status, BackgroundTasks, Body, Depends
-from typing import Optional, Annotated, Callable, Coroutine
+from fastapi import APIRouter, status, Body, Depends
+from typing import Optional, Annotated
 from uuid import uuid4
 from pydantic import BaseModel
 
@@ -224,21 +224,9 @@ async def list_workflows(
     return await get_admyral_store().list_workflows(authenticated_user.user_id)
 
 
-def exec_task(
-    user_id: str, workflow: Workflow, payload: dict[str, JsonValue]
-) -> Callable[[], Coroutine]:
-    async def task() -> None:
-        await get_workers_client().execute_workflow(
-            user_id, workflow, MANUAL_TRIGGER_SOURCE_NAME, payload
-        )
-
-    return task
-
-
 @router.post("/{workflow_name}/trigger", status_code=status.HTTP_201_CREATED)
 async def trigger_workflow(
     workflow_name: str,
-    background_tasks: BackgroundTasks,
     payload: Annotated[dict[str, JsonValue], Body()] = {},
     authenticated_user: AuthenticatedUser = Depends(authenticate),
 ) -> WorkflowTriggerResponse:
@@ -256,7 +244,9 @@ async def trigger_workflow(
         raise ValueError(f"Workflow with name {workflow_name} not found.")
     if not workflow.is_active:
         return WorkflowTriggerResponse.inactive()
-    background_tasks.add_task(exec_task(authenticated_user.user_id, workflow, payload))
+    await get_workers_client().start_workflow(
+        authenticated_user.user_id, workflow, MANUAL_TRIGGER_SOURCE_NAME, payload
+    )
     return WorkflowTriggerResponse.success()
 
 
