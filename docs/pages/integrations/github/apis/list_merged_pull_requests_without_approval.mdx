@@ -21,7 +21,7 @@ Alternatively, for a Token (classic):
 **SDK Import:**
 
 ```python
-from admyral.actions import list_merged_pull_requests_without_approval
+from admyral.actions import list_github_merged_pull_requests_without_approval
 ```
 
 ## Arguments
@@ -52,7 +52,7 @@ A JSON array of pull request information. Each pull request contains the followi
 ## SDK Example
 
 ```python
-audit_log_entries = list_merged_pull_requests_without_approval(
+audit_log_entries = list_github_merged_pull_requests_without_approval(
 	repo_owner="Admyral-Security",
 	repo_name="admyral",
 	secrets={"GITHUB_SECRET": "my_github_secret"}

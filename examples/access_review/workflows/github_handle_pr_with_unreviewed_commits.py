@@ -5,8 +5,8 @@ from admyral.workflow import workflow, Webhook
 from admyral.typings import JsonValue
 from admyral.action import action, ArgumentMetadata
 from admyral.actions import (
-    list_commit_history_for_pull_request,
-    list_review_history_for_pull_request,
+    list_github_commit_history_for_pull_request,
+    list_github_review_history_for_pull_request,
     send_slack_message_to_user_by_email,
     send_slack_message,
     create_jira_issue,
@@ -52,7 +52,7 @@ def has_pr_unreviewed_commits(
         ArgumentMetadata(display_name="State", description="The state of the review"),
     ] = "APPROVED",
 ) -> dict[str, JsonValue]:
-    commit_history = list_commit_history_for_pull_request(
+    commit_history = list_github_commit_history_for_pull_request(
         repo_owner=repo_owner,
         repo_name=repo_name,
         pull_request_number=pull_request["number"],
@@ -70,7 +70,7 @@ def has_pr_unreviewed_commits(
     last_commit_id = last_commit["sha"]
 
     # Identify the last approved commit
-    approval_history = list_review_history_for_pull_request(
+    approval_history = list_github_review_history_for_pull_request(
         repo_owner=repo_owner,
         repo_name=repo_name,
         pull_request_number=pull_request["number"],

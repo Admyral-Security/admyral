@@ -222,7 +222,7 @@ def compare_two_github_commits(
     description="List all merged pull requests for a repository.",
     secrets_placeholders=["GITHUB_SECRET"],
 )
-def list_merged_pull_requests(
+def list_github_merged_pull_requests(
     repo_owner: Annotated[
         str,
         ArgumentMetadata(
@@ -298,7 +298,7 @@ def list_merged_pull_requests(
     description="List commit history for a Pull Request from most recent to oldest",
     secrets_placeholders=["GITHUB_SECRET"],
 )
-def list_commit_history_for_pull_request(
+def list_github_commit_history_for_pull_request(
     repo_owner: Annotated[
         str,
         ArgumentMetadata(
@@ -341,7 +341,7 @@ def list_commit_history_for_pull_request(
     description="List approval history for a Pull Request",
     secrets_placeholders=["GITHUB_SECRET"],
 )
-def list_review_history_for_pull_request(
+def list_github_review_history_for_pull_request(
     repo_owner: Annotated[
         str,
         ArgumentMetadata(
@@ -401,7 +401,7 @@ def list_review_history_for_pull_request(
     description="List all pull requests of a repository that contain unapproved commits, i.e., PRs which were never approved or commits after an approval.",
     secrets_placeholders=["GITHUB_SECRET"],
 )
-def list_merged_pull_requests_without_approval(
+def list_github_merged_pull_requests_without_approval(
     repo_owner: Annotated[
         str,
         ArgumentMetadata(
@@ -431,7 +431,7 @@ def list_merged_pull_requests_without_approval(
         ),
     ] = None,
 ) -> list[dict[str, JsonValue]]:
-    merged_prs = list_merged_pull_requests(
+    merged_prs = list_github_merged_pull_requests(
         repo_owner=repo_owner,
         repo_name=repo_name,
         start_time=start_time,
@@ -440,7 +440,7 @@ def list_merged_pull_requests_without_approval(
 
     unreviewed_prs = []
     for pr in merged_prs:
-        commit_history = list_commit_history_for_pull_request(
+        commit_history = list_github_commit_history_for_pull_request(
             repo_owner=repo_owner, repo_name=repo_name, pull_request_number=pr["number"]
         )
         if is_empty(commit_history):
@@ -455,7 +455,7 @@ def list_merged_pull_requests_without_approval(
         last_commit_id = last_commit["sha"]
 
         # Identify the last approved commit
-        approval_history = list_review_history_for_pull_request(
+        approval_history = list_github_review_history_for_pull_request(
             repo_owner=repo_owner,
             repo_name=repo_name,
             pull_request_number=pr["number"],

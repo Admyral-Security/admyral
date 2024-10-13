@@ -1,7 +1,7 @@
 from admyral.workflow import workflow, Schedule
 from admyral.typings import JsonValue
 from admyral.actions import (
-    list_merged_pull_requests_without_approval,
+    list_github_merged_pull_requests_without_approval,
     get_time_interval_of_last_n_days,
     send_slack_message,
     format_json_to_list_view_string,
@@ -15,7 +15,7 @@ from admyral.actions import (
 def monitor_merged_github_prs_without_approval(payload: dict[str, JsonValue]):
     last_day_time_interval = get_time_interval_of_last_n_days(n_days=1)
 
-    unreviewed_prs = list_merged_pull_requests_without_approval(
+    unreviewed_prs = list_github_merged_pull_requests_without_approval(
         repo_owner="Admyral-Security",  # TODO: set your repo owner here
         repo_name="Admyral_Github_Integration_Test",  # TODO: set your repo name here
         start_time=last_day_time_interval[0],

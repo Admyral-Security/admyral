@@ -26,7 +26,7 @@ Alternatively, for a Token (classic):
 **SDK Import:**
 
 ```python
-from admyral.actions import list_merged_pull_requests
+from admyral.actions import list_github_merged_pull_requests
 ```
 
 ## Arguments
@@ -52,7 +52,7 @@ A JSON array of merged pull requests.
 ## SDK Example
 
 ```python
-commit_diff = list_merged_pull_requests(
+commit_diff = list_github_merged_pull_requests(
 	repo_owner="admyral",
 	repo_name="admyral",
 	secrets={"GITHUB_SECRET": "your_github_secret"}

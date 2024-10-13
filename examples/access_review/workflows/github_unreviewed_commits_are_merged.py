@@ -6,7 +6,7 @@ import requests
 from admyral.workflow import workflow, Schedule
 from admyral.typings import JsonValue
 from admyral.action import action, ArgumentMetadata
-from admyral.actions import list_merged_pull_requests
+from admyral.actions import list_github_merged_pull_requests
 
 
 @action(
@@ -74,7 +74,7 @@ def check_pull_requests_for_unreviewed_merged_commits(
 def github_unreviewed_commits_are_merged(payload: dict[str, JsonValue]):
     start_end_end_time = get_time_range_of_last_full_hour()
 
-    merged_prs = list_merged_pull_requests(
+    merged_prs = list_github_merged_pull_requests(
         repo_owner="admyral",  # TODO: set repo owner
         repo_name="admyral",  # TODO: set repo name
         start_time=start_end_end_time[0],
