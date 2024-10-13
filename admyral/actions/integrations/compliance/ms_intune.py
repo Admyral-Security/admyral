@@ -37,4 +37,4 @@ def list_ms_intune_unencrypted_devices(
         limit=limit,
     )
 
-    return [device for device in devices if not device.get("isEncrypted")]
+    return [device for device in devices if not device["isEncrypted"]]
