@@ -70,7 +70,8 @@ from admyral.actions.integrations.compliance import (
     compare_two_github_commits,
     list_merged_pull_requests_without_approval,
     list_google_docs_revisions,
-    list_ms_intune_unencrypted_devices,
+    list_ms_intune_unencrypted_managed_devices,
+    list_ms_intune_managed_devices,
 )
 from admyral.actions.integrations.cloud import (
     steampipe_query_aws,
@@ -144,5 +145,6 @@ __all__ = [
     "format_json_to_list_view_string",
     "run_sql_query",
     "list_google_docs_revisions",
-    "list_ms_intune_unencrypted_devices",
+    "list_ms_intune_unencrypted_managed_devices",
+    "list_ms_intune_managed_devices",
 ]

@@ -17,7 +17,8 @@ from admyral.actions.integrations.compliance.google_drive import (
     list_google_docs_revisions,
 )
 from admyral.actions.integrations.compliance.ms_intune import (
-    list_ms_intune_unencrypted_devices,
+    list_ms_intune_managed_devices,
+    list_ms_intune_unencrypted_managed_devices,
 )
 
 __all__ = [
@@ -31,5 +32,6 @@ __all__ = [
     "compare_two_github_commits",
     "list_merged_pull_requests_without_approval",
     "list_google_docs_revisions",
-    "list_ms_intune_unencrypted_devices",
+    "list_ms_intune_managed_devices",
+    "list_ms_intune_unencrypted_managed_devices",
 ]
