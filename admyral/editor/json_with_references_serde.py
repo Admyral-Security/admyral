@@ -16,7 +16,7 @@ Behavior:
     - If we have something like `"123"` as input, then the quotes will be removed and we will simply store 123 as a string
 - In all other cases, we will JSON-deserialize the string and store the result.
 
-    
+
 
 Types:
 
@@ -33,14 +33,6 @@ Note:
 - empty UI field equals None
 
 """
-
-
-def _unescape_string(value: str) -> str:
-    return value.encode("utf-8").decode("unicode_escape")
-
-
-def _escape_string(value: str) -> str:
-    return value.encode("unicode_escape").decode("utf-8")
 
 
 def _is_float(value: str) -> bool:
@@ -107,9 +99,6 @@ def serialize_json_with_reference(value: JsonValue) -> str:
 
 
 def deserialize_json_with_reference(value: str) -> JsonValue:
-    value = value.replace("\\n", "\n")
-    value = _unescape_string(value)
-
     if value == "":
         return None
 

@@ -190,10 +190,11 @@ def test_serde_pure_reference2():
     ```
     """
     json_str = '"something {{ a[\'b\'][0][\\"c\\"] }} else"'
-    assert (
-        deserialize_json_with_reference(json_str)
-        == "something {{ a['b'][0][\"c\"] }} else"
-    )
+    deserialized = deserialize_json_with_reference(json_str)
+    assert deserialized == "something {{ a['b'][0][\\\"c\\\"] }} else"
+
+    serialized = serialize_json_with_reference(deserialized)
+    assert serialized == "something {{ a['b'][0][\\\"c\\\"] }} else"
 
 
 #########################################################################################################
@@ -293,9 +294,28 @@ def test_invalid_list():
     """
     input_value = '[\\n"]'
     json_obj = deserialize_json_with_reference(input_value)
-    json_str = serialize_json_with_reference(json_obj)
+    assert json_obj == '[\\n"]'
 
+    json_str = serialize_json_with_reference(json_obj)
+    assert json_str == '[\\n"]'
+
+
+#########################################################################################################
+
+
+def test_invalid_list2():
+    """
+    Textfield Input in UI:
+    ```
+    [
+    "]
+    ```
+    """
+    input_value = '[\n"]'
+    json_obj = deserialize_json_with_reference(input_value)
     assert json_obj == '[\n"]'
+
+    json_str = serialize_json_with_reference(json_obj)
     assert json_str == '[\n"]'
 
 
@@ -313,8 +333,8 @@ def test_invalid_list_in_string():
     json_obj = deserialize_json_with_reference(input_value)
     json_str = serialize_json_with_reference(json_obj)
 
-    assert json_obj == '[\n"]'
-    assert json_str == '[\n"]'
+    assert json_obj == '[\\n"]'
+    assert json_str == '[\\n"]'
 
 
 #########################################################################################################
@@ -388,3 +408,32 @@ def test_empty():
 
     assert json_obj is None
     assert json_str == "null"
+
+
+#########################################################################################################
+
+
+def test_object_serde():
+    input_obj = {
+        "content": [
+            {
+                "content": [
+                    {
+                        "text": "Title: {{ payload['element']['title'] }}\nRepository: {{ payload['shared']['repo_owner'] }}/{{ payload['shared']['repo_name'] }}\nUser: {{ payload['element']['user'] }}\nLink: {{ payload['element']['html_url'] }}\nMerged At: {{ payload['element']['merged_at'] }}",
+                        "type": "text",
+                    }
+                ],
+                "type": "paragraph",
+            }
+        ],
+        "type": "doc",
+        "version": 1,
+    }
+
+    json_str = serialize_json_with_reference(input_obj)
+    json_obj = deserialize_json_with_reference(json_str)
+
+    expected_str = "{\"content\": [{\"content\": [{\"text\": \"Title: {{ payload['element']['title'] }}\\nRepository: {{ payload['shared']['repo_owner'] }}/{{ payload['shared']['repo_name'] }}\\nUser: {{ payload['element']['user'] }}\\nLink: {{ payload['element']['html_url'] }}\\nMerged At: {{ payload['element']['merged_at'] }}\", \"type\": \"text\"}], \"type\": \"paragraph\"}], \"type\": \"doc\", \"version\": 1}"
+
+    assert expected_str == json_str
+    assert json_obj == input_obj
