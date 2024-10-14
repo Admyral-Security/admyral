@@ -144,8 +144,9 @@ def create_jira_issue(
             "name": priority,
         }
 
-    for key, value in custom_fields.items():
-        body["fields"][key] = value
+    if custom_fields:
+        for key, value in custom_fields.items():
+            body["fields"][key] = value
 
     with get_jira_client(domain, email, api_key) as client:
         response = client.post(
