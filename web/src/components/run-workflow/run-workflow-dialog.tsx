@@ -3,8 +3,8 @@ import { errorToast, infoToast } from "@/lib/toast";
 import { useWorkflowStore } from "@/stores/workflow-store";
 import { Cross1Icon } from "@radix-ui/react-icons";
 import { Button, Dialog, Flex, Text } from "@radix-ui/themes";
-import { useEffect, useState } from "react";
-import { CustomEditor } from "@/components/editor/editor";
+import { useEffect } from "react";
+import { CodeEditor } from "@/components/code-editor/code-editor";
 
 export default function RunWorkflowDialog({
 	closeDialog,
@@ -78,7 +78,7 @@ export default function RunWorkflowDialog({
 
 			<Flex direction="column" gap="2">
 				<Text weight="medium">Test Payload (JSON)</Text>
-				<CustomEditor
+				<CodeEditor
 					className="h-72 w-full"
 					value={payloadCache}
 					language="json"
