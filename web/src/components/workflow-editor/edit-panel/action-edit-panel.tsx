@@ -1,4 +1,4 @@
-import { Code, Flex, Text, TextArea, TextField } from "@radix-ui/themes";
+import { Code, Flex, Text, TextField } from "@radix-ui/themes";
 import ActionIcon from "../action-icon";
 import WorkflowEditorRightPanelBase from "../right-panel-base";
 import { useWorkflowStore } from "@/stores/workflow-store";
@@ -8,6 +8,7 @@ import { produce } from "immer";
 import { ChangeEvent, useEffect } from "react";
 import { useImmer } from "use-immer";
 import { TActionMetadata } from "@/types/editor-actions";
+import { CustomEditor } from "@/components/editor/editor";
 
 function buildInitialArgs(
 	action: TEditorWorkflowActionNode,
@@ -69,15 +70,15 @@ export default function ActionEditPanel() {
 	const onChangeActionArgument = (
 		argument: string,
 		argIdx: number,
-		event: ChangeEvent<HTMLTextAreaElement>,
+		value: string | undefined,
 	) => {
 		updateArgs((draft) => {
-			draft[argIdx] = event.target.value;
+			draft[argIdx] = value || "";
 		});
 		updateNodeData(
 			selectedNodeIdx,
 			produce(actionData, (draft) => {
-				draft.args[argument] = event.target.value;
+				draft.args[argument] = value || "";
 			}),
 		);
 	};
@@ -167,17 +168,16 @@ export default function ActionEditPanel() {
 								<Text color="gray" weight="light" size="1">
 									Type: {argument.argType}
 								</Text>
-								<TextArea
-									variant="surface"
+								<CustomEditor
 									value={args[argIdx]}
-									resize="vertical"
-									onChange={(event) =>
+									onChange={(value) =>
 										onChangeActionArgument(
 											argument.argName,
 											argIdx,
-											event,
+											value,
 										)
 									}
+									className="h-12 w-full"
 								/>
 								<Flex justify="end">
 									<Text color="gray" weight="light" size="1">
