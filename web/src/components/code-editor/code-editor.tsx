@@ -7,16 +7,18 @@ import {
 import { editor } from "monaco-editor";
 import { cn } from "@/utils/tailwind";
 
-export function CustomEditor({
+interface CodeEditorProps extends EditorProps {
+	className?: string;
+	language?: string;
+	onChange?: OnChange;
+}
+
+export function CodeEditor({
 	className,
 	language,
 	onChange,
 	...props
-}: EditorProps & {
-	className?: string;
-	language?: string;
-	onChange?: OnChange;
-}) {
+}: CodeEditorProps) {
 	const handleEditorDidMount = (
 		editor: editor.IStandaloneCodeEditor,
 		monaco: Monaco,

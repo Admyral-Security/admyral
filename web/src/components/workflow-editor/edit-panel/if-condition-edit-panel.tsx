@@ -5,8 +5,10 @@ import { Code, Flex, Text, Dialog, IconButton } from "@radix-ui/themes";
 import IfConditionActionIcon from "@/components/icons/if-condition-action-icon";
 import { TEditorWorkflowIfNode } from "@/types/react-flow";
 import { produce } from "immer";
-import { CustomEditor } from "@/components/editor/editor";
+import { CodeEditor } from "@/components/code-editor/code-editor";
 import { SizeIcon } from "@radix-ui/react-icons";
+import CodeEditorWithDialogButton from "@/components/code-editor-with-dialog-button/code-editor-with-dialog-button";
+import CodeEditorWithDialog from "@/components/code-editor-with-dialog/code-editor-with-dialog";
 
 const exampleCode = 'result["message"] == "hello" or result["count"] > 0';
 
@@ -65,44 +67,25 @@ export default function IfConditionEditPanel() {
 						<Text size="2" color="gray">
 							Condition
 						</Text>
-						<IconButton
-							variant="ghost"
-							size="1"
+						<CodeEditorWithDialogButton
 							onClick={() => setEnlargedEditorOpen(true)}
-						>
-							<SizeIcon />
-						</IconButton>
+						/>
 					</Flex>
-					<CustomEditor
+					<CodeEditor
 						value={condition.toString()}
 						onChange={handleConditionChange}
 						language="python"
 						className="h-16 w-full"
 					/>
 				</Flex>
-				<Dialog.Root
+				<CodeEditorWithDialog
 					open={enlargedEditorOpen}
 					onOpenChange={setEnlargedEditorOpen}
-				>
-					<Dialog.Content
-						style={{ maxWidth: "min(90vw, 800px)", width: "100%" }}
-					>
-						<Flex justify="between" align="center" mb="4">
-							<Dialog.Title>Edit Condition</Dialog.Title>
-							<Dialog.Close>
-								<IconButton variant="ghost" size="1">
-									<SizeIcon />
-								</IconButton>
-							</Dialog.Close>
-						</Flex>
-						<CustomEditor
-							value={condition.toString()}
-							onChange={handleConditionChange}
-							language="python"
-							className="h-[30vh] w-full"
-						/>
-					</Dialog.Content>
-				</Dialog.Root>
+					title="Edit Condition"
+					value={condition.toString()}
+					onChange={handleConditionChange}
+					language="python"
+				/>
 			</Flex>
 		</WorkflowEditorRightPanelBase>
 	);

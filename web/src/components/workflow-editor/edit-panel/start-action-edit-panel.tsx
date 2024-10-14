@@ -18,8 +18,10 @@ import {
 import { MinusIcon, PlusIcon, SizeIcon } from "@radix-ui/react-icons";
 import CopyText from "@/components/utils/copy-text";
 import { produce } from "immer";
-import { CustomEditor } from "@/components/editor/editor";
+import { CodeEditor } from "@/components/code-editor/code-editor";
 import { useState } from "react";
+import CodeEditorWithDialogButton from "@/components/code-editor-with-dialog-button/code-editor-with-dialog-button";
+import CodeEditorWithDialog from "@/components/code-editor-with-dialog/code-editor-with-dialog";
 
 export default function StartActionEditPanel({
 	apiBaseUrl,
@@ -217,18 +219,17 @@ export default function StartActionEditPanel({
 	const getCurrentEditingValue = () => {
 		if (isEditingWebhook) {
 			return (
-				actionData.webhook?.defaultArgs[currentEditingArgIdx!]?.[1] ||
-				""
+				actionData.webhook?.defaultArgs?.[
+					currentEditingArgIdx ?? 0
+				]?.[1] ?? ""
 			);
 		} else if (
 			currentEditingScheduleIdx !== null &&
-			currentEditingArgIdx !== null &&
-			actionData.schedules[currentEditingScheduleIdx]?.defaultArgs
+			currentEditingArgIdx !== null
 		) {
 			return (
-				actionData.schedules[currentEditingScheduleIdx].defaultArgs[
-					currentEditingArgIdx
-				][1] || ""
+				actionData.schedules?.[currentEditingScheduleIdx]
+					?.defaultArgs?.[currentEditingArgIdx]?.[1] ?? ""
 			);
 		}
 		return "";
@@ -374,9 +375,7 @@ export default function StartActionEditPanel({
 												<Text size="2" color="gray">
 													Default Value
 												</Text>
-												<IconButton
-													variant="ghost"
-													size="1"
+												<CodeEditorWithDialogButton
 													onClick={() =>
 														openEnlargedEditor(
 															null,
@@ -384,11 +383,9 @@ export default function StartActionEditPanel({
 															true,
 														)
 													}
-												>
-													<SizeIcon />
-												</IconButton>
+												/>
 											</Flex>
-											<CustomEditor
+											<CodeEditor
 												className="h-16 w-full"
 												value={defaultArg[1]}
 												language="json"
@@ -586,20 +583,16 @@ export default function StartActionEditPanel({
 														>
 															Default Value
 														</Text>
-														<IconButton
-															variant="ghost"
-															size="1"
+														<CodeEditorWithDialogButton
 															onClick={() =>
 																openEnlargedEditor(
 																	scheduleIdx,
 																	defaultArgIdx,
 																)
 															}
-														>
-															<SizeIcon />
-														</IconButton>
+														/>
 													</Flex>
-													<CustomEditor
+													<CodeEditor
 														className="h-16 w-full"
 														value={defaultArg[1]}
 														onChange={(value) =>
@@ -639,31 +632,14 @@ export default function StartActionEditPanel({
 						</Flex>
 					))}
 				</Flex>
-				<Dialog.Root
+				<CodeEditorWithDialog
 					open={enlargedEditorOpen}
 					onOpenChange={setEnlargedEditorOpen}
-				>
-					<Dialog.Content
-						style={{ maxWidth: "min(90vw, 800px)", width: "100%" }}
-					>
-						<Flex justify="between" align="center" mb="4">
-							<Dialog.Title>Edit Default Value</Dialog.Title>
-							<Dialog.Close>
-								<IconButton variant="ghost" size="1">
-									<SizeIcon />
-								</IconButton>
-							</Dialog.Close>
-						</Flex>
-						<Flex>
-							<CustomEditor
-								value={getCurrentEditingValue()}
-								onChange={handleCurrentEditingValueChange}
-								className="h-[30vh] w-full"
-								language="json"
-							/>
-						</Flex>
-					</Dialog.Content>
-				</Dialog.Root>
+					title="Edit Default Value"
+					value={getCurrentEditingValue()}
+					onChange={handleCurrentEditingValueChange}
+					language="json"
+				/>
 			</Flex>
 		</WorkflowEditorRightPanelBase>
 	);

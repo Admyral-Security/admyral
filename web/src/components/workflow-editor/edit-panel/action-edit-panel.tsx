@@ -8,7 +8,7 @@ import { produce } from "immer";
 import { ChangeEvent, useEffect } from "react";
 import { useImmer } from "use-immer";
 import { TActionMetadata } from "@/types/editor-actions";
-import { CustomEditor } from "@/components/editor/editor";
+import { CodeEditor } from "@/components/code-editor/code-editor";
 
 function buildInitialArgs(
 	action: TEditorWorkflowActionNode,
@@ -168,7 +168,7 @@ export default function ActionEditPanel() {
 								<Text color="gray" weight="light" size="1">
 									Type: {argument.argType}
 								</Text>
-								<CustomEditor
+								<CodeEditor
 									value={args[argIdx]}
 									onChange={(value) =>
 										onChangeActionArgument(
