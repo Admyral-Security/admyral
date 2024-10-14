@@ -77,7 +77,7 @@ export default function IfConditionEditPanel() {
 						value={condition.toString()}
 						onChange={handleConditionChange}
 						language="python"
-						className="h-24 w-full"
+						className="h-16 w-full"
 					/>
 				</Flex>
 				<Dialog.Root
