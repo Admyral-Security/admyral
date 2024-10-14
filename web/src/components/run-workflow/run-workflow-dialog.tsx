@@ -50,7 +50,7 @@ export default function RunWorkflowDialog({
 	};
 
 	const handleEditorChange = (value: string | undefined) => {
-		setPayload(value || "");
+		setPayloadCache(value || "");
 	};
 
 	return (
@@ -80,7 +80,7 @@ export default function RunWorkflowDialog({
 				<Text weight="medium">Test Payload (JSON)</Text>
 				<CustomEditor
 					className="h-72 w-full"
-					value={payload}
+					value={payloadCache}
 					language="json"
 					onChange={handleEditorChange}
 				/>
