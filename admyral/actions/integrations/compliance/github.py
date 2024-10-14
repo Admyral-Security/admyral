@@ -62,7 +62,7 @@ def _get_events_with_pagination(
         else:
             break
 
-    return events
+    return events if limit is None else events[:limit]
 
 
 @action(
@@ -336,9 +336,9 @@ def list_github_commit_history_for_pull_request(
 
 
 @action(
-    display_name="Get Approval History for a Pull Request",
+    display_name="List Review History for a Pull Request",
     display_namespace="GitHub",
-    description="List approval history for a Pull Request",
+    description="List review history for a pull request.",
     secrets_placeholders=["GITHUB_SECRET"],
 )
 def list_github_review_history_for_pull_request(
@@ -367,7 +367,7 @@ def list_github_review_history_for_pull_request(
         Literal["APPROVED", "CHANGES_REQUESTED", "COMMENTED", "DISMISSED"] | None,
         ArgumentMetadata(
             display_name="State",
-            description="The state of the reviews to list.",
+            description="The state of the review to list.",
         ),
     ] = None,
 ) -> list[dict[str, JsonValue]]:
@@ -468,7 +468,7 @@ def list_github_merged_pull_requests_without_approval(
                     "title": pr["title"],
                     "html_url": pr["html_url"],
                     "user": pr["user"]["login"],
-                    "closed_at": pr["closed_at"],
+                    "merged_at": pr["merged_at"],
                     "last_commit_id": last_commit_id,
                     "last_approved_commit_id": pr["base"]["sha"],
                 }
@@ -489,10 +489,57 @@ def list_github_merged_pull_requests_without_approval(
                     "title": pr["title"],
                     "html_url": pr["html_url"],
                     "user": pr["user"]["login"],
-                    "closed_at": pr["closed_at"],
+                    "merged_at": pr["merged_at"],
                     "last_commit_id": last_commit_id,
                     "last_approved_commit_id": last_approved_commit_id,
                 }
             )
 
     return unreviewed_prs
+
+
+@action(
+    display_name="Get Pull Request Comments",
+    display_namespace="GitHub",
+    description="Get comments for a pull request.",
+    secrets_placeholders=["GITHUB_SECRET"],
+)
+def list_github_issue_comments(
+    repo_owner: Annotated[
+        str,
+        ArgumentMetadata(
+            display_name="Repository Owner",
+            description="The owner of the repository",
+        ),
+    ],
+    repo_name: Annotated[
+        str,
+        ArgumentMetadata(
+            display_name="Repository Name",
+            description="The name of the repository",
+        ),
+    ],
+    number: Annotated[
+        int,
+        ArgumentMetadata(
+            display_name="Pull Request/Issue Number",
+            description="The number of the pull request or issue",
+        ),
+    ],
+) -> list[dict[str, JsonValue]]:
+    # https://docs.github.com/en/rest/issues/comments?apiVersion=2022-11-28#list-issue-comments
+    secret = ctx.get().secrets.get("GITHUB_SECRET")
+    access_token = secret["access_token"]
+
+    with get_github_client(access_token=access_token) as client:
+        params = {
+            "per_page": 100,
+        }
+
+        events = _get_events_with_pagination(
+            client=client,
+            url=f"/repos/{repo_owner}/{repo_name}/issues/{number}/comments",
+            params=params,
+        )
+
+        return events

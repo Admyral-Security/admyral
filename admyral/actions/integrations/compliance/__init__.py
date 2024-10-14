@@ -12,6 +12,7 @@ from admyral.actions.integrations.compliance.github import (
     list_github_review_history_for_pull_request,
     compare_two_github_commits,
     list_github_merged_pull_requests_without_approval,
+    list_github_issue_comments,
 )
 from admyral.actions.integrations.compliance.google_drive import (
     list_google_docs_revisions,
@@ -34,4 +35,5 @@ __all__ = [
     "list_google_docs_revisions",
     "list_ms_intune_managed_devices",
     "list_ms_intune_unencrypted_managed_devices",
+    "list_github_issue_comments",
 ]

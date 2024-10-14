@@ -75,6 +75,7 @@ from admyral.actions.integrations.compliance import (
     list_google_docs_revisions,
     list_ms_intune_unencrypted_managed_devices,
     list_ms_intune_managed_devices,
+    list_github_issue_comments,
 )
 from admyral.actions.integrations.cloud import (
     steampipe_query_aws,
@@ -153,4 +154,5 @@ __all__ = [
     "send_to_workflow",
     "send_list_elements_to_workflow",
     "split_text",
+    "list_github_issue_comments",
 ]
