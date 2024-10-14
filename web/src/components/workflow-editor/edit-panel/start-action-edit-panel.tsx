@@ -7,7 +7,6 @@ import {
 	Separator,
 	Text,
 	TextField,
-	Dialog,
 } from "@radix-ui/themes";
 import StartWorkflowActionIcon from "@/components/icons/start-workflow-icon";
 import {
@@ -15,7 +14,7 @@ import {
 	SCHEDULE_TYPES,
 	TEditorWorkflowStartNode,
 } from "@/types/react-flow";
-import { MinusIcon, PlusIcon, SizeIcon } from "@radix-ui/react-icons";
+import { MinusIcon, PlusIcon } from "@radix-ui/react-icons";
 import CopyText from "@/components/utils/copy-text";
 import { produce } from "immer";
 import { CodeEditor } from "@/components/code-editor/code-editor";
