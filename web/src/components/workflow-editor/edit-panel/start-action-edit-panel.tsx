@@ -7,6 +7,8 @@ import {
 	Separator,
 	Text,
 	TextField,
+	Button,
+	Dialog,
 } from "@radix-ui/themes";
 import StartWorkflowActionIcon from "@/components/icons/start-workflow-icon";
 import {
@@ -14,9 +16,11 @@ import {
 	SCHEDULE_TYPES,
 	TEditorWorkflowStartNode,
 } from "@/types/react-flow";
-import { MinusIcon, PlusIcon } from "@radix-ui/react-icons";
+import { MinusIcon, PlusIcon, SizeIcon } from "@radix-ui/react-icons";
 import CopyText from "@/components/utils/copy-text";
 import { produce } from "immer";
+import { CustomEditor } from "@/components/editor/editor";
+import { useState } from "react";
 
 export default function StartActionEditPanel({
 	apiBaseUrl,
@@ -25,6 +29,15 @@ export default function StartActionEditPanel({
 }) {
 	const { nodes, selectedNodeIdx, updateNodeData, webhookId, webhookSecret } =
 		useWorkflowStore();
+
+	const [enlargedEditorOpen, setEnlargedEditorOpen] = useState(false);
+	const [currentEditingArgIdx, setCurrentEditingArgIdx] = useState<
+		number | null
+	>(null);
+	const [currentEditingScheduleIdx, setCurrentEditingScheduleIdx] = useState<
+		number | null
+	>(null);
+	const [isEditingWebhook, setIsEditingWebhook] = useState(false);
 
 	if (selectedNodeIdx === null) {
 		return null;
@@ -186,9 +199,55 @@ export default function StartActionEditPanel({
 			selectedNodeIdx,
 			produce(actionData, (draft) => {
 				draft.schedules[scheduleIdx].defaultArgs[defaultArgIdx][1] =
-					event;
+					event || "";
 			}),
 		);
+	};
+
+	const openEnlargedEditor = (
+		scheduleIdx: number | null,
+		defaultArgIdx: number,
+		isWebhook: boolean = false,
+	) => {
+		setCurrentEditingScheduleIdx(scheduleIdx);
+		setCurrentEditingArgIdx(defaultArgIdx);
+		setIsEditingWebhook(isWebhook);
+		setEnlargedEditorOpen(true);
+	};
+
+	const getCurrentEditingValue = () => {
+		if (isEditingWebhook) {
+			return (
+				actionData.webhook?.defaultArgs[currentEditingArgIdx!]?.[1] ||
+				""
+			);
+		} else if (
+			currentEditingScheduleIdx !== null &&
+			currentEditingArgIdx !== null &&
+			actionData.schedules[currentEditingScheduleIdx]?.defaultArgs
+		) {
+			return (
+				actionData.schedules[currentEditingScheduleIdx].defaultArgs[
+					currentEditingArgIdx
+				][1] || ""
+			);
+		}
+		return "";
+	};
+
+	const handleCurrentEditingValueChange = (value: string | undefined) => {
+		if (isEditingWebhook && currentEditingArgIdx !== null) {
+			handleWebhookDefaultArgValue(currentEditingArgIdx, value || "");
+		} else if (
+			currentEditingScheduleIdx !== null &&
+			currentEditingArgIdx !== null
+		) {
+			handleScheduleDefaultArgValue(
+				currentEditingScheduleIdx,
+				currentEditingArgIdx,
+				value || "",
+			);
+		}
 	};
 
 	return (
@@ -309,16 +368,35 @@ export default function StartActionEditPanel({
 											/>
 										</Flex>
 										<Flex direction="column" gap="1">
-											<Text size="2" color="gray">
-												Default Value
-											</Text>
-											<TextField.Root
-												variant="surface"
+											<Flex
+												justify="between"
+												align="center"
+											>
+												<Text size="2" color="gray">
+													Default Value
+												</Text>
+												<IconButton
+													variant="ghost"
+													size="1"
+													onClick={() =>
+														openEnlargedEditor(
+															null,
+															defaultArgIdx,
+															true,
+														)
+													}
+												>
+													<SizeIcon />
+												</IconButton>
+											</Flex>
+											<CustomEditor
+												className="h-16 w-full"
 												value={defaultArg[1]}
-												onChange={(event) =>
+												language="json"
+												onChange={(value) =>
 													handleWebhookDefaultArgValue(
 														defaultArgIdx,
-														event.target.value,
+														value || "",
 													)
 												}
 											/>
@@ -499,20 +577,40 @@ export default function StartActionEditPanel({
 													direction="column"
 													gap="1"
 												>
-													<Text size="2" color="gray">
-														Default Value
-													</Text>
-													<TextField.Root
-														variant="surface"
+													<Flex
+														justify="between"
+														align="center"
+													>
+														<Text
+															size="2"
+															color="gray"
+														>
+															Default Value
+														</Text>
+														<IconButton
+															variant="ghost"
+															size="1"
+															onClick={() =>
+																openEnlargedEditor(
+																	scheduleIdx,
+																	defaultArgIdx,
+																)
+															}
+														>
+															<SizeIcon />
+														</IconButton>
+													</Flex>
+													<CustomEditor
+														className="h-16 w-full"
 														value={defaultArg[1]}
-														onChange={(event) =>
+														onChange={(value) =>
 															handleScheduleDefaultArgValue(
 																scheduleIdx,
 																defaultArgIdx,
-																event.target
-																	.value,
+																value || "",
 															)
 														}
+														language="json"
 													/>
 												</Flex>
 											</Flex>
@@ -542,6 +640,31 @@ export default function StartActionEditPanel({
 						</Flex>
 					))}
 				</Flex>
+				<Dialog.Root
+					open={enlargedEditorOpen}
+					onOpenChange={setEnlargedEditorOpen}
+				>
+					<Dialog.Content
+						style={{ maxWidth: "min(90vw, 800px)", width: "100%" }}
+					>
+						<Flex justify="between" align="center" mb="4">
+							<Dialog.Title>Edit Default Value</Dialog.Title>
+							<Dialog.Close>
+								<IconButton variant="ghost" size="1">
+									<SizeIcon />
+								</IconButton>
+							</Dialog.Close>
+						</Flex>
+						<Flex>
+							<CustomEditor
+								value={getCurrentEditingValue()}
+								onChange={handleCurrentEditingValueChange}
+								className="h-[30vh] w-full"
+								language="json"
+							/>
+						</Flex>
+					</Dialog.Content>
+				</Dialog.Root>
 			</Flex>
 		</WorkflowEditorRightPanelBase>
 	);
