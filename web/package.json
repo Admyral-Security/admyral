@@ -37,6 +37,7 @@
 		"react-toastify": "^10.0.5",
 		"reactflow": "^11.11.4",
 		"snakecase-keys": "^8.0.1",
+		"tailwind-merge": "^2.5.3",
 		"ts-node": "^10.9.2",
 		"type-fest": "^4.23.0",
 		"use-immer": "^0.10.0",
