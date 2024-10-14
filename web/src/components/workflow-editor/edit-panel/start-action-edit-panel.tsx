@@ -17,9 +17,6 @@ import {
 import { MinusIcon, PlusIcon } from "@radix-ui/react-icons";
 import CopyText from "@/components/utils/copy-text";
 import { produce } from "immer";
-import { CodeEditor } from "@/components/code-editor/code-editor";
-import { useState } from "react";
-import CodeEditorWithDialogButton from "@/components/code-editor-with-dialog-button/code-editor-with-dialog-button";
 import CodeEditorWithDialog from "@/components/code-editor-with-dialog/code-editor-with-dialog";
 
 export default function StartActionEditPanel({
@@ -29,15 +26,6 @@ export default function StartActionEditPanel({
 }) {
 	const { nodes, selectedNodeIdx, updateNodeData, webhookId, webhookSecret } =
 		useWorkflowStore();
-
-	const [enlargedEditorOpen, setEnlargedEditorOpen] = useState(false);
-	const [currentEditingArgIdx, setCurrentEditingArgIdx] = useState<
-		number | null
-	>(null);
-	const [currentEditingScheduleIdx, setCurrentEditingScheduleIdx] = useState<
-		number | null
-	>(null);
-	const [isEditingWebhook, setIsEditingWebhook] = useState(false);
 
 	if (selectedNodeIdx === null) {
 		return null;
@@ -204,51 +192,6 @@ export default function StartActionEditPanel({
 		);
 	};
 
-	const openEnlargedEditor = (
-		scheduleIdx: number | null,
-		defaultArgIdx: number,
-		isWebhook: boolean = false,
-	) => {
-		setCurrentEditingScheduleIdx(scheduleIdx);
-		setCurrentEditingArgIdx(defaultArgIdx);
-		setIsEditingWebhook(isWebhook);
-		setEnlargedEditorOpen(true);
-	};
-
-	const getCurrentEditingValue = () => {
-		if (isEditingWebhook) {
-			return (
-				actionData.webhook?.defaultArgs?.[
-					currentEditingArgIdx ?? 0
-				]?.[1] ?? ""
-			);
-		} else if (
-			currentEditingScheduleIdx !== null &&
-			currentEditingArgIdx !== null
-		) {
-			return (
-				actionData.schedules?.[currentEditingScheduleIdx]
-					?.defaultArgs?.[currentEditingArgIdx]?.[1] ?? ""
-			);
-		}
-		return "";
-	};
-
-	const handleCurrentEditingValueChange = (value: string | undefined) => {
-		if (isEditingWebhook && currentEditingArgIdx !== null) {
-			handleWebhookDefaultArgValue(currentEditingArgIdx, value || "");
-		} else if (
-			currentEditingScheduleIdx !== null &&
-			currentEditingArgIdx !== null
-		) {
-			handleScheduleDefaultArgValue(
-				currentEditingScheduleIdx,
-				currentEditingArgIdx,
-				value || "",
-			);
-		}
-	};
-
 	return (
 		<WorkflowEditorRightPanelBase
 			title={"Start Workflow"}
@@ -367,34 +310,22 @@ export default function StartActionEditPanel({
 											/>
 										</Flex>
 										<Flex direction="column" gap="1">
-											<Flex
-												justify="between"
-												align="center"
-											>
-												<Text size="2" color="gray">
-													Default Value
-												</Text>
-												<CodeEditorWithDialogButton
-													onClick={() =>
-														openEnlargedEditor(
-															null,
+											<Text size="2" color="gray">
+												Default Value
+											</Text>
+											<Flex>
+												<CodeEditorWithDialog
+													title="Edit Default Value"
+													value={defaultArg[1]}
+													onChange={(value) =>
+														handleWebhookDefaultArgValue(
 															defaultArgIdx,
-															true,
+															value || "",
 														)
 													}
+													language="json"
 												/>
 											</Flex>
-											<CodeEditor
-												className="h-16 w-full"
-												value={defaultArg[1]}
-												language="json"
-												onChange={(value) =>
-													handleWebhookDefaultArgValue(
-														defaultArgIdx,
-														value || "",
-													)
-												}
-											/>
 										</Flex>
 									</Flex>
 								),
@@ -572,37 +503,25 @@ export default function StartActionEditPanel({
 													direction="column"
 													gap="1"
 												>
-													<Flex
-														justify="between"
-														align="center"
-													>
-														<Text
-															size="2"
-															color="gray"
-														>
-															Default Value
-														</Text>
-														<CodeEditorWithDialogButton
-															onClick={() =>
-																openEnlargedEditor(
+													<Text size="2" color="gray">
+														Default Value
+													</Text>
+													<Flex>
+														<CodeEditorWithDialog
+															title="Edit Default Value"
+															value={
+																defaultArg[1]
+															}
+															onChange={(value) =>
+																handleScheduleDefaultArgValue(
 																	scheduleIdx,
 																	defaultArgIdx,
+																	value || "",
 																)
 															}
+															language="json"
 														/>
 													</Flex>
-													<CodeEditor
-														className="h-16 w-full"
-														value={defaultArg[1]}
-														onChange={(value) =>
-															handleScheduleDefaultArgValue(
-																scheduleIdx,
-																defaultArgIdx,
-																value || "",
-															)
-														}
-														language="json"
-													/>
 												</Flex>
 											</Flex>
 										),
@@ -631,14 +550,6 @@ export default function StartActionEditPanel({
 						</Flex>
 					))}
 				</Flex>
-				<CodeEditorWithDialog
-					open={enlargedEditorOpen}
-					onOpenChange={setEnlargedEditorOpen}
-					title="Edit Default Value"
-					value={getCurrentEditingValue()}
-					onChange={handleCurrentEditingValueChange}
-					language="json"
-				/>
 			</Flex>
 		</WorkflowEditorRightPanelBase>
 	);

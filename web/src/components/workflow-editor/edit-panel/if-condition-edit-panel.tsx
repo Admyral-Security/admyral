@@ -1,19 +1,15 @@
-import { useState } from "react";
 import { useWorkflowStore } from "@/stores/workflow-store";
 import WorkflowEditorRightPanelBase from "../right-panel-base";
 import { Code, Flex, Text } from "@radix-ui/themes";
 import IfConditionActionIcon from "@/components/icons/if-condition-action-icon";
 import { TEditorWorkflowIfNode } from "@/types/react-flow";
 import { produce } from "immer";
-import { CodeEditor } from "@/components/code-editor/code-editor";
-import CodeEditorWithDialogButton from "@/components/code-editor-with-dialog-button/code-editor-with-dialog-button";
 import CodeEditorWithDialog from "@/components/code-editor-with-dialog/code-editor-with-dialog";
 
 const exampleCode = 'result["message"] == "hello" or result["count"] > 0';
 
 export default function IfConditionEditPanel() {
 	const { nodes, selectedNodeIdx, updateNodeData } = useWorkflowStore();
-	const [enlargedEditorOpen, setEnlargedEditorOpen] = useState(false);
 
 	if (!selectedNodeIdx) {
 		return null;
@@ -66,25 +62,16 @@ export default function IfConditionEditPanel() {
 						<Text size="2" color="gray">
 							Condition
 						</Text>
-						<CodeEditorWithDialogButton
-							onClick={() => setEnlargedEditorOpen(true)}
+					</Flex>
+					<Flex>
+						<CodeEditorWithDialog
+							title="Edit Condition"
+							value={condition.toString()}
+							onChange={handleConditionChange}
+							language="python"
 						/>
 					</Flex>
-					<CodeEditor
-						value={condition.toString()}
-						onChange={handleConditionChange}
-						language="python"
-						className="h-16 w-full"
-					/>
 				</Flex>
-				<CodeEditorWithDialog
-					open={enlargedEditorOpen}
-					onOpenChange={setEnlargedEditorOpen}
-					title="Edit Condition"
-					value={condition.toString()}
-					onChange={handleConditionChange}
-					language="python"
-				/>
 			</Flex>
 		</WorkflowEditorRightPanelBase>
 	);
