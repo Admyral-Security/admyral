@@ -6209,7 +6209,7 @@ packages:
             }
 
     tailwind-merge@2.5.3:
-          resolution: 
+        resolution:
             {
                 integrity: sha512-d9ZolCAIzom1nf/5p4LdD5zvjmgSxY0BGgdSvmXIoMYAiPdAW/dSpP7joCDYFY7r/HkEa2qmPtkgsu0xjQeQtw==,
             }
