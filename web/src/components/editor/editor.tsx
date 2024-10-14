@@ -45,11 +45,14 @@ export function CustomEditor({
 					tabSize: 2,
 					minimap: { enabled: false },
 					scrollbar: {
-						verticalScrollbarSize: 5,
+						verticalScrollbarSize: 0,
 						horizontalScrollbarSize: 5,
 					},
 					renderLineHighlight: "all",
 					inlineSuggest: { enabled: false },
+					suggestOnTriggerCharacters: false,
+					quickSuggestions: false,
+					wordBasedSuggestions: "off",
 					suggest: { preview: false },
 					...props.options,
 				}}
