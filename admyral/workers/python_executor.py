@@ -40,6 +40,45 @@ MOUNT_TEMPLATE = """mount {{
 ADMYRAL_PYTHON_PATH = "/usr/local/bin/python"
 
 
+PYTHON_PACKAGE_MAPPING = {
+    "psycopg2": "psycopg2-binary",
+    "psycopg": "psycopg[binary, pool]",
+    "yaml": "pyyaml",
+    "git": "GitPython",
+    "shopify": "ShopifyAPI",
+    "seleniumwire": "selenium-wire",
+    "openbb-terminal": "openbb[all]",
+    "riskfolio": "riskfolio-lib",
+    "smb": "pysmb",
+    "PIL": "Pillow",
+    "googleapiclient": "google-api-python-client",
+    "dateutil": "python-dateutil",
+    "mailparser": "mail-parser",
+    "mailparser-reply": "mail-parser-reply",
+    "gitlab": "python-gitlab",
+    "smbclient": "smbprotocol",
+    "playhouse": "peewee",
+    "dns": "dnspython",
+    "msoffcrypto": "msoffcrypto-tool",
+    "tabula": "tabula-py",
+    "shapefile": "pyshp",
+    "sklearn": "scikit-learn",
+    "umap": "umap-learn",
+    "cv2": "opencv-python",
+    "atlassian": "atlassian-python-api",
+    "mysql": "mysql-connector-python",
+    "tenable": "pytenable",
+    "ns1": "ns1-python",
+    "pymsql": "PyMySQL",
+    "haystack": "haystack-ai",
+    "github": "PyGithub",
+    "ldap": "python-ldap",
+    "opensearchpy": "opensearch-py",
+    "lokalise": "python-lokalise-api",
+    "msgraph": "msgraph-sdk",
+}
+
+
 async def get_nsjail_dir() -> str:
     file_dir = await dirname(__file__)
     return os.path.join(file_dir, "nsjail")
@@ -134,6 +173,16 @@ async def _prepare_python_action(
         req
         for req in requirements_list
         if req.split("==")[0] not in sys.stdlib_module_names
+    ]
+
+    # handle package name mapping. some packages have different names on PyPi
+    requirements_list = [
+        PYTHON_PACKAGE_MAPPING.get(req, req)
+        if "==" not in req
+        else PYTHON_PACKAGE_MAPPING.get(req.split("==")[0], req.split("==")[0])
+        + "=="
+        + req.split("==")[1]
+        for req in requirements_list
     ]
 
     async with aiofiles.open(os.path.join(job_dir, "requirements.in"), "w") as f:
