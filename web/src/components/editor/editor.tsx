@@ -5,12 +5,7 @@ import {
 	OnChange,
 } from "@monaco-editor/react";
 import { editor } from "monaco-editor";
-import clsx, { ClassValue } from "clsx";
-import { twMerge } from "tailwind-merge";
-
-function mergeCSSClasses(...inputs: ClassValue[]) {
-	return twMerge(clsx(inputs));
-}
+import { cn } from "@/utils/tailwind";
 
 export function CustomEditor({
 	className,
@@ -39,7 +34,7 @@ export function CustomEditor({
 	};
 
 	return (
-		<div className={mergeCSSClasses("h-36", className)}>
+		<div className={cn("h-36", className)}>
 			<ReactMonacoEditor
 				height="100%"
 				{...(language && { language })}
@@ -54,6 +49,8 @@ export function CustomEditor({
 						horizontalScrollbarSize: 5,
 					},
 					renderLineHighlight: "all",
+					inlineSuggest: { enabled: false },
+					suggest: { preview: false },
 					...props.options,
 				}}
 				wrapperProps={{ className: "editor-wrapper" }}
