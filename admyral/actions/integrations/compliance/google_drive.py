@@ -4,11 +4,38 @@ from google.oauth2.service_account import Credentials as ServiceAccountCredentia
 from difflib import ndiff
 import requests
 from dateutil import parser
+from tenacity import (
+    retry,
+    retry_if_exception_type,
+    stop_after_attempt,
+    wait_exponential,
+)
 
 from admyral.action import action, ArgumentMetadata
 from admyral.context import ctx
 from admyral.typings import JsonValue
 from admyral.utils.collections import is_empty
+
+
+@retry(
+    stop=stop_after_attempt(10),
+    wait=wait_exponential(multiplier=1, min=1, max=10),
+    retry=retry_if_exception_type(requests.HTTPError),
+    reraise=True,
+)
+def _export_google_docs_revision(
+    export_link: str, mime_type: str, creds: ServiceAccountCredentials
+) -> requests.Response:
+    """
+    For very recent revisions, we might need to retry the export a couple of times since
+    there is a slight delay between the revision being created and the export being available.
+    """
+    export_response = requests.get(
+        export_link,
+        headers={"Authorization": f"Bearer {creds.token}", "Accept": mime_type},
+    )
+    export_response.raise_for_status()
+    return export_response
 
 
 @action(
@@ -76,11 +103,9 @@ def list_google_docs_revisions(
 
             mime_type = "text/plain"
             export_link = revision["exportLinks"][mime_type]
-            export_response = requests.get(
-                export_link,
-                headers={"Authorization": f"Bearer {creds.token}", "Accept": mime_type},
+            export_response = _export_google_docs_revision(
+                export_link, mime_type, creds
             )
-            export_response.raise_for_status()
 
             prev_text = "" if is_empty(result) else result[-1]["content"]
             diff = "\n".join(
