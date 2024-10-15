@@ -1,29 +1,26 @@
-import {
-	EditorProps,
-	Editor as ReactMonacoEditor,
-	type Monaco,
-	OnChange,
-} from "@monaco-editor/react";
+import { Editor as ReactMonacoEditor, type Monaco } from "@monaco-editor/react";
 import { editor } from "monaco-editor";
-import { cn } from "@/utils/tailwind";
 
-interface CodeEditorProps extends EditorProps {
+interface CodeEditorProps {
+	defaultValue?: string;
+	value?: string;
+	onChange: (value: string) => void;
 	className?: string;
 	language?: string;
-	onChange?: OnChange;
 }
 
-export function CodeEditor({
+export default function CodeEditor({
 	className,
 	language,
 	onChange,
+	value,
 	...props
 }: CodeEditorProps) {
 	const handleEditorDidMount = (
 		editor: editor.IStandaloneCodeEditor,
 		monaco: Monaco,
 	) => {
-		monaco.editor.defineTheme("myCustomTheme", {
+		monaco.editor.defineTheme("custom", {
 			base: "vs",
 			inherit: true,
 			rules: [],
@@ -32,35 +29,33 @@ export function CodeEditor({
 				"editorLineNumber.foreground": "#5A5A5A",
 			},
 		});
-		monaco.editor.setTheme("myCustomTheme");
+		monaco.editor.setTheme("custom");
 	};
 
 	return (
-		<div className={cn("h-36", className)}>
-			<ReactMonacoEditor
-				height="100%"
-				{...(language && { language })}
-				onMount={handleEditorDidMount}
-				onChange={onChange}
-				theme="myCustomTheme"
-				options={{
-					tabSize: 2,
-					minimap: { enabled: false },
-					scrollbar: {
-						verticalScrollbarSize: 0,
-						horizontalScrollbarSize: 5,
-					},
-					renderLineHighlight: "all",
-					inlineSuggest: { enabled: false },
-					suggestOnTriggerCharacters: false,
-					quickSuggestions: false,
-					wordBasedSuggestions: "off",
-					suggest: { preview: false },
-					...props.options,
-				}}
-				wrapperProps={{ className: "editor-wrapper" }}
-				{...props}
-			/>
-		</div>
+		<ReactMonacoEditor
+			{...(language && { language })}
+			onMount={handleEditorDidMount}
+			onChange={(value, _ev) => onChange(value || "")}
+			theme="custom"
+			options={{
+				tabSize: 2,
+				minimap: { enabled: false },
+				scrollbar: {
+					verticalScrollbarSize: 5,
+					horizontalScrollbarSize: 5,
+				},
+				renderLineHighlight: "all",
+				inlineSuggest: { enabled: false },
+				suggestOnTriggerCharacters: false,
+				quickSuggestions: false,
+				wordBasedSuggestions: "off",
+				suggest: { preview: false },
+			}}
+			width="100%"
+			wrapperProps={{ className: "editor-wrapper" }}
+			value={value || ""}
+			{...props}
+		/>
 	);
 }

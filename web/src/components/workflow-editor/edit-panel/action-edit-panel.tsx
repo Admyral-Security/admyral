@@ -8,7 +8,7 @@ import { produce } from "immer";
 import { ChangeEvent, useEffect } from "react";
 import { useImmer } from "use-immer";
 import { TActionMetadata } from "@/types/editor-actions";
-import { CodeEditor } from "@/components/code-editor/code-editor";
+import CodeEditorWithDialog from "@/components/code-editor-with-dialog/code-editor-with-dialog";
 
 function buildInitialArgs(
 	action: TEditorWorkflowActionNode,
@@ -18,7 +18,7 @@ function buildInitialArgs(
 		const value =
 			arg.argName in action.args
 				? action.args[arg.argName]
-				: arg.defaultValue || "";
+				: JSON.stringify(arg.defaultValue) || "";
 		return value === "null" ? "" : value;
 	});
 }
@@ -70,15 +70,19 @@ export default function ActionEditPanel() {
 	const onChangeActionArgument = (
 		argument: string,
 		argIdx: number,
-		value: string | undefined,
+		value: string,
 	) => {
 		updateArgs((draft) => {
-			draft[argIdx] = value || "";
+			draft[argIdx] = value;
 		});
 		updateNodeData(
 			selectedNodeIdx,
 			produce(actionData, (draft) => {
-				draft.args[argument] = value || "";
+				if (value === "") {
+					delete draft.args[argument];
+				} else {
+					draft.args[argument] = value;
+				}
 			}),
 		);
 	};
@@ -151,7 +155,7 @@ export default function ActionEditPanel() {
 				)}
 
 				{actionDefinition.arguments.length > 0 && (
-					<Flex direction="column" gap="2">
+					<Flex direction="column" gap="2" width="100%">
 						<Text weight="medium" size="4">
 							Action Arguments
 						</Text>
@@ -160,6 +164,7 @@ export default function ActionEditPanel() {
 								key={`${action.id}_action_edit_${argument.argName}`}
 								direction="column"
 								gap="1"
+								width="100%"
 							>
 								<Text>{argument.displayName}</Text>
 								<Text color="gray" weight="light" size="1">
@@ -168,17 +173,20 @@ export default function ActionEditPanel() {
 								<Text color="gray" weight="light" size="1">
 									Type: {argument.argType}
 								</Text>
-								<CodeEditor
-									value={args[argIdx]}
-									onChange={(value) =>
-										onChangeActionArgument(
-											argument.argName,
-											argIdx,
-											value,
-										)
-									}
-									className="h-12 w-full"
-								/>
+								<Flex width="100%" height="128px">
+									<CodeEditorWithDialog
+										title={argument.displayName}
+										description={argument.description}
+										value={args[argIdx]}
+										onChange={(value) =>
+											onChangeActionArgument(
+												argument.argName,
+												argIdx,
+												value,
+											)
+										}
+									/>
+								</Flex>
 								<Flex justify="end">
 									<Text color="gray" weight="light" size="1">
 										{argument.isOptional

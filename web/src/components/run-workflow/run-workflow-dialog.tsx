@@ -4,7 +4,7 @@ import { useWorkflowStore } from "@/stores/workflow-store";
 import { Cross1Icon } from "@radix-ui/react-icons";
 import { Button, Dialog, Flex, Text } from "@radix-ui/themes";
 import { useEffect } from "react";
-import { CodeEditor } from "@/components/code-editor/code-editor";
+import CodeEditor from "@/components/code-editor/code-editor";
 
 export default function RunWorkflowDialog({
 	closeDialog,
@@ -49,66 +49,70 @@ export default function RunWorkflowDialog({
 		triggerWorkflow.mutate({ workflowName, payload: parsedPayload });
 	};
 
-	const handleEditorChange = (value: string | undefined) => {
-		setPayloadCache(value || "");
-	};
-
 	return (
-		<Flex direction="column" gap="4">
-			<Flex justify="between" align="center">
-				<Text weight="bold" size="5">
-					Run Workflow
-				</Text>
+		<Dialog.Content
+			style={{
+				maxWidth: "min(90vw, 900px)",
+				height: "min(90vh, 612px)",
+			}}
+		>
+			<Flex direction="column" gap="4" height="100%">
+				<Flex justify="between" align="center">
+					<Text weight="bold" size="5">
+						Run Workflow
+					</Text>
 
-				<Dialog.Close>
+					<Dialog.Close>
+						<Button
+							size="2"
+							variant="soft"
+							color="gray"
+							style={{
+								cursor: "pointer",
+								paddingLeft: 8,
+								paddingRight: 8,
+							}}
+						>
+							<Cross1Icon width="16" height="16" />
+						</Button>
+					</Dialog.Close>
+				</Flex>
+
+				<Flex direction="column" gap="2" height="100%">
+					<Text weight="medium">Test Payload (JSON)</Text>
+					<Flex width="100%" height="100%">
+						<CodeEditor
+							value={payloadCache}
+							onChange={setPayloadCache}
+							language="json"
+						/>
+					</Flex>
+				</Flex>
+
+				<Flex align="center" justify="end" gap="4">
+					<Dialog.Close>
+						<Button
+							variant="soft"
+							color="gray"
+							style={{ cursor: "pointer" }}
+						>
+							Cancel
+						</Button>
+					</Dialog.Close>
+
 					<Button
+						variant="solid"
 						size="2"
-						variant="soft"
-						color="gray"
 						style={{
 							cursor: "pointer",
-							paddingLeft: 8,
-							paddingRight: 8,
 						}}
+						onClick={handleRunWorkflow}
+						loading={triggerWorkflow.isPending}
 					>
-						<Cross1Icon width="16" height="16" />
+						Run Workflow
 					</Button>
-				</Dialog.Close>
+				</Flex>
 			</Flex>
-
-			<Flex direction="column" gap="2">
-				<Text weight="medium">Test Payload (JSON)</Text>
-				<CodeEditor
-					className="h-72 w-full"
-					value={payloadCache}
-					language="json"
-					onChange={handleEditorChange}
-				/>
-			</Flex>
-
-			<Flex align="center" justify="end" gap="4">
-				<Dialog.Close>
-					<Button
-						variant="soft"
-						color="gray"
-						style={{ cursor: "pointer" }}
-					>
-						Cancel
-					</Button>
-				</Dialog.Close>
-
-				<Button
-					variant="solid"
-					size="2"
-					style={{
-						cursor: "pointer",
-					}}
-					onClick={handleRunWorkflow}
-					loading={triggerWorkflow.isPending}
-				>
-					Run Workflow
-				</Button>
-			</Flex>
-		</Flex>
+		</Dialog.Content>
 	);
 }
