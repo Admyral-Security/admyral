@@ -70,6 +70,16 @@ def anthropic_chat_completion(
 
     client = Anthropic(api_key=api_key)
 
+    model_params = {}
+    if top_p is not None:
+        model_params["top_p"] = top_p
+    if temperature is not None:
+        model_params["temperature"] = temperature
+    if max_tokens is not None:
+        model_params["max_tokens"] = max_tokens
+    if stop_tokens is not None:
+        model_params["stop_sequences"] = stop_tokens
+
     message = client.messages.create(
         messages=[
             {
@@ -78,10 +88,7 @@ def anthropic_chat_completion(
             }
         ],
         model=model,
-        top_p=top_p,
-        temperature=temperature,
-        max_tokens=max_tokens,
-        stop_sequences=stop_tokens,
+        **model_params,
     )
 
     # TODO: what is the best behavior for returning the content blocks?

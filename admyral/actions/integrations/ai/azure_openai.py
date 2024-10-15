@@ -60,11 +60,16 @@ def azure_openai_chat_completion(
     client = AzureOpenAI(
         api_version="2024-06-01", azure_endpoint=endpoint, api_key=api_key
     )
+
+    model_params = {}
+    if top_p is not None:
+        model_params["top_p"] = top_p
+    if temperature is not None:
+        model_params["temperature"] = temperature
+    if stop_tokens is not None and not model.startswith("o1"):
+        model_params["stop"] = stop_tokens
+
     chat_completion = client.chat.completions.create(
-        messages=[{"role": "user", "content": prompt}],
-        model=model,
-        top_p=top_p,
-        temperature=temperature,
-        stop=stop_tokens,
+        messages=[{"role": "user", "content": prompt}], model=model, **model_params
     )
     return chat_completion.choices[0].message.content
