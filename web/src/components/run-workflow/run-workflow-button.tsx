@@ -1,5 +1,5 @@
 import { PlayIcon } from "@radix-ui/react-icons";
-import { Button, Dialog, Flex } from "@radix-ui/themes";
+import { Button, Dialog } from "@radix-ui/themes";
 import RunWorkflowDialog from "./run-workflow-dialog";
 import { useState } from "react";
 
@@ -25,9 +25,7 @@ export default function RunWorkflowButton() {
 				</Button>
 			</Dialog.Trigger>
 
-			<Dialog.Content>
-				<RunWorkflowDialog closeDialog={() => setShowModal(false)} />
-			</Dialog.Content>
+			<RunWorkflowDialog closeDialog={() => setShowModal(false)} />
 		</Dialog.Root>
 	);
 }

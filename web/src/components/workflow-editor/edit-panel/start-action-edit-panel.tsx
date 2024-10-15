@@ -187,7 +187,7 @@ export default function StartActionEditPanel({
 			selectedNodeIdx,
 			produce(actionData, (draft) => {
 				draft.schedules[scheduleIdx].defaultArgs[defaultArgIdx][1] =
-					event || "";
+					event;
 			}),
 		);
 	};
@@ -313,14 +313,14 @@ export default function StartActionEditPanel({
 											<Text size="2" color="gray">
 												Default Value
 											</Text>
-											<Flex>
+											<Flex width="100%" height="128px">
 												<CodeEditorWithDialog
 													title="Edit Default Value"
 													value={defaultArg[1]}
 													onChange={(value) =>
 														handleWebhookDefaultArgValue(
 															defaultArgIdx,
-															value || "",
+															value,
 														)
 													}
 													language="json"
@@ -506,7 +506,10 @@ export default function StartActionEditPanel({
 													<Text size="2" color="gray">
 														Default Value
 													</Text>
-													<Flex>
+													<Flex
+														width="100%"
+														height="128px"
+													>
 														<CodeEditorWithDialog
 															title="Edit Default Value"
 															value={
@@ -516,7 +519,7 @@ export default function StartActionEditPanel({
 																handleScheduleDefaultArgValue(
 																	scheduleIdx,
 																	defaultArgIdx,
-																	value || "",
+																	value,
 																)
 															}
 															language="json"

@@ -1,82 +1,85 @@
-import { useState, useEffect } from "react";
-import { Flex, Dialog, IconButton } from "@radix-ui/themes";
+import { Flex, Dialog, IconButton, Text } from "@radix-ui/themes";
 import { SizeIcon } from "@radix-ui/react-icons";
-import { CodeEditor } from "@/components/code-editor/code-editor";
+import CodeEditor from "@/components/code-editor/code-editor";
 
 interface CodeEditorWithDialogProps {
 	title?: string;
-	value: string;
+	description?: string;
+	defaultValue?: string;
+	value?: string;
 	onChange: (value: string) => void;
+	className?: string;
 	language?: string;
 }
 
 export default function CodeEditorWithDialog({
 	title,
+	description,
 	value,
 	onChange,
 	language,
+	className,
 }: CodeEditorWithDialogProps) {
-	const [isOpen, setIsOpen] = useState(false);
-	const [currentValue, setCurrentValue] = useState(value);
-
-	useEffect(() => {
-		setCurrentValue(value);
-	}, [value]);
-
-	const handleOpenChange = (open: boolean) => {
-		setIsOpen(open);
-		if (!open) {
-			onChange(currentValue);
-		}
-	};
-
-	const handleEditorChange = (value: string | undefined) => {
-		setCurrentValue(value ?? "");
-		onChange(value ?? "");
-	};
-
 	return (
-		<Flex direction="column" gap="10" width="100%">
-			<div className="relative w-full">
-				<CodeEditor
-					value={currentValue}
-					onChange={handleEditorChange}
-					language={language}
-					className=" h-16 w-full"
-				/>
-				<IconButton
-					variant="ghost"
-					size="1"
-					onClick={() => setIsOpen(true)}
+		<Flex width="100%" height="100%" position="relative">
+			<CodeEditor
+				value={value}
+				onChange={onChange}
+				language={language}
+				className={className}
+			/>
+
+			<Dialog.Root>
+				<Dialog.Trigger>
+					<IconButton
+						variant="ghost"
+						size="1"
+						style={{
+							position: "absolute",
+							top: "-18px",
+							right: "0px",
+							cursor: "pointer",
+						}}
+					>
+						<SizeIcon />
+					</IconButton>
+				</Dialog.Trigger>
+
+				<Dialog.Content
 					style={{
-						position: "absolute",
-						top: "-15%",
-						right: "0%",
-						transform: "translateY(-50%)",
+						maxWidth: "min(90vw, 900px)",
+						height: "min(90vh, 612px)",
 					}}
 				>
-					<SizeIcon />
-				</IconButton>
-			</div>
-			<Dialog.Root open={isOpen} onOpenChange={handleOpenChange}>
-				<Dialog.Content
-					style={{ maxWidth: "min(90vw, 800px)", width: "100%" }}
-				>
-					<Flex direction="column" gap="4">
+					<Flex direction="column" gap="2" height="100%" width="100%">
 						<Flex justify="between" align="center">
-							<Dialog.Title>{title}</Dialog.Title>
+							{title !== undefined && (
+								<Text size="5" weight="medium">
+									{title}
+								</Text>
+							)}
 							<Dialog.Close>
-								<IconButton variant="ghost" size="1">
+								<IconButton
+									variant="ghost"
+									size="1"
+									style={{ cursor: "pointer" }}
+								>
 									<SizeIcon />
 								</IconButton>
 							</Dialog.Close>
 						</Flex>
-						<CodeEditor
-							value={currentValue}
-							onChange={handleEditorChange}
-							className="h-[30vh] w-full"
-							language={language}
-						/>
+						{description !== undefined && (
+							<Flex justify="between" align="center">
+								<Text size="3">{description}</Text>
+							</Flex>
+						)}
+						<Flex height="100%" width="100%">
+							<CodeEditor
+								value={value}
+								onChange={onChange}
+								language={language}
+							/>
+						</Flex>
 					</Flex>
 				</Dialog.Content>
 			</Dialog.Root>

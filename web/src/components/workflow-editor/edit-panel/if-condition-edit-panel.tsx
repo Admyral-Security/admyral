@@ -18,11 +18,11 @@ export default function IfConditionEditPanel() {
 	const data = nodes[selectedNodeIdx].data as TEditorWorkflowIfNode;
 	const condition = data.condition;
 
-	const handleConditionChange = (value: string | undefined) => {
+	const handleConditionChange = (value: string) => {
 		updateNodeData(
 			selectedNodeIdx,
 			produce(data, (draft) => {
-				draft.condition = value || "";
+				draft.condition = value;
 			}),
 		);
 	};
@@ -63,10 +63,10 @@ export default function IfConditionEditPanel() {
 							Condition
 						</Text>
 					</Flex>
-					<Flex>
+					<Flex width="100%" height="128px">
 						<CodeEditorWithDialog
-							title="Edit Condition"
-							value={condition.toString()}
+							title="If Condition"
+							value={condition}
 							onChange={handleConditionChange}
 							language="python"
 						/>
