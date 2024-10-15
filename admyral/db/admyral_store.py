@@ -516,7 +516,7 @@ class AdmyralStore(StoreInterface):
             return webhooks[0].to_model()
 
     async def _get_webhook(
-        db: AdmyralDatabaseSession, webhook_id: str
+        self, db: AdmyralDatabaseSession, webhook_id: str
     ) -> Optional[WorkflowWebhook]:
         result = await db.exec(
             select(WorkflowWebhookSchema).where(

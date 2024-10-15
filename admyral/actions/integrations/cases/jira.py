@@ -63,12 +63,12 @@ def create_jira_issue(
         ),
     ] = None,
     labels: Annotated[
-        list[str],
+        list[str] | None,
         ArgumentMetadata(
             display_name="Labels",
             description="The labels to add to the issue",
         ),
-    ] = [],
+    ] = None,
     priority: Annotated[
         Literal["Lowest", "Low", "Medium", "High", "Highest"] | None,
         ArgumentMetadata(
