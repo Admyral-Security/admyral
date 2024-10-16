@@ -26,7 +26,7 @@ export default function WorkflowSettingsEditPanel() {
 		setDescription,
 		controls,
 		addControl,
-		updateControlsByIdx,
+		updateControlByIdx,
 		deleteControlByIdx,
 	} = useWorkflowStore();
 	const deleteWorkflow = useDeleteWorkflowApi();
@@ -98,7 +98,7 @@ export default function WorkflowSettingsEditPanel() {
 										variant="surface"
 										value={control}
 										onChange={(event) =>
-											updateControlsByIdx(
+											updateControlByIdx(
 												controlIdx,
 												event.target.value,
 											)

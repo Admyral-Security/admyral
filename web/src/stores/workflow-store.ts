@@ -83,7 +83,7 @@ type WorkflowStoreState = TReactFlowGraph & {
 		webhookId: string,
 		webhookSecret: string,
 	) => void;
-	updateControlsByIdx: (controlIdx: number, control: string) => void;
+	updateControlByIdx: (controlIdx: number, control: string) => void;
 	deleteNodeByIdx: (nodeIdx: number) => void;
 	deleteControlByIdx: (controlIdx: number) => void;
 	duplicateNodeByIdx: (nodeIdx: number) => void;
@@ -350,7 +350,7 @@ export const useWorkflowStore = create<WorkflowStoreState>((set, get) => ({
 				}
 			}),
 		),
-	updateControlsByIdx: (controlIdx: number, control: string) =>
+	updateControlByIdx: (controlIdx: number, control: string) =>
 		set(
 			produce((draft) => {
 				draft.controls[controlIdx] = control;
