@@ -283,6 +283,9 @@ export const useWorkflowStore = create<WorkflowStoreState>((set, get) => ({
 	addControl: () =>
 		set(
 			produce((draft) => {
+				if (draft.controls === null) {
+					draft.controls = [];
+				}
 				draft.controls.push("");
 			}),
 		),
