@@ -68,10 +68,10 @@ type WorkflowStoreState = TReactFlowGraph & {
 	onNodesChange: OnNodesChange;
 	onEdgesChange: OnEdgesChange;
 	addNode: (node: TReactFlowNode) => void;
+	addControl: () => void;
 	getNodeId: () => string;
 	setWorkflowName: (workflowName: string) => void;
 	setDescription: (description: string) => void;
-	setControls: (controls: string[]) => void;
 	updateNodeData: (
 		nodeIdx: number,
 		data:
@@ -83,7 +83,9 @@ type WorkflowStoreState = TReactFlowGraph & {
 		webhookId: string,
 		webhookSecret: string,
 	) => void;
+	updateControlsByIdx: (controlIdx: number, control: string) => void;
 	deleteNodeByIdx: (nodeIdx: number) => void;
+	deleteControlByIdx: (controlIdx: number) => void;
 	duplicateNodeByIdx: (nodeIdx: number) => void;
 	// Settings Side Panel
 	detailPageType: "workflow" | "action" | null;
@@ -278,6 +280,12 @@ export const useWorkflowStore = create<WorkflowStoreState>((set, get) => ({
 				draft.nodes.push(node);
 			}),
 		),
+	addControl: () =>
+		set(
+			produce((draft) => {
+				draft.controls.push("");
+			}),
+		),
 	getNodeId: () => {
 		let newIdx = get().nextId;
 		let nodeId = `node_${newIdx}`;
@@ -300,12 +308,6 @@ export const useWorkflowStore = create<WorkflowStoreState>((set, get) => ({
 		set(
 			produce((draft) => {
 				draft.description = description;
-			}),
-		),
-	setControls: (controls) =>
-		set(
-			produce((draft) => {
-				draft.controls = controls;
 			}),
 		),
 	updateNodeData: (
@@ -345,6 +347,12 @@ export const useWorkflowStore = create<WorkflowStoreState>((set, get) => ({
 				}
 			}),
 		),
+	updateControlsByIdx: (controlIdx: number, control: string) =>
+		set(
+			produce((draft) => {
+				draft.controls[controlIdx] = control;
+			}),
+		),
 	duplicateNodeByIdx: (nodeIdx: number) => {
 		const newNodeId = get().getNodeId();
 		set(
@@ -378,6 +386,12 @@ export const useWorkflowStore = create<WorkflowStoreState>((set, get) => ({
 					draft.detailPageType = null;
 					draft.selectedNodeIdx = null;
 				}
+			}),
+		),
+	deleteControlByIdx: (controlIdx: number) =>
+		set(
+			produce((draft) => {
+				draft.controls.splice(controlIdx, 1);
 			}),
 		),
 	// Settings Side Panel

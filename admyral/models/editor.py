@@ -95,6 +95,7 @@ class EditorWorkflowGraph(BaseModel):
     workflow_id: str
     workflow_name: str
     description: str | None
+    controls: list[str] | None
     is_active: bool
     nodes: list[EditorWorkflowNode]
     edges: list[EditorWorkflowEdge]

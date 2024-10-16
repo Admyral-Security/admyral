@@ -8,13 +8,14 @@ import {
 	Text,
 	TextArea,
 	TextField,
+	IconButton,
 } from "@radix-ui/themes";
 import SettingsIcon from "../icons/settings-icon";
 import WorkflowEditorRightPanelBase from "./right-panel-base";
 import { useWorkflowStore } from "@/stores/workflow-store";
 import { useDeleteWorkflowApi } from "@/hooks/use-delete-workflow-api";
 import { useRouter } from "next/navigation";
-import { TrashIcon } from "@radix-ui/react-icons";
+import { TrashIcon, MinusIcon, PlusIcon } from "@radix-ui/react-icons";
 
 export default function WorkflowSettingsEditPanel() {
 	const {
@@ -23,6 +24,10 @@ export default function WorkflowSettingsEditPanel() {
 		setWorkflowName,
 		description,
 		setDescription,
+		controls,
+		addControl,
+		updateControlsByIdx,
+		deleteControlByIdx,
 	} = useWorkflowStore();
 	const deleteWorkflow = useDeleteWorkflowApi();
 	const router = useRouter();
@@ -61,6 +66,58 @@ export default function WorkflowSettingsEditPanel() {
 					/>
 				</Flex>
 
+				<Flex direction="column" gap="3">
+					<Text>Controls</Text>
+					{controls &&
+						controls.map((control, controlIdx) => (
+							<Flex
+								key={`control_${controlIdx}`}
+								direction="column"
+								gap="1"
+							>
+								<Flex direction="column" gap="1">
+									<Flex justify="between">
+										<Text size="2" color="gray">
+											Name of the Control
+										</Text>
+										<IconButton
+											radius="full"
+											color="red"
+											size="1"
+											style={{
+												cursor: "pointer",
+											}}
+											onClick={() =>
+												deleteControlByIdx(controlIdx)
+											}
+										>
+											<MinusIcon />
+										</IconButton>
+									</Flex>
+									<TextField.Root
+										variant="surface"
+										value={control}
+										onChange={(event) =>
+											updateControlsByIdx(
+												controlIdx,
+												event.target.value,
+											)
+										}
+									/>
+								</Flex>
+							</Flex>
+						))}
+					<Flex width="100%" justify="center" align="center">
+						<IconButton
+							radius="full"
+							size="1"
+							style={{ cursor: "pointer" }}
+							onClick={addControl}
+						>
+							<PlusIcon />
+						</IconButton>
+					</Flex>
+				</Flex>
 				<Box width="auto">
 					<AlertDialog.Root>
 						<AlertDialog.Trigger>

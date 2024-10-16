@@ -125,6 +125,7 @@ def workflow_to_editor_workflow_graph(
         workflow_id=workflow.workflow_id,
         workflow_name=workflow.workflow_name,
         description=workflow.workflow_dag.description,
+        controls=workflow.workflow_dag.controls,
         is_active=workflow.is_active,
         nodes=nodes,
         edges=edges,
@@ -205,6 +206,7 @@ def editor_workflow_graph_to_workflow(
         workflow_dag=WorkflowDAG(
             name=editor_workflow_graph.workflow_name,
             description=editor_workflow_graph.description,
+            controls=editor_workflow_graph.controls,
             start=WorkflowStart(triggers=triggers),
             dag=workflow_dag,
         ),

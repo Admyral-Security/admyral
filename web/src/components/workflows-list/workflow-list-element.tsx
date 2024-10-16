@@ -31,7 +31,7 @@ export default function WorkflowListElement({
 						</Text>
 					)}
 					{controls !== null && controls.length > 0 && (
-						<Flex gap="2">
+						<Flex gap="2" wrap="wrap">
 							{controls.map((control) => (
 								<Badge color="blue" radius="full">
 									{control}
