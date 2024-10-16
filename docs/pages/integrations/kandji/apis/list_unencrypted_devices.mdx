@@ -1,0 +1,243 @@
+import { Callout } from "nextra/components";
+
+# List Unencrypted Devices
+
+Get a list of all unencrypted devices in an organization from Kandji. A device is classified as unencrypted when it has at least one unencrypted volume.
+
+<Callout type="info">
+	For more information on the API, see [List
+	devices](https://api-docs.kandji.io/#78209960-31a7-4e3b-a2c0-95c7e65bb5f9)
+	and [Get Device
+	Details](https://api-docs.kandji.io/#efa2170d-e5f7-4b97-8f4c-da6f84ba58b5).
+</Callout>
+
+**Required permissions:**
+
+-   `Device list`
+-   `Device details`
+
+**SDK Import:**
+
+```python
+from admyral.actions import list_kandji_unencrypted_devices
+```
+
+## Arguments:
+
+| Argument Name | Description | Required |
+| ------------- | ----------- | :------: |
+
+## Returns
+
+A JSON array of unencrypted devices.
+
+## Required Secrets
+
+| Secret Placeholder | Description                                                    |
+| ------------------ | -------------------------------------------------------------- |
+| `KANDJI_SECRET`    | Kandji secret. See [Kandji setup](/integrations/kandji/kandji) |
+
+## SDK Example
+
+```python
+devices = list_kandji_unencrypted_devices(
+	secrets={"KANDJI_SECRET": "my_kandji_secret"}
+)
+```
+
+## Example Output:
+
+```json
+[
+    {
+        "general": {
+            "device_id": "03f81208-2b6a-4a77-81f5-cf1633bcfb95",
+            "device_name": "testuser’s MacBook Air",
+            "last_enrollment": "2024-05-13 20:09:27.374451+00:00",
+            "first_enrollment": "2024-01-26 16:15:36.087016+00:00",
+            "model": "MacBook Air (M1, 2020)",
+            "platform": "Mac",
+            "os_version": "14.4.1",
+            "supplemental_build_version": "23E224",
+            "supplemental_os_version_extra": "",
+            "system_version": "14.4.1 (23E224)",
+            "boot_volume": "Macintosh HD",
+            "time_since_boot": "1 month ago",
+            "last_user": "root",
+            "asset_tag": "sending_tag_to_now",
+            "assigned_user": {
+                "email": "accuhive.admin@kandji.io",
+                "name": "acchuhive admin",
+                "id": "5344c996-8823-4b37-8d6e-8515fc7c3a0a",
+                "is_archived": false
+            },
+            "blueprint_name": "_test_something",
+            "blueprint_uuid": "ab102b9d-8e9c-420d-a498-f2a1123091c7"
+        },
+        "mdm": {
+            "mdm_enabled": "True",
+            "supervised": "True",
+            "install_date": "2024-05-13 20:09:27.213607+00:00",
+            "last_check_in": "2024-07-23 12:43:15.675470+00:00",
+            "mdm_enabled_user": [
+                "testuser"
+            ]
+        },
+        "activation_lock": {
+            "bypass_code_failed": false,
+            "user_activation_lock_enabled": false,
+            "device_activation_lock_enabled": false,
+            "activation_lock_allowed_while_supervised": false,
+            "activation_lock_supported": true
+        },
+        "filevault": {
+            "filevault_enabled": false,
+            "filevault_recoverykey_type": "",
+            "filevault_prk_escrowed": false,
+            "filevault_next_rotation": "",
+            "filevault_regen_required": false
+        },
+        "lost_mode": {},
+        "automated_device_enrollment": {},
+        "kandji_agent": {
+            "agent_installed": "True",
+            "install_date": "2024-06-17 11:32:35+00:00",
+            "last_check_in": "2024-07-23T14:26:49.166267Z",
+            "agent_version": "4.5.9 (5160)"
+        },
+        "hardware_overview": {
+            "model_name": "MacBook Air",
+            "model_identifier": "MacBookAir10,1",
+            "processor_name": "Apple M1",
+            "processor_speed": "",
+            "number_of_processors": "8",
+            "total_number_of_cores": "8",
+            "memory": "8 GB LPDDR4",
+            "udid": "3c976d96-08a0-5014-89e4-66259ab79fe6",
+            "serial_number": "FVHHFKF7Q6L4"
+        },
+        "volumes": [
+            {
+                "name": "Macintosh HD",
+                "format": "APFS",
+                "percent_used": "19%",
+                "identifier": "disk3s3s1",
+                "capacity": "228.27 GB",
+                "available": "182.66 GB",
+                "encrypted": "No"
+            },
+            {
+                "name": "Macintosh HD - Data",
+                "format": "APFS",
+                "percent_used": "19%",
+                "identifier": "disk3s1",
+                "capacity": "228.27 GB",
+                "available": "182.66 GB",
+                "encrypted": "Yes"
+            }
+        ],
+        "network": {
+            "local_hostname": "testusers-MacBook-Air",
+            "mac_address": "fc:e2:6c:27:1b:e4",
+            "ip_address": "192.168.1.76",
+            "public_ip": ""
+        },
+        "recovery_information": {
+            "recovery_lock_enabled": true,
+            "firmware_password_exist": false,
+            "firmware_password_pending": false,
+            "password_rotation_scheduled": "2024-09-10T11:48:00.610908Z",
+            "password_has_been_set": true
+        },
+        "users": {
+            "regular_users": [
+                {
+                    "username": "testuser",
+                    "uid": "501",
+                    "path": "/Users/testuser",
+                    "admin": "Yes",
+                    "name": ""
+                }
+            ],
+            "system_users": [
+                {
+                    "username": "_lp",
+                    "uid": "26",
+                    "path": "/var/spool/cups",
+                    "admin": "No"
+                },
+                {
+                    "username": "_ard",
+                    "uid": "67",
+                    "path": "/var/empty",
+                    "admin": "No"
+                },
+                ...
+            ]
+        },
+        "installed_profiles": [
+            {
+                "name": "MDM Profile",
+                "uuid": "35fec4f0-88f4-41c5-b3c1-e6da3f0f592d",
+                "verified": "verified",
+                "identifier": "com.kandji.profile.mdmprofile",
+                "organization": "Kandji, Inc.",
+                "payload_types": [
+                    "com.apple.mdm",
+                    "com.apple.security.scep"
+                ],
+                "install_date": "2024-05-13 20:09:23 +0000"
+            },
+            {
+                "name": "SCEP for Okta Device Trust",
+                "uuid": "351c9f76-defa-5fbe-91d3-c9aefe787453",
+                "verified": "verified",
+                "identifier": "com.kandji.profile.odt.scep",
+                "organization": "Kandji, Inc.",
+                "payload_types": [
+                    "com.apple.security.scep"
+                ],
+                "install_date": "2024-06-14 00:24:43 +0000"
+            },
+            {
+                "name": "SSO for Okta Device Trust",
+                "uuid": "3e350947-74f1-5d73-bb70-abb7ea9af6c1",
+                "verified": "verified",
+                "identifier": "com.kandji.profile.odt.sso",
+                "organization": "Kandji, Inc.",
+                "payload_types": [
+                    "com.apple.extensiblesso",
+                    "com.apple.loginitems.managed",
+                    "com.okta.mobile",
+                    "com.okta.mobile.auth-service-extension"
+                ],
+                "install_date": "2024-06-11 23:15:57 +0000"
+            },
+            {
+                "name": "Kandji Agent Settings",
+                "uuid": "1cbbbb6e-f8cc-41d7-bd1c-aa83b962a915",
+                "verified": "verified",
+                "identifier": "com.kandji.profile.pppc",
+                "organization": "Kandji, Inc.",
+                "payload_types": [
+                    "com.apple.TCC.configuration-profile-policy",
+                    "com.apple.TCC.configuration-profile-policy",
+                    "com.apple.notificationsettings",
+                    "com.apple.servicemanagement",
+                    "com.apple.system-extension-policy",
+                    "io.kandji.extensions"
+                ],
+                "install_date": "2024-05-13 22:07:50 +0000"
+            }
+        ],
+        "apple_business_manager": {},
+        "security_information": {
+            "remote_desktop_enabled": true
+        },
+        "cellular": {},
+        "tags": [
+            "accuhive_02"
+        ]
+    }
+]
+```

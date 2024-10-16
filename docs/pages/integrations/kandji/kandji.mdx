@@ -1,0 +1,32 @@
+# Kandji
+
+1. In **Kandji**, go to **Settings** > **Access**.
+
+2. In the **API Token** section, click on **Add Token**.
+
+![Kandji Settings](/connect_kandji.png)
+
+3. Configure your API permissions. The following permissions are recommended:
+
+-   `Device details`
+-   `Device list`
+-   `Application list`
+
+3. Go to the **Settings** page in **Admyral** and click on **Add New Credential** in the **Credentials** section.
+
+4. Give your credential a name, e.g. `Kandji`.
+
+5. The following secrets structure is expected:
+
+| Key       | Value                                                                                                                                       |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| `api_key` | Paste the API key here                                                                                                                      |
+| `api_url` | Paste your organization's API url here. Example for EU hosting: `admyral.api.eu.kandji.io`. Example for US hosting: `admyral.api.kandji.io` |
+
+6. Click on the **Save** button.
+
+Alternatively, you can use the following CLI command structure:
+
+```bash
+admyral secret set jira_secret --value api_key=your_key_value --value api_url=your_api_url
+```

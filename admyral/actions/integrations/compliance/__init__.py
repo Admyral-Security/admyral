@@ -21,6 +21,12 @@ from admyral.actions.integrations.compliance.ms_intune import (
     list_ms_intune_managed_devices,
     list_ms_intune_unencrypted_managed_devices,
 )
+from admyral.actions.integrations.compliance.kandji import (
+    list_kandji_devices,
+    get_kandji_device_details,
+    list_kandji_unencrypted_devices,
+    get_kandji_device_apps,
+)
 
 __all__ = [
     "list_retool_inactive_users",
@@ -36,4 +42,8 @@ __all__ = [
     "list_ms_intune_managed_devices",
     "list_ms_intune_unencrypted_managed_devices",
     "list_github_issue_comments",
+    "list_kandji_devices",
+    "get_kandji_device_details",
+    "list_kandji_unencrypted_devices",
+    "get_kandji_device_apps",
 ]

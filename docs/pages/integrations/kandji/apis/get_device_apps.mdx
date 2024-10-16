@@ -1,0 +1,97 @@
+import { Callout } from "nextra/components";
+
+# Get Device App
+
+Get installed apps on a Kandji managed device.
+
+<Callout type="info">
+	For more information on the API, see [Get Device
+	Apps](https://api-docs.kandji.io/#f8cd9733-89b6-40f0-a7ca-76829c6974df).
+</Callout>
+
+**Required permissions:**
+
+-   `Application list`
+
+**SDK Import:**
+
+```python
+from admyral.actions import get_kandji_device_apps
+```
+
+## Arguments:
+
+| Argument Name             | Description           | Required |
+| ------------------------- | --------------------- | :------: |
+| **Device ID** `device_id` | The ID of the device. |   Yes    |
+
+## Returns
+
+A list of JSON objects.
+
+## Required Secrets
+
+| Secret Placeholder | Description                                                    |
+| ------------------ | -------------------------------------------------------------- |
+| `KANDJI_SECRET`    | Kandji secret. See [Kandji setup](/integrations/kandji/kandji) |
+
+## SDK Example
+
+```python
+apps = get_kandji_device_apps(
+    device_id="03f81208-2b6a-4a77-81f5-cf1633bcfb95",
+	secrets={"KANDJI_SECRET": "my_kandji_secret"}
+)
+```
+
+## Example Output:
+
+```json
+[
+	{
+		"app_id": "83068",
+		"app_name": "Activity Monitor",
+		"bundle_id": "com.apple.ActivityMonitor",
+		"bundle_size": "1",
+		"app_store_vendable": "",
+		"device_based_vpp": "",
+		"source": "Apple",
+		"process": "Activity Monitor",
+		"signature": "Software Signing, Apple Code Signing Certification Authority, Apple Root CA",
+		"creation_date": "2023-06-06T19:43:15.206870Z",
+		"modification_date": "2023-06-06T19:43:15.206888Z",
+		"path": "/System/Applications/Utilities/Activity Monitor.app",
+		"version": "10.14"
+	},
+	{
+		"app_id": "83069",
+		"app_name": "AirPort Utility",
+		"bundle_id": "com.apple.airport.airportutility",
+		"bundle_size": "1",
+		"app_store_vendable": "",
+		"device_based_vpp": "",
+		"source": "Apple",
+		"process": "AirPort Utility",
+		"signature": "Software Signing, Apple Code Signing Certification Authority, Apple Root CA",
+		"creation_date": "2023-06-06T19:43:15.206937Z",
+		"modification_date": "2023-06-06T19:43:15.206941Z",
+		"path": "/System/Applications/Utilities/AirPort Utility.app",
+		"version": "6.3.9"
+	},
+	{
+		"app_id": "83070",
+		"app_name": "App Store",
+		"bundle_id": "com.apple.AppStore",
+		"bundle_size": "1",
+		"app_store_vendable": "",
+		"device_based_vpp": "",
+		"source": "Apple",
+		"process": "App Store",
+		"signature": "Software Signing, Apple Code Signing Certification Authority, Apple Root CA",
+		"creation_date": "2023-06-06T19:43:15.206966Z",
+		"modification_date": "2023-06-06T19:43:15.206969Z",
+		"path": "/System/Applications/App Store.app",
+		"version": "3.0"
+	}
+]
+```
