@@ -1686,6 +1686,38 @@ def test_workflow_input_with_json_body_and_default():
 #########################################################################################################
 
 
+@workflow(
+    description="This is a description of my workflow", controls=["CC4.1", "CC2.3"]
+)
+def workflow_with_controls(payload: dict[str, JsonValue]):
+    dummy_test_action1()
+
+
+def test_workflow_with_controls():
+    expected_dag = WorkflowDAG(
+        name="workflow_with_controls",
+        description="This is a description of my workflow",
+        start=WorkflowStart(triggers=[]),
+        controls=["CC4.1", "CC2.3"],
+        dag={
+            "start": ActionNode(
+                id="start", type="start", children=["dummy_test_action1"]
+            ),
+            # dummy_test_action1()
+            "dummy_test_action1": ActionNode(
+                id="dummy_test_action1",
+                type="dummy_test_action1",
+            ),
+        },
+    )
+    dag = WorkflowCompiler().compile(workflow_with_controls)
+    assert dag == expected_dag
+    assert WorkflowDAG.model_validate(dag.model_dump()) == expected_dag
+
+
+#########################################################################################################
+
+
 @workflow
 def workflow_input_mixed(payload: dict[str, JsonValue]):
     """
