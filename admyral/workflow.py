@@ -40,10 +40,12 @@ class Workflow:
         *,
         triggers: list[Webhook | Schedule] = [],
         description: str | None = None,
+        controls: list[str] | None = None,
     ) -> None:
         self.func = func
         self.description = description
         self.triggers = triggers
+        self.controls = controls
 
     def compile(self) -> WorkflowDAG:
         return WorkflowCompiler().compile(self)
@@ -63,11 +65,14 @@ def workflow(
     *,
     description: str | None = None,
     triggers: list[Webhook | Schedule] = [],
+    controls: list[str] | None = None,
 ) -> Workflow:
     """Decorator to create a workflow."""
 
     def inner(func: "F") -> Workflow:
-        w = Workflow(func, description=description, triggers=triggers)
+        w = Workflow(
+            func, description=description, triggers=triggers, controls=controls
+        )
         w.__doc__ = func.__doc__
         return w
 

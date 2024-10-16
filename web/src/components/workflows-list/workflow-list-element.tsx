@@ -1,6 +1,6 @@
 "use client";
 
-import { Card, Flex, IconButton, Text } from "@radix-ui/themes";
+import { Card, Flex, IconButton, Text, Badge } from "@radix-ui/themes";
 import Link from "next/link";
 import RightArrowIcon from "@/components/icons/right-arrow-icon";
 import PublishWorkflowToggleWorkflowList from "../publish-workflow-toggle/publish-workflow-toggle-workflow-list";
@@ -9,6 +9,7 @@ interface WorkflowListElementProps {
 	workflowId: string;
 	workflowName: string | null;
 	description: string | null;
+	controls: string[] | null;
 	isLive: boolean;
 }
 
@@ -16,6 +17,7 @@ export default function WorkflowListElement({
 	workflowId,
 	workflowName,
 	description,
+	controls,
 	isLive,
 }: WorkflowListElementProps) {
 	return (
@@ -27,6 +29,15 @@ export default function WorkflowListElement({
 						<Text size="2" color="gray">
 							{description}
 						</Text>
+					)}
+					{controls !== null && controls.length > 0 && (
+						<Flex gap="2">
+							{controls.map((control) => (
+								<Badge color="blue" radius="full">
+									{control}
+								</Badge>
+							))}
+						</Flex>
 					)}
 				</Flex>
 

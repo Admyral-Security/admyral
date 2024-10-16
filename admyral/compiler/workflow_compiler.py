@@ -157,6 +157,7 @@ class WorkflowCompiler:
         return WorkflowDAG(
             name=workflow.name,
             description=workflow.description,
+            controls=workflow.controls,
             start=WorkflowStart(
                 triggers=self._handle_triggers(workflow),
             ),

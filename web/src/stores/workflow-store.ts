@@ -71,6 +71,7 @@ type WorkflowStoreState = TReactFlowGraph & {
 	getNodeId: () => string;
 	setWorkflowName: (workflowName: string) => void;
 	setDescription: (description: string) => void;
+	setControls: (controls: string[]) => void;
 	updateNodeData: (
 		nodeIdx: number,
 		data:
@@ -99,6 +100,7 @@ export const useWorkflowStore = create<WorkflowStoreState>((set, get) => ({
 	workflowName: "",
 	payloadCache: "",
 	description: null,
+	controls: [],
 	isActive: false,
 	nodes: [],
 	edges: [],
@@ -115,6 +117,7 @@ export const useWorkflowStore = create<WorkflowStoreState>((set, get) => ({
 			workflowName: "",
 			payloadCache: "",
 			description: null,
+			controls: [],
 			isActive: false,
 			nodes: [],
 			edges: [],
@@ -132,6 +135,7 @@ export const useWorkflowStore = create<WorkflowStoreState>((set, get) => ({
 			workflowName: "",
 			payloadCache: "",
 			description: null,
+			controls: [],
 			isActive: false,
 			nodes: [buildStartNode(windowInnerWidth)],
 			edges: [],
@@ -148,6 +152,7 @@ export const useWorkflowStore = create<WorkflowStoreState>((set, get) => ({
 				draft.workflowId = workflow.workflowId;
 				draft.workflowName = workflow.workflowName;
 				draft.description = workflow.description;
+				draft.controls = workflow.controls;
 				draft.isActive = workflow.isActive;
 				draft.nodes = workflow.nodes;
 				draft.edges = workflow.edges;
@@ -181,6 +186,7 @@ export const useWorkflowStore = create<WorkflowStoreState>((set, get) => ({
 			workflowId: get().workflowId,
 			workflowName: get().workflowName,
 			description: get().description,
+			controls: get().controls,
 			isActive: get().isActive,
 			nodes: get().nodes.map((node) => node.data),
 			edges: get().edges.map((edge) => ({
@@ -294,6 +300,12 @@ export const useWorkflowStore = create<WorkflowStoreState>((set, get) => ({
 		set(
 			produce((draft) => {
 				draft.description = description;
+			}),
+		),
+	setControls: (controls) =>
+		set(
+			produce((draft) => {
+				draft.controls = controls;
 			}),
 		),
 	updateNodeData: (
