@@ -104,7 +104,7 @@ def list_kandji_unencrypted_devices() -> list[dict[str, JsonValue]]:
         for device in devices:
             device_details = _get_device_details(client, device["device_id"])
             if any(volume["encrypted"] == "No" for volume in device_details["volumes"]):
-                unencrypted_devices.append(device_details)
+                unencrypted_devices.append(device)
 
         return unencrypted_devices
 
