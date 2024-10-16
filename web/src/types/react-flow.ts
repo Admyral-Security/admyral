@@ -96,6 +96,7 @@ export const EditorWorkflowGraph = withCamelCaseTransform(
 		workflow_id: z.string(),
 		workflow_name: z.string(),
 		description: z.string().nullable(),
+		controls: z.array(z.string()).nullable(),
 		is_active: z.boolean(),
 		nodes: z.array(
 			z.union([
