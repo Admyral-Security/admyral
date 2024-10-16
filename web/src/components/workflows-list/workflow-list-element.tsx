@@ -32,8 +32,12 @@ export default function WorkflowListElement({
 					)}
 					{controls !== null && controls.length > 0 && (
 						<Flex gap="2" wrap="wrap">
-							{controls.map((control) => (
-								<Badge color="blue" radius="full">
+							{controls.map((control, controlIdx) => (
+								<Badge
+									color="blue"
+									radius="full"
+									key={`${controlIdx}_${control}`}
+								>
 									{control}
 								</Badge>
 							))}
