@@ -81,6 +81,7 @@ class WorkflowSchema(BaseSchema, table=True):
             workflow_id=self.workflow_id,
             workflow_name=self.workflow_name,
             workflow_description=self.workflow_dag.get("description"),
+            controls=self.workflow_dag.get("controls"),
             created_at=self.created_at,
             is_active=self.is_active,
         )

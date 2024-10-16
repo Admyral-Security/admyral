@@ -127,6 +127,7 @@ class WorkflowStart(BaseModel):
 class WorkflowDAG(BaseModel):
     name: str
     description: str | None = None
+    controls: list[str] | None = None
     start: WorkflowStart
     dag: dict[str, IfNode | ActionNode]
     version: str = "1"
@@ -185,5 +186,6 @@ class WorkflowMetadata(BaseModel):
     workflow_id: str
     workflow_name: str
     workflow_description: str | None = None
+    controls: list[str] | None = None
     created_at: datetime
     is_active: bool

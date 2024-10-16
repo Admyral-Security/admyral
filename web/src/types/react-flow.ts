@@ -117,6 +117,7 @@ export type TReactFlowGraph = {
 	workflowId: string;
 	workflowName: string;
 	description: string | null;
+	controls: string[] | null;
 	isActive: boolean;
 	nodes: TReactFlowNode[];
 	edges: TReactFlowEdge[];
@@ -183,6 +184,7 @@ export const EditorWorkflowGraphSnakeCase = withSnakeCaseTransform(
 		workflowId: z.string(),
 		workflowName: z.string(),
 		description: z.string().nullable(),
+		controls: z.array(z.string()).nullable(),
 		isActive: z.boolean(),
 		nodes: z.array(
 			z.union([

@@ -72,6 +72,7 @@ export default function WorkflowsList() {
 								workflowId={workflow.workflowId}
 								workflowName={workflow.workflowName}
 								description={workflow.workflowDescription}
+								controls={workflow.controls}
 								isLive={workflow.isActive}
 							/>
 						))}
