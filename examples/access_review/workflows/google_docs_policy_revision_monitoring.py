@@ -35,7 +35,7 @@ def google_docs_policy_revision_monitoring(payload: dict[str, JsonValue]):
             workflow_name="google_docs_policy_revision_monitoring_body",
             elements=revisions,
             shared_data={
-                "file_id": "1ozuJuLT2MOOlJX_DjQ8dAtbI7Xm03JTdp2QbaFU5caY",
+                "file_id": payload["file_id"],
                 "latest_version": revisions[-1]["content"],
             },
         )
