@@ -7,6 +7,7 @@ import {
 	ExclamationTriangleIcon,
 	CheckCircledIcon,
 } from "@radix-ui/react-icons";
+import { Flex } from "@radix-ui/themes";
 
 type ToastType = "success" | "error" | "info";
 
@@ -55,20 +56,17 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
 					open={open}
 					onOpenChange={setOpen}
 				>
-					<div className="ToastContent">
+					<Flex className="ToastContent" align="center">
 						<ToastIcon type={type} />
-						<div>
+						<Flex direction="column">
 							<Toast.Title className="ToastTitle">
-								<strong>
-									{type.charAt(0).toUpperCase() +
-										type.slice(1)}
-								</strong>
+								{type.charAt(0).toUpperCase() + type.slice(1)}
 							</Toast.Title>
 							<Toast.Description className="ToastDescription">
 								{message}
 							</Toast.Description>
-						</div>
-					</div>
+						</Flex>
+					</Flex>
 				</Toast.Root>
 				<Toast.Viewport className="ToastViewport" />
 			</Toast.Provider>
