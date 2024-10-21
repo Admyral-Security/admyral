@@ -5,10 +5,10 @@ import { DiscIcon } from "@radix-ui/react-icons";
 import { useSaveWorkflowApi } from "@/hooks/use-save-workflow-api";
 import { useWorkflowStore } from "@/stores/workflow-store";
 import { useEffect } from "react";
-import { errorToast, infoToast } from "@/lib/toast";
 import { AxiosError } from "axios";
 import { useEditorActionStore } from "@/stores/editor-action-store";
 import { EditorWorkflowNodeType } from "@/types/react-flow";
+import { useToastFunctions } from "@/lib/toast";
 
 const SPACE = " ";
 
@@ -16,6 +16,7 @@ export default function SaveWorkflowButton() {
 	const { getWorkflow, updateWebhookIdAndSecret } = useWorkflowStore();
 	const { actionsIndex } = useEditorActionStore();
 	const saveWorkflow = useSaveWorkflowApi();
+	const { errorToast, infoToast } = useToastFunctions();
 
 	useEffect(() => {
 		if (saveWorkflow.isSuccess) {

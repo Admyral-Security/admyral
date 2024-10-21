@@ -17,7 +17,7 @@ import WorkflowSettingsButton from "./workflow-settings-button";
 import WorkflowEditorActionEditSidebar from "./workflow-editor-action-edit-sidebar";
 import WorkflowRunHistory from "./run-history/workflow-run-history";
 import RunWorkflowButton from "../run-workflow/run-workflow-button";
-import { errorToast } from "@/lib/toast";
+import { useToastFunctions } from "@/lib/toast";
 import { AxiosError } from "axios";
 import { useRouter } from "next/navigation";
 
@@ -36,6 +36,7 @@ export default function WorkflowEditor({
 
 	const { isNew, setWorkflow, clearWorkflowStore } = useWorkflowStore();
 	const { setEditorActions } = useEditorActionStore();
+	const { errorToast } = useToastFunctions();
 
 	// Loading Actions
 	const {

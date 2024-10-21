@@ -8,9 +8,10 @@ import { useSecretsStore } from "@/stores/secrets-store";
 import { useSetSecretApi } from "@/hooks/use-set-secret-api";
 import { ChangeEvent, useEffect } from "react";
 import { produce } from "immer";
-import { errorToast } from "@/lib/toast";
+import { useToastFunctions } from "@/lib/toast";
 
 export default function NewSecret({ idx }: { idx: number }) {
+	const { errorToast } = useToastFunctions();
 	const { secrets, updateSecret } = useSecretsStore();
 	const saveSecret = useSetSecretApi();
 
