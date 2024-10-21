@@ -1,4 +1,4 @@
-import { useToastFunctions } from "@/lib/toast";
+import { useToast } from "@/providers/toast";
 import { Flex, Switch, Text } from "@radix-ui/themes";
 import { usePublishWorkflowApi } from "@/hooks/use-publish-workflow-api";
 import { useEffect } from "react";
@@ -14,7 +14,7 @@ export default function PublishWorkflowToggleBase({
 	isLive,
 	updateIsLiveState,
 }: PublishWorkflowToggleBaseProps) {
-	const { infoToast } = useToastFunctions();
+	const { infoToast } = useToast();
 	const publishWorkflow = usePublishWorkflowApi();
 
 	useEffect(() => {

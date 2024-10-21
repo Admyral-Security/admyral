@@ -1,5 +1,5 @@
 import { useListWorkflowRunsApi } from "@/hooks/use-list-workflow-runs-api";
-import { useToastFunctions } from "@/lib/toast";
+import { useToast } from "@/providers/toast";
 import { Box, Flex, Spinner, ScrollArea, Text } from "@radix-ui/themes";
 import { useEffect, useState } from "react";
 import WorkflowRunTrace from "./workflow-run-trace";
@@ -50,7 +50,7 @@ export default function WorkflowRunHistory({
 	const { data, isPending, error } = useListWorkflowRunsApi(workflowId);
 	const [selectedRunIdx, setSelectedRunIdx] = useState<number | null>(null);
 	const [runs, setRuns] = useState<TWorkflowRunMetadata[]>([]);
-	const { errorToast } = useToastFunctions();
+	const { errorToast } = useToast();
 
 	useEffect(() => {
 		if (data && data.length > 0) {

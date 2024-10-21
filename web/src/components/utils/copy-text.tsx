@@ -1,4 +1,4 @@
-import { useToastFunctions } from "@/lib/toast";
+import { useToast } from "@/providers/toast";
 import { CopyIcon } from "@radix-ui/react-icons";
 import { Button, Flex, TextField, Tooltip } from "@radix-ui/themes";
 
@@ -7,7 +7,7 @@ export interface CopyTextProps {
 }
 
 export default function CopyText({ text }: CopyTextProps) {
-	const { successToast } = useToastFunctions();
+	const { successToast } = useToast();
 	const copyToClipboard = () => {
 		navigator.clipboard.writeText(text);
 		successToast("Copied to clipboard.");

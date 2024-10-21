@@ -2,7 +2,7 @@ import { Box, Flex, Text } from "@radix-ui/themes";
 import WorkflowRunStep from "./workflow-run-step";
 import { useGetWorkflowRunStepsApi } from "@/hooks/use-get-workflow-run-steps-api";
 import { useEffect, useState } from "react";
-import { useToastFunctions } from "@/lib/toast";
+import { useToast } from "@/providers/toast";
 import Row from "./row";
 import ErrorCallout from "@/components/utils/error-callout";
 import { TWorkflowRunStepMetadata } from "@/types/workflow-runs";
@@ -24,7 +24,7 @@ export default function WorkflowRunTrace({
 	);
 	const [selectedStepIdx, setSelectedStepIdx] = useState<number>(0);
 	const [steps, setSteps] = useState<TWorkflowRunStepMetadata[]>([]);
-	const { errorToast } = useToastFunctions();
+	const { errorToast } = useToast();
 
 	useEffect(() => {
 		if (data) {

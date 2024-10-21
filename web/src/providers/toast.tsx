@@ -12,18 +12,12 @@ import { Flex } from "@radix-ui/themes";
 type ToastType = "success" | "error" | "info";
 
 interface ToastContextType {
-	showToast: (message: string, type: ToastType) => void;
+	successToast: (message: string) => void;
+	errorToast: (message: string) => void;
+	infoToast: (message: string) => void;
 }
 
 const ToastContext = createContext<ToastContextType | undefined>(undefined);
-
-export function useToast() {
-	const context = useContext(ToastContext);
-	if (context === undefined) {
-		throw new Error("useToast must be used within a ToastProvider");
-	}
-	return context;
-}
 
 const ToastIcon = ({ type }: { type: ToastType }) => {
 	switch (type) {
@@ -48,7 +42,14 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
 	};
 
 	return (
-		<ToastContext.Provider value={{ showToast }}>
+		<ToastContext.Provider
+			value={{
+				successToast: (message: string) =>
+					showToast(message, "success"),
+				errorToast: (message: string) => showToast(message, "error"),
+				infoToast: (message: string) => showToast(message, "info"),
+			}}
+		>
 			{children}
 			<Toast.Provider swipeDirection="right">
 				<Toast.Root
@@ -72,4 +73,12 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
 			</Toast.Provider>
 		</ToastContext.Provider>
 	);
+}
+
+export function useToast() {
+	const context = useContext(ToastContext);
+	if (context === undefined) {
+		throw new Error("useToast must be used within a ToastProvider");
+	}
+	return context;
 }
