@@ -1,6 +1,6 @@
 import ErrorCallout from "@/components/utils/error-callout";
 import { useGetWorkflowRunStepApi } from "@/hooks/use-get-workflow-run-step-api";
-import { useToastFunctions } from "@/lib/toast";
+import { useToast } from "@/providers/toast";
 import { TJson } from "@/types/json";
 import { Box, DataList, Flex, ScrollArea, Tabs, Text } from "@radix-ui/themes";
 import { useEffect } from "react";
@@ -20,7 +20,7 @@ export default function WorkflowRunStep({
 		workflowRunId,
 		workflowRunStepId,
 	);
-	const { errorToast } = useToastFunctions();
+	const { errorToast } = useToast();
 
 	useEffect(() => {
 		if (error) {

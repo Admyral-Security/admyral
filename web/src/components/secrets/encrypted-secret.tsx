@@ -5,11 +5,11 @@ import { Flex, IconButton, Text, TextField } from "@radix-ui/themes";
 import { useSecretsStore } from "@/stores/secrets-store";
 import { useDeleteSecretApi } from "@/hooks/use-delete-secret-api";
 import { useEffect } from "react";
-import { useToastFunctions } from "@/lib/toast";
+import { useToast } from "@/providers/toast";
 import { TrashIcon } from "@radix-ui/react-icons";
 
 export default function EncryptedSecret({ idx }: { idx: number }) {
-	const { errorToast } = useToastFunctions();
+	const { errorToast } = useToast();
 	const { secrets, removeSecret } = useSecretsStore();
 	const deleteSecret = useDeleteSecretApi();
 

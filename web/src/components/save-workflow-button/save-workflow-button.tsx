@@ -8,7 +8,7 @@ import { useEffect } from "react";
 import { AxiosError } from "axios";
 import { useEditorActionStore } from "@/stores/editor-action-store";
 import { EditorWorkflowNodeType } from "@/types/react-flow";
-import { useToastFunctions } from "@/lib/toast";
+import { useToast } from "@/providers/toast";
 
 const SPACE = " ";
 
@@ -16,7 +16,7 @@ export default function SaveWorkflowButton() {
 	const { getWorkflow, updateWebhookIdAndSecret } = useWorkflowStore();
 	const { actionsIndex } = useEditorActionStore();
 	const saveWorkflow = useSaveWorkflowApi();
-	const { errorToast, infoToast } = useToastFunctions();
+	const { errorToast, infoToast } = useToast();
 
 	useEffect(() => {
 		if (saveWorkflow.isSuccess) {
