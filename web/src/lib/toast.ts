@@ -1,22 +1,11 @@
-import { toast } from "react-toastify";
+import { useToast } from "@/providers/toast";
 
-export function successToast(message: string) {
-	toast(message, {
-		theme: "colored",
-		type: "success",
-	});
-}
+export function useToastFunctions() {
+	const { showToast } = useToast();
 
-export function errorToast(message: string) {
-	toast(message, {
-		theme: "colored",
-		type: "error",
-	});
-}
+	const successToast = (message: string) => showToast(message, "success");
+	const errorToast = (message: string) => showToast(message, "error");
+	const infoToast = (message: string) => showToast(message, "info");
 
-export function infoToast(message: string) {
-	toast(message, {
-		theme: "colored",
-		type: "info",
-	});
+	return { successToast, errorToast, infoToast };
 }
