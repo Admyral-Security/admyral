@@ -1,5 +1,5 @@
 import { useTriggerWorkflowApi } from "@/hooks/use-trigger-workflow-api";
-import { errorToast, infoToast } from "@/lib/toast";
+import { useToastFunctions } from "@/lib/toast";
 import { useWorkflowStore } from "@/stores/workflow-store";
 import { Cross1Icon } from "@radix-ui/react-icons";
 import { Button, Dialog, Flex, Text } from "@radix-ui/themes";
@@ -14,6 +14,7 @@ export default function RunWorkflowDialog({
 	const { workflowName, isActive, payloadCache, setPayloadCache } =
 		useWorkflowStore();
 	const triggerWorkflow = useTriggerWorkflowApi();
+	const { errorToast, infoToast } = useToastFunctions();
 
 	useEffect(() => {
 		if (triggerWorkflow.isSuccess) {

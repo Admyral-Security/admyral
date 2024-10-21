@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
-import "react-toastify/dist/ReactToastify.css";
 import "./globals.css";
 import "@radix-ui/themes/styles.css";
 import { Theme } from "@radix-ui/themes";
 import { inter } from "./fonts";
 import { SessionProvider } from "@/providers/session";
+import { ToastProvider } from "@/providers/toast";
 
 export const metadata: Metadata = {
 	title: "Admyral",
@@ -34,7 +34,9 @@ export default async function RootLayout({
 		<html lang="en" className="h-full">
 			<body className={`${inter.className} h-full`}>
 				<SessionProvider>
-					<Theme>{children}</Theme>
+					<Theme>
+						<ToastProvider>{children}</ToastProvider>
+					</Theme>
 				</SessionProvider>
 			</body>
 		</html>

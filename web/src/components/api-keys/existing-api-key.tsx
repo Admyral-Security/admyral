@@ -1,12 +1,12 @@
 "use client";
 
 import { useDeleteApiKey } from "@/hooks/use-delete-api-key";
-import { errorToast } from "@/lib/toast";
 import { useApiKeysStore } from "@/stores/api-keys-store";
 import { TApiKeyMetadata } from "@/types/api-key";
 import { TrashIcon } from "@radix-ui/react-icons";
 import { Flex, IconButton, Text, TextField } from "@radix-ui/themes";
 import { useEffect } from "react";
+import { useToastFunctions } from "@/lib/toast";
 
 export default function ExistingApiKey({
 	key,
@@ -18,6 +18,7 @@ export default function ExistingApiKey({
 	const { removeApiKey } = useApiKeysStore();
 	const deleteApiKey = useDeleteApiKey();
 	const handleDelete = () => deleteApiKey.mutate({ id: apiKey.id });
+	const { errorToast } = useToastFunctions();
 
 	useEffect(() => {
 		if (deleteApiKey.isSuccess) {
