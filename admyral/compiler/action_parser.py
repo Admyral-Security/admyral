@@ -57,7 +57,7 @@ def parse_action(module_str: str, action_name: str) -> PythonAction:
             break
 
     if action_decorator is None:
-        raise ValueError("Action function must have the @action decorator.")
+        raise ValueError("Action functions must implement the @action decorator.")
 
     if isinstance(action_decorator, ast.Call):
         # Ensure the decorator has arguments if expected
