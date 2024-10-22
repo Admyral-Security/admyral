@@ -82,11 +82,23 @@ def contains_pull_request_approval_as_comment_after_merge(
             description="The timestamp when the pull request was merged.",
         ),
     ],
+    approval_keywords: Annotated[
+        str | list[str],
+        ArgumentMetadata(
+            display_name="Approval Keywords",
+            description="The keywords to check for approval.",
+        ),
+    ] = ["approved"],
 ) -> bool:
     merged_at = parser.parse(merged_at)
+    allowed_approval_keywords = set(
+        approval_keywords
+        if isinstance(approval_keywords, list)
+        else [approval_keywords]
+    )
     return any(
         map(
-            lambda review: review.get("body", "").lower() == "approved"
+            lambda review: review.get("body", "") in allowed_approval_keywords
             and parser.parse(review.get("created_at")) > merged_at,
             comments,
         )
@@ -368,6 +380,7 @@ def handle_merged_github_pr_without_approval(payload: dict[str, JsonValue]):
         has_approval_as_comment = contains_pull_request_approval_as_comment_after_merge(
             comments=comments,
             merged_at=payload["element"]["merged_at"],
+            approval_keywords=["approved"],
         )
 
         if not has_approval_as_comment:
