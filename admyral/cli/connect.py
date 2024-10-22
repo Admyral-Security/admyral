@@ -32,6 +32,6 @@ def connect(base_url: str, api_key: str):
 def disconnect():
     """Disconnect from the Admyral server."""
     config = load_config()
-    config.pop("cli_target", None)
-    config.pop("api_key", None)
+    config.pop("cli_target")
+    config.pop("api_key")
     save_config(config)
