@@ -122,12 +122,12 @@ def okta_search_users(
         ),
     ] = None,
     limit: Annotated[
-        int,
+        int | None,
         ArgumentMetadata(
             display_name="Limit",
             description="The maximum number of users to list.",
         ),
-    ] = 1000,
+    ] = None,
 ) -> list[dict[str, JsonValue]]:
     # https://developer.okta.com/docs/api/openapi/okta-management/management/tag/User/#tag/User/operation/listUsers
     secret = ctx.get().secrets.get("OKTA_SECRET")
@@ -152,11 +152,13 @@ def okta_search_users(
             response = client.get(link.replace(base_url, ""))
             response.raise_for_status()
             users.extend(response.json())
-            if len(users) >= limit or prev_num_users == len(users):
+            if limit is not None and (
+                len(users) >= limit or prev_num_users == len(users)
+            ):
                 break
             prev_num_users = len(users)
 
-        return users[:limit]
+        return users[:limit] if limit is not None else users
 
 
 @action(
