@@ -5,6 +5,7 @@ from admyral.actions.integrations.cloud.aws import (
     aws_s3_restrict_public_read_access,
     aws_s3_restrict_public_write_access,
     aws_s3_default_encryption_enabled,
+    aws_list_iam_users,
 )
 
 __all__ = [
@@ -14,4 +15,5 @@ __all__ = [
     "aws_s3_restrict_public_read_access",
     "aws_s3_restrict_public_write_access",
     "aws_s3_default_encryption_enabled",
+    "aws_list_iam_users",
 ]

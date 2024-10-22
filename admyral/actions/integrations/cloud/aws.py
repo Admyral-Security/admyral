@@ -302,3 +302,47 @@ from
     aws_secret_access_key = secret["aws_secret_access_key"]
 
     return run_steampipe_query(query, aws_access_key_id, aws_secret_access_key)
+
+
+@action(
+    display_name="List IAM Users",
+    display_namespace="AWS",
+    description="List AWS IAM users.",
+    secrets_placeholders=["AWS_SECRET"],
+)
+def aws_list_iam_users(
+    query: Annotated[
+        str,
+        ArgumentMetadata(
+            display_name="Query",
+            description="The query for fetching IAM users.",
+        ),
+    ] = """select
+  account_id,
+  akas,
+  arn,
+  attached_policy_arns,
+  create_date,
+  groups,
+  inline_policies,
+  inline_policies_std,
+  login_profile,
+  mfa_devices,
+  mfa_enabled,
+  name,
+  partition,
+  password_last_used,
+  path,
+  permissions_boundary_arn,
+  permissions_boundary_type,
+  region,
+  user_id
+from
+  aws_iam_user;
+    """,
+) -> JsonValue:
+    secret = ctx.get().secrets.get("AWS_SECRET")
+    aws_access_key_id = secret["aws_access_key_id"]
+    aws_secret_access_key = secret["aws_secret_access_key"]
+
+    return run_steampipe_query(query, aws_access_key_id, aws_secret_access_key)

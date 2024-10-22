@@ -1,0 +1,225 @@
+import { Callout } from "nextra/components";
+
+# List IAM Users
+
+List AWS IAM users based on Steampipe.
+
+The following policy implements the required permissions for this action:
+
+```json
+{
+	"Version": "2012-10-17",
+	"Statement": [
+		{
+			"Sid": "VisualEditor0",
+			"Effect": "Allow",
+			"Action": [
+				"iam:ListUsers",
+				"iam:GetLoginProfile",
+				"iam:ListUserPolicies",
+				"iam:ListGroupsForUser",
+				"iam:ListMFADevices",
+				"iam:GetUser",
+				"iam:ListAttachedUserPolicies",
+				"iam:GetUserPolicy"
+			],
+			"Resource": "*"
+		}
+	]
+}
+```
+
+**SDK Import:**
+
+```python
+from admyral.actions import aws_list_iam_users
+```
+
+## Arguments:
+
+| Argument Name | Description | Required |
+| ------------- | ----------- | :------: |
+
+## Returns
+
+A JSON object with two keys: `columns` and `rows`. The `columns` value is a JSON array containing more information about the columns of the result. The `rows` JSON array contains the users.
+
+## Required Secrets
+
+| Secret Placeholder | Description                                        |
+| ------------------ | -------------------------------------------------- |
+| `AWS_SECRET`       | AWS secret. See [AWS setup](/integrations/aws/aws) |
+
+## SDK Example
+
+```python
+response = aws_list_iam_users(
+	secrets={
+		"AWS_SECRET": "my_stored_aws_secret"
+	}
+)
+```
+
+## Example Output:
+
+```json
+{
+	"columns": [
+		{
+			"name": "account_id",
+			"data_type": "text"
+		},
+		{
+			"name": "akas",
+			"data_type": "jsonb"
+		},
+		{
+			"name": "arn",
+			"data_type": "text"
+		},
+		{
+			"name": "attached_policy_arns",
+			"data_type": "jsonb"
+		},
+		{
+			"name": "create_date",
+			"data_type": "timestamptz"
+		},
+		{
+			"name": "groups",
+			"data_type": "jsonb"
+		},
+		{
+			"name": "inline_policies",
+			"data_type": "jsonb"
+		},
+		{
+			"name": "inline_policies_std",
+			"data_type": "jsonb"
+		},
+		{
+			"name": "login_profile",
+			"data_type": "jsonb"
+		},
+		{
+			"name": "mfa_devices",
+			"data_type": "jsonb"
+		},
+		{
+			"name": "mfa_enabled",
+			"data_type": "bool"
+		},
+		{
+			"name": "name",
+			"data_type": "text"
+		},
+		{
+			"name": "partition",
+			"data_type": "text"
+		},
+		{
+			"name": "password_last_used",
+			"data_type": "timestamptz"
+		},
+		{
+			"name": "path",
+			"data_type": "text"
+		},
+		{
+			"name": "permissions_boundary_arn",
+			"data_type": "text"
+		},
+		{
+			"name": "permissions_boundary_type",
+			"data_type": "text"
+		},
+		{
+			"name": "region",
+			"data_type": "text"
+		},
+		{
+			"name": "user_id",
+			"data_type": "text"
+		}
+	],
+	"rows": [
+		{
+			"account_id": "123454939434",
+			"akas": ["arn:aws:iam::123454939434:user/admyral"],
+			"arn": "arn:aws:iam::123454939434:user/admyral",
+			"attached_policy_arns": null,
+			"create_date": "2024-10-06T19:29:23+02:00",
+			"groups": [
+				{
+					"Arn": "arn:aws:iam::123454939434:group/admyral",
+					"CreateDate": "2024-10-06T17:15:13Z",
+					"GroupId": "AGPAZQULHFNCJMEUMTOUR",
+					"GroupName": "admyral",
+					"Path": "/"
+				}
+			],
+			"inline_policies": [
+				{
+					"PolicyDocument": {
+						"Statement": [
+							{
+								"Action": [
+									"iam:ListUsers",
+									"iam:GetLoginProfile",
+									"iam:ListUserPolicies",
+									"iam:ListGroupsForUser",
+									"iam:ListMFADevices",
+									"iam:GetUser",
+									"iam:ListAttachedUserPolicies",
+									"iam:GetUserPolicy"
+								],
+								"Effect": "Allow",
+								"Resource": "*",
+								"Sid": "VisualEditor0"
+							}
+						],
+						"Version": "2012-10-17"
+					},
+					"PolicyName": "ListUsers"
+				}
+			],
+			"inline_policies_std": [
+				{
+					"PolicyDocument": {
+						"Statement": [
+							{
+								"Action": [
+									"iam:getloginprofile",
+									"iam:getuser",
+									"iam:getuserpolicy",
+									"iam:listattacheduserpolicies",
+									"iam:listgroupsforuser",
+									"iam:listmfadevices",
+									"iam:listuserpolicies",
+									"iam:listusers"
+								],
+								"Effect": "Allow",
+								"Resource": ["*"],
+								"Sid": "VisualEditor0"
+							}
+						],
+						"Version": "2012-10-17"
+					},
+					"PolicyName": "ListUsers"
+				}
+			],
+			"login_profile": null,
+			"mfa_devices": [],
+			"mfa_enabled": false,
+			"name": "admyral",
+			"partition": "aws",
+			"password_last_used": null,
+			"path": "/",
+			"permissions_boundary_arn": "",
+			"permissions_boundary_type": "",
+			"region": "global",
+			"user_id": "DSJASDJSDJSDJSDJSJFSS"
+		}
+	]
+}
+```

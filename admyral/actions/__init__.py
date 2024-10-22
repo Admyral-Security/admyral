@@ -88,6 +88,7 @@ from admyral.actions.integrations.cloud import (
     aws_s3_restrict_public_write_access,
     aws_s3_restrict_public_read_access,
     aws_s3_default_encryption_enabled,
+    aws_list_iam_users,
 )
 from admyral.actions.integrations.database import run_sql_query
 
@@ -163,4 +164,5 @@ __all__ = [
     "get_kandji_device_details",
     "list_kandji_unencrypted_devices",
     "get_kandji_device_apps",
+    "aws_list_iam_users",
 ]
