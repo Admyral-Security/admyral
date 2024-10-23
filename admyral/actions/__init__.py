@@ -80,6 +80,7 @@ from admyral.actions.integrations.compliance import (
     get_kandji_device_details,
     list_kandji_unencrypted_devices,
     get_kandji_device_apps,
+    list_zendesk_users,
 )
 from admyral.actions.integrations.cloud import (
     steampipe_query_aws,
@@ -165,4 +166,5 @@ __all__ = [
     "list_kandji_unencrypted_devices",
     "get_kandji_device_apps",
     "aws_list_iam_users",
+    "list_zendesk_users",
 ]

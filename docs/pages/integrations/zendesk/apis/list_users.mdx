@@ -1,0 +1,96 @@
+import { Callout } from "nextra/components";
+
+# List Users
+
+Get a list of all users in an organization from Zendesk ticketing.
+
+<Callout type="info">
+	For more information on the API, see [List Users
+	Ticketing](https://developer.zendesk.com/api-reference/ticketing/users/users/).
+</Callout>
+
+**SDK Import:**
+
+```python
+from admyral.actions import list_zendesk_users
+```
+
+## Arguments:
+
+| Argument Name                 | Description                                                                                                                                                                       | Required |
+| ----------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------: |
+| **User Status** `user_status` | The status of the users to list. Possible values: `active`, `inactive`                                                                                                            |    -     |
+| **User Role** `user_role`     | Role of user to search for. Possible values: user, admin, end-user. You can either filter for one role (e.g., `admin`) or for multiple roles (e.g., `[\"admin\", \"end-user\"]`). |    -     |
+
+## Returns
+
+A JSON array of users.
+
+## Required Secrets
+
+| Secret Placeholder | Description                                                        |
+| ------------------ | ------------------------------------------------------------------ |
+| `ZENDESK_SECRET`   | Zendesk secret. See [Zendesk setup](/integrations/zendesk/zendesk) |
+
+## SDK Example
+
+```python
+devices = list_zendesk_users(
+    user_status="active",
+    user_role=["admin", "agent"],
+	secrets={"ZENDESK_SECRET": "my_zendesk_secret"}
+)
+```
+
+```python
+devices = list_zendesk_users(
+    user_role="end-user",
+	secrets={"ZENDESK_SECRET": "my_zendesk_secret"}
+)
+```
+
+## Example Output:
+
+```json
+[
+	{
+		"id": 16531747834012,
+		"url": "https://d3v-admyral.zendesk.com/api/v2/users/16531747834012.json",
+		"name": "Jiwon Bora",
+		"email": "jiwon.bora@example.com",
+		"created_at": "2024-10-23T08:26:48Z",
+		"updated_at": "2024-10-23T08:26:48Z",
+		"time_zone": "Europe/Berlin",
+		"iana_time_zone": "Europe/Berlin",
+		"phone": null,
+		"shared_phone_number": null,
+		"photo": null,
+		"locale_id": 1,
+		"locale": "en-US",
+		"organization_id": null,
+		"role": "end-user",
+		"verified": false,
+		"external_id": null,
+		"tags": [],
+		"alias": null,
+		"active": true,
+		"shared": false,
+		"shared_agent": false,
+		"last_login_at": null,
+		"two_factor_auth_enabled": null,
+		"signature": null,
+		"details": null,
+		"notes": null,
+		"role_type": null,
+		"custom_role_id": null,
+		"moderator": false,
+		"ticket_restriction": "requested",
+		"only_private_comments": false,
+		"restricted_agent": true,
+		"suspended": false,
+		"default_group_id": null,
+		"report_csv": false,
+		"user_fields": {}
+	}
+]
+```

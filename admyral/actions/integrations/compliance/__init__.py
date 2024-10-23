@@ -27,6 +27,7 @@ from admyral.actions.integrations.compliance.kandji import (
     list_kandji_unencrypted_devices,
     get_kandji_device_apps,
 )
+from admyral.actions.integrations.compliance.zendesk import list_zendesk_users
 
 __all__ = [
     "list_retool_inactive_users",
@@ -46,4 +47,5 @@ __all__ = [
     "get_kandji_device_details",
     "list_kandji_unencrypted_devices",
     "get_kandji_device_apps",
+    "list_zendesk_users",
 ]

@@ -1,0 +1,31 @@
+# Zendesk
+
+1. In **Zendesk**, go to your **Admin Center**.
+
+2. Your **Zendesk Admin Center**, go to **Apps and integrations** > **Zendesk API**.
+
+![Zendesk Admin Center API](/zendesk_admin_zendesk_api.png)
+
+3. Enable **Token Access** if not yet enabled. Click on **Add API token**.
+
+4. Copy your **API token**.
+
+5. Go to the **Settings** page in **Admyral** and click on **Add New Secret** in the **Secrets** section.
+
+6. Give your secret a name, e.g. `Zendesk`.
+
+7. The following secrets structure is expected:
+
+| Key         | Value                                                                                                                                        |
+| ----------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| `api_token` | Paste the API token here                                                                                                                     |
+| `subdomain` | Paste your Zendesk subdomain here. E.g., if you access Zendesk via the domain `admyral.zendesk.com`, then your subdomain would be `admyral`. |
+| `email`     | Paste the email of the user on whose behalf the actions should be performed.                                                                 |
+
+8. Click on the **Save** button.
+
+Alternatively, you can use the following CLI command structure:
+
+```bash
+admyral secret set zendesk_secret --value api_toke=your_api_token_value --value subdomain=your_subdomain --value email=your_email
+```

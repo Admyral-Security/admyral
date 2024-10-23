@@ -28,5 +28,6 @@
 	"slack": "Slack",
 	"snyk": "Snyk",
 	"virus_total": "VirusTotal",
-	"wiz": "Wiz"
+	"wiz": "Wiz",
+	"zendesk": "Zendesk"
 }
