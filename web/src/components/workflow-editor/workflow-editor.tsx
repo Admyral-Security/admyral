@@ -1,9 +1,11 @@
 "use client";
 
 import { useGetWorkflowApi } from "@/hooks/use-get-workflow-api";
+import { useListSecretsApi } from "@/hooks/use-list-credentials-api";
 import { useListEditorActionsApi } from "@/hooks/use-list-editor-actions-api";
 import { useEditorActionStore } from "@/stores/editor-action-store";
 import { useWorkflowStore } from "@/stores/workflow-store";
+import { useSecretsStore } from "@/stores/secrets-store";
 import { Box, Flex, Grid, Tabs, Text } from "@radix-ui/themes";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -39,6 +41,7 @@ export default function WorkflowEditor({
 	const { isNew, setWorkflow, clearWorkflowStore } = useWorkflowStore();
 	const { setEditorActions } = useEditorActionStore();
 	const { errorToast } = useToast();
+	const { setSecrets, clear } = useSecretsStore();
 
 	// Loading Actions
 	const {
@@ -55,6 +58,15 @@ export default function WorkflowEditor({
 			errorToast("Failed to load actions. Please refresh the page.");
 		}
 	}, [editorActions, setEditorActions, editActionsError]);
+
+	const { data: encryptedSecrets } = useListSecretsApi();
+
+	useEffect(() => {
+		if (encryptedSecrets) {
+			setSecrets(encryptedSecrets);
+			return () => clear();
+		}
+	}, [encryptedSecrets, setSecrets, clear]);
 
 	// Load Workflow
 	// Note: we only load from the DB if the workflow is not newly created
