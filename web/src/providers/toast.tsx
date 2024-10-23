@@ -9,7 +9,11 @@ import {
 } from "@radix-ui/react-icons";
 import { Flex } from "@radix-ui/themes";
 
-type ToastType = "success" | "error" | "info";
+enum ToastType {
+	SUCCESS = "Success",
+	ERROR = "Error",
+	INFO = "Info",
+}
 
 interface ToastContextType {
 	successToast: (message: string) => void;
@@ -21,11 +25,11 @@ const ToastContext = createContext<ToastContextType | undefined>(undefined);
 
 const ToastIcon = ({ type }: { type: ToastType }) => {
 	switch (type) {
-		case "info":
+		case "Info":
 			return <InfoCircledIcon className="ToastIcon" />;
-		case "error":
+		case "Error":
 			return <ExclamationTriangleIcon className="ToastIcon" />;
-		case "success":
+		case "Success":
 			return <CheckCircledIcon className="ToastIcon" />;
 	}
 };
@@ -33,7 +37,7 @@ const ToastIcon = ({ type }: { type: ToastType }) => {
 export function ToastProvider({ children }: { children: React.ReactNode }) {
 	const [open, setOpen] = useState(false);
 	const [message, setMessage] = useState("");
-	const [type, setType] = useState<ToastType>("info");
+	const [type, setType] = useState<ToastType>(ToastType.INFO);
 
 	const showToast = (newMessage: string, newType: ToastType) => {
 		setMessage(newMessage);
@@ -45,9 +49,11 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
 		<ToastContext.Provider
 			value={{
 				successToast: (message: string) =>
-					showToast(message, "success"),
-				errorToast: (message: string) => showToast(message, "error"),
-				infoToast: (message: string) => showToast(message, "info"),
+					showToast(message, ToastType.SUCCESS),
+				errorToast: (message: string) =>
+					showToast(message, ToastType.ERROR),
+				infoToast: (message: string) =>
+					showToast(message, ToastType.INFO),
 			}}
 		>
 			{children}
@@ -61,7 +67,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
 						<ToastIcon type={type} />
 						<Flex direction="column">
 							<Toast.Title className="ToastTitle">
-								{type.charAt(0).toUpperCase() + type.slice(1)}
+								{type}
 							</Toast.Title>
 							<Toast.Description className="ToastDescription">
 								{message}

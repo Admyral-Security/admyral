@@ -62,33 +62,33 @@ https://stackoverflow.com/questions/74607419/react-markdown-don%C2%B4t-render-ma
 	height: 25px;
 }
 
-.ToastRoot.success {
+.ToastRoot.Success {
 	background-color: #e6f4ea;
 	border-color: #34a853;
 }
 
-.ToastRoot.success .ToastIcon,
-.ToastRoot.success .ToastTitle {
+.ToastRoot.Success .ToastIcon,
+.ToastRoot.Success .ToastTitle {
 	color: #34a853;
 }
 
-.ToastRoot.error {
+.ToastRoot.Error {
 	background-color: #fce8e6;
 	border-color: #ea4335;
 }
 
-.ToastRoot.error .ToastIcon,
-.ToastRoot.error .ToastTitle {
+.ToastRoot.Error .ToastIcon,
+.ToastRoot.Error .ToastTitle {
 	color: #ea4335;
 }
 
-.ToastRoot.info {
+.ToastRoot.Info {
 	background-color: #e8f0fe;
 	border-color: #4285f4;
 }
 
-.ToastRoot.info .ToastIcon,
-.ToastRoot.info .ToastTitle {
+.ToastRoot.Info .ToastIcon,
+.ToastRoot.Info .ToastTitle {
 	color: #4285f4;
 }
 
