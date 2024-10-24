@@ -11,6 +11,8 @@ from admyral.actions.utilities import (
     send_to_workflow,
     send_list_elements_to_workflow,
     split_text,
+    build_lookup_table,
+    filter,
 )
 from admyral.actions.integrations.communication import (
     send_slack_message,
@@ -167,4 +169,6 @@ __all__ = [
     "get_kandji_device_apps",
     "aws_list_iam_users",
     "list_zendesk_users",
+    "build_lookup_table",
+    "filter",
 ]

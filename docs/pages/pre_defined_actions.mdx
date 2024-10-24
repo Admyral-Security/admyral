@@ -71,7 +71,7 @@ Create if-branches within your automations.
 
 The following Python for if-conditions is currently supported:
 
--   Binary Operators: `==`, `!=`, `<`, `<=`, `>`, `>=`, `in`
+-   Binary Operators: `==`, `!=`, `<`, `<=`, `>`, `>=`, `in`, `not in`
 -   Unary Operators: `not`, `is None`, `is not None`
 
 You can construct condition expressions of the following types:
@@ -348,3 +348,81 @@ ghi: jkl
 | Parameter    | Type | Description                  | Required/Optional |
 | ------------ | ---- | ---------------------------- | ----------------- |
 | `json_value` | str  | The object to be serialized. | Required          |
+
+## Build Lookup Table
+
+Build a lookup table, i.e., a dictionary from a list of objects. The lookup table can be used for building conditions.
+
+Consider the following list:
+
+```json
+[
+	{ "email": "abc@gmail.com" },
+	{ "email": "def@gmail.com" },
+	{ "email": "ghi@gmail.com" }
+]
+```
+
+Building a lookup table on the key `email` results in the following lookup table:
+
+```json
+{
+	"abc@gmail.com": {
+		"email": "abc@gmail.com"
+	},
+	"def@gmail.com": {
+		"email": "def@gmail.com"
+	},
+	"ghi@gmail.com": {
+		"email": "ghi@gmail.com"
+	}
+}
+```
+
+This allows you to efficiently lookup objects based on a key.
+
+<Callout type="warning">
+	If your keys are not unique, then objects will be overwritten!
+</Callout>
+
+| Parameter    | Type            | Description                                                                                                                                                                                                                                              | Required/Optional |
+| ------------ | --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------- |
+| `input_list` | list            | The list to build a lookup table for.                                                                                                                                                                                                                    | Required          |
+| `key_path`   | list of strings | The path to the key used which should be used as the lookup value. For example: To build a lookup on `email` for the object `{"profile": {"email": "me@gmail.com"}}`, we need to consider the nesting of the object into account: `["profile", "email"]` | Required          |
+
+## Filter
+
+Filter out list entries which do not match a defined condition. The condition follows the same syntax as **if conditions**. The defined condition is applied on each list entry. If the condition
+returns `true`, the entry is kept. Otherwise the entry is removed from the list. The current entry in the list is always referenced by using `x`. In order to use data returned from previous actions,
+you need to pass them via the `values` parameter. Suppose you have a JSON object of valid user emails with result name `user_emails` and you want to filter on those. Then, you can pass the following values
+object `{"user_emails": user_emails}` as the `values` input. This allows you to use the `user_emails` object inside your condition: `x["email"] in user_emails`. Note that the only the keys inside the `values`
+argument must match the usage in the condition. Therefore, if our result name would be `emails` instead of `user_emails` and our `value` argument receives the object `{"user_emails": emails}`, then the
+condition `x["email"] in user_emails` is still valid.
+
+Example conditions:
+
+-   `x["company"]["name"] == "Admyral"`
+-   `x["verified"] is not None`
+-   `x["company"]["name"] == "Admyral" and x["email"] in valid_users`
+
+| Parameter    | Type            | Description         | Required/Optional |
+| ------------ | --------------- | ------------------- | ----------------- |
+| `input_list` | list            | The list to filter. | Required          |
+| `filter`     | list of strings | ...                 | Required          |
+| `values`     | object          | ...                 | Required          |
+
+Examples:
+
+```python
+# previously fetched Okta and Zendesk users
+okta_users = ...
+zendesk_users = ...
+
+invalid_zendesk_users = filter(
+    input_list=zendesk_users,
+    filter="x['email'] not in okta_users",
+    values={
+        "okta_users": okta_users
+    }
+)
+```
