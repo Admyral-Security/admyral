@@ -1,7 +1,8 @@
-import { Code, Flex, Text, TextField } from "@radix-ui/themes";
+import { Code, Flex, Text, TextField, Select } from "@radix-ui/themes";
 import ActionIcon from "../action-icon";
 import WorkflowEditorRightPanelBase from "../right-panel-base";
 import { useWorkflowStore } from "@/stores/workflow-store";
+import { useSecretsStore } from "@/stores/secrets-store";
 import { useEditorActionStore } from "@/stores/editor-action-store";
 import { TEditorWorkflowActionNode } from "@/types/react-flow";
 import { produce } from "immer";
@@ -9,6 +10,8 @@ import { ChangeEvent, useEffect } from "react";
 import { useImmer } from "use-immer";
 import { TActionMetadata } from "@/types/editor-actions";
 import CodeEditorWithDialog from "@/components/code-editor-with-dialog/code-editor-with-dialog";
+import useSaveWorkflow from "@/providers/save-workflow";
+import { useRouter } from "next/navigation";
 
 function buildInitialArgs(
 	action: TEditorWorkflowActionNode,
@@ -24,8 +27,11 @@ function buildInitialArgs(
 }
 
 export default function ActionEditPanel() {
+	const router = useRouter();
 	const { nodes, selectedNodeIdx, updateNodeData } = useWorkflowStore();
 	const { actionsIndex } = useEditorActionStore();
+	const { secrets } = useSecretsStore();
+	const { saveWorkflow } = useSaveWorkflow();
 
 	const [args, updateArgs] = useImmer<string[]>([]);
 
@@ -55,14 +61,26 @@ export default function ActionEditPanel() {
 		);
 	};
 
+	const saveWorkflowAndRedirect = async () => {
+		const saveSuccessful = await saveWorkflow();
+		if (saveSuccessful) {
+			router.push("/settings");
+		}
+	};
+
 	const onChangeSecretsMapping = (
 		secretPlaceholder: string,
-		event: ChangeEvent<HTMLInputElement>,
+		value: string,
 	) => {
+		if (value === "$$$save_and_redirect$$$") {
+			saveWorkflowAndRedirect();
+			return;
+		}
+
 		updateNodeData(
 			selectedNodeIdx,
 			produce(actionData, (draft) => {
-				draft.secretsMapping[secretPlaceholder] = event.target.value;
+				draft.secretsMapping[secretPlaceholder] = value;
 			}),
 		);
 	};
@@ -134,20 +152,47 @@ export default function ActionEditPanel() {
 									<Flex>
 										<Code>{secretPlaceholder}</Code>
 									</Flex>
-									<TextField.Root
-										variant="surface"
+									<Select.Root
 										value={
 											actionData.secretsMapping[
 												secretPlaceholder
 											]
 										}
-										onChange={(event) =>
+										onValueChange={(value) =>
 											onChangeSecretsMapping(
 												secretPlaceholder,
-												event,
+												value,
 											)
 										}
-									/>
+									>
+										<Select.Trigger />
+										<Select.Content>
+											<Select.Group>
+												<Select.Label>
+													Select a secret
+												</Select.Label>
+												{secrets.map((_, idx) => (
+													<Select.Item
+														key={
+															secrets[idx]
+																.secretId
+														}
+														value={
+															secrets[idx]
+																.secretId
+														}
+													>
+														{secrets[idx].secretId}
+													</Select.Item>
+												))}
+												<Select.Separator />
+												<Select.Item value="$$$save_and_redirect$$$">
+													Save Workflow and Redirect
+													to Secrets
+												</Select.Item>
+											</Select.Group>
+										</Select.Content>
+									</Select.Root>
 								</Flex>
 							),
 						)}
