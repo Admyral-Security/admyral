@@ -53,6 +53,8 @@ class ConditionEvaluator(IVisitor):
                 return lhs <= rhs
             case BinaryOperator.IN:
                 return lhs in rhs
+            case BinaryOperator.NOT_IN:
+                return lhs not in rhs
             case _:
                 raise ValueError(f"Invalid operator: {expr.op.value}")
 

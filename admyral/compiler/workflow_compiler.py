@@ -631,6 +631,8 @@ class WorkflowCompiler:
                 op = BinaryOperator.LESS_THAN_OR_EQUAL
             elif isinstance(op_node, ast.In):
                 op = BinaryOperator.IN
+            elif isinstance(op_node, ast.NotIn):
+                op = BinaryOperator.NOT_IN
             else:
                 raise RuntimeError(
                     f"Unsupported comparison operator: {astor.to_source(op_node)}"

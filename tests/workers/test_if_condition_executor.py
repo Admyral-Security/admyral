@@ -145,3 +145,14 @@ def test_complex():
         ]
     )
     assert evaluate(expr, execution_state)
+
+
+# Condition: {{ a }} not in ["a", "b", "c"]
+def test_not_in_list():
+    execution_state = {"a": "b"}
+    expr = BinaryConditionExpression(
+        lhs=ConstantConditionExpression(value="{{ a }}"),
+        op=BinaryOperator.NOT_IN,
+        rhs=ConstantConditionExpression(value=["a", "b", "c"]),
+    )
+    assert not evaluate(expr, execution_state)
