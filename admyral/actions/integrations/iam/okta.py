@@ -137,7 +137,7 @@ def okta_search_users(
     with get_okta_client(okta_domain, api_key) as client:
         params = {
             "search": search,
-            "limit": min(limit, 200),  # Okta's maximum limit per request is 200
+            "limit": min(limit or 200, 200),  # Okta's maximum limit per request is 200
         }
 
         response = client.get("/users", params=params)

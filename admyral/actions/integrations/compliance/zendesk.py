@@ -48,10 +48,25 @@ def list_zendesk_users(
     email = secret["email"]
     api_token = secret["api_token"]
 
-    if user_role is not None and user_role not in ["end-user", "agent", "admin"]:
-        raise NonRetryableActionError(
-            f"Invalid user role: {user_role}. If user role is defined, it must be one of: end-user, agent, admin"
-        )
+    if user_role is not None:
+        if isinstance(user_role, str) and user_role not in [
+            "end-user",
+            "agent",
+            "admin",
+        ]:
+            raise NonRetryableActionError(
+                f"Invalid user role: {user_role}. If user role is defined, it must be one of: end-user, agent, admin"
+            )
+        else:
+            if not isinstance(user_role, list):
+                raise NonRetryableActionError(
+                    "User role must be a list of roles or a single role defined as a string."
+                )
+            for role in user_role:
+                if role not in ["end-user", "agent", "admin"]:
+                    raise NonRetryableActionError(
+                        f"Invalid user role: {role}. If user role is defined, it must be one of: end-user, agent, admin"
+                    )
 
     with get_zendesk_client(subdomain, email, api_token) as client:
         page = 1
