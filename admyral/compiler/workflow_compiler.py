@@ -157,12 +157,17 @@ class WorkflowCompiler:
         return WorkflowDAG(
             name=workflow.name,
             description=workflow.description,
-            controls=workflow.controls,
+            controls=self._filter_empty_controls(workflow.controls),
             start=WorkflowStart(
                 triggers=self._handle_triggers(workflow),
             ),
             dag=self.nodes,
         )
+
+    def _filter_empty_controls(self, controls: list[str] | None) -> list[str] | None:
+        if not controls:
+            return None
+        return [control for control in controls if control]
 
     def _compute_unique_node_id(self, base: str) -> str:
         if base not in self.nodes:
