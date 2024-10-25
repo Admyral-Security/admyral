@@ -62,6 +62,12 @@ export default function SaveWorkflowButton() {
 			return;
 		}
 
+		if (workflow.controls) {
+			workflow.controls = workflow.controls.filter(
+				(control) => control.trim() !== "",
+			);
+		}
+
 		// Make sure that we only save args which are present in the current
 		// action definition. If an action is updated and an argument is
 		// removed, we want to clean it up here.
