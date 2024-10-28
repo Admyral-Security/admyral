@@ -56,6 +56,7 @@ type WorkflowStoreState = TReactFlowGraph & {
 	webhookSecret: string | null;
 	lastDeletedEdges: TReactFlowEdge[];
 	payloadCache: string;
+	missingSecretForNodes: string[];
 	// Operations
 	clearWorkflowStore: () => void;
 	initWorkflow: (workflowId: string, windowInnerWidth: number) => void;
@@ -87,6 +88,9 @@ type WorkflowStoreState = TReactFlowGraph & {
 	deleteNodeByIdx: (nodeIdx: number) => void;
 	deleteControlByIdx: (controlIdx: number) => void;
 	duplicateNodeByIdx: (nodeIdx: number) => void;
+	addMissingSecretByIdx: (secret: string, nodeIdx: number) => void;
+	deleteMissingSecretByIdx: (idx: number) => void;
+	getMissingSecretByIdx: (idx: number) => string;
 	// Settings Side Panel
 	detailPageType: "workflow" | "action" | null;
 	selectedNodeIdx: number | null;
@@ -106,6 +110,7 @@ export const useWorkflowStore = create<WorkflowStoreState>((set, get) => ({
 	isActive: false,
 	nodes: [],
 	edges: [],
+	missingSecretForNodes: [],
 	// Other
 	isNew: false,
 	nextId: 0,
@@ -123,6 +128,7 @@ export const useWorkflowStore = create<WorkflowStoreState>((set, get) => ({
 			isActive: false,
 			nodes: [],
 			edges: [],
+			missingSecretForNodes: [],
 			isNew: false,
 			nextId: 0,
 			webhookId: null,
@@ -140,6 +146,7 @@ export const useWorkflowStore = create<WorkflowStoreState>((set, get) => ({
 			controls: [],
 			isActive: false,
 			nodes: [buildStartNode(windowInnerWidth)],
+			missingSecretForNodes: [],
 			edges: [],
 			isNew: true,
 			webhookId: null,
@@ -372,6 +379,19 @@ export const useWorkflowStore = create<WorkflowStoreState>((set, get) => ({
 			}),
 		);
 	},
+	addMissingSecretByIdx: (secret: string, nodeIdx: number) =>
+		set(
+			produce((draft) => {
+				draft.missingSecretForNodes[nodeIdx] = secret;
+			}),
+		),
+	deleteMissingSecretByIdx: (idx: number) =>
+		set(
+			produce((draft) => {
+				draft.missingSecretForNodes[idx] = "";
+			}),
+		),
+	getMissingSecretByIdx: (idx: number) => get().missingSecretForNodes[idx],
 	deleteNodeByIdx: (nodeIdx: number) =>
 		set(
 			produce((draft) => {

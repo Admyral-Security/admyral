@@ -38,7 +38,8 @@ export default function WorkflowEditor({
 
 	const [view, setView] = useState<View>("workflowBuilder");
 
-	const { isNew, setWorkflow, clearWorkflowStore } = useWorkflowStore();
+	const { isNew, setWorkflow, clearWorkflowStore, addMissingSecretByIdx } =
+		useWorkflowStore();
 	const { setEditorActions } = useEditorActionStore();
 	const { errorToast } = useToast();
 	const { setSecrets, clear } = useSecretsStore();
@@ -109,6 +110,26 @@ export default function WorkflowEditor({
 		clearWorkflowStore,
 		router,
 	]);
+
+	useEffect(() => {
+		if (!workflow || !encryptedSecrets) {
+			return;
+		}
+		workflow.nodes.forEach((node, nodeIdx) => {
+			console.log("node", node);
+			if (node.type === "action") {
+				const secretName = Object.values(node.secretsMapping)[0];
+				if (
+					secretName &&
+					!encryptedSecrets.find((s) => s.secretId === secretName)
+				) {
+					addMissingSecretByIdx(secretName, nodeIdx);
+					return;
+				}
+			}
+			addMissingSecretByIdx("", nodeIdx);
+		});
+	}, [encryptedSecrets, workflow]);
 
 	// TODO(frontend): nicer loading screen
 	if (isLoadingEditorActions || (!isNew && isLoadingWorkflow)) {
