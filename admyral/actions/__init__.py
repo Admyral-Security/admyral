@@ -13,6 +13,7 @@ from admyral.actions.utilities import (
     split_text,
     build_lookup_table,
     filter,
+    join_lists,
 )
 from admyral.actions.integrations.communication import (
     send_slack_message,
@@ -83,6 +84,9 @@ from admyral.actions.integrations.compliance import (
     list_kandji_unencrypted_devices,
     get_kandji_device_apps,
     list_zendesk_users,
+    get_kandji_application_firewall,
+    get_kandji_desktop_and_screensaver,
+    get_kandji_library_item_statuses,
 )
 from admyral.actions.integrations.cloud import (
     steampipe_query_aws,
@@ -171,4 +175,8 @@ __all__ = [
     "list_zendesk_users",
     "build_lookup_table",
     "filter",
+    "get_kandji_application_firewall",
+    "get_kandji_desktop_and_screensaver",
+    "get_kandji_library_item_statuses",
+    "join_lists",
 ]

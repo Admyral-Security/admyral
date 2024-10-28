@@ -26,6 +26,9 @@ from admyral.actions.integrations.compliance.kandji import (
     get_kandji_device_details,
     list_kandji_unencrypted_devices,
     get_kandji_device_apps,
+    get_kandji_application_firewall,
+    get_kandji_desktop_and_screensaver,
+    get_kandji_library_item_statuses,
 )
 from admyral.actions.integrations.compliance.zendesk import list_zendesk_users
 
@@ -48,4 +51,7 @@ __all__ = [
     "list_kandji_unencrypted_devices",
     "get_kandji_device_apps",
     "list_zendesk_users",
+    "get_kandji_application_firewall",
+    "get_kandji_desktop_and_screensaver",
+    "get_kandji_library_item_statuses",
 ]

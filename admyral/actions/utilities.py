@@ -293,3 +293,85 @@ def filter(
         if ConditionEvaluator().evaluate(expr):
             filtered_input_list.append(x)
     return filtered_input_list
+
+
+@action(
+    display_name="Join Lists",
+    display_namespace="Admyral",
+    description="Performs an inner join between 2 lists, i.e., returns a list of objects that have matching keys in both lists.",
+)
+def join_lists(
+    list1: Annotated[
+        list[JsonValue],
+        ArgumentMetadata(
+            display_name="List 1",
+            description="The first list to join.",
+        ),
+    ],
+    list1_join_key_paths: Annotated[
+        list[list[str]],
+        ArgumentMetadata(
+            display_name="Keys",
+            description="The keys to join the lists on.",
+        ),
+    ],
+    list2: Annotated[
+        list[JsonValue],
+        ArgumentMetadata(
+            display_name="List 2",
+            description="The second list to join.",
+        ),
+    ],
+    list2_join_key_paths: Annotated[
+        list[list[str]],
+        ArgumentMetadata(
+            display_name="Keys",
+            description="The keys to join the lists on.",
+        ),
+    ],
+    key_prefix_list1: Annotated[
+        str | None,
+        ArgumentMetadata(
+            display_name="Key Prefix",
+            description="The prefix to add to the keys of the second list.",
+        ),
+    ] = None,
+    key_prefix_list2: Annotated[
+        str | None,
+        ArgumentMetadata(
+            display_name="Key Prefix",
+            description="The prefix to add to the keys of the second list.",
+        ),
+    ] = None,
+) -> list[JsonValue]:
+    def calculate_join_key(entry, key_paths):
+        composed_key = []
+        for key_path in key_paths:
+            key = entry
+            for key_part in key_path:
+                key = key[key_part]
+            composed_key.append(key)
+        return tuple(composed_key)
+
+    ht = {}
+    for entry in list2:
+        key = calculate_join_key(entry, list2_join_key_paths)
+        ht[key] = entry
+
+    join_result = []
+    for entry in list1:
+        key = calculate_join_key(entry, list1_join_key_paths)
+        if entry_list2 := ht.get(key):
+            entry_list2 = deepcopy(entry_list2)
+            new_entry = deepcopy(entry)
+            if key_prefix_list1:
+                new_entry = {f"{key_prefix_list1}{k}": v for k, v in new_entry.items()}
+            if key_prefix_list2:
+                entry_list2 = {
+                    f"{key_prefix_list2}{k}": v for k, v in entry_list2.items()
+                }
+            new_entry |= entry_list2
+
+            join_result.append(new_entry)
+
+    return join_result
