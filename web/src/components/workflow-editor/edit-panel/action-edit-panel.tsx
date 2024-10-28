@@ -28,7 +28,13 @@ function buildInitialArgs(
 
 export default function ActionEditPanel() {
 	const router = useRouter();
-	const { nodes, selectedNodeIdx, updateNodeData } = useWorkflowStore();
+	const {
+		nodes,
+		selectedNodeIdx,
+		updateNodeData,
+		getMissingSecretByIdx,
+		deleteMissingSecretByIdx,
+	} = useWorkflowStore();
 	const { actionsIndex } = useEditorActionStore();
 	const { secrets } = useSecretsStore();
 	const { saveWorkflow } = useSaveWorkflow();
@@ -83,6 +89,10 @@ export default function ActionEditPanel() {
 				draft.secretsMapping[secretPlaceholder] = value;
 			}),
 		);
+
+		if (getMissingSecretByIdx(selectedNodeIdx) !== "") {
+			deleteMissingSecretByIdx(selectedNodeIdx);
+		}
 	};
 
 	const onChangeActionArgument = (
@@ -193,6 +203,22 @@ export default function ActionEditPanel() {
 											</Select.Group>
 										</Select.Content>
 									</Select.Root>
+									{getMissingSecretByIdx(selectedNodeIdx) !==
+										"" && (
+										<Flex
+											direction="row"
+											align="center"
+											className="text-red-500 font-medium mt-2"
+										>
+											<Text>
+												The previously selected secret "
+												{getMissingSecretByIdx(
+													selectedNodeIdx,
+												)}
+												" is not available anymore.
+											</Text>
+										</Flex>
+									)}
 								</Flex>
 							),
 						)}

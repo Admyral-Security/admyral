@@ -3,7 +3,7 @@ import { NodeToolbar, Position } from "reactflow";
 import * as Toolbar from "@radix-ui/react-toolbar";
 import DuplicateIcon from "../icons/duplicate-icon";
 import { useWorkflowStore } from "@/stores/workflow-store";
-import { TrashIcon } from "@radix-ui/react-icons";
+import { TrashIcon, ExclamationTriangleIcon } from "@radix-ui/react-icons";
 
 export interface NodeBaseProps {
 	nodeId: string;
@@ -20,12 +20,19 @@ export default function NodeBase({
 	name,
 	selected,
 }: NodeBaseProps) {
-	const { nodes, duplicateNodeByIdx, deleteNodeByIdx } = useWorkflowStore();
+	const {
+		nodes,
+		duplicateNodeByIdx,
+		deleteNodeByIdx,
+		getMissingSecretByIdx,
+	} = useWorkflowStore();
 
 	const nodeIdx = nodes.findIndex((node) => node.id === nodeId);
 	if (nodeIdx === -1) {
 		return null;
 	}
+
+	const hasMissingSecret = getMissingSecretByIdx(nodeIdx) !== "";
 
 	const cardStyle = selected
 		? {
@@ -59,6 +66,23 @@ export default function NodeBase({
 							{type}
 						</Text>
 					</Flex>
+					{hasMissingSecret && (
+						<Flex
+							className="absolute top-2 right-2"
+							justify="end"
+							align="start"
+						>
+							<Tooltip content="Missing secret">
+								<Flex
+									className="bg-red-500 rounded-full w-6 h-6"
+									justify="center"
+									align="center"
+								>
+									<ExclamationTriangleIcon className="text-white w-4 h-4" />
+								</Flex>
+							</Tooltip>
+						</Flex>
+					)}
 				</Flex>
 			</Card>
 
