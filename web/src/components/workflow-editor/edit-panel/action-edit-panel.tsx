@@ -211,11 +211,12 @@ export default function ActionEditPanel() {
 											className="text-red-500 font-medium mt-2"
 										>
 											<Text>
-												The previously selected secret "
+												The previously selected secret
+												&quot;
 												{getMissingSecretByIdx(
 													selectedNodeIdx,
 												)}
-												" is not available anymore.
+												&quot; is not available anymore.
 											</Text>
 										</Flex>
 									)}
