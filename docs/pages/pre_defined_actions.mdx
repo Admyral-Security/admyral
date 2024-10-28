@@ -426,3 +426,122 @@ invalid_zendesk_users = filter(
     }
 )
 ```
+
+## Join Lists
+
+Performs an inner join between two lists based on specified key paths, similar to SQL JOIN operations. The function matches objects from both lists based on common values found at the specified key paths
+and combines matched objects into a single object. Only objects that have matching keys in both lists are included in the result.
+
+For example, consider joining these lists:
+
+```json
+List 1:
+[
+    {"id": 1, "name": "John"},
+    {"id": 2, "name": "Jane"}
+]
+
+List 2:
+[
+    {"user_id": 1, "email": "john@example.com"},
+    {"user_id": 2, "email": "jane@example.com"}
+]
+
+// Joining on List 1's "id" and List 2's "user_id"
+// Result:
+[
+    {"id": 1, "name": "John", "user_id": 1, "email": "john@example.com"},
+    {"id": 2, "name": "Jane", "user_id": 2, "email": "jane@example.com"}
+]
+```
+
+You can optionally add prefixes to the keys of either list to prevent key collisions in the resulting objects. For example, adding the prefix "user\_" to List 1's keys would result in:
+
+```json
+[
+	{ "user_id": 1, "user_name": "John", "email": "john@example.com" },
+	{ "user_id": 2, "user_name": "Jane", "email": "jane@example.com" }
+]
+```
+
+| Parameter              | Type                    | Description                                                                                                                                                                                                                                                     | Required/Optional |
+| ---------------------- | ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------- |
+| `list1`                | list                    | The first list to join. Each element must be a JSON-serializable object.                                                                                                                                                                                        | Required          |
+| `list1_join_key_paths` | list of list of strings | The paths to the keys in list1 objects that should be used for joining. Each path is a list of strings representing nested keys. For example, `[["user", "id"]]` would access `object["user"]["id"]`. Multiple paths can be specified to join on multiple keys. | Required          |
+| `list2`                | list                    | The second list to join. Each element must be a JSON-serializable object.                                                                                                                                                                                       | Required          |
+| `list2_join_key_paths` | list of list of strings | The paths to the keys in list2 objects that should be used for joining. Must contain the same number of paths as `list1_join_key_paths`.                                                                                                                        | Required          |
+| `key_prefix_list1`     | string \| None          | Optional prefix to add to all keys from list1 in the resulting objects. Use this to prevent key collisions. Default is None.                                                                                                                                    | Optional          |
+| `key_prefix_list2`     | string \| None          | Optional prefix to add to all keys from list2 in the resulting objects. Use this to prevent key collisions. Default is None.                                                                                                                                    | Optional          |
+
+Usage Examples:
+
+```python
+# Join users with their orders
+"""
+users = [
+    {"id": 1, "name": "John"},
+    {"id": 2, "name": "Jane"}
+]
+orders = [
+    {"user_id": 1, "product": "Laptop"},
+    {"user_id": 2, "product": "Phone"}
+]
+"""
+
+users = ...
+orders = ...
+
+users_with_orders = join_lists(
+    list1=users,
+    list1_join_key_paths=[["id"]],
+    list2=orders,
+    list2_join_key_paths=[["user_id"]],
+    key_prefix_list1="user_"
+)
+# Result:
+# [
+#     {"user_id": 1, "user_name": "John", "product": "Laptop"},
+#     {"user_id": 2, "user_name": "Jane", "product": "Phone"}
+# ]
+
+# Join on multiple keys
+# employees = [
+#     {"dept_id": 1, "location_id": 100, "name": "John"},
+#     {"dept_id": 2, "location_id": 100, "name": "Jane"}
+# ]
+# departments = [
+#     {"id": 1, "location": 100, "name": "Engineering"},
+#     {"id": 2, "location": 100, "name": "Sales"}
+# ]
+
+employees = ...
+departments = ...
+
+employee_departments = join_lists(
+    list1=employees,
+    list1_join_key_paths=[["dept_id"], ["location_id"]],
+    list2=departments,
+    list2_join_key_paths=[["id"], ["location"]],
+    key_prefix_list1="employee_",
+    key_prefix_list2="department_"
+)
+# Result:
+# [
+#     {
+#         "employee_dept_id": 1,
+#         "employee_location_id": 100,
+#         "employee_name": "John",
+#         "department_id": 1,
+#         "department_location": 100,
+#         "department_name": "Engineering"
+#     },
+#     {
+#         "employee_dept_id": 2,
+#         "employee_location_id": 100,
+#         "employee_name": "Jane",
+#         "department_id": 2,
+#         "department_location": 100,
+#         "department_name": "Sales"
+#     }
+# ]
+```

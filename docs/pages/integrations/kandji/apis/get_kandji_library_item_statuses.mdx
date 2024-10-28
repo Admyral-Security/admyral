@@ -1,0 +1,88 @@
+import { Callout } from "nextra/components";
+
+# Get Library Item Statuses
+
+This endpoint retrieves the statuses related to a specific library item.
+
+<Callout type="info">
+	For more information on the API, see [Get Library Item
+	Statuses](https://api-docs.kandji.io/#478764c4-638c-416c-b44c-3685a2f7b441).
+</Callout>
+
+**Required permissions:**
+
+-   `View Library Item Status`
+
+**SDK Import:**
+
+```python
+from admyral.actions import get_kandji_library_item_statuses
+```
+
+## Arguments:
+
+| Argument Name                          | Description                 | Required |
+| -------------------------------------- | --------------------------- | :------: |
+| **Library Item ID**, `library_item_id` | The ID of the library item. |   Yes    |
+
+## Returns
+
+A list of JSON objects.
+
+## Required Secrets
+
+| Secret Placeholder | Description                                                    |
+| ------------------ | -------------------------------------------------------------- |
+| `KANDJI_SECRET`    | Kandji secret. See [Kandji setup](/integrations/kandji/kandji) |
+
+## SDK Example
+
+```python
+apps = get_kandji_library_item_statuses(
+    library_item_id="46e31b6e-6d9e-35b8-bvd1-9034f94d507f",
+	secrets={"KANDJI_SECRET": "my_kandji_secret"}
+)
+```
+
+## Example Output:
+
+```json
+[
+	{
+		"id": 13908,
+		"blueprint": {
+			"id": "ab102b9d-8e9c-420d-a498-f2a1123091c7",
+			"name": "_test_something"
+		},
+		"computer": {
+			"id": "2f25e13e-3b1c-4717-bf7e-7d23e61bb68c",
+			"name": "Mac mini"
+		},
+		"status": "PENDING",
+		"reported_at": null,
+		"log": null,
+		"last_audit_run": null,
+		"last_audit_log": null,
+		"control_log": null,
+		"control_reported_at": null
+	},
+	{
+		"id": 13907,
+		"blueprint": {
+			"id": "ab102b9d-8e9c-420d-a498-f2a1123091c7",
+			"name": "_test_something"
+		},
+		"computer": {
+			"id": "912bc505-a7ee-4d0b-906d-2102f332a4b3",
+			"name": "testuser’s MacBook Air"
+		},
+		"status": "PENDING",
+		"reported_at": null,
+		"log": null,
+		"last_audit_run": null,
+		"last_audit_log": null,
+		"control_log": null,
+		"control_reported_at": null
+	}
+]
+```

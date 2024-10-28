@@ -1,0 +1,98 @@
+import { Callout } from "nextra/components";
+
+# Application Firewall
+
+Get Application Firewall details for macOS.
+
+<Callout type="info">
+	For more information on the API, see [Application
+	Firewall](https://api-docs.kandji.io/#0d3abc6c-a5a5-4fe6-b7d4-19b1287eaf91).
+</Callout>
+
+**Required permissions:**
+
+-   `Application Firewall`
+
+**SDK Import:**
+
+```python
+from admyral.actions import get_kandji_application_firewall
+```
+
+## Arguments:
+
+| Argument Name | Description | Required |
+| ------------- | ----------- | :------: |
+
+## Returns
+
+A list of JSON objects.
+
+## Required Secrets
+
+| Secret Placeholder | Description                                                    |
+| ------------------ | -------------------------------------------------------------- |
+| `KANDJI_SECRET`    | Kandji secret. See [Kandji setup](/integrations/kandji/kandji) |
+
+## SDK Example
+
+```python
+apps = get_kandji_application_firewall(
+	secrets={"KANDJI_SECRET": "my_kandji_secret"}
+)
+```
+
+## Example Output:
+
+```json
+[
+	{
+		"blueprint_id": "9b1ce867-83dd-46bb-b79a-ba2b5c3a4acc",
+		"blueprint_name": "_testing_something",
+		"device__user_id": "",
+		"device__user_name": "",
+		"device__user_email": "",
+		"device__name": "test_from_api",
+		"device__family": "Mac",
+		"asset_tag": "send \"this\"",
+		"serial_number": "C02FL5YXQ6LC",
+		"model_id": null,
+		"device_id": "782f4054-b971-4bec-850b-7bf13ce806fe",
+		"updated_at": "2023-11-08T16:19:03.109352+00:00",
+		"last_changed_at": null,
+		"last_collected_at": "2023-11-08T16:19:03.109352+00:00",
+		"status": false,
+		"block_all_incoming": false,
+		"logging": true,
+		"logging_option": "throttled",
+		"stealth_mode": false,
+		"version": "1.6",
+		"allow_signed_applications": true,
+		"unloading": false
+	},
+	{
+		"blueprint_id": "9b1ce867-83dd-46bb-b79a-ba2b5c3a4acc",
+		"blueprint_name": "_testing_something",
+		"device__user_id": "31239",
+		"device__user_name": "avenger admin",
+		"device__user_email": "avenger.admin@secretavengers.onmicrosoft.com",
+		"device__name": "14_1_1_23B81_as_adcs_testing",
+		"device__family": "Mac",
+		"asset_tag": null,
+		"serial_number": "Z6V0YW4M1C",
+		"model_id": null,
+		"device_id": "d6ac2d8c-3852-4dc1-afe7-d5a32306ee39",
+		"updated_at": "2023-12-24T22:01:33.059930+00:00",
+		"last_changed_at": null,
+		"last_collected_at": "2023-12-24T22:01:33.059930+00:00",
+		"status": false,
+		"block_all_incoming": false,
+		"logging": true,
+		"logging_option": "throttled",
+		"stealth_mode": false,
+		"version": "1.7",
+		"allow_signed_applications": true,
+		"unloading": false
+	}
+]
+```

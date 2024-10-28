@@ -1,0 +1,108 @@
+import { Callout } from "nextra/components";
+
+# Desktop & Screensaver
+
+Get Desktop and Screensaver details for macOS.
+
+<Callout type="info">
+	For more information on the API, see [Desktop and
+	Screensaver](https://api-docs.kandji.io/#7f6f6813-6522-4249-9f6a-3d0c479e2bbe).
+</Callout>
+
+**Required permissions:**
+
+-   `Desktop & Screensaver`
+
+**SDK Import:**
+
+```python
+from admyral.actions import get_kandji_desktop_and_screensaver
+```
+
+## Arguments:
+
+| Argument Name | Description | Required |
+| ------------- | ----------- | :------: |
+
+## Returns
+
+A list of JSON objects.
+
+## Required Secrets
+
+| Secret Placeholder | Description                                                    |
+| ------------------ | -------------------------------------------------------------- |
+| `KANDJI_SECRET`    | Kandji secret. See [Kandji setup](/integrations/kandji/kandji) |
+
+## SDK Example
+
+```python
+apps = get_kandji_desktop_and_screensaver(
+	secrets={"KANDJI_SECRET": "my_kandji_secret"}
+)
+```
+
+## Example Output:
+
+```json
+[
+	{
+		"blueprint_id": "9b1ce867-83dd-46bb-b79a-ba2b5c3a4acc",
+		"blueprint_name": "_testing_something",
+		"device__user_id": "",
+		"device__user_name": "",
+		"device__user_email": "",
+		"device__name": "test_from_api",
+		"device__family": "Mac",
+		"asset_tag": "send \"this\"",
+		"serial_number": "C02FL5YXQ6LC",
+		"model_id": null,
+		"device_id": "782f4054-b971-4bec-850b-7bf13ce806fe",
+		"updated_at": "2023-11-08T16:19:02.587787+00:00",
+		"last_changed_at": null,
+		"last_collected_at": "2023-11-08T16:19:02.587787+00:00",
+		"screensaver_interval": 1200,
+		"user_account": "matt",
+		"screensaver_path": "/System/Library/Frameworks/ScreenSaver.framework/PlugIns/Ventura.appex",
+		"uses_random_screensaver": false,
+		"show_with_clock": false,
+		"top_left_hot_corner_option": "Off",
+		"top_left_hot_corner_modifier": "No Modifiers",
+		"top_right_hot_corner_option": "Off",
+		"top_right_hot_corner_modifier": "No Modifiers",
+		"bottom_left_hot_corner_option": "Off",
+		"bottom_left_hot_corner_modifier": "No Modifiers",
+		"bottom_right_hot_corner_option": "Quick Note",
+		"bottom_right_hot_corner_modifier": "No Modifiers"
+	},
+	{
+		"blueprint_id": "9b1ce867-83dd-46bb-b79a-ba2b5c3a4acc",
+		"blueprint_name": "_testing_something",
+		"device__user_id": "",
+		"device__user_name": "",
+		"device__user_email": "",
+		"device__name": "test_from_api",
+		"device__family": "Mac",
+		"asset_tag": "send \"this\"",
+		"serial_number": "C02FL5YXQ6LC",
+		"model_id": null,
+		"device_id": "782f4054-b971-4bec-850b-7bf13ce806fe",
+		"updated_at": "2023-11-08T16:19:02.587871+00:00",
+		"last_changed_at": "2023-09-20T15:49:24.229196+00:00",
+		"last_collected_at": "2023-11-08T16:19:02.587871+00:00",
+		"screensaver_interval": 300,
+		"user_account": "testuser",
+		"screensaver_path": "/Users/testuser/Library/Screen Savers/Brooklyn.saver",
+		"uses_random_screensaver": false,
+		"show_with_clock": false,
+		"top_left_hot_corner_option": "Off",
+		"top_left_hot_corner_modifier": "No Modifiers",
+		"top_right_hot_corner_option": "Off",
+		"top_right_hot_corner_modifier": "No Modifiers",
+		"bottom_left_hot_corner_option": "Off",
+		"bottom_left_hot_corner_modifier": "No Modifiers",
+		"bottom_right_hot_corner_option": "Quick Note",
+		"bottom_right_hot_corner_modifier": "No Modifiers"
+	}
+]
+```
