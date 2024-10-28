@@ -32,6 +32,7 @@ const NAMESPACE_ICON_MAPPING: Record<string, string> = {
 	"Microsoft Intune": "/ms_intunes_logo.svg",
 	Kandji: "/kandji_logo.svg",
 	Zendesk: "/zendesk_logo.svg",
+	LeakCheck: "/leakcheck_logo.png",
 };
 
 export default function NamespaceIcon({ namespace }: { namespace: string }) {
