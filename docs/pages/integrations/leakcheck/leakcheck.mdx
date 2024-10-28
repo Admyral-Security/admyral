@@ -1,0 +1,23 @@
+# LeakCheck
+
+1. In **LeakCheck**, go to **Settings** > **API**.
+
+2. Create an API token.
+
+3. Go to the **Settings** page in **Admyral** and click on **Add New Secret** in the **Secrets** section.
+
+4. Give your secret a name, e.g. `LeakCheck`.
+
+5. The following secrets structure is expected:
+
+| Key       | Value                  |
+| --------- | ---------------------- |
+| `api_key` | Paste the API key here |
+
+6. Click on the **Save** button.
+
+Alternatively, you can use the following CLI command structure:
+
+```bash
+admyral secret set leakcheck_secret --value api_key=your_key_value
+```

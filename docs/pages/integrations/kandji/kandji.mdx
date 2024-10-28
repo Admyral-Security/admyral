@@ -6,27 +6,27 @@
 
 ![Kandji Settings](/connect_kandji.png)
 
-3. Configure your API permissions. The following permissions are recommended:
+3. Configure your API permissions. Please check the permissions needed for the Kandji actions you want to use. The following permissions are recommended:
 
 -   `Device details`
 -   `Device list`
 -   `Application list`
 
-3. Go to the **Settings** page in **Admyral** and click on **Add New Secret** in the **Secrets** section.
+4. Go to the **Settings** page in **Admyral** and click on **Add New Secret** in the **Secrets** section.
 
-4. Give your secret a name, e.g. `Kandji`.
+5. Give your secret a name, e.g. `Kandji`.
 
-5. The following secrets structure is expected:
+6. The following secrets structure is expected:
 
-| Key       | Value                                                                                                                                       |
-| --------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| `api_token` | Paste the API key here                                                                                                                      |
-| `api_url` | Paste your organization's API url here. Example for EU hosting: `admyral.api.eu.kandji.io`. Example for US hosting: `admyral.api.kandji.io` |
+| Key         | Value                                                                                                                                       |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| `api_token` | Paste the API token here                                                                                                                    |
+| `api_url`   | Paste your organization's API url here. Example for EU hosting: `admyral.api.eu.kandji.io`. Example for US hosting: `admyral.api.kandji.io` |
 
-6. Click on the **Save** button.
+7. Click on the **Save** button.
 
 Alternatively, you can use the following CLI command structure:
 
 ```bash
-admyral secret set jira_secret --value api_token=your_key_value --value api_url=your_api_url
+admyral secret set kandji_secret --value api_token=your_token_value --value api_url=your_api_url
 ```

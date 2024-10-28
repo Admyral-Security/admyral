@@ -1,0 +1,62 @@
+import { Callout } from "nextra/components";
+
+# Lookup via Public API
+
+Search for email, email by hash, and usernames.
+
+<Callout type="info">
+	For more information on the API, see [Public API
+	Documentation](https://wiki.leakcheck.io/en/api/public).
+</Callout>
+
+**SDK Import:**
+
+```python
+from admyral.actions import leakcheck_public_lookup
+```
+
+## Arguments:
+
+| Argument Name     | Description                                                                                      | Required |
+| ----------------- | ------------------------------------------------------------------------------------------------ | :------: |
+| **Query** `query` | The data to query for (email, email hashed with SHA256 and truncated to 24 characters, username) |   Yes    |
+
+## Returns
+
+A JSON object.
+
+## Required Secrets
+
+No secret required.
+
+## SDK Example
+
+```python
+result = leakcheck_public_lookup(
+	query="your.email@gmail.com"
+)
+```
+
+## Example Output:
+
+```json
+{
+	"success": true,
+	"found": 3,
+	"fields": ["username", "first_name", "address"],
+	"sources": [
+		{
+			"name": "Evony.com",
+			"date": "2016-07"
+		},
+		{
+			"name": "I-Dressup.com",
+			"date": "2016-08"
+		},
+		{
+			"name": "Zynga.com",
+			"date": "2019-09"
+		}
+	]
+}
+```

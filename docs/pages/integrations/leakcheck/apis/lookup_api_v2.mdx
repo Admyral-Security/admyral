@@ -1,0 +1,44 @@
+import { Callout } from "nextra/components";
+
+# Lookup via Pro API v2
+
+Search for email, domain, keyword, username, phone, email hash, password hash, origin, or password.
+
+<Callout type="info">
+	For more information on the API, see [Pro API v2
+	Documentation](https://wiki.leakcheck.io/en/api/api-v2-pro).
+</Callout>
+
+**SDK Import:**
+
+```python
+from admyral.actions import leakcheck_v2_lookup
+```
+
+## Arguments:
+
+| Argument Name               | Description                                                                                                                                                                                                                                                       | Required |
+| --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------: |
+| **Query** `query`           | The data to query for                                                                                                                                                                                                                                             |   Yes    |
+| **Query Type** `query_type` | The data type to query for. Only email, username, phone number and hash can be detected automatically. For other data you must set the type explicitly. Available types: `email`, `domain`, `keyword`, `username`, `phone`, `hash`, `phash`, `origin`, `password` |    -     |
+| **Limit** `limit`           | The number of results to return. Max: 1000.                                                                                                                                                                                                                       |   Yes    |
+
+## Returns
+
+A JSON object.
+
+## Required Secrets
+
+| Secret Placeholder | Description                                                                |
+| ------------------ | -------------------------------------------------------------------------- |
+| `LEAKCHECK_SECRET` | LeakCheck secret. See [LeakCheck setup](/integrations/leakcheck/leakcheck) |
+
+## SDK Example
+
+```python
+result = leakcheck_v2_lookup(
+	query="your.email@gmail.com",
+    query_type="email",
+    secrets={"LEAKCHECK_SECRET": "leakcheck_secret"}
+)
+```

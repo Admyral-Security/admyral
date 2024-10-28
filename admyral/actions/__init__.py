@@ -29,6 +29,8 @@ from admyral.actions.integrations.enrich import (
     virus_total_analyze_ip,
     virus_total_analyze_url,
     abuseipdb_analyze_ip,
+    leakcheck_v2_lookup,
+    leakcheck_public_lookup,
 )
 from admyral.actions.integrations.cases import (
     create_jira_issue,
@@ -179,4 +181,6 @@ __all__ = [
     "get_kandji_desktop_and_screensaver",
     "get_kandji_library_item_statuses",
     "join_lists",
+    "leakcheck_v2_lookup",
+    "leakcheck_public_lookup",
 ]
