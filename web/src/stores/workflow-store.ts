@@ -58,7 +58,7 @@ type WorkflowStoreState = TReactFlowGraph & {
 	webhookSecret: string | null;
 	lastDeletedEdges: TReactFlowEdge[];
 	payloadCache: string;
-	missingSecretForNodes: Set<String>;
+	missingSecretForNodes: Map<string, Set<number>> | undefined;
 	// Operations
 	clearWorkflowStore: () => void;
 	initWorkflow: (workflowId: string, windowInnerWidth: number) => void;
@@ -90,9 +90,9 @@ type WorkflowStoreState = TReactFlowGraph & {
 	deleteNodeByIdx: (nodeIdx: number) => void;
 	deleteControlByIdx: (controlIdx: number) => void;
 	duplicateNodeByIdx: (nodeIdx: number) => void;
-	addMissingSecret: (nodeId: string) => void;
-	hasMissingSecret: (nodeId: string) => boolean;
-	removeMissingSecretById: (nodeId: string) => void;
+	hasMissingSecret: (nodeId: string, secretIdx?: number) => boolean;
+	addMissingSecrets: (missingSecrets: Map<string, Set<number>>) => void;
+	removeMissingSecretById: (nodeId: string, secretIdx: number) => void;
 	// Settings Side Panel
 	detailPageType: "workflow" | "action" | null;
 	selectedNodeIdx: number | null;
@@ -112,7 +112,7 @@ export const useWorkflowStore = create<WorkflowStoreState>((set, get) => ({
 	isActive: false,
 	nodes: [],
 	edges: [],
-	missingSecretForNodes: new Set<String>(),
+	missingSecretForNodes: undefined,
 	// Other
 	isNew: false,
 	nextId: 0,
@@ -130,7 +130,7 @@ export const useWorkflowStore = create<WorkflowStoreState>((set, get) => ({
 			isActive: false,
 			nodes: [],
 			edges: [],
-			missingSecretForNodes: new Set<String>(),
+			missingSecretForNodes: undefined,
 			isNew: false,
 			nextId: 0,
 			webhookId: null,
@@ -148,7 +148,7 @@ export const useWorkflowStore = create<WorkflowStoreState>((set, get) => ({
 			controls: [],
 			isActive: false,
 			nodes: [buildStartNode(windowInnerWidth)],
-			missingSecretForNodes: new Set<String>(),
+			missingSecretForNodes: undefined,
 			edges: [],
 			isNew: true,
 			webhookId: null,
@@ -381,23 +381,34 @@ export const useWorkflowStore = create<WorkflowStoreState>((set, get) => ({
 			}),
 		);
 	},
-	addMissingSecret: (nodeId: string) =>
+	hasMissingSecret: (nodeId: string, secretIdx?: number) => {
+		const missingSecrets = get().missingSecretForNodes;
+		if (missingSecrets) {
+			if (secretIdx !== undefined) {
+				return (
+					missingSecrets.has(nodeId) &&
+					missingSecrets.get(nodeId)!.has(secretIdx)
+				);
+			}
+			return missingSecrets.has(nodeId);
+		}
+		return false;
+	},
+	addMissingSecrets: (missingSecrets: Map<string, Set<number>>) =>
 		set(
 			produce((draft) => {
-				draft.missingSecretForNodes.add(nodeId);
+				draft.missingSecretForNodes = missingSecrets;
 			}),
 		),
-	hasMissingSecret: (nodeId: string) => {
-		const nodeIdx = get().nodes.findIndex((node) => node.id === nodeId);
-		if (nodeIdx === -1) {
-			return false;
-		}
-		return get().missingSecretForNodes.has(nodeId);
-	},
-	removeMissingSecretById: (nodeId: string) =>
+	removeMissingSecretById: (nodeId: string, secretIdx: number) =>
 		set(
 			produce((draft) => {
-				draft.missingSecretForNodes.delete(nodeId);
+				if (draft.missingSecretForNodes.has(nodeId)) {
+					draft.missingSecretForNodes.get(nodeId).delete(secretIdx);
+					if (draft.missingSecretForNodes.get(nodeId).size === 0) {
+						draft.missingSecretForNodes.delete(nodeId);
+					}
+				}
 			}),
 		),
 	deleteNodeByIdx: (nodeIdx: number) =>

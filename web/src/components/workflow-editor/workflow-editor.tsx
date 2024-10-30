@@ -1,6 +1,7 @@
 "use client";
 
 import { useGetWorkflowApi } from "@/hooks/use-get-workflow-api";
+import { TEditorWorkflowActionNode } from "@/types/react-flow";
 import { useListSecretsApi } from "@/hooks/use-list-credentials-api";
 import { useListEditorActionsApi } from "@/hooks/use-list-editor-actions-api";
 import { useEditorActionStore } from "@/stores/editor-action-store";
@@ -38,7 +39,7 @@ export default function WorkflowEditor({
 
 	const [view, setView] = useState<View>("workflowBuilder");
 
-	const { isNew, setWorkflow, clearWorkflowStore, addMissingSecret } =
+	const { isNew, setWorkflow, clearWorkflowStore, addMissingSecrets } =
 		useWorkflowStore();
 	const { setEditorActions } = useEditorActionStore();
 	const { errorToast } = useToast();
@@ -116,15 +117,29 @@ export default function WorkflowEditor({
 			return;
 		}
 		const secretIds = new Set(encryptedSecrets.map((s) => s.secretId));
-		workflow.nodes.forEach((node) => {
-			if (node.type === "action") {
-				const secretName = Object.values(node.secretsMapping)[0];
-				if (secretName && !secretIds.has(secretName)) {
-					addMissingSecret(node.id);
-				}
-			}
-		});
-	}, [encryptedSecrets, workflow]);
+		const missingSecrets = workflow?.nodes
+			.filter((node) => node.type === "action")
+			.reduce((acc, node) => {
+				const secretsForNode = Object.values(node.secretsMapping);
+				secretsForNode.forEach((secretId, secretIdx) => {
+					if (!secretIds.has(secretId as string)) {
+						if (!acc.has(node.id)) {
+							acc.set(node.id, new Set());
+						}
+						acc.get(node.id)?.add(secretIdx);
+					}
+				});
+				return acc;
+			}, new Map<string, Set<number>>());
+		if (missingSecrets) {
+			addMissingSecrets(missingSecrets);
+		}
+		if (missingSecrets && missingSecrets.size > 0) {
+			errorToast(
+				"Some secrets are missing. Please add them before running the workflow.",
+			);
+		}
+	}, [encryptedSecrets, workflow, addMissingSecrets]);
 
 	// TODO(frontend): nicer loading screen
 	if (isLoadingEditorActions || (!isNew && isLoadingWorkflow)) {
