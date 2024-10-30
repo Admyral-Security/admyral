@@ -29,5 +29,6 @@ export const useGetWorkflowApi = (workflowId: string, doApiCall: boolean) => {
 		queryKey: ["workflow", workflowId],
 		queryFn: () => getWorkflow({ workflowId }),
 		enabled: doApiCall,
+		gcTime: 0,
 	});
 };
