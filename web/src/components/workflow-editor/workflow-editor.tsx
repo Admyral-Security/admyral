@@ -38,7 +38,7 @@ export default function WorkflowEditor({
 
 	const [view, setView] = useState<View>("workflowBuilder");
 
-	const { isNew, setWorkflow, clearWorkflowStore, addMissingSecretByIdx } =
+	const { isNew, setWorkflow, clearWorkflowStore, addMissingSecret } =
 		useWorkflowStore();
 	const { setEditorActions } = useEditorActionStore();
 	const { errorToast } = useToast();
@@ -115,19 +115,14 @@ export default function WorkflowEditor({
 		if (!workflow || !encryptedSecrets) {
 			return;
 		}
-		workflow.nodes.forEach((node, nodeIdx) => {
-			console.log("node", node);
+		const secretIds = new Set(encryptedSecrets.map((s) => s.secretId));
+		workflow.nodes.forEach((node) => {
 			if (node.type === "action") {
 				const secretName = Object.values(node.secretsMapping)[0];
-				if (
-					secretName &&
-					!encryptedSecrets.find((s) => s.secretId === secretName)
-				) {
-					addMissingSecretByIdx(secretName, nodeIdx);
-					return;
+				if (secretName && !secretIds.has(secretName)) {
+					addMissingSecret(node.id);
 				}
 			}
-			addMissingSecretByIdx("", nodeIdx);
 		});
 	}, [encryptedSecrets, workflow]);
 
