@@ -1,0 +1,62 @@
+import { Callout } from "nextra/components";
+
+# List Used Groups and Apps per User
+
+List all apps a user has used as viewer and/or editor within a certain time range.
+
+<Callout type="info">
+	For more information on the used APIs, see [List
+	users](https://docs.retool.com/reference/api/#tag/Users/paths/~1users/get),
+	[List
+	groups](https://docs.retool.com/reference/api/#tag/Groups/paths/~1groups/get),
+	[List objects a group can
+	access](https://docs.retool.com/reference/api/#tag/Groups/paths/~1permissions~1listObjects/post),
+	and [The user details for the selected user and
+	organizations](https://docs.retool.com/reference/api/#tag/Usage/paths/~1usage~1user_summary/get).
+</Callout>
+
+**SDK Import:**
+
+```python
+from admyral.actions import list_used_groups_and_apps_per_user
+```
+
+## Arguments
+
+| Argument Name                |                                                         Description                                                          | Required |
+| ---------------------------- | :--------------------------------------------------------------------------------------------------------------------------: | -------- |
+| **Start Date**, `start_date` |                                    The start date of the time range. Example: 2022-01-01                                     | Yes      |
+| **End Date**, `end_date`     | The end date of the time range. If not specified, then minimum(start_date + 30 days, today - 1) is used. Example: 2022-12-31 | -        |
+
+## Returns
+
+A list of JSON objects.
+
+Schema:
+
+```
+[
+	{
+        "user": The user email,
+		"used_groups": List of group names the user used within the time range,
+        "viewed_apps": Name of the apps the user used within the time range,
+        "edited_apps": Name of the apps the user edited within the time range,
+	}
+]
+```
+
+## Required Secrets
+
+| Secret Placeholder | Description                                                    |
+| ------------------ | -------------------------------------------------------------- |
+| `RETOOL_SECRET`    | Retool secret. See [Retool setup](/integrations/retool/retool) |
+
+## SDK Example
+
+```python
+groups_per_user = list_used_groups_and_apps_per_user(
+    start_date="2024-10-01",
+    end_date="2024-10-31",
+	secrets={"RETOOL_SECRET": "my_stored_retool_secret"}
+)
+```

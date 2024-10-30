@@ -1,0 +1,57 @@
+import { Callout } from "nextra/components";
+
+# List Groups and Apps per User
+
+List all groups a user is a member of and all the apps a user has access to.
+
+<Callout type="info">
+	For more information on the used APIs, see [List
+	users](https://docs.retool.com/reference/api/#tag/Users/paths/~1users/get),
+	[List
+	groups](https://docs.retool.com/reference/api/#tag/Groups/paths/~1groups/get),
+	and [List objects a group can
+	access](https://docs.retool.com/reference/api/#tag/Groups/paths/~1permissions~1listObjects/post).
+</Callout>
+
+**SDK Import:**
+
+```python
+from admyral.actions import list_groups_and_apps_per_user
+```
+
+## Arguments
+
+| Argument Name | Description | Required |
+| ------------- | :---------: | -------- |
+
+## Returns
+
+A list of JSON objects.
+
+Schema:
+
+```
+[
+	{
+        "user": The user email,
+		"groups": List of group names the user is part of,
+        "apps_own_access": Name of the apps the user owns,
+        "apps_edit_access": Name of the apps the user has edit access,
+        "apps_use_access": Name of the apps the user has use access,
+	}
+]
+```
+
+## Required Secrets
+
+| Secret Placeholder | Description                                                    |
+| ------------------ | -------------------------------------------------------------- |
+| `RETOOL_SECRET`    | Retool secret. See [Retool setup](/integrations/retool/retool) |
+
+## SDK Example
+
+```python
+groups_per_user = list_groups_and_apps_per_user(
+	secrets={"RETOOL_SECRET": "my_stored_retool_secret"}
+)
+```
