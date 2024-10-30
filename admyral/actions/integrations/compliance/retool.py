@@ -112,23 +112,13 @@ def list_retool_inactive_users(
     domain = secret["domain"]
 
     with get_retool_client(domain, api_key) as client:
-        # TODO: handle pageination
-        response = client.get("/users")
-        response.raise_for_status()
-        response_json = response.json()
-
-        if not response_json["success"]:
-            raise RuntimeError(
-                f"Failed to list Retool users: {response_json['message']}"
-            )
-
+        users = _list_retool_api_with_pagination(client, "/users")
         utc_time_now = datetime.now(timezone.utc) - timedelta(
             days=inactivity_threshold_in_days
         )
-
         return [
             user
-            for user in response_json["data"]
+            for user in users
             if parser.isoparse(user["last_active"]) <= utc_time_now
         ]
 
@@ -150,34 +140,19 @@ def list_groups_per_user() -> dict[str, JsonValue]:
 
     with get_retool_client(domain, api_key) as client:
         # Fetch all users to get the last active date
-        response = client.get("/users")
-        response.raise_for_status()
-        response_json = response.json()
-
-        if not response_json["success"]:
-            raise RuntimeError(
-                f"Failed to list Retool users: {response_json['message']}"
-            )
+        users = _list_retool_api_with_pagination(client, "/users")
 
         groups_per_user = {
             user["email"]: {
                 "groups": [],
                 "last_active": user["last_active"],
             }
-            for user in response_json["data"]
+            for user in users
         }
 
         # Fetch all groups
-        response = client.get("/groups")
-        response.raise_for_status()
-        response_json = response.json()
-
-        if not response_json["success"]:
-            raise RuntimeError(
-                f"Failed to list Retool groups: {response_json['message']}"
-            )
-
-        for group in response_json["data"]:
+        groups = _list_retool_api_with_pagination(client, "/groups")
+        for group in groups:
             for member in group["member"]:
                 groups_per_user[member]["groups"].append(group["name"])
 
