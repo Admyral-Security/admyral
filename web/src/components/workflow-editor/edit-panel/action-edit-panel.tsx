@@ -32,8 +32,8 @@ export default function ActionEditPanel() {
 		nodes,
 		selectedNodeIdx,
 		updateNodeData,
-		getMissingSecretByIdx,
-		deleteMissingSecretByIdx,
+		hasMissingSecret,
+		removeMissingSecretById,
 	} = useWorkflowStore();
 	const { actionsIndex } = useEditorActionStore();
 	const { secrets } = useSecretsStore();
@@ -90,8 +90,8 @@ export default function ActionEditPanel() {
 			}),
 		);
 
-		if (getMissingSecretByIdx(selectedNodeIdx) !== "") {
-			deleteMissingSecretByIdx(selectedNodeIdx);
+		if (hasMissingSecret(action.id)) {
+			removeMissingSecretById(action.id);
 		}
 	};
 
@@ -203,8 +203,7 @@ export default function ActionEditPanel() {
 											</Select.Group>
 										</Select.Content>
 									</Select.Root>
-									{getMissingSecretByIdx(selectedNodeIdx) !==
-										"" && (
+									{hasMissingSecret(action.id) && (
 										<Flex
 											direction="row"
 											align="center"
@@ -212,11 +211,7 @@ export default function ActionEditPanel() {
 										>
 											<Text>
 												The previously selected secret
-												&quot;
-												{getMissingSecretByIdx(
-													selectedNodeIdx,
-												)}
-												&quot; is not available anymore.
+												could not be found.
 											</Text>
 										</Flex>
 									)}

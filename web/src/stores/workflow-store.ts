@@ -10,7 +10,7 @@ import {
 	TReactFlowNode,
 	TReactFlowEdge,
 } from "@/types/react-flow";
-import { produce } from "immer";
+import { produce, enableMapSet } from "immer";
 import {
 	addEdge,
 	applyEdgeChanges,
@@ -48,6 +48,8 @@ function buildStartNode(
 	};
 }
 
+enableMapSet();
+
 type WorkflowStoreState = TReactFlowGraph & {
 	// Other
 	isNew: boolean;
@@ -56,7 +58,7 @@ type WorkflowStoreState = TReactFlowGraph & {
 	webhookSecret: string | null;
 	lastDeletedEdges: TReactFlowEdge[];
 	payloadCache: string;
-	missingSecretForNodes: string[];
+	missingSecretForNodes: Set<String>;
 	// Operations
 	clearWorkflowStore: () => void;
 	initWorkflow: (workflowId: string, windowInnerWidth: number) => void;
@@ -88,9 +90,9 @@ type WorkflowStoreState = TReactFlowGraph & {
 	deleteNodeByIdx: (nodeIdx: number) => void;
 	deleteControlByIdx: (controlIdx: number) => void;
 	duplicateNodeByIdx: (nodeIdx: number) => void;
-	addMissingSecretByIdx: (secret: string, nodeIdx: number) => void;
-	deleteMissingSecretByIdx: (idx: number) => void;
-	getMissingSecretByIdx: (idx: number) => string;
+	addMissingSecret: (nodeId: string) => void;
+	hasMissingSecret: (nodeId: string) => boolean;
+	removeMissingSecretById: (nodeId: string) => void;
 	// Settings Side Panel
 	detailPageType: "workflow" | "action" | null;
 	selectedNodeIdx: number | null;
@@ -110,7 +112,7 @@ export const useWorkflowStore = create<WorkflowStoreState>((set, get) => ({
 	isActive: false,
 	nodes: [],
 	edges: [],
-	missingSecretForNodes: [],
+	missingSecretForNodes: new Set<String>(),
 	// Other
 	isNew: false,
 	nextId: 0,
@@ -128,7 +130,7 @@ export const useWorkflowStore = create<WorkflowStoreState>((set, get) => ({
 			isActive: false,
 			nodes: [],
 			edges: [],
-			missingSecretForNodes: [],
+			missingSecretForNodes: new Set<String>(),
 			isNew: false,
 			nextId: 0,
 			webhookId: null,
@@ -146,7 +148,7 @@ export const useWorkflowStore = create<WorkflowStoreState>((set, get) => ({
 			controls: [],
 			isActive: false,
 			nodes: [buildStartNode(windowInnerWidth)],
-			missingSecretForNodes: [],
+			missingSecretForNodes: new Set<String>(),
 			edges: [],
 			isNew: true,
 			webhookId: null,
@@ -379,19 +381,25 @@ export const useWorkflowStore = create<WorkflowStoreState>((set, get) => ({
 			}),
 		);
 	},
-	addMissingSecretByIdx: (secret: string, nodeIdx: number) =>
+	addMissingSecret: (nodeId: string) =>
 		set(
 			produce((draft) => {
-				draft.missingSecretForNodes[nodeIdx] = secret;
+				draft.missingSecretForNodes.add(nodeId);
 			}),
 		),
-	deleteMissingSecretByIdx: (idx: number) =>
+	hasMissingSecret: (nodeId: string) => {
+		const nodeIdx = get().nodes.findIndex((node) => node.id === nodeId);
+		if (nodeIdx === -1) {
+			return false;
+		}
+		return get().missingSecretForNodes.has(nodeId);
+	},
+	removeMissingSecretById: (nodeId: string) =>
 		set(
 			produce((draft) => {
-				draft.missingSecretForNodes[idx] = "";
+				draft.missingSecretForNodes.delete(nodeId);
 			}),
 		),
-	getMissingSecretByIdx: (idx: number) => get().missingSecretForNodes[idx],
 	deleteNodeByIdx: (nodeIdx: number) =>
 		set(
 			produce((draft) => {
