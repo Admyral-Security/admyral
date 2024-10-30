@@ -1,13 +1,20 @@
-from typing import Annotated
-from httpx import Client
+from typing import Annotated, Literal
+from httpx import Client, HTTPStatusError
 from collections import defaultdict
 from dateutil import parser
 from datetime import datetime, timezone, timedelta
+from tenacity import (
+    retry,
+    stop_after_attempt,
+    wait_random_exponential,
+    retry_if_exception_type,
+)
+import itertools
 
 from admyral.action import action, ArgumentMetadata
-
 from admyral.context import ctx
 from admyral.typings import JsonValue
+from admyral.exceptions import NonRetryableActionError, RetryableActionError
 
 
 def get_retool_client(domain: str, api_key: str) -> Client:
@@ -20,6 +27,66 @@ def get_retool_client(domain: str, api_key: str) -> Client:
             "Accept": "application/json",
         },
     )
+
+
+@retry(
+    stop=stop_after_attempt(15),
+    wait=wait_random_exponential(multiplier=1, max=90),
+    retry=retry_if_exception_type(RetryableActionError),  # Don't retry on 4xx errors
+    reraise=True,
+)
+def _list_retool_api(
+    client: Client,
+    url: str,
+    next_token: str | None = None,
+    method: Literal["get", "post"] = "get",
+    json_body: dict = {},
+    params: dict = {},
+) -> dict[str, JsonValue]:
+    if next_token is not None:
+        params["next_token"] = next_token
+
+    try:
+        if method == "post":
+            response = client.post(url, json=json_body, params=params)
+        else:
+            response = client.get(url, params=params)
+        response.raise_for_status()
+        response_json = response.json()
+
+        if not response_json["success"]:
+            raise NonRetryableActionError(
+                f"Failed to call Retool API: {response_json['message']}"
+            )
+
+        return response_json
+
+    except HTTPStatusError as e:
+        if e.response.status_code == 429:  # Rate limit exceeded
+            raise RetryableActionError("Rate limit exceeded")
+        if e.response.status_code >= 500:  # Server error
+            raise RetryableActionError(f"Server error: {e.response.text}")
+        raise NonRetryableActionError(f"Failed to call Retool API: {e.response.text}")
+
+
+def _list_retool_api_with_pagination(
+    client: Client,
+    url: str,
+    method: Literal["get", "post"] = "get",
+    json_body: dict = {},
+) -> list[dict[str, JsonValue]]:
+    data = []
+
+    next_token = None
+    while True:
+        response = _list_retool_api(client, url, next_token, method, json_body)
+        data.extend(response["data"])
+
+        next_token = response.get("next_token")
+        if not response.get("has_more"):
+            break
+
+    return data
 
 
 @action(
@@ -94,7 +161,7 @@ def list_groups_per_user() -> dict[str, JsonValue]:
 
         groups_per_user = {
             user["email"]: {
-                "groups": defaultdict(list),
+                "groups": [],
                 "last_active": user["last_active"],
             }
             for user in response_json["data"]
@@ -115,3 +182,201 @@ def list_groups_per_user() -> dict[str, JsonValue]:
                 groups_per_user[member]["groups"].append(group["name"])
 
         return groups_per_user
+
+
+@action(
+    display_name="List Groups and Apps per User",
+    display_namespace="Retool",
+    description="List all groups a user is a member of and all the apps a user has access to.",
+    secrets_placeholders=["RETOOL_SECRET"],
+)
+def list_groups_and_apps_per_user() -> list[dict[str, JsonValue]]:
+    secret = ctx.get().secrets.get("RETOOL_SECRET")
+    api_key = secret["api_key"]
+    domain = secret["domain"]
+
+    with get_retool_client(domain, api_key) as client:
+        # https://docs.retool.com/reference/api/#tag/Users/paths/~1users/get
+        users = _list_retool_api_with_pagination(client, "/users")
+
+        user_to_groups_and_apps = {
+            user["email"]: {
+                "user": user["email"],
+                "groups": [],
+                "apps_own_access": set(),
+                "apps_edit_access": set(),
+                "apps_use_access": set(),
+            }
+            for user in users
+        }
+
+        # https://docs.retool.com/reference/api/#tag/Groups/paths/~1groups/get
+        groups = _list_retool_api_with_pagination(client, "/groups")
+
+        # use cache to avoid hitting the /apps/{appId} endpoint multiple times
+        app_details_cache = {}
+
+        for group in groups:
+            # List apps (object_type == "app") a group can access
+            # https://docs.retool.com/reference/api/#tag/Groups/paths/~1permissions~1listObjects/post
+            body = {
+                "subject": {
+                    "type": "group",
+                    "id": group["id"],
+                },
+                "object_type": "app",
+            }
+            group_accessible_apps = _list_retool_api_with_pagination(
+                client, "/permissions/listObjects", method="post", json_body=body
+            )
+
+            # fetch the app name
+            apps_by_access_level = defaultdict(list)
+            VALID_ACCESS_LEVELS = {"own", "edit", "use"}
+
+            for app_access in group_accessible_apps:
+                app_id = app_access["id"]
+                access_level = app_access["access_level"]
+                if access_level not in VALID_ACCESS_LEVELS:
+                    raise ValueError(
+                        f"Invalid access level: {access_level}. Expected one of: {VALID_ACCESS_LEVELS}"
+                    )
+
+                # https://docs.retool.com/reference/api/#tag/Apps/paths/~1apps~1%7BappId%7D/get
+                app_details = app_details_cache.get(app_id)
+                if app_details is None:
+                    app_details = _list_retool_api(client, f"/apps/{app_id}")
+                    app_details_cache[app_id] = app_details
+
+                apps_by_access_level[access_level].append(app_details["name"])
+
+            # merge with user information
+            for member in group["members"]:
+                user_to_groups_and_apps[member]["groups"].append(group["name"])
+                user_to_groups_and_apps[member]["apps_own_access"].update(
+                    apps_by_access_level.get("own", [])
+                )
+                user_to_groups_and_apps[member]["apps_edit_access"].update(
+                    apps_by_access_level.get("edit", [])
+                )
+                user_to_groups_and_apps[member]["apps_use_access"].update(
+                    apps_by_access_level.get("use", [])
+                )
+
+        return list(
+            {
+                "user": user["user"],
+                "groups": user["groups"],
+                "apps_own_access": list(user["apps_own_access"]),
+                "apps_edit_access": list(user["apps_edit_access"]),
+                "apps_use_access": list(user["apps_use_access"]),
+            }
+            for user in user_to_groups_and_apps.values()
+        )
+
+
+def _validate_date_format(date_str: str) -> str:
+    try:
+        datetime.strptime(date_str, "%Y-%m-%d")
+        return date_str
+    except ValueError:
+        raise ValueError(
+            f"Invalid date format: {date_str}. Expected format: YYYY-MM-DD"
+        )
+
+
+@action(
+    display_name="List Used Groups and Apps per User",
+    display_namespace="Retool",
+    description="List all apps a user has used as viewer and/or editor within a certain time range.",
+    secrets_placeholders=["RETOOL_SECRET"],
+)
+def list_used_groups_and_apps_per_user(
+    start_date: Annotated[
+        str,
+        ArgumentMetadata(
+            display_name="Start Date",
+            description="The start date of the time range. Example: 2022-01-01",
+        ),
+    ],
+    end_date: Annotated[
+        str | None,
+        ArgumentMetadata(
+            display_name="End Date",
+            description="The end date of the time range. If not specified, then minimum(start_date + 30 days, today - 1) is used. Example: 2022-12-31",
+        ),
+    ] = None,
+) -> list[dict[str, JsonValue]]:
+    secret = ctx.get().secrets.get("RETOOL_SECRET")
+    api_key = secret["api_key"]
+    domain = secret["domain"]
+
+    start_date = _validate_date_format(start_date)
+    if end_date is not None:
+        end_date = _validate_date_format(end_date)
+
+    with get_retool_client(domain, api_key) as client:
+        # https://docs.retool.com/reference/api/#tag/Users/paths/~1users/get
+        users = _list_retool_api_with_pagination(client, "/users")
+
+        app_id_to_groups = defaultdict(list)
+        # https://docs.retool.com/reference/api/#tag/Groups/paths/~1groups/get
+        groups = _list_retool_api_with_pagination(client, "/groups")
+        for group in groups:
+            # List apps (object_type == "app") a group can access
+            # https://docs.retool.com/reference/api/#tag/Groups/paths/~1permissions~1listObjects/post
+            body = {
+                "subject": {
+                    "type": "group",
+                    "id": group["id"],
+                },
+                "object_type": "app",
+            }
+            apps = _list_retool_api_with_pagination(
+                client, "/permissions/listObjects", method="post", json_body=body
+            )
+
+            for app in apps:
+                app_id_to_groups[app["id"]].append(group["name"])
+
+        result = []
+        for user in users:
+            # fetch the app usage for the user
+            # https://docs.retool.com/reference/api/#tag/Usage/paths/~1usage~1user_details/get
+            params = {
+                "start_date": start_date,
+                "email": user["email"],
+            }
+            if end_date is not None:
+                params["end_date"] = end_date
+            response = _list_retool_api(client, "/usage/user_details", params=params)
+            user_details = response["data"]
+
+            # calculate the groups the user has used
+            used_groups = set(
+                itertools.chain.from_iterable(
+                    app_id_to_groups[app["id"]]
+                    for app in user_details["editor_summary"]
+                )
+            ) | set(
+                itertools.chain.from_iterable(
+                    app_id_to_groups[app["id"]]
+                    for app in user_details["viewer_summary"]
+                )
+            )
+            used_groups = list(used_groups)
+
+            result.append(
+                {
+                    "user": user["email"],
+                    "viewed_apps": list(
+                        app["app_name"] for app in user_details["viewer_summary"]
+                    ),
+                    "edited_apps": list(
+                        app["app_name"] for app in user_details["editor_summary"]
+                    ),
+                    "used_groups": used_groups,
+                }
+            )
+
+        return result

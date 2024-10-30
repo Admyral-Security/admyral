@@ -117,9 +117,21 @@ def get_time_interval_of_last_n_days(
             description="Number of days to go back.",
         ),
     ] = 1,
+    only_date: Annotated[
+        bool,
+        ArgumentMetadata(
+            display_name="Only Date",
+            description="If true, only the date is returned.",
+        ),
+    ] = False,
 ) -> list[str]:
     end_time = datetime.now(UTC).replace(hour=0, minute=0, second=0, microsecond=0)
-    start_time = (end_time - timedelta(days=n_days)).isoformat().replace("+00:00", "Z")
+    start_time = end_time - timedelta(days=n_days)
+
+    if only_date:
+        return [start_time.strftime("%Y-%m-%d"), end_time.strftime("%Y-%m-%d")]
+
+    start_time = start_time.isoformat().replace("+00:00", "Z")
     return [start_time, end_time.isoformat().replace("+00:00", "Z")]
 
 

@@ -89,6 +89,8 @@ from admyral.actions.integrations.compliance import (
     get_kandji_application_firewall,
     get_kandji_desktop_and_screensaver,
     get_kandji_library_item_statuses,
+    list_groups_and_apps_per_user,
+    list_used_groups_and_apps_per_user,
 )
 from admyral.actions.integrations.cloud import (
     steampipe_query_aws,
@@ -183,4 +185,6 @@ __all__ = [
     "join_lists",
     "leakcheck_v2_lookup",
     "leakcheck_public_lookup",
+    "list_groups_and_apps_per_user",
+    "list_used_groups_and_apps_per_user",
 ]
