@@ -1,7 +1,6 @@
 "use client";
 
 import { useGetWorkflowApi } from "@/hooks/use-get-workflow-api";
-import { TEditorWorkflowActionNode } from "@/types/react-flow";
 import { useListSecretsApi } from "@/hooks/use-list-credentials-api";
 import { useListEditorActionsApi } from "@/hooks/use-list-editor-actions-api";
 import { useEditorActionStore } from "@/stores/editor-action-store";
