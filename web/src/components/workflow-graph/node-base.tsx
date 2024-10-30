@@ -72,18 +72,12 @@ export default function NodeBase({
 				<Tooltip content="Missing secret">
 					<Flex
 						style={{
-							filter: "drop-shadow(0px 2px 4px rgba(0,0,0,0.18))",
 							transform: "translate(10px, 24px)",
 						}}
 					>
-						<Flex className="absolute inset-0 bg-[var(--red-9)] rounded-full blur-[2px]" />
+						<Flex className="absolute inset-0 bg-[var(--red-9)] rounded-full " />
 						<Flex
 							className="relative rounded-full w-6 h-6"
-							style={{
-								background:
-									"linear-gradient(180deg, var(--red-8) 0%, var(--red-9) 100%)",
-								border: "1px solid var(--red-6)",
-							}}
 							justify="center"
 							align="center"
 						>
