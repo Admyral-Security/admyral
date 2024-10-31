@@ -1,0 +1,109 @@
+import { Callout } from "nextra/components";
+
+# List Google Drive Files with Link Sharing Enabled
+
+List all files in a Google Drive of an organization which have public link sharing enabled.
+
+<Callout type="info">
+	For more information on the used APIs, see [Drive API v3
+	files.list](https://developers.google.com/drive/api/reference/rest/v3/files/list)
+	and [Admin Directory v1
+	users.list](https://developers.google.com/admin-sdk/directory/reference/rest/v1/users/list).
+</Callout>
+
+The following scopes are required:
+
+-   `https://www.googleapis.com/auth/drive.readonly`
+-   `https://www.googleapis.com/auth/admin.directory.user.readonly`
+
+The following APIs must be enabled in the Google Cloud Console:
+
+-   `Google Drive API`
+-   `Admin SDK API`
+
+**SDK Import:**
+
+```python
+from admyral.actions import list_google_drive_files_with_link_sharing_enabled
+```
+
+## Arguments:
+
+| Argument Name                 | Description                                                                                   | Required |
+| ----------------------------- | --------------------------------------------------------------------------------------------- | :------: |
+| **Customer ID** `customer_id` | The customer ID of your Google Workspace.                                                     |   Yes    |
+| **Admin Email** `admin_email` | The email of an admin user for your Google Workspace for delegated access.                    |   Yes    |
+| **Limit** `limit`             | The maximum number of files to return. If not specified, all files are returned. Default: 100 |    -     |
+
+## Returns
+
+A list of file objects.
+
+## Required Secrets
+
+| Secret Placeholder    | Description                                                                            |
+| --------------------- | -------------------------------------------------------------------------------------- |
+| `GOOGLE_DRIVE_SECRET` | Google Drive secret. See [Google Drive setup](/integrations/google_drive/google_drive) |
+
+## SDK Example
+
+```python
+result = list_google_drive_files_with_link_sharing_enabled(
+    customer_id="d43sg123m",
+    admin_email="admin@email.com",
+	secrets={
+		"GOOGLE_DRIVE_SECRET": "my_stored_google_drive_secret"
+	}
+)
+```
+
+## Example Output
+
+```json
+[
+	{
+		"mimeType": "application/vnd.google-apps.document",
+		"webViewLink": "https://docs.google.com/document/d/1ZKDSDSFS123rqNrPGRasdasdSVbIQlC82T14ftfc4/edit?usp=drivesdk",
+		"id": "1ZKL79OXM1mWrrqNJEDEDddeDDEVbIQlC82T14ftfc4",
+		"name": "Dummy",
+		"modifiedTime": "2024-10-30T13:32:20.227Z"
+	},
+	{
+		"mimeType": "application/vnd.google-apps.document",
+		"owners": [
+			{
+				"displayName": "Daniel Grittner",
+				"kind": "drive#user",
+				"me": true,
+				"permissionId": "083212312338428264683",
+				"emailAddress": "daniel@admyral.ai",
+				"photoLink": "https://lh3.googleusercontent.com/a/ACg8ocLi8q8tDDSKLFDX9znpZXD3JSjhu8Rdyhg3JCUA=s64"
+			}
+		],
+		"webViewLink": "https://docs.google.com/document/d/1P9ixKJFNJKFNJKJFK5IUyayLp7gRHEciM/edit?usp=drivesdk",
+		"permissions": [
+			{
+				"id": "anyoneWithLink",
+				"type": "anyone",
+				"kind": "drive#permission",
+				"role": "reader",
+				"allowFileDiscovery": false
+			},
+			{
+				"id": "083212312338428264683",
+				"displayName": "Daniel Grittner",
+				"type": "user",
+				"kind": "drive#permission",
+				"photoLink": "https://lh3.googleusercontent.com/a/ACg8ocLi8q8tDDSKLFDX9znpZXD3JSjhu8Rdyhg3JCUA=s64",
+				"emailAddress": "daniel@admyral.ai",
+				"role": "owner",
+				"deleted": false,
+				"pendingOwner": false
+			}
+		],
+		"id": "1P9ix7gdfkjfkjdfgLAldSQrK5pmvK5IUyayLpsFDJFDdjf",
+		"name": "Dummy 2",
+		"modifiedTime": "2024-10-30T13:48:30.735Z"
+	}
+]
+```
