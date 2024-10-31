@@ -75,6 +75,7 @@ def list_google_docs_revisions(
 
     drive_service = build("drive", "v3", credentials=creds)
 
+    # TODO: pagination
     request = drive_service.revisions().list(
         fileId=file_id,
         fields="nextPageToken, revisions(id, modifiedTime, lastModifyingUser, exportLinks)",
@@ -136,3 +137,92 @@ def list_google_docs_revisions(
             break
 
     return result
+
+
+@action(
+    display_name="List Google Drive Files with Link Sharing Enabled",
+    display_namespace="Google Drive",
+    description="List all files in a Google Drive of an organization which have public link sharing enabled.",
+    secrets_placeholders=["GOOGLE_DRIVE_SECRET"],
+)
+def list_google_drive_files_with_link_sharing_enabled(
+    customer_id: Annotated[
+        str,
+        ArgumentMetadata(
+            display_name="Customer ID",
+            description="The customer ID of your Google Workspace.",
+        ),
+    ],
+    admin_email: Annotated[
+        str,
+        ArgumentMetadata(
+            display_name="Admin Email",
+            description="The email of an admin user for your Google Workspace for delegated access.",
+        ),
+    ],
+    limit: Annotated[
+        int | None,
+        ArgumentMetadata(
+            display_name="Limit",
+            description="The maximum number of files to return. If not specified, all files are returned.",
+        ),
+    ] = 100,
+) -> list[dict[str, JsonValue]]:
+    secret = ctx.get().secrets.get("GOOGLE_DRIVE_SECRET")
+    creds = ServiceAccountCredentials.from_service_account_info(
+        info=secret,
+        scopes=[
+            "https://www.googleapis.com/auth/drive.readonly",
+            "https://www.googleapis.com/auth/admin.directory.user.readonly",
+        ],
+    )
+
+    admin_delegated_creds = creds.with_subject(admin_email)
+
+    admin_service = build("admin", "directory_v1", credentials=admin_delegated_creds)
+
+    # make this a dict because we want to deduplciate the files
+    all_public_files = {}
+
+    # https://googleapis.github.io/google-api-python-client/docs/dyn/admin_directory_v1.html
+    # https://developers.google.com/admin-sdk/directory/reference/rest/v1/users/list
+    users_request = admin_service.users().list(customer=customer_id)
+    while users_request is not None and (
+        limit is None or len(all_public_files) < limit
+    ):
+        user_response = users_request.execute()
+
+        # extract the publicly shared files for each user - for each user we look at the files which
+        # the user has access to
+        for user in user_response.get("users", []):
+            user_email = user["primaryEmail"]
+
+            # create delegated credentials for the user
+            user_delegated_creds = creds.with_subject(user_email)
+            drive_service = build("drive", "v3", credentials=user_delegated_creds)
+
+            # extracts the files
+            # https://googleapis.github.io/google-api-python-client/docs/dyn/drive_v3.files.html
+            # https://developers.google.com/drive/api/reference/rest/v3/files/list
+            list_files_request = drive_service.files().list(
+                # spaces='drive',
+                fields="nextPageToken, files(id, name, webViewLink, permissions, mimeType, modifiedTime, sharingUser, owners)",
+                supportsAllDrives=True,
+                includeItemsFromAllDrives=True,
+                corpora="user",
+                q="mimeType != 'application/vnd.google-apps.folder' and visibility = 'anyoneWithLink'",  # Exclude folders and include only files with public link sharing
+            )
+            while list_files_request is not None and (
+                limit is None or len(all_public_files) < limit
+            ):
+                files_response = list_files_request.execute()
+                for file in files_response.get("files", []):
+                    all_public_files[file["id"]] = file
+                list_files_request = drive_service.files().list_next(
+                    list_files_request, files_response
+                )
+
+        users_request = admin_service.users().list_next(users_request, user_response)
+
+    all_public_files = list(all_public_files.values())
+    return all_public_files if limit is None else all_public_files[:limit]

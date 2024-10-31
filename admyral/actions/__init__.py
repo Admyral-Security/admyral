@@ -91,6 +91,7 @@ from admyral.actions.integrations.compliance import (
     get_kandji_library_item_statuses,
     list_groups_and_apps_per_user,
     list_used_groups_and_apps_per_user,
+    list_google_drive_files_with_link_sharing_enabled,
 )
 from admyral.actions.integrations.cloud import (
     steampipe_query_aws,
@@ -187,4 +188,5 @@ __all__ = [
     "leakcheck_public_lookup",
     "list_groups_and_apps_per_user",
     "list_used_groups_and_apps_per_user",
+    "list_google_drive_files_with_link_sharing_enabled",
 ]

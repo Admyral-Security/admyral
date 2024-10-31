@@ -18,6 +18,7 @@ from admyral.actions.integrations.compliance.github import (
 )
 from admyral.actions.integrations.compliance.google_drive import (
     list_google_docs_revisions,
+    list_google_drive_files_with_link_sharing_enabled,
 )
 from admyral.actions.integrations.compliance.ms_intune import (
     list_ms_intune_managed_devices,
@@ -58,4 +59,5 @@ __all__ = [
     "get_kandji_library_item_statuses",
     "list_groups_and_apps_per_user",
     "list_used_groups_and_apps_per_user",
+    "list_google_drive_files_with_link_sharing_enabled",
 ]
