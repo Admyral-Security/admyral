@@ -75,15 +75,6 @@ def list_google_docs_revisions(
 
     drive_service = build("drive", "v3", credentials=creds)
 
-    # TODO: pagination
-    request = drive_service.revisions().list(
-        fileId=file_id,
-        fields="nextPageToken, revisions(id, modifiedTime, lastModifyingUser, exportLinks)",
-    )
-
-    response = request.execute()
-    revisions = response.get("revisions", [])
-
     if start_time:
         start_time = parser.parse(start_time)
     if end_time:
@@ -91,7 +82,15 @@ def list_google_docs_revisions(
 
     result = []
 
-    while revisions:
+    revision_request = drive_service.revisions().list(
+        fileId=file_id,
+        fields="nextPageToken, revisions(id, modifiedTime, lastModifyingUser, exportLinks)",
+    )
+
+    while revision_request is not None:
+        revision_response = revision_request.execute()
+        revisions = revision_response.get("revisions", [])
+
         for revision in revisions:
             revision_id = revision["id"]
             modified_time = parser.parse(revision["modifiedTime"])
@@ -130,11 +129,9 @@ def list_google_docs_revisions(
                 }
             )
 
-        if request := drive_service.revisions().list_next(request, response):
-            response = request.execute()
-            revisions = response.get("revisions", [])
-        else:
-            break
+        revision_request = drive_service.revisions().list_next(
+            revision_request, revision_response
+        )
 
     return result
 
