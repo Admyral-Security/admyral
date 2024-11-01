@@ -5,9 +5,9 @@
 <div align="center">
   <div>
     <h3>
-        <a href="https://docs.admyral.dev/"><strong>Docs</strong></a> ·
-        <a href="https://discord.gg/GqbJZT9Hbf"><strong>Discord</strong></a> ·
-        <a href="https://github.com/Admyral-Security/admyral-quickstart"><strong>Quickstart</strong></a>
+        <a href="https://docs.admyral.dev/"><strong>📚 Docs</strong></a> ·
+        <a href="https://discord.gg/GqbJZT9Hbf"><strong>💬 Discord</strong></a> ·
+        <a href="https://github.com/Admyral-Security/admyral-quickstart"><strong>🏎️ Quickstart</strong></a>
     </h3>
   </div>
   <div>
