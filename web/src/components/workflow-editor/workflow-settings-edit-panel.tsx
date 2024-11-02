@@ -16,6 +16,11 @@ import { useWorkflowStore } from "@/stores/workflow-store";
 import { useDeleteWorkflowApi } from "@/hooks/use-delete-workflow-api";
 import { useRouter } from "next/navigation";
 import { TrashIcon, MinusIcon, PlusIcon } from "@radix-ui/react-icons";
+import { useState } from "react";
+import {
+	isValidWorkflowName,
+	WORKFLOW_NAME_VALIDATION_ERROR_MESSAGE,
+} from "@/lib/workflow-validation";
 
 export default function WorkflowSettingsEditPanel() {
 	const {
@@ -31,6 +36,8 @@ export default function WorkflowSettingsEditPanel() {
 	} = useWorkflowStore();
 	const deleteWorkflow = useDeleteWorkflowApi();
 	const router = useRouter();
+
+	const [validWorkflowName, setValidWorkflowName] = useState<boolean>(true);
 
 	const handleDeleteWorkflow = async () => {
 		await deleteWorkflow.mutateAsync(workflowId);
@@ -48,10 +55,18 @@ export default function WorkflowSettingsEditPanel() {
 					<TextField.Root
 						variant="surface"
 						value={workflowName}
-						onChange={(event) =>
-							setWorkflowName(event.target.value)
-						}
+						onChange={(event) => {
+							setWorkflowName(event.target.value);
+							setValidWorkflowName(
+								isValidWorkflowName(event.target.value),
+							);
+						}}
 					/>
+					{!validWorkflowName && (
+						<Text color="red">
+							{WORKFLOW_NAME_VALIDATION_ERROR_MESSAGE}
+						</Text>
+					)}
 				</Flex>
 
 				<Flex direction="column" gap="2">

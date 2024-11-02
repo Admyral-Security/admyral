@@ -2,6 +2,7 @@ from fastapi import APIRouter, status, Body, Depends
 from typing import Optional, Annotated
 from uuid import uuid4
 from pydantic import BaseModel
+import re
 
 from admyral.utils.collections import is_not_empty
 from admyral.server.deps import get_admyral_store, get_workers_client
@@ -25,6 +26,7 @@ logger = get_logger(__name__)
 
 MANUAL_TRIGGER_SOURCE_NAME = "manual"
 SPACE = " "
+SNAKE_CASE_REGEX = re.compile(r"^[a-zA-Z]+(_[a-zA-Z]+)*$")
 
 
 class WorkflowBody(BaseModel):
@@ -68,9 +70,6 @@ async def push_workflow_impl(
     """
     admyral_store = get_admyral_store()
     workers_client = get_workers_client()
-
-    if SPACE in workflow_name:
-        raise ValueError("Workflow name must not contain spaces.")
 
     if workflow_id:
         existing_workflow = await admyral_store.get_workflow_by_id(user_id, workflow_id)
@@ -188,6 +187,16 @@ async def push_workflow(
         workflow_name: The workflow name.
         workflow: The workflow object.
     """
+    # transform workflow name. expected: snake_case to Snake Case
+    if SNAKE_CASE_REGEX.match(workflow_name):
+        workflow_name = SPACE.join(
+            map(lambda x: x.capitalize(), workflow_name.split("_"))
+        )
+    if SNAKE_CASE_REGEX.match(request.workflow_dag.name):
+        request.workflow_dag.name = SPACE.join(
+            map(lambda x: x.capitalize(), request.workflow_dag.name.split("_"))
+        )
+
     return await push_workflow_impl(
         authenticated_user.user_id, workflow_name, None, request
     )

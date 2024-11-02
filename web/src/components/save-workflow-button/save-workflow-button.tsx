@@ -9,8 +9,10 @@ import { AxiosError } from "axios";
 import { useEditorActionStore } from "@/stores/editor-action-store";
 import { EditorWorkflowNodeType } from "@/types/react-flow";
 import { useToast } from "@/providers/toast";
-
-const SPACE = " ";
+import {
+	isValidWorkflowName,
+	WORKFLOW_NAME_VALIDATION_ERROR_MESSAGE,
+} from "@/lib/workflow-validation";
 
 export default function SaveWorkflowButton() {
 	const { getWorkflow, updateWebhookIdAndSecret } = useWorkflowStore();
@@ -57,8 +59,8 @@ export default function SaveWorkflowButton() {
 			);
 			return;
 		}
-		if (workflow.workflowName.includes(SPACE)) {
-			errorToast("Workflow name must not contain empty spaces.");
+		if (!isValidWorkflowName(workflow.workflowName)) {
+			errorToast(WORKFLOW_NAME_VALIDATION_ERROR_MESSAGE);
 			return;
 		}
 

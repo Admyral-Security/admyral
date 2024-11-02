@@ -8,6 +8,10 @@ import { TEditorWorkflowStartNode } from "@/types/react-flow";
 import StartWorkflowActionIcon from "../icons/start-workflow-icon";
 import { useWorkflowStore } from "@/stores/workflow-store";
 
+function toSnakeCase(name: string): string {
+	return name.replaceAll(" ", "_").toLowerCase();
+}
+
 type StartNodeProps = NodeProps<TEditorWorkflowStartNode>;
 
 function StartNode({ id, selected }: StartNodeProps) {
@@ -19,7 +23,7 @@ function StartNode({ id, selected }: StartNodeProps) {
 				selected={selected}
 				icon={<StartWorkflowActionIcon />}
 				name={"Start Workflow"}
-				type={`def ${workflowName}(payload)`}
+				type={`def ${toSnakeCase(workflowName)}(payload)`}
 			/>
 			<Handle
 				type="source"
