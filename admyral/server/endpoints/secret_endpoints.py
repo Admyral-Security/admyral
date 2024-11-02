@@ -17,6 +17,12 @@ router = APIRouter()
 async def set_secret(
     secret: Secret, authenticated_user: AuthenticatedUser = Depends(authenticate)
 ) -> None:
+    secret.secret = dict(
+        [
+            (key, val.encode("utf-8").decode("unicode_escape"))
+            for key, val in secret.secret.items()
+        ]
+    )
     await get_secrets_manager().set(authenticated_user.user_id, secret)
 
 

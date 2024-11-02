@@ -37,8 +37,6 @@ def set(ctx: click.Context, secret_id: str, value: list[tuple[str, str]]) -> Non
     capture(event_name="secret:set")
     client: AdmyralClient = ctx.obj
 
-    value = [(key, val.encode("utf-8").decode("unicode_escape")) for key, val in value]
-
     try:
         client.set_secret(Secret(secret_id=secret_id, secret=dict(value)))
     except Exception as e:
