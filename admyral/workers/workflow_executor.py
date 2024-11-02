@@ -29,7 +29,7 @@ with workflow.unsafe.imports_passed_through():
 logger = get_logger(__name__)
 
 
-START_TO_CLOSE_TIMEOUT = timedelta(seconds=60 * 15)  # 15 min
+START_TO_CLOSE_TIMEOUT = timedelta(seconds=6 * 60 * 60)  # 6 hours
 ACTION_RETRY_POLICY = RetryPolicy(
     maximum_attempts=3,
     non_retryable_error_types=["NonRetryableActionError"],
