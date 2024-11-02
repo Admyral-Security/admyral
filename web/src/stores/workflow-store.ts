@@ -127,7 +127,7 @@ export const useWorkflowStore = create<WorkflowStoreState>((set, get) => ({
 			nextId: 0,
 			webhookId: null,
 			webhookSecret: null,
-			detailPageType: "workflow",
+			detailPageType: null,
 			selectedNodeIdx: null,
 		});
 	},
@@ -144,7 +144,7 @@ export const useWorkflowStore = create<WorkflowStoreState>((set, get) => ({
 			isNew: true,
 			webhookId: null,
 			webhookSecret: null,
-			detailPageType: "workflow",
+			detailPageType: null,
 			selectedNodeIdx: null,
 		});
 	},
@@ -398,7 +398,7 @@ export const useWorkflowStore = create<WorkflowStoreState>((set, get) => ({
 			}),
 		),
 	// Settings Side Panel
-	detailPageType: "workflow",
+	detailPageType: null,
 	selectedNodeIdx: null,
 	clickWorkflowSettings: () =>
 		set(

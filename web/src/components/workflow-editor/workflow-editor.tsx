@@ -21,6 +21,7 @@ import { useToast } from "@/providers/toast";
 import { AxiosError } from "axios";
 import { useRouter } from "next/navigation";
 import { SaveWorkflowProvider } from "@/providers/save-workflow";
+import NewWorkflowModal from "./new-workflow-modal";
 
 type View = "workflowBuilder" | "runHistory";
 
@@ -72,7 +73,7 @@ export default function WorkflowEditor({
 				workflowError instanceof AxiosError &&
 				(workflowError as AxiosError).response?.status === 404
 			) {
-				router.replace("/");
+				router.push("/");
 				errorToast("Workflow does not exist.");
 			} else {
 				errorToast("Failed to load workflow. Please refresh the page.");
@@ -104,6 +105,8 @@ export default function WorkflowEditor({
 
 	return (
 		<SaveWorkflowProvider>
+			<NewWorkflowModal />
+
 			<Grid rows="50px 1fr" width="auto" height="100%" align="center">
 				<Box width="100%" height="100%">
 					<Grid

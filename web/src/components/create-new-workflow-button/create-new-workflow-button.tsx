@@ -12,7 +12,7 @@ export default function CreateNewWorkflowButton() {
 	const handleCreateNewWorkflow = () => {
 		const workflowId = uuidv4();
 		initWorkflow(workflowId, window.innerWidth);
-		router.replace(`/editor/${workflowId}`);
+		router.push(`/editor/${workflowId}`);
 	};
 
 	return (

@@ -41,7 +41,7 @@ export default function WorkflowSettingsEditPanel() {
 
 	const handleDeleteWorkflow = async () => {
 		await deleteWorkflow.mutateAsync(workflowId);
-		router.replace("/");
+		router.push("/");
 	};
 
 	return (
