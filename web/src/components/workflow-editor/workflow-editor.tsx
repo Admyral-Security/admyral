@@ -20,6 +20,7 @@ import RunWorkflowButton from "../run-workflow/run-workflow-button";
 import { useToast } from "@/providers/toast";
 import { AxiosError } from "axios";
 import { useRouter } from "next/navigation";
+import { SaveWorkflowProvider } from "@/providers/save-workflow";
 
 type View = "workflowBuilder" | "runHistory";
 
@@ -102,83 +103,85 @@ export default function WorkflowEditor({
 	}
 
 	return (
-		<Grid rows="50px 1fr" width="auto" height="100%" align="center">
-			<Box width="100%" height="100%">
-				<Grid
-					pb="2"
-					pt="2"
-					pl="4"
-					pr="4"
-					columns="1fr 200px 1fr"
-					className="border-b-2 border-gray-200"
-					align="center"
-					height="56px"
-					width="calc(100% - 56px)"
-					style={{
-						position: "fixed",
-						backgroundColor: "white",
-						zIndex: 100,
-					}}
-				>
-					<Flex justify="start" align="center" gap="4">
-						<Link href="/">
-							<BackIcon />
-						</Link>
+		<SaveWorkflowProvider>
+			<Grid rows="50px 1fr" width="auto" height="100%" align="center">
+				<Box width="100%" height="100%">
+					<Grid
+						pb="2"
+						pt="2"
+						pl="4"
+						pr="4"
+						columns="1fr 200px 1fr"
+						className="border-b-2 border-gray-200"
+						align="center"
+						height="56px"
+						width="calc(100% - 56px)"
+						style={{
+							position: "fixed",
+							backgroundColor: "white",
+							zIndex: 100,
+						}}
+					>
+						<Flex justify="start" align="center" gap="4">
+							<Link href="/">
+								<BackIcon />
+							</Link>
 
-						<Text size="4" weight="medium">
-							Workflow Editor
-						</Text>
-					</Flex>
+							<Text size="4" weight="medium">
+								Workflow Editor
+							</Text>
+						</Flex>
 
-					<Flex justify="center" align="center">
-						<Tabs.Root
-							value={view}
-							onValueChange={(page) => setView(page as View)}
-						>
-							<Tabs.List size="1">
-								<Tabs.Trigger
-									value="workflowBuilder"
-									style={{ cursor: "pointer" }}
-								>
-									Workflow Builder
-								</Tabs.Trigger>
-								<Tabs.Trigger
-									value="runHistory"
-									style={{ cursor: "pointer" }}
-								>
-									Run History
-								</Tabs.Trigger>
-							</Tabs.List>
-						</Tabs.Root>
-					</Flex>
+						<Flex justify="center" align="center">
+							<Tabs.Root
+								value={view}
+								onValueChange={(page) => setView(page as View)}
+							>
+								<Tabs.List size="1">
+									<Tabs.Trigger
+										value="workflowBuilder"
+										style={{ cursor: "pointer" }}
+									>
+										Workflow Builder
+									</Tabs.Trigger>
+									<Tabs.Trigger
+										value="runHistory"
+										style={{ cursor: "pointer" }}
+									>
+										Run History
+									</Tabs.Trigger>
+								</Tabs.List>
+							</Tabs.Root>
+						</Flex>
 
-					<Flex justify="end" align="center" gap="3">
-						<RunWorkflowButton />
+						<Flex justify="end" align="center" gap="3">
+							<RunWorkflowButton />
 
-						<SaveWorkflowButton />
+							<SaveWorkflowButton />
 
-						<WorkflowSettingsButton />
+							<WorkflowSettingsButton />
 
-						<Box width="105px">
-							<PublishWorkflowToggleEditor />
-						</Box>
-					</Flex>
-				</Grid>
-			</Box>
+							<Box width="105px">
+								<PublishWorkflowToggleEditor />
+							</Box>
+						</Flex>
+					</Grid>
+				</Box>
 
-			<WorkflowEditorActionEditSidebar apiBaseUrl={apiBaseUrl} />
+				<WorkflowEditorActionEditSidebar apiBaseUrl={apiBaseUrl} />
 
-			<Box height="100%" width="100%">
-				{view === "workflowBuilder" && (
-					<>
-						<WorkflowEditorBuilder />
-						<WorkflowEditorActionsSidebar />
-					</>
-				)}
-				{view === "runHistory" && (
-					<WorkflowRunHistory workflowId={workflowId} />
-				)}
-			</Box>
-		</Grid>
+				<Box height="100%" width="100%">
+					{view === "workflowBuilder" && (
+						<>
+							<WorkflowEditorBuilder />
+							<WorkflowEditorActionsSidebar />
+						</>
+					)}
+					{view === "runHistory" && (
+						<WorkflowRunHistory workflowId={workflowId} />
+					)}
+				</Box>
+			</Grid>
+		</SaveWorkflowProvider>
 	);
 }
