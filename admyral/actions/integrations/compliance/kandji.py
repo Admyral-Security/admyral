@@ -17,7 +17,7 @@ def get_kandji_client(api_url: str, api_token: str) -> Client:
     )
 
 
-def _kandji_get_api(url: str, data_access_key: str | None = None):
+def _kandji_get_api_with_pagination(url: str, data_access_key: str | None = None):
     secret = ctx.get().secrets.get("KANDJI_SECRET")
     api_token = secret["api_token"]
     api_url = secret["api_url"]
@@ -49,6 +49,17 @@ def _kandji_get_api(url: str, data_access_key: str | None = None):
         return out
 
 
+def _kandji_get_api(url: str) -> dict[str, JsonValue]:
+    secret = ctx.get().secrets.get("KANDJI_SECRET")
+    api_token = secret["api_token"]
+    api_url = secret["api_url"]
+
+    with get_kandji_client(api_url, api_token) as client:
+        response = client.get(url=url)
+        response.raise_for_status()
+        return response.json()
+
+
 @action(
     display_name="List Devices",
     display_namespace="Kandji",
@@ -57,7 +68,7 @@ def _kandji_get_api(url: str, data_access_key: str | None = None):
 )
 def list_kandji_devices() -> list[dict[str, JsonValue]]:
     # https://api-docs.kandji.io/#78209960-31a7-4e3b-a2c0-95c7e65bb5f9
-    return _kandji_get_api(url="/devices")
+    return _kandji_get_api_with_pagination(url="/devices")
 
 
 @action(
@@ -85,7 +96,7 @@ def get_kandji_device_details(
 def list_kandji_unencrypted_devices() -> list[dict[str, JsonValue]]:
     # https://api-docs.kandji.io/#78209960-31a7-4e3b-a2c0-95c7e65bb5f9
 
-    devices = _kandji_get_api(url="/devices")
+    devices = _kandji_get_api_with_pagination(url="/devices")
 
     unencrypted_devices = []
     for device in devices:
@@ -109,7 +120,9 @@ def get_kandji_device_apps(
     ],
 ) -> list[dict[str, JsonValue]]:
     # https://api-docs.kandji.io/#f8cd9733-89b6-40f0-a7ca-76829c6974df
-    return _kandji_get_api(url=f"/devices/{device_id}/apps", data_access_key="apps")
+    return _kandji_get_api_with_pagination(
+        url=f"/devices/{device_id}/apps", data_access_key="apps"
+    )
 
 
 @action(
@@ -120,7 +133,10 @@ def get_kandji_device_apps(
 )
 def get_kandji_application_firewall() -> list[dict[str, JsonValue]]:
     # https://api-docs.kandji.io/#0d3abc6c-a5a5-4fe6-b7d4-19b1287eaf91
-    return _kandji_get_api(url="/prism/application_firewall", data_access_key="data")
+
+    return _kandji_get_api_with_pagination(
+        url="/prism/application_firewall", data_access_key="data"
+    )
 
 
 @action(
@@ -131,7 +147,9 @@ def get_kandji_application_firewall() -> list[dict[str, JsonValue]]:
 )
 def get_kandji_desktop_and_screensaver() -> list[dict[str, JsonValue]]:
     # https://api-docs.kandji.io/#7f6f6813-6522-4249-9f6a-3d0c479e2bbe
-    return _kandji_get_api(url="/prism/desktop_and_screensaver", data_access_key="data")
+    return _kandji_get_api_with_pagination(
+        url="/prism/desktop_and_screensaver", data_access_key="data"
+    )
 
 
 @action(
@@ -149,7 +167,7 @@ def get_kandji_library_item_statuses(
     ],
 ) -> list[dict[str, JsonValue]]:
     # https://api-docs.kandji.io/#478764c4-638c-416c-b44c-3685a2f7b441
-    return _kandji_get_api(
+    return _kandji_get_api_with_pagination(
         url=f"/library/library-items/{library_item_id}/status",
         data_access_key="results",
     )
