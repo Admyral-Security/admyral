@@ -58,7 +58,7 @@ type WorkflowStoreState = TReactFlowGraph & {
 	webhookSecret: string | null;
 	lastDeletedEdges: TReactFlowEdge[];
 	payloadCache: string;
-	missingSecretForNodes: Map<string, Set<number>> | undefined;
+	deletedSecretsForNodes: Map<string, Set<string>> | undefined;
 	// Operations
 	clearWorkflowStore: () => void;
 	initWorkflow: (workflowId: string, windowInnerWidth: number) => void;
@@ -90,9 +90,12 @@ type WorkflowStoreState = TReactFlowGraph & {
 	deleteNodeByIdx: (nodeIdx: number) => void;
 	deleteControlByIdx: (controlIdx: number) => void;
 	duplicateNodeByIdx: (nodeIdx: number) => void;
-	hasMissingSecret: (nodeId: string, secretIdx?: number) => boolean;
-	addMissingSecrets: (missingSecrets: Map<string, Set<number>>) => void;
-	removeMissingSecretById: (nodeId: string, secretIdx: number) => void;
+	hasDeletedSecret: (nodeId: string, secretPlaceholer?: string) => boolean;
+	addDeletedSecrets: (missingSecrets: Map<string, Set<string>>) => void;
+	removeDeletedSecretByPlaceholder: (
+		nodeId: string,
+		secretPlaceholer: string,
+	) => void;
 	// Settings Side Panel
 	detailPageType: "workflow" | "action" | null;
 	selectedNodeIdx: number | null;
@@ -112,7 +115,7 @@ export const useWorkflowStore = create<WorkflowStoreState>((set, get) => ({
 	isActive: false,
 	nodes: [],
 	edges: [],
-	missingSecretForNodes: undefined,
+	deletedSecretsForNodes: undefined,
 	// Other
 	isNew: false,
 	nextId: 0,
@@ -130,7 +133,7 @@ export const useWorkflowStore = create<WorkflowStoreState>((set, get) => ({
 			isActive: false,
 			nodes: [],
 			edges: [],
-			missingSecretForNodes: undefined,
+			deletedSecretsForNodes: undefined,
 			isNew: false,
 			nextId: 0,
 			webhookId: null,
@@ -148,7 +151,7 @@ export const useWorkflowStore = create<WorkflowStoreState>((set, get) => ({
 			controls: [],
 			isActive: false,
 			nodes: [buildStartNode(windowInnerWidth)],
-			missingSecretForNodes: undefined,
+			deletedSecretsForNodes: undefined,
 			edges: [],
 			isNew: true,
 			webhookId: null,
@@ -381,33 +384,29 @@ export const useWorkflowStore = create<WorkflowStoreState>((set, get) => ({
 			}),
 		);
 	},
-	hasMissingSecret: (nodeId: string, secretIdx?: number) => {
-		const missingSecrets = get().missingSecretForNodes;
-		if (missingSecrets) {
-			if (secretIdx !== undefined) {
-				return (
-					missingSecrets.has(nodeId) &&
-					missingSecrets.get(nodeId)!.has(secretIdx)
-				);
-			}
-			return missingSecrets.has(nodeId);
-		}
-		return false;
+	hasDeletedSecret: (nodeId: string, secretPlaceholder?: string) => {
+		const missingSecrets = get().deletedSecretsForNodes;
+		return !!(secretPlaceholder === undefined
+			? missingSecrets?.has(nodeId)
+			: missingSecrets?.get(nodeId)?.has(secretPlaceholder));
 	},
-	addMissingSecrets: (missingSecrets: Map<string, Set<number>>) =>
+	addDeletedSecrets: (missingSecrets: Map<string, Set<string>>) =>
 		set(
 			produce((draft) => {
-				draft.missingSecretForNodes = missingSecrets;
+				draft.deletedSecretsForNodes = missingSecrets;
 			}),
 		),
-	removeMissingSecretById: (nodeId: string, secretIdx: number) =>
+	removeDeletedSecretByPlaceholder: (
+		nodeId: string,
+		secretPlaceholder: string,
+	) =>
 		set(
 			produce((draft) => {
-				if (draft.missingSecretForNodes.has(nodeId)) {
-					draft.missingSecretForNodes.get(nodeId).delete(secretIdx);
-					if (draft.missingSecretForNodes.get(nodeId).size === 0) {
-						draft.missingSecretForNodes.delete(nodeId);
-					}
+				const secretPlaceholdersWithMissingSecrets =
+					draft.deletedSecretsForNodes?.get(nodeId);
+				secretPlaceholdersWithMissingSecrets?.delete(secretPlaceholder);
+				if (secretPlaceholdersWithMissingSecrets?.size === 0) {
+					draft.deletedSecretsForNodes?.delete(nodeId);
 				}
 			}),
 		),

@@ -38,7 +38,7 @@ export default function WorkflowEditor({
 
 	const [view, setView] = useState<View>("workflowBuilder");
 
-	const { isNew, setWorkflow, clearWorkflowStore, addMissingSecrets } =
+	const { isNew, setWorkflow, clearWorkflowStore, addDeletedSecrets } =
 		useWorkflowStore();
 	const { setEditorActions } = useEditorActionStore();
 	const { errorToast } = useToast();
@@ -119,26 +119,27 @@ export default function WorkflowEditor({
 		const missingSecrets = workflow?.nodes
 			.filter((node) => node.type === "action")
 			.reduce((acc, node) => {
-				const secretsForNode = Object.values(node.secretsMapping);
-				secretsForNode.forEach((secretId, secretIdx) => {
-					if (!secretIds.has(secretId as string)) {
+				const secretsMapping = node.secretsMapping;
+				const secretsForNode = Object.keys(secretsMapping);
+				secretsForNode.forEach((secretPlaceholder) => {
+					if (!secretIds.has(secretsMapping[secretPlaceholder])) {
 						if (!acc.has(node.id)) {
 							acc.set(node.id, new Set());
 						}
-						acc.get(node.id)?.add(secretIdx);
+						acc.get(node.id)?.add(secretPlaceholder);
 					}
 				});
 				return acc;
-			}, new Map<string, Set<number>>());
+			}, new Map<string, Set<string>>());
 		if (missingSecrets) {
-			addMissingSecrets(missingSecrets);
+			addDeletedSecrets(missingSecrets);
 		}
 		if (missingSecrets && missingSecrets.size > 0) {
 			errorToast(
 				"Some secrets are missing. Please add them before running the workflow.",
 			);
 		}
-	}, [encryptedSecrets, workflow, addMissingSecrets]);
+	}, [encryptedSecrets, workflow, addDeletedSecrets]);
 
 	// TODO(frontend): nicer loading screen
 	if (isLoadingEditorActions || (!isNew && isLoadingWorkflow)) {

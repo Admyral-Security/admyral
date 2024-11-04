@@ -20,7 +20,7 @@ export default function NodeBase({
 	name,
 	selected,
 }: NodeBaseProps) {
-	const { nodes, duplicateNodeByIdx, deleteNodeByIdx, hasMissingSecret } =
+	const { nodes, duplicateNodeByIdx, deleteNodeByIdx, hasDeletedSecret } =
 		useWorkflowStore();
 
 	const nodeIdx = nodes.findIndex((node) => node.id === nodeId);
@@ -64,7 +64,7 @@ export default function NodeBase({
 			</Card>
 
 			<NodeToolbar
-				isVisible={hasMissingSecret(nodeId)}
+				isVisible={hasDeletedSecret(nodeId)}
 				position={Position.Top}
 				offset={8}
 				align="end"
@@ -75,7 +75,7 @@ export default function NodeBase({
 							transform: "translate(10px, 24px)",
 						}}
 					>
-						<Flex className="absolute inset-0 bg-[var(--red-9)] rounded-full " />
+						<Flex className="absolute inset-0 bg-[var(--red-9)] rounded-full" />
 						<Flex
 							className="relative rounded-full w-6 h-6"
 							justify="center"

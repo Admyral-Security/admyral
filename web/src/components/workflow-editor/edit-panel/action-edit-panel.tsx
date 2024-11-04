@@ -32,8 +32,8 @@ export default function ActionEditPanel() {
 		nodes,
 		selectedNodeIdx,
 		updateNodeData,
-		hasMissingSecret,
-		removeMissingSecretById,
+		hasDeletedSecret,
+		removeDeletedSecretByPlaceholder,
 	} = useWorkflowStore();
 	const { actionsIndex } = useEditorActionStore();
 	const { secrets } = useSecretsStore();
@@ -77,7 +77,6 @@ export default function ActionEditPanel() {
 	const onChangeSecretsMapping = (
 		secretPlaceholder: string,
 		value: string,
-		secretIdx: number,
 	) => {
 		if (value === "$$$save_and_redirect$$$") {
 			saveWorkflowAndRedirect();
@@ -91,7 +90,7 @@ export default function ActionEditPanel() {
 			}),
 		);
 
-		removeMissingSecretById(action.id, secretIdx);
+		removeDeletedSecretByPlaceholder(action.id, secretPlaceholder);
 	};
 
 	const onChangeActionArgument = (
@@ -152,7 +151,7 @@ export default function ActionEditPanel() {
 							Secrets
 						</Text>
 						{actionDefinition.secretsPlaceholders.map(
-							(secretPlaceholder, secretIdx) => (
+							(secretPlaceholder) => (
 								<Flex
 									key={`${action.id}_secret_placeholder_${secretPlaceholder}`}
 									direction="column"
@@ -171,7 +170,6 @@ export default function ActionEditPanel() {
 											onChangeSecretsMapping(
 												secretPlaceholder,
 												value,
-												secretIdx,
 											)
 										}
 									>
@@ -203,7 +201,10 @@ export default function ActionEditPanel() {
 											</Select.Group>
 										</Select.Content>
 									</Select.Root>
-									{hasMissingSecret(action.id, secretIdx) && (
+									{hasDeletedSecret(
+										action.id,
+										secretPlaceholder,
+									) && (
 										<Flex
 											direction="row"
 											align="center"
