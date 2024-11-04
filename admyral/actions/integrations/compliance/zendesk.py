@@ -1,19 +1,28 @@
 from typing import Annotated, Literal
 from httpx import Client
+from pydantic import BaseModel
 
 from admyral.action import action, ArgumentMetadata
 from admyral.context import ctx
 from admyral.typings import JsonValue
 from admyral.exceptions import NonRetryableActionError
+from admyral.secret.secret import register_secret
 
 
-def get_zendesk_client(subdomain: str, email: str, api_token: str) -> Client:
+@register_secret(secret_type="Zendesk")
+class ZendeskSecret(BaseModel):
+    subdomain: str
+    email: str
+    api_token: str
+
+
+def get_zendesk_client(secret: ZendeskSecret) -> Client:
     return Client(
-        base_url=f"https://{subdomain}.zendesk.com/api",
+        base_url=f"https://{secret.subdomain}.zendesk.com/api",
         headers={
             "Content-Type": "application/json",
         },
-        auth=(f"{email}/token", api_token),
+        auth=(f"{secret.email}/token", secret.api_token),
     )
 
 
@@ -44,9 +53,7 @@ def list_zendesk_users(
 ) -> JsonValue:
     # https://developer.zendesk.com/api-reference/ticketing/users/users/
     secret = ctx.get().secrets.get("ZENDESK_SECRET")
-    subdomain = secret["subdomain"]
-    email = secret["email"]
-    api_token = secret["api_token"]
+    secret = ZendeskSecret.model_validate(secret)
 
     if user_role is not None:
         if isinstance(user_role, str) and user_role not in [
@@ -68,7 +75,7 @@ def list_zendesk_users(
                         f"Invalid user role: {role}. If user role is defined, it must be one of: end-user, agent, admin"
                     )
 
-    with get_zendesk_client(subdomain, email, api_token) as client:
+    with get_zendesk_client(secret) as client:
         page = 1
         endpoint = "/v2/users.json?per_page=100&page={page}"
 

@@ -9,18 +9,26 @@ Setup:
 
 from typing import Annotated
 from httpx import Client, Response
+from pydantic import BaseModel
 
 from admyral.action import action, ArgumentMetadata
 from admyral.context import ctx
 from admyral.typings import JsonValue
+from admyral.secret.secret import register_secret
+
+
+@register_secret(secret_type="Okta")
+class OktaSecret(BaseModel):
+    domain: str
+    api_key: str
 
 
 # TODO: OAuth2: https://developer.okta.com/docs/guides/implement-oauth-for-okta-serviceapp/main/
-def get_okta_client(okta_domain: str, api_key: str) -> Client:
+def get_okta_client(secret: OktaSecret) -> Client:
     return Client(
-        base_url=f"https://{okta_domain}/api/v1",
+        base_url=f"https://{secret.domain}/api/v1",
         headers={
-            "Authorization": f"SSWS {api_key}",
+            "Authorization": f"SSWS {secret.api_key}",
             "Accept": "application/json",
         },
     )
@@ -35,7 +43,6 @@ def _get_next_link(response: Response) -> str | None:
     return next_link[0] if len(next_link) > 0 else None
 
 
-# TODO: OCSF schema mapping
 @action(
     display_name="List Events",
     display_namespace="Okta",
@@ -76,10 +83,9 @@ def list_okta_events(
     # https://developer.okta.com/docs/reference/api/system-log/#list-events
 
     secret = ctx.get().secrets.get("OKTA_SECRET")
-    okta_domain = secret["domain"]
-    api_key = secret["api_key"]
+    secret = OktaSecret.model_validate(secret)
 
-    with get_okta_client(okta_domain, api_key) as client:
+    with get_okta_client(secret) as client:
         params = {
             "limit": min(limit, 1000),
             "since": start_time,
@@ -131,10 +137,9 @@ def okta_search_users(
 ) -> list[dict[str, JsonValue]]:
     # https://developer.okta.com/docs/api/openapi/okta-management/management/tag/User/#tag/User/operation/listUsers
     secret = ctx.get().secrets.get("OKTA_SECRET")
-    okta_domain = secret["domain"]
-    api_key = secret["api_key"]
+    secret = OktaSecret.model_validate(secret)
 
-    with get_okta_client(okta_domain, api_key) as client:
+    with get_okta_client(secret) as client:
         params = {
             "search": search,
             "limit": min(limit or 200, 200),  # Okta's maximum limit per request is 200
@@ -170,10 +175,9 @@ def okta_search_users(
 def okta_get_all_user_types() -> list[dict[str, JsonValue]]:
     # https://developer.okta.com/docs/api/openapi/okta-management/management/tag/UserType/#tag/UserType/operation/listUserTypes
     secret = ctx.get().secrets.get("OKTA_SECRET")
-    okta_domain = secret["domain"]
-    api_key = secret["api_key"]
+    secret = OktaSecret.model_validate(secret)
 
-    with get_okta_client(okta_domain, api_key) as client:
+    with get_okta_client(secret) as client:
         response = client.get("/meta/types/user")
         response.raise_for_status()
 
@@ -220,10 +224,9 @@ def get_okta_logs(
 ) -> list[dict[str, JsonValue]]:
     # https://developer.okta.com/docs/api/openapi/okta-management/management/tag/SystemLog/#tag/SystemLog/operation/listLogEvents
     secret = ctx.get().secrets.get("OKTA_SECRET")
-    okta_domain = secret["domain"]
-    api_key = secret["api_key"]
+    secret = OktaSecret.model_validate(secret)
 
-    with get_okta_client(okta_domain, api_key) as client:
+    with get_okta_client(secret) as client:
         params = {
             "limit": min(limit, 1000),
         }

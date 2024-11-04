@@ -1,9 +1,16 @@
 from typing import Annotated
 from anthropic import Anthropic
 from anthropic.types import TextBlock
+from pydantic import BaseModel
 
 from admyral.action import action, ArgumentMetadata
 from admyral.context import ctx
+from admyral.secret.secret import register_secret
+
+
+@register_secret(secret_type="Anthropic")
+class AnthropicSecret(BaseModel):
+    api_key: str
 
 
 @action(
@@ -66,9 +73,9 @@ def anthropic_chat_completion(
     # https://docs.anthropic.com/en/api/messages
     # TODO: error handling
     secret = ctx.get().secrets.get("ANTHROPIC_SECRET")
-    api_key = secret["api_key"]
+    secret = AnthropicSecret.model_validate(secret)
 
-    client = Anthropic(api_key=api_key)
+    client = Anthropic(api_key=secret.api_key)
 
     model_params = {}
     if top_p is not None:

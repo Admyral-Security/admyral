@@ -148,20 +148,21 @@ class AdmyralStore(StoreInterface):
             )
             await db.commit()
 
+    async def delete_user(self, user_id: str) -> None:
+        async with self._get_async_session() as db:
+            await db.exec(delete(UserSchema).where(UserSchema.id == user_id))
+            await db.commit()
+
     ########################################################
     # API Key Management
     ########################################################
 
     async def store_api_key(self, user_id: str, name: str, key: str) -> ApiKey:
         async with self._get_async_session() as db:
-            api_key = ApiKey(
-                id=str(uuid4()),
-                name=name,
-                user_id=user_id,
-            )
+            api_key_id = str(uuid4())
             await db.exec(
                 insert(ApiKeySchema).values(
-                    id=api_key.id,
+                    id=api_key_id,
                     user_id=user_id,
                     name=name,
                     key=key,
@@ -169,14 +170,42 @@ class AdmyralStore(StoreInterface):
             )
             await db.commit()
 
-        return api_key
+            result = await db.exec(
+                select(ApiKeySchema, UserSchema)
+                .join(UserSchema)
+                .where(ApiKeySchema.user_id == user_id)
+                .where(ApiKeySchema.id == api_key_id)
+                .where(UserSchema.id == user_id)
+            )
+            row = result.one()
+
+            return ApiKey(
+                id=row[0].id,
+                name=row[0].name,
+                created_at=row[0].created_at,
+                user_email=row[1].email,
+            )
 
     async def list_api_keys(self, user_id: str) -> list[ApiKey]:
         async with self._get_async_session() as db:
             result = await db.exec(
-                select(ApiKeySchema).where(ApiKeySchema.user_id == user_id)
+                select(ApiKeySchema, UserSchema)
+                .join(UserSchema)
+                .where(ApiKeySchema.user_id == user_id)
             )
-            return [api_key.to_model() for api_key in result.all()]
+            return list(
+                map(
+                    lambda row: ApiKey.model_validate(
+                        {
+                            "id": row[0].id,
+                            "name": row[0].name,
+                            "created_at": row[0].created_at,
+                            "user_email": row[1].email,
+                        }
+                    ),
+                    result.all(),
+                )
+            )
 
     async def search_api_key_owner(self, key: str) -> Optional[str]:
         async with self._get_async_session() as db:
@@ -859,9 +888,26 @@ class AdmyralStore(StoreInterface):
     ) -> list[SecretMetadata]:
         async with self._get_async_session() as db:
             result = await db.exec(
-                select(SecretsSchema).where(SecretsSchema.user_id == user_id)
+                select(SecretsSchema, UserSchema)
+                .join(UserSchema)
+                .where(SecretsSchema.user_id == user_id)
+                .where(UserSchema.id == user_id)
             )
-            return [secret.to_metadata() for secret in result.all()]
+            return list(
+                map(
+                    lambda row: SecretMetadata.model_validate(
+                        {
+                            "secret_id": row[0].secret_id,
+                            "secret_schema": json.loads(row[0].schema_json_serialized),
+                            "email": row[1].email,
+                            "created_at": row[0].created_at,
+                            "updated_at": row[0].updated_at,
+                            "secret_type": row[0].secret_type,
+                        }
+                    ),
+                    result.all(),
+                ),
+            )
 
     async def _get_secret(
         self, db: AdmyralDatabaseSession, user_id: str, secret_id: str
@@ -886,6 +932,7 @@ class AdmyralStore(StoreInterface):
         secret_id: str,
         encrypted_secret: Optional[str],
         schema: list[str],
+        secret_type: Optional[str] = None,
     ) -> None:
         async with self._get_async_session() as db:
             secret = await self._get_secret(db, user_id, secret_id)
@@ -908,6 +955,7 @@ class AdmyralStore(StoreInterface):
                         secret_id=secret_id,
                         encrypted_secret=encrypted_secret,
                         schema_json_serialized=json.dumps(schema),
+                        secret_type=secret_type,
                     )
                 )
 

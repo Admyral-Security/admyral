@@ -1,13 +1,15 @@
 "use client";
 
 import { useListSecretsApi } from "@/hooks/use-list-credentials-api";
-import { PlusIcon } from "@radix-ui/react-icons";
-import { Box, Button, Card, Flex, Text } from "@radix-ui/themes";
-import EncryptedSecret from "./encrypted-secret";
-import NewSecret from "./new-secret";
+import { DotsVerticalIcon, TrashIcon } from "@radix-ui/react-icons";
+import { DropdownMenu, Flex, IconButton, Table } from "@radix-ui/themes";
 import { useEffect } from "react";
 import { useSecretsStore } from "@/stores/secrets-store";
 import ErrorCallout from "../utils/error-callout";
+import NamespaceIcon from "../workflow-editor/namespace-icon";
+import Image from "next/image";
+import { useDeleteSecretApi } from "@/hooks/use-delete-secret-api";
+import { useToast } from "@/providers/toast";
 
 export default function Secrets() {
 	const {
@@ -15,8 +17,25 @@ export default function Secrets() {
 		isPending: isListingSecretsLoading,
 		error: listingSecretsError,
 	} = useListSecretsApi();
-	const { setSecrets, getNumberOfSecrets, addNewSecret, isNewSecret, clear } =
-		useSecretsStore();
+	const {
+		secrets,
+		setSecrets,
+		getNumberOfSecrets,
+		addNewSecret,
+		clear,
+		removeSecret,
+	} = useSecretsStore();
+	const deleteSecret = useDeleteSecretApi();
+	const { errorToast } = useToast();
+
+	const handleDeleteSecret = async (idx: number) => {
+		try {
+			await deleteSecret.mutateAsync({ secretId: secrets[idx].secretId });
+			removeSecret(idx);
+		} catch (error) {
+			errorToast("Failed to delete secret. Please try again.");
+		}
+	};
 
 	useEffect(() => {
 		if (encryptedSecrets) {
@@ -34,42 +53,71 @@ export default function Secrets() {
 	}
 
 	return (
-		<Box width="50%">
-			<Card size="3" variant="classic">
-				<Flex direction="column" gap="5">
-					<Flex justify="between">
-						<Text size="4" weight="medium">
-							Secrets
-						</Text>
+		<Table.Root>
+			<Table.Header>
+				<Table.Row>
+					<Table.ColumnHeaderCell></Table.ColumnHeaderCell>
+					<Table.ColumnHeaderCell>Name</Table.ColumnHeaderCell>
+					<Table.ColumnHeaderCell>Updated</Table.ColumnHeaderCell>
+					<Table.ColumnHeaderCell>Created</Table.ColumnHeaderCell>
+					<Table.ColumnHeaderCell>Author</Table.ColumnHeaderCell>
+					<Table.ColumnHeaderCell></Table.ColumnHeaderCell>
+				</Table.Row>
+			</Table.Header>
 
-						<Button
-							style={{
-								cursor: "pointer",
-							}}
-							onClick={addNewSecret}
-						>
-							Add New Secret
-							<PlusIcon />
-						</Button>
-					</Flex>
-
-					{Array(getNumberOfSecrets())
-						.fill(0)
-						.map((_, idx) =>
-							isNewSecret(idx) ? (
-								<NewSecret
-									key={`new_secret_${idx}`}
-									idx={idx}
-								/>
+			<Table.Body>
+				{secrets.map((secret, idx) => (
+					<Table.Row>
+						<Table.Cell>
+							{secret.secretType ? (
+								<NamespaceIcon namespace={secret.secretType} />
 							) : (
-								<EncryptedSecret
-									key={`encrypted_secret_${idx}`}
-									idx={idx}
+								<Image
+									src="/custom_secret_icon.svg"
+									alt="Custom Secret Icon"
+									width={18}
+									height={18}
 								/>
-							),
-						)}
-				</Flex>
-			</Card>
-		</Box>
+							)}
+						</Table.Cell>
+						<Table.RowHeaderCell>
+							{secret.secretId}
+						</Table.RowHeaderCell>
+						<Table.Cell>
+							{secret.updatedAt.toLocaleString("en-US")}
+						</Table.Cell>
+						<Table.Cell>
+							{secret.createdAt.toLocaleString("en-US")}
+						</Table.Cell>
+						<Table.Cell>{secret.email}</Table.Cell>
+						<Table.Cell>
+							<Flex justify="end">
+								<DropdownMenu.Root>
+									<DropdownMenu.Trigger>
+										<IconButton
+											variant="ghost"
+											style={{ cursor: "pointer" }}
+										>
+											<DotsVerticalIcon />
+										</IconButton>
+									</DropdownMenu.Trigger>
+
+									<DropdownMenu.Content variant="soft">
+										<DropdownMenu.Item
+											onClick={() =>
+												handleDeleteSecret(idx)
+											}
+										>
+											<TrashIcon />
+											Delete
+										</DropdownMenu.Item>
+									</DropdownMenu.Content>
+								</DropdownMenu.Root>
+							</Flex>
+						</Table.Cell>
+					</Table.Row>
+				))}
+			</Table.Body>
+		</Table.Root>
 	);
 }

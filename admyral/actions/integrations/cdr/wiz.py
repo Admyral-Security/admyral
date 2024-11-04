@@ -1,11 +1,21 @@
 from typing import Annotated
 from httpx import Client
 from datetime import timedelta
+from pydantic import BaseModel
 
 from admyral.action import action, ArgumentMetadata
 from admyral.context import ctx
 from admyral.typings import JsonValue
 from admyral.utils.time import utc_now
+from admyral.secret.secret import register_secret
+
+
+@register_secret(secret_type="Wiz")
+class WizSecret(BaseModel):
+    client_id: str
+    client_secret: str
+    auth_url: str
+    api_endpoint: str
 
 
 def _fetch_token(
@@ -32,15 +42,10 @@ def _fetch_token(
         return response.json()["access_token"]
 
 
-def get_wiz_client(
-    client_id: str,
-    client_secret: str,
-    auth_url: str,
-    api_endpoint: str,
-) -> Client:
-    access_token = _fetch_token(client_id, client_secret, auth_url)
+def get_wiz_client(secret: WizSecret) -> Client:
+    access_token = _fetch_token(secret.client_id, secret.client_secret, secret.auth_url)
     return Client(
-        base_url=api_endpoint,
+        base_url=secret.api_endpoint,
         headers={
             "Content-Type": "application/json",
             "Accept": "application/json",
@@ -134,7 +139,6 @@ query IssuesTable($filterBy: IssueFilters, $first: Int, $after: String, $orderBy
 """
 
 
-# TODO: OCSF schema
 @action(
     display_name="List Alerts",
     display_namespace="Wiz",
@@ -167,12 +171,9 @@ def list_wiz_alerts(
     # https://github.com/criblio/collector-templates/blob/main/collectors/rest/wiz/collector-wiz-issues.json
 
     secret = ctx.get().secrets.get("WIZ_SECRET")
-    client_id = secret["client_id"]
-    client_secret = secret["client_secret"]
-    auth_url = secret["auth_url"]
-    api_endpoint = secret["api_endpoint"]
+    secret = WizSecret.model_validate(secret)
 
-    with get_wiz_client(client_id, client_secret, auth_url, api_endpoint) as client:
+    with get_wiz_client(secret) as client:
         alerts = []
 
         end_cursor = None

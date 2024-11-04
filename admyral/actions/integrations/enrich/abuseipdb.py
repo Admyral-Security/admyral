@@ -1,16 +1,23 @@
 from typing import Annotated, Literal
 from httpx import Client
+from pydantic import BaseModel
 
 from admyral.action import action, ArgumentMetadata
 from admyral.context import ctx
 from admyral.typings import JsonValue
+from admyral.secret.secret import register_secret
 
 
-def get_abuseipdb_client(api_key: str) -> Client:
+@register_secret(secret_type="AbuseIPDB")
+class AbuseIPDBSecret(BaseModel):
+    api_key: str
+
+
+def get_abuseipdb_client(secret: AbuseIPDBSecret) -> Client:
     return Client(
         base_url="https://api.abuseipdb.com/api/v2",
         headers={
-            "Key": api_key,
+            "Key": secret.api_key,
             "Accept": "application/json",
         },
     )
@@ -48,8 +55,9 @@ def abuseipdb_analyze_ip(
     # https://docs.abuseipdb.com/#check-endpoint
 
     secret = ctx.get().secrets.get("ABUSEIPDB_SECRET")
-    api_key = secret["api_key"]
-    with get_abuseipdb_client(api_key) as client:
+    secret = AbuseIPDBSecret.model_validate(secret)
+
+    with get_abuseipdb_client(secret) as client:
         params = {
             "ipAddress": ip_address,
         }

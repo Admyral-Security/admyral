@@ -1,17 +1,16 @@
-import { isSecretMetadata, TSecret, TSecretMetadata } from "@/types/secrets";
+import { TSecretMetadata } from "@/types/secrets";
 import { create } from "zustand";
 import { produce } from "immer";
 
 type SecretsStore = {
-	secrets: (TSecret | TSecretMetadata)[];
+	secrets: TSecretMetadata[];
 	clear: () => void;
-	setSecrets: (secrets: (TSecret | TSecretMetadata)[]) => void;
-	getSecret: (idx: number) => TSecret | TSecretMetadata;
+	setSecrets: (secrets: TSecretMetadata[]) => void;
+	getSecret: (idx: number) => TSecretMetadata;
 	getNumberOfSecrets: () => number;
 	addNewSecret: () => void;
-	updateSecret: (idx: number, update: TSecret | TSecretMetadata) => void;
+	updateSecret: (idx: number, update: TSecretMetadata) => void;
 	removeSecret: (idx: number) => void;
-	isNewSecret: (idx: number) => boolean;
 };
 
 export const useSecretsStore = create<SecretsStore>((set, get) => ({
@@ -35,7 +34,7 @@ export const useSecretsStore = create<SecretsStore>((set, get) => ({
 				});
 			}),
 		),
-	updateSecret: (idx: number, update: TSecret | TSecretMetadata) =>
+	updateSecret: (idx: number, update: TSecretMetadata) =>
 		set(
 			produce((draft) => {
 				draft.secrets[idx] = update;
@@ -47,5 +46,4 @@ export const useSecretsStore = create<SecretsStore>((set, get) => ({
 				draft.secrets.splice(idx, 1);
 			}),
 		),
-	isNewSecret: (idx: number) => !isSecretMetadata(get().secrets[idx]),
 }));

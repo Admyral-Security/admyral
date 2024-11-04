@@ -8,6 +8,7 @@ from admyral.models import (
     AuthenticatedUser,
 )
 from admyral.server.deps import get_secrets_manager
+from admyral.secret.secret_registry import SecretRegistry
 
 
 router = APIRouter()
@@ -41,3 +42,10 @@ async def delete_secret(
     await get_secrets_manager().delete(
         user_id=authenticated_user.user_id, secret_id=request.secret_id
     )
+
+
+@router.get("/schemas")
+async def get_secret_schemas(
+    _authenticated_user: AuthenticatedUser = Depends(authenticate),
+) -> dict[str, list[str]]:
+    return SecretRegistry.get_secret_schemas()

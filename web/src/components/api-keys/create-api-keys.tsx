@@ -33,10 +33,7 @@ export default function CreateApiKey() {
 
 	useEffect(() => {
 		if (createApiKey.isSuccess) {
-			addApiKey({
-				id: createApiKey.data.key.id,
-				name: createApiKey.data.key.name,
-			});
+			addApiKey(createApiKey.data.key);
 			setSecretKey(createApiKey.data.secret);
 			setState(State.SHOW_KEY);
 			createApiKey.reset();

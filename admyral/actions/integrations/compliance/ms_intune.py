@@ -1,7 +1,10 @@
 from admyral.action import action
 from admyral.context import ctx
 from admyral.typings import JsonValue
-from admyral.actions.integrations.shared.ms_graph import ms_graph_list_managed_devices
+from admyral.actions.integrations.shared.ms_graph import (
+    ms_graph_list_managed_devices,
+    AzureSecret,
+)
 
 
 @action(
@@ -12,11 +15,8 @@ from admyral.actions.integrations.shared.ms_graph import ms_graph_list_managed_d
 )
 def list_ms_intune_managed_devices() -> list[dict[str, JsonValue]]:
     secret = ctx.get().secrets.get("AZURE_SECRET")
-    return ms_graph_list_managed_devices(
-        tenant_id=secret["tenant_id"],
-        client_id=secret["client_id"],
-        client_secret=secret["client_secret"],
-    )
+    secret = AzureSecret.model_validate(secret)
+    return ms_graph_list_managed_devices(secret)
 
 
 @action(

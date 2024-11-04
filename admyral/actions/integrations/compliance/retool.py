@@ -10,19 +10,27 @@ from tenacity import (
     retry_if_exception_type,
 )
 import itertools
+from pydantic import BaseModel
 
 from admyral.action import action, ArgumentMetadata
 from admyral.context import ctx
 from admyral.typings import JsonValue
 from admyral.exceptions import NonRetryableActionError, RetryableActionError
+from admyral.secret.secret import register_secret
 
 
-def get_retool_client(domain: str, api_key: str) -> Client:
+@register_secret(secret_type="Retool")
+class RetoolSecret(BaseModel):
+    domain: str
+    api_key: str
+
+
+def get_retool_client(secret: RetoolSecret) -> Client:
     # Auth: https://docs.retool.com/org-users/guides/retool-api/authentication#tag/Organization/paths/~1usage~1organizations/get
     return Client(
-        base_url=f"https://{domain}/api/v2",
+        base_url=f"https://{secret.domain}/api/v2",
         headers={
-            "Authorization": f"Bearer {api_key}",
+            "Authorization": f"Bearer {secret.api_key}",
             "Content-Type": "application/json",
             "Accept": "application/json",
         },
@@ -108,10 +116,9 @@ def list_retool_inactive_users(
     # https://docs.retool.com/reference/api/#tag/Users/paths/~1users~1%7BuserId%7D/patch
 
     secret = ctx.get().secrets.get("RETOOL_SECRET")
-    api_key = secret["api_key"]
-    domain = secret["domain"]
+    secret = RetoolSecret.model_validate(secret)
 
-    with get_retool_client(domain, api_key) as client:
+    with get_retool_client(secret) as client:
         users = _list_retool_api_with_pagination(client, "/users")
         utc_time_now = datetime.now(timezone.utc) - timedelta(
             days=inactivity_threshold_in_days
@@ -135,10 +142,9 @@ def list_groups_per_user() -> dict[str, JsonValue]:
     # https://docs.retool.com/reference/api/v2/#tag/Groups/paths/~1groups~1%7BgroupId%7D/put
 
     secret = ctx.get().secrets.get("RETOOL_SECRET")
-    api_key = secret["api_key"]
-    domain = secret["domain"]
+    secret = RetoolSecret.model_validate(secret)
 
-    with get_retool_client(domain, api_key) as client:
+    with get_retool_client(secret) as client:
         # Fetch all users to get the last active date
         users = _list_retool_api_with_pagination(client, "/users")
 
@@ -167,10 +173,9 @@ def list_groups_per_user() -> dict[str, JsonValue]:
 )
 def list_groups_and_apps_per_user() -> list[dict[str, JsonValue]]:
     secret = ctx.get().secrets.get("RETOOL_SECRET")
-    api_key = secret["api_key"]
-    domain = secret["domain"]
+    secret = RetoolSecret.model_validate(secret)
 
-    with get_retool_client(domain, api_key) as client:
+    with get_retool_client(secret) as client:
         # https://docs.retool.com/reference/api/#tag/Users/paths/~1users/get
         users = _list_retool_api_with_pagination(client, "/users")
 
@@ -283,14 +288,13 @@ def list_used_groups_and_apps_per_user(
     ] = None,
 ) -> list[dict[str, JsonValue]]:
     secret = ctx.get().secrets.get("RETOOL_SECRET")
-    api_key = secret["api_key"]
-    domain = secret["domain"]
+    secret = RetoolSecret.model_validate(secret)
 
     start_date = _validate_date_format(start_date)
     if end_date is not None:
         end_date = _validate_date_format(end_date)
 
-    with get_retool_client(domain, api_key) as client:
+    with get_retool_client(secret) as client:
         # https://docs.retool.com/reference/api/#tag/Users/paths/~1users/get
         users = _list_retool_api_with_pagination(client, "/users")
 

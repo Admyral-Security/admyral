@@ -8,14 +8,23 @@ from msgraph.generated.models.security.alert import Alert
 from kiota_serialization_json.json_serialization_writer import JsonSerializationWriter
 import json
 from httpx import Client
+from pydantic import BaseModel
 
 from admyral.typings import JsonValue
 from admyral.utils.future_executor import execute_future
 from admyral.utils.collections import is_not_empty
+from admyral.secret.secret import register_secret
+
+
+@register_secret(secret_type="Azure")
+class AzureSecret(BaseModel):
+    tenant_id: str
+    client_id: str
+    client_secret: str
 
 
 def get_ms_graph_client(
-    tenant_id: str, client_id: str, client_secret: str
+    secret: AzureSecret,
 ) -> GraphServiceClient:
     """
     Create an MS Graph client using the client credentials provider (OAuth 2.0)
@@ -26,7 +35,9 @@ def get_ms_graph_client(
     """
     return GraphServiceClient(
         ClientSecretCredential(
-            tenant_id=tenant_id, client_id=client_id, client_secret=client_secret
+            tenant_id=secret.tenant_id,
+            client_id=secret.client_id,
+            client_secret=secret.client_secret,
         ),
         ["https://graph.microsoft.com/.default"],
     )
@@ -53,9 +64,7 @@ def _alert_to_json(alert: Alert) -> JsonValue:
 
 
 def ms_graph_list_alerts_v2(
-    tenant_id: str,
-    client_id: str,
-    client_secret: str,
+    secret: AzureSecret,
     start_time: str | None = None,
     end_time: str | None = None,
     service_source: MsSecurityGraphAlertServiceSource | None = None,
@@ -70,9 +79,7 @@ def ms_graph_list_alerts_v2(
         - https://github.com/microsoftgraph/msgraph-sdk-python/blob/main/msgraph/generated/security/alerts_v2/alerts_v2_request_builder.py
         - https://learn.microsoft.com/en-us/entra/identity-platform/v2-oauth2-client-creds-grant-flow
     """
-    client = get_ms_graph_client(
-        tenant_id=tenant_id, client_id=client_id, client_secret=client_secret
-    )
+    client = get_ms_graph_client(secret)
 
     filter_params = []
     if service_source:
@@ -110,10 +117,8 @@ def ms_graph_list_alerts_v2(
 
 
 class MSGraphClient:
-    def __init__(self, tenant_id: str, client_id: str, client_secret: str):
-        self.tenant_id = tenant_id
-        self.client_id = client_id
-        self.client_secret = client_secret
+    def __init__(self, secret: AzureSecret):
+        self.secret = secret
         self.token = None
         self.base_url = "https://graph.microsoft.com/v1.0"
         self.client = Client()
@@ -125,13 +130,11 @@ class MSGraphClient:
         self.client.close()
 
     def _get_token(self) -> str:
-        token_url = (
-            f"https://login.microsoftonline.com/{self.tenant_id}/oauth2/v2.0/token"
-        )
+        token_url = f"https://login.microsoftonline.com/{self.secret.tenant_id}/oauth2/v2.0/token"
         data = {
-            "client_id": self.client_id,
+            "client_id": self.secret.client_id,
             "scope": "https://graph.microsoft.com/.default",
-            "client_secret": self.client_secret,
+            "client_secret": self.secret.client_secret,
             "grant_type": "client_credentials",
         }
         response = self.client.post(token_url, data=data)
@@ -163,11 +166,7 @@ class MSGraphClient:
         return self._make_request("GET", url)
 
 
-def ms_graph_list_managed_devices(
-    tenant_id: str,
-    client_id: str,
-    client_secret: str,
-) -> list[dict[str, JsonValue]]:
+def ms_graph_list_managed_devices(secret: AzureSecret) -> list[dict[str, JsonValue]]:
     """
     Fetch managed devices from the Microsoft Graph Security API using the List Managed Devices endpoint.
 
@@ -176,9 +175,7 @@ def ms_graph_list_managed_devices(
         - https://github.com/microsoftgraph/msgraph-sdk-python/blob/6ec0cca83fdcbde8a6cca6b8407b2ffc59343b9e/msgraph/generated/devices/item/device_item_request_builder.py
     """
 
-    with MSGraphClient(
-        tenant_id=tenant_id, client_id=client_id, client_secret=client_secret
-    ) as client:
+    with MSGraphClient(secret) as client:
         managed_devices = []
         next_link = "/deviceManagement/managedDevices"
 

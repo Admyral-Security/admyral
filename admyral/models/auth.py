@@ -4,7 +4,7 @@ from datetime import datetime
 
 class AuthenticatedUser(BaseModel):
     user_id: str
-    email: str | None = None
+    email: str
 
 
 class User(BaseModel):
@@ -15,3 +15,7 @@ class User(BaseModel):
     image: str | None
     created_at: datetime
     updated_at: datetime
+
+
+class UserProfile(BaseModel):
+    email: str

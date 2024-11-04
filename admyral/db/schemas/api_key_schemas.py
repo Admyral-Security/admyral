@@ -3,7 +3,6 @@ from sqlalchemy import TEXT
 from typing import TYPE_CHECKING
 
 from admyral.db.schemas.base_schemas import BaseSchema
-from admyral.models import ApiKey
 
 if TYPE_CHECKING:
     from admyral.db.schemas.auth_schemas import UserSchema
@@ -36,10 +35,5 @@ class ApiKeySchema(BaseSchema, table=True):
     # relationship parent
     user: "UserSchema" = Relationship(back_populates="api_keys")
 
-    def to_model(self, include_resources: bool = False) -> ApiKey:
-        return ApiKey.model_validate(
-            {
-                "id": self.id,
-                "name": self.name,
-            }
-        )
+    def to_model(self) -> None:
+        pass

@@ -32,6 +32,9 @@ class StoreInterface(ABC):
     @abstractmethod
     async def clean_up_workflow_data_of(self, user_id: str) -> None: ...
 
+    @abstractmethod
+    async def delete_user(self, user_id: str) -> None: ...
+
     ########################################################
     # API Key Management
     ########################################################
@@ -235,7 +238,12 @@ class StoreInterface(ABC):
 
     @abstractmethod
     async def store_secret(
-        self, user_id: str, secret_id: str, encrypted_secret: Optional[str]
+        self,
+        user_id: str,
+        secret_id: str,
+        encrypted_secret: Optional[str],
+        secret_schema: list[str],
+        secret_type: Optional[str] = None,
     ) -> None: ...
 
     @abstractmethod

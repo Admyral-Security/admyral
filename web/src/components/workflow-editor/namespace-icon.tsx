@@ -33,6 +33,7 @@ const NAMESPACE_ICON_MAPPING: Record<string, string> = {
 	Kandji: "/kandji_logo.svg",
 	Zendesk: "/zendesk_logo.svg",
 	LeakCheck: "/leakcheck_logo.png",
+	Azure: "/azure_logo.svg",
 };
 
 export default function NamespaceIcon({ namespace }: { namespace: string }) {

@@ -1,16 +1,23 @@
 from typing import Annotated
 from httpx import Client
+from pydantic import BaseModel
 
 from admyral.action import action, ArgumentMetadata
 from admyral.context import ctx
 from admyral.typings import JsonValue
+from admyral.secret.secret import register_secret
 
 
-def get_grey_noise_client(api_key: str) -> Client:
+@register_secret(secret_type="GreyNoise")
+class GreyNoiseSecret(BaseModel):
+    api_key: str
+
+
+def get_grey_noise_client(secret: GreyNoiseSecret) -> Client:
     return Client(
         base_url="https://api.greynoise.io/v3",
         headers={
-            "x-apikey": api_key,
+            "x-apikey": secret.api_key,
             "Content-Type": "application/json",
             "Accept": "application/json",
         },
@@ -33,8 +40,9 @@ def grey_noise_ip_lookup(
 ) -> JsonValue:
     # https://docs.greynoise.io/reference/get_v3-community-ip
     secret = ctx.get().secrets.get("GREY_NOISE_SECRET")
-    api_key = secret["api_key"]
-    with get_grey_noise_client(api_key) as client:
+    secret = GreyNoiseSecret.model_validate(secret)
+
+    with get_grey_noise_client(secret) as client:
         response = client.get(f"/community/{ip_address}")
         response.raise_for_status()
         return response.json()

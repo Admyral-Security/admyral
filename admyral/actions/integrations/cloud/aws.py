@@ -4,6 +4,7 @@ from admyral.action import action, ArgumentMetadata
 from admyral.context import ctx
 from admyral.typings import JsonValue
 from admyral.actions.integrations.shared.steampipe import run_steampipe_query
+from admyral.actions.integrations.shared.aws import AWSSecret
 
 
 @action(
@@ -22,10 +23,10 @@ def steampipe_query_aws(
     ],
 ) -> JsonValue:
     secret = ctx.get().secrets.get("AWS_SECRET")
-    aws_access_key_id = secret["aws_access_key_id"]
-    aws_secret_access_key = secret["aws_secret_access_key"]
-
-    return run_steampipe_query(query, aws_access_key_id, aws_secret_access_key)
+    secret = AWSSecret.model_validate(secret)
+    return run_steampipe_query(
+        query, secret.aws_access_key_id, secret.aws_secret_access_key
+    )
 
 
 @action(
@@ -56,10 +57,10 @@ from
     """,
 ) -> JsonValue:
     secret = ctx.get().secrets.get("AWS_SECRET")
-    aws_access_key_id = secret["aws_access_key_id"]
-    aws_secret_access_key = secret["aws_secret_access_key"]
-
-    return run_steampipe_query(query, aws_access_key_id, aws_secret_access_key)
+    secret = AWSSecret.model_validate(secret)
+    return run_steampipe_query(
+        query, secret.aws_access_key_id, secret.aws_secret_access_key
+    )
 
 
 @action(
@@ -110,10 +111,10 @@ left join ssl_ok as ok on ok.name = b.name;
     """,
 ) -> JsonValue:
     secret = ctx.get().secrets.get("AWS_SECRET")
-    aws_access_key_id = secret["aws_access_key_id"]
-    aws_secret_access_key = secret["aws_secret_access_key"]
-
-    return run_steampipe_query(query, aws_access_key_id, aws_secret_access_key)
+    secret = AWSSecret.model_validate(secret)
+    return run_steampipe_query(
+        query, secret.aws_access_key_id, secret.aws_secret_access_key
+    )
 
 
 @action(
@@ -185,10 +186,10 @@ from
     """,
 ) -> JsonValue:
     secret = ctx.get().secrets.get("AWS_SECRET")
-    aws_access_key_id = secret["aws_access_key_id"]
-    aws_secret_access_key = secret["aws_secret_access_key"]
-
-    return run_steampipe_query(query, aws_access_key_id, aws_secret_access_key)
+    secret = AWSSecret.model_validate(secret)
+    return run_steampipe_query(
+        query, secret.aws_access_key_id, secret.aws_secret_access_key
+    )
 
 
 @action(
@@ -264,10 +265,10 @@ from
     """,
 ) -> JsonValue:
     secret = ctx.get().secrets.get("AWS_SECRET")
-    aws_access_key_id = secret["aws_access_key_id"]
-    aws_secret_access_key = secret["aws_secret_access_key"]
-
-    return run_steampipe_query(query, aws_access_key_id, aws_secret_access_key)
+    secret = AWSSecret.model_validate(secret)
+    return run_steampipe_query(
+        query, secret.aws_access_key_id, secret.aws_secret_access_key
+    )
 
 
 @action(
@@ -298,10 +299,10 @@ from
     """,
 ) -> JsonValue:
     secret = ctx.get().secrets.get("AWS_SECRET")
-    aws_access_key_id = secret["aws_access_key_id"]
-    aws_secret_access_key = secret["aws_secret_access_key"]
-
-    return run_steampipe_query(query, aws_access_key_id, aws_secret_access_key)
+    secret = AWSSecret.model_validate(secret)
+    return run_steampipe_query(
+        query, secret.aws_access_key_id, secret.aws_secret_access_key
+    )
 
 
 @action(
@@ -342,7 +343,7 @@ from
     """,
 ) -> JsonValue:
     secret = ctx.get().secrets.get("AWS_SECRET")
-    aws_access_key_id = secret["aws_access_key_id"]
-    aws_secret_access_key = secret["aws_secret_access_key"]
-
-    return run_steampipe_query(query, aws_access_key_id, aws_secret_access_key)
+    secret = AWSSecret.model_validate(secret)
+    return run_steampipe_query(
+        query, secret.aws_access_key_id, secret.aws_secret_access_key
+    )

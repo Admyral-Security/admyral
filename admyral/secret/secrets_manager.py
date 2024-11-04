@@ -74,7 +74,7 @@ class SQLSecretsManager(SecretsManager):
         encrypted_secret = encrypt_secret(serialized_secret)
         secret_schema = list(secret.secret.keys())
         return await self.db.store_secret(
-            user_id, secret.secret_id, encrypted_secret, secret_schema
+            user_id, secret.secret_id, encrypted_secret, secret_schema, secret.namespace
         )
 
     async def delete(self, user_id: str, secret_id: str) -> None:

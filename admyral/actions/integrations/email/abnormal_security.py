@@ -1,22 +1,28 @@
 from typing import Annotated
 from httpx import Client
+from pydantic import BaseModel
 
 from admyral.action import action, ArgumentMetadata
 from admyral.context import ctx
 from admyral.typings import JsonValue
+from admyral.secret.secret import register_secret
 
 
-def get_abnormal_security_client(api_key: str) -> Client:
+@register_secret(secret_type="Abnormal Security")
+class AbnormalSecuritySecret(BaseModel):
+    api_key: str
+
+
+def get_abnormal_security_client(secret: AbnormalSecuritySecret) -> Client:
     return Client(
         base_url="https://api.abnormalplatform.com/v1",
         headers={
-            "Authorization": f"Bearer {api_key}",
+            "Authorization": f"Bearer {secret.api_key}",
             "Accept": "application/json",
         },
     )
 
 
-# TODO: normalize cases (OCSF?)
 @action(
     display_name="List Abnormal Cases",
     display_namespace="Abnormal Security",
@@ -49,11 +55,11 @@ def list_abnormal_security_cases(
     # https://app.swaggerhub.com/apis/abnormal-security/abx/1.4.3#/Cases/get_cases
 
     secret = ctx.get().secrets.get("ABNORMAL_SECURITY_SECRET")
-    api_key = secret["api_key"]
+    secret = AbnormalSecuritySecret.model_validate(secret)
 
     filter = f"createdTime gte {start_time} lte {end_time}"
 
-    with get_abnormal_security_client(api_key) as client:
+    with get_abnormal_security_client(secret) as client:
         page_number = 1
         cases = []
 

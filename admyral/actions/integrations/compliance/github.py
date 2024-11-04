@@ -7,28 +7,35 @@ https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/c
 from typing import Annotated, Literal, Union
 from httpx import Client
 from dateutil import parser
+from pydantic import BaseModel
 
 from admyral.action import action, ArgumentMetadata
 from admyral.context import ctx
 from admyral.typings import JsonValue
 from admyral.utils.collections import is_not_empty, is_empty
+from admyral.secret.secret import register_secret
 
 
-def get_github_enterprise_client(access_token: str, enterprise: str) -> Client:
+@register_secret(secret_type="GitHub")
+class GitHubSecret(BaseModel):
+    access_token: str
+
+
+def get_github_enterprise_client(secret: GitHubSecret, enterprise: str) -> Client:
     return Client(
         base_url=f"https://api.github.com/enterprises/{enterprise}",
         headers={
-            "Authorization": f"Bearer {access_token}",
+            "Authorization": f"Bearer {secret.access_token}",
             "Accept": "application/vnd.github.v3+json",
         },
     )
 
 
-def get_github_client(access_token: str) -> Client:
+def get_github_client(secret: GitHubSecret) -> Client:
     return Client(
         base_url="https://api.github.com",
         headers={
-            "Authorization": f"Bearer {access_token}",
+            "Authorization": f"Bearer {secret.access_token}",
             "Accept": "application/vnd.github.v3+json",
         },
     )
@@ -112,9 +119,9 @@ def search_github_enterprise_audit_logs(
     # https://docs.github.com/en/search-github/getting-started-with-searching-on-github/understanding-the-search-syntax#query-for-dates
 
     secret = ctx.get().secrets.get("GITHUB_ENTERPRISE_SECRET")
-    access_token = secret["access_token"]
+    secret = GitHubSecret.model_validate(secret)
 
-    with get_github_enterprise_client(access_token, enterprise) as client:
+    with get_github_enterprise_client(secret, enterprise) as client:
         params = {"order": "asc", "per_page": 100}
 
         phrases = []
@@ -190,9 +197,9 @@ def compare_two_github_commits(
     # https://docs.github.com/en/rest/commits/commits?apiVersion=2022-11-28#compare-two-commits
 
     secret = ctx.get().secrets.get("GITHUB_SECRET")
-    access_token = secret["access_token"]
+    secret = GitHubSecret.model_validate(secret)
 
-    with get_github_client(access_token=access_token) as client:
+    with get_github_client(secret) as client:
         url = f"/repos/{repo_owner}/{repo_name}/compare/{base}...{head}"
 
         if diff_type == "diff":
@@ -262,9 +269,9 @@ def list_github_merged_pull_requests(
     # https://docs.github.com/en/rest/pulls/pulls?apiVersion=2022-11-28
 
     secret = ctx.get().secrets.get("GITHUB_SECRET")
-    access_token = secret["access_token"]
+    secret = GitHubSecret.model_validate(secret)
 
-    with get_github_client(access_token=access_token) as client:
+    with get_github_client(secret) as client:
         params = {
             "state": "closed",
             "sort": "updated",
@@ -324,9 +331,9 @@ def list_github_commit_history_for_pull_request(
     # https://docs.github.com/en/rest/commits/commits?apiVersion=2022-11-28
 
     secret = ctx.get().secrets.get("GITHUB_SECRET")
-    access_token = secret["access_token"]
+    secret = GitHubSecret.model_validate(secret)
 
-    with get_github_client(access_token=access_token) as client:
+    with get_github_client(secret) as client:
         events = _get_events_with_pagination(
             client=client,
             url=f"/repos/{repo_owner}/{repo_name}/pulls/{pull_request_number}/commits",
@@ -373,9 +380,9 @@ def list_github_review_history_for_pull_request(
 ) -> list[dict[str, JsonValue]]:
     # https://docs.github.com/en/rest/pulls/reviews?apiVersion=2022-11-28
     secret = ctx.get().secrets.get("GITHUB_SECRET")
-    access_token = secret["access_token"]
+    secret = GitHubSecret.model_validate(secret)
 
-    with get_github_client(access_token=access_token) as client:
+    with get_github_client(secret) as client:
         params = {
             "per_page": 100,
         }
@@ -529,9 +536,9 @@ def list_github_issue_comments(
 ) -> list[dict[str, JsonValue]]:
     # https://docs.github.com/en/rest/issues/comments?apiVersion=2022-11-28#list-issue-comments
     secret = ctx.get().secrets.get("GITHUB_SECRET")
-    access_token = secret["access_token"]
+    secret = GitHubSecret.model_validate(secret)
 
-    with get_github_client(access_token=access_token) as client:
+    with get_github_client(secret) as client:
         params = {
             "per_page": 100,
         }
