@@ -117,7 +117,7 @@ export default function WorkflowEditor({
 		}
 		const secretIds = new Set(encryptedSecrets.map((s) => s.secretId));
 		const deletedSecrets = new Map(
-			workflow?.nodes
+			workflow.nodes
 				.filter((node) => node.type === "action")
 				.map((node) => {
 					const secretsMapping = node.secretsMapping;
