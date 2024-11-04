@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from typing import Optional
 
 from admyral.models import (
     User,
@@ -46,7 +45,7 @@ class StoreInterface(ABC):
     async def list_api_keys(self, user_id: str) -> list[ApiKey]: ...
 
     @abstractmethod
-    async def search_api_key_owner(self, key: str) -> Optional[str]: ...
+    async def search_api_key_owner(self, key: str) -> str | None: ...
 
     @abstractmethod
     async def delete_api_key(self, user_id: str, key_id: str) -> None: ...
@@ -61,7 +60,7 @@ class StoreInterface(ABC):
     @abstractmethod
     async def get_action(
         self, user_id: str, action_type: str
-    ) -> Optional[PythonAction]: ...
+    ) -> PythonAction | None: ...
 
     @abstractmethod
     async def store_action(self, user_id: str, action: PythonAction) -> None: ...
@@ -74,7 +73,7 @@ class StoreInterface(ABC):
     ########################################################
 
     @abstractmethod
-    async def get_cached_pip_lockfile(self, hash: str) -> Optional[PipLockfile]: ...
+    async def get_cached_pip_lockfile(self, hash: str) -> PipLockfile | None: ...
 
     @abstractmethod
     async def cache_pip_lockfile(self, pip_lockfile: PipLockfile) -> None: ...
@@ -92,12 +91,12 @@ class StoreInterface(ABC):
     @abstractmethod
     async def get_workflow_by_name(
         self, user_id: str, workflow_name: str
-    ) -> Optional[Workflow]: ...
+    ) -> Workflow | None: ...
 
     @abstractmethod
     async def get_workflow_by_id(
         self, user_id: str, workflow_id: str
-    ) -> Optional[Workflow]: ...
+    ) -> Workflow | None: ...
 
     @abstractmethod
     async def store_workflow(self, user_id: str, workflow: Workflow) -> None: ...
@@ -113,7 +112,7 @@ class StoreInterface(ABC):
     @abstractmethod
     async def get_workflow_for_webhook(
         self, workflow_id: str
-    ) -> Optional[tuple[str, Workflow]]: ...
+    ) -> tuple[str, Workflow] | None: ...
 
     ########################################################
     # Workflow Webhooks
@@ -127,10 +126,10 @@ class StoreInterface(ABC):
     @abstractmethod
     async def get_webhook_for_workflow(
         self, user_id: str, workflow_id: str
-    ) -> Optional[WorkflowWebhook]: ...
+    ) -> WorkflowWebhook | None: ...
 
     @abstractmethod
-    async def get_webhook(self, webhook_id: str) -> Optional[WorkflowWebhook]: ...
+    async def get_webhook(self, webhook_id: str) -> WorkflowWebhook | None: ...
 
     @abstractmethod
     async def delete_webhook(self, user_id: str, webhook_id: str) -> None: ...
@@ -164,7 +163,7 @@ class StoreInterface(ABC):
     @abstractmethod
     async def get_workflow_run(
         self, workflow_id: str, run_id: str
-    ) -> Optional[WorkflowRun]: ...
+    ) -> WorkflowRun | None: ...
 
     @abstractmethod
     async def list_workflow_run_steps(
@@ -174,7 +173,7 @@ class StoreInterface(ABC):
     @abstractmethod
     async def get_workflow_run_step(
         self, user_id: str, workflow_id: str, run_id: str, step_id: str
-    ) -> Optional[WorkflowRunStep]: ...
+    ) -> WorkflowRunStep | None: ...
 
     ########################################################
     # Workflow Runs - State Updates during execution
@@ -228,22 +227,22 @@ class StoreInterface(ABC):
 
     @abstractmethod
     async def list_secrets(
-        self, user_id: str, secret_type: Optional[str] = None
+        self, user_id: str, secret_type: str | None = None
     ) -> list[SecretMetadata]: ...
 
     @abstractmethod
     async def get_secret(
         self, user_id: str, secret_id: str
-    ) -> Optional[EncryptedSecret]: ...
+    ) -> EncryptedSecret | None: ...
 
     @abstractmethod
     async def store_secret(
         self,
         user_id: str,
         secret_id: str,
-        encrypted_secret: Optional[str],
+        encrypted_secret: str | None,
         secret_schema: list[str],
-        secret_type: Optional[str] = None,
+        secret_type: str | None = None,
     ) -> SecretMetadata: ...
 
     @abstractmethod
