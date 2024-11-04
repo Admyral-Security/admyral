@@ -206,11 +206,11 @@ export default function ActionEditPanel() {
 										secretPlaceholder,
 									) && (
 										<Flex
+											mt="2"
 											direction="row"
 											align="center"
-											className="text-red-500 font-medium mt-2"
 										>
-											<Text>
+											<Text color="red" weight="medium">
 												The previously selected secret
 												could not be found.
 											</Text>

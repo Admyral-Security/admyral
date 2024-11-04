@@ -38,11 +38,11 @@ export default function WorkflowEditor({
 
 	const [view, setView] = useState<View>("workflowBuilder");
 
-	const { isNew, setWorkflow, clearWorkflowStore, addDeletedSecrets } =
+	const { isNew, setWorkflow, clearWorkflowStore, setDeletedSecrets } =
 		useWorkflowStore();
 	const { setEditorActions } = useEditorActionStore();
 	const { errorToast } = useToast();
-	const { setSecrets, clear } = useSecretsStore();
+	const { setSecrets, clearSecretsStore } = useSecretsStore();
 
 	// Loading Actions
 	const {
@@ -65,9 +65,9 @@ export default function WorkflowEditor({
 	useEffect(() => {
 		if (encryptedSecrets) {
 			setSecrets(encryptedSecrets);
-			return () => clear();
+			return () => clearSecretsStore();
 		}
-	}, [encryptedSecrets, setSecrets, clear]);
+	}, [encryptedSecrets, setSecrets, clearSecretsStore]);
 
 	// Load Workflow
 	// Note: we only load from the DB if the workflow is not newly created
@@ -116,12 +116,12 @@ export default function WorkflowEditor({
 			return;
 		}
 		const secretIds = new Set(encryptedSecrets.map((s) => s.secretId));
-		const missingSecrets = workflow?.nodes
+		const deletedSecrets = workflow?.nodes
 			.filter((node) => node.type === "action")
 			.reduce((acc, node) => {
 				const secretsMapping = node.secretsMapping;
-				const secretsForNode = Object.keys(secretsMapping);
-				secretsForNode.forEach((secretPlaceholder) => {
+				const secretPlaceholders = Object.keys(secretsMapping);
+				secretPlaceholders.forEach((secretPlaceholder) => {
 					if (!secretIds.has(secretsMapping[secretPlaceholder])) {
 						if (!acc.has(node.id)) {
 							acc.set(node.id, new Set());
@@ -131,15 +131,15 @@ export default function WorkflowEditor({
 				});
 				return acc;
 			}, new Map<string, Set<string>>());
-		if (missingSecrets) {
-			addDeletedSecrets(missingSecrets);
+		if (deletedSecrets) {
+			setDeletedSecrets(deletedSecrets);
 		}
-		if (missingSecrets && missingSecrets.size > 0) {
+		if (deletedSecrets && deletedSecrets.size > 0) {
 			errorToast(
 				"Some secrets are missing. Please add them before running the workflow.",
 			);
 		}
-	}, [encryptedSecrets, workflow, addDeletedSecrets]);
+	}, [encryptedSecrets, workflow, setDeletedSecrets]);
 
 	// TODO(frontend): nicer loading screen
 	if (isLoadingEditorActions || (!isNew && isLoadingWorkflow)) {
