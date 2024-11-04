@@ -116,21 +116,26 @@ export default function WorkflowEditor({
 			return;
 		}
 		const secretIds = new Set(encryptedSecrets.map((s) => s.secretId));
-		const deletedSecrets = workflow?.nodes
-			.filter((node) => node.type === "action")
-			.reduce((acc, node) => {
-				const secretsMapping = node.secretsMapping;
-				const secretPlaceholders = Object.keys(secretsMapping);
-				secretPlaceholders.forEach((secretPlaceholder) => {
-					if (!secretIds.has(secretsMapping[secretPlaceholder])) {
-						if (!acc.has(node.id)) {
-							acc.set(node.id, new Set());
-						}
-						acc.get(node.id)?.add(secretPlaceholder);
-					}
-				});
-				return acc;
-			}, new Map<string, Set<string>>());
+		const deletedSecrets = new Map(
+			workflow?.nodes
+				.filter((node) => node.type === "action")
+				.map((node) => {
+					const secretsMapping = node.secretsMapping;
+					const deletedSecrets = new Set(
+						Object.keys(secretsMapping).filter(
+							(secretPlaceholder) =>
+								!secretIds.has(
+									secretsMapping[secretPlaceholder],
+								),
+						),
+					);
+					return [node.id, deletedSecrets] as [string, Set<string>];
+				})
+				.filter(
+					(nodeIdAndDeletedSecrets) =>
+						nodeIdAndDeletedSecrets[1].size > 0,
+				),
+		);
 		if (deletedSecrets) {
 			setDeletedSecrets(deletedSecrets);
 		}
