@@ -1,4 +1,5 @@
 "use client";
+
 import { useSaveWorkflowApi } from "@/hooks/use-save-workflow-api";
 import { useWorkflowStore } from "@/stores/workflow-store";
 import React, { createContext, useContext, useState } from "react";
@@ -19,12 +20,12 @@ class WorkflowValidationError extends Error {
 }
 
 interface SaveWorkflowContextType {
-	saveWorkflow: () => Promise<void>;
+	saveWorkflow: () => Promise<boolean>;
 	isPending: boolean;
 }
 
 const SaveWorkflowContext = createContext<SaveWorkflowContextType>({
-	saveWorkflow: async () => {},
+	saveWorkflow: async () => false,
 	isPending: false,
 });
 
@@ -41,7 +42,7 @@ export function SaveWorkflowProvider({
 
 	const handleSaveWorkflow = async () => {
 		if (isPending) {
-			return;
+			return false;
 		}
 		setIsPending(true);
 
@@ -59,7 +60,6 @@ export function SaveWorkflowProvider({
 			}
 			if (!isValidWorkflowName(workflow.workflowName)) {
 				errorToast(WORKFLOW_NAME_VALIDATION_ERROR_MESSAGE);
-				return;
 			}
 
 			// Make sure that we only save args which are present in the current
@@ -101,6 +101,7 @@ export function SaveWorkflowProvider({
 			if (webhookId && webhookSecret) {
 				updateWebhookIdAndSecret(webhookId, webhookSecret);
 			}
+			return true;
 		} catch (error) {
 			if (
 				error instanceof AxiosError &&
@@ -114,6 +115,7 @@ export function SaveWorkflowProvider({
 			} else {
 				errorToast("Failed to save workflow. Please try again.");
 			}
+			return false;
 		} finally {
 			setIsPending(false);
 		}
