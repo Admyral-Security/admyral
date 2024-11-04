@@ -14,17 +14,30 @@ from admyral.secret.secret_registry import SecretRegistry
 router = APIRouter()
 
 
-@router.post("/set", status_code=status.HTTP_204_NO_CONTENT)
+@router.post("/set", status_code=status.HTTP_201_CREATED)
 async def set_secret(
     secret: Secret, authenticated_user: AuthenticatedUser = Depends(authenticate)
-) -> None:
+) -> SecretMetadata:
     secret.secret = dict(
         [
             (key, val.encode("utf-8").decode("unicode_escape"))
             for key, val in secret.secret.items()
         ]
     )
-    await get_secrets_manager().set(authenticated_user.user_id, secret)
+    return await get_secrets_manager().set(authenticated_user.user_id, secret)
+
+
+@router.post("/update", status_code=status.HTTP_201_CREATED)
+async def update_secret(
+    secret: Secret, authenticated_user: AuthenticatedUser = Depends(authenticate)
+) -> SecretMetadata:
+    secret.secret = dict(
+        [
+            (key, val.encode("utf-8").decode("unicode_escape"))
+            for key, val in secret.secret.items()
+        ]
+    )
+    return await get_secrets_manager().update(authenticated_user.user_id, secret)
 
 
 @router.get("/list", status_code=status.HTTP_200_OK)

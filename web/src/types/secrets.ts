@@ -21,5 +21,6 @@ export const Secret = z.object({
 			value: z.string(),
 		}),
 	),
+	secretType: z.string().nullable(),
 });
 export type TSecret = z.infer<typeof Secret>;

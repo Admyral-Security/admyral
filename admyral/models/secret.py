@@ -11,7 +11,7 @@ class EncryptedSecret(BaseModel):
 class Secret(BaseModel):
     secret_id: str
     secret: dict[str, str]
-    namespace: str | None = None
+    secret_type: str | None = None
 
 
 class SecretMetadata(BaseModel):

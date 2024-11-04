@@ -19,6 +19,10 @@ class SecretRegistry(metaclass=Singleton):
             for secret_type, secret in cls._secrets.items()
         }
 
+    @classmethod
+    def is_registered(cls, secret_type: str) -> bool:
+        return secret_type in cls._secrets
+
 
 # needs to be defined after SecretRegistry, such that SecretRegistry is fully defined
 # before any action is registered

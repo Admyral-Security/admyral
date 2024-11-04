@@ -7,10 +7,10 @@ type SecretsStore = {
 	clear: () => void;
 	setSecrets: (secrets: TSecretMetadata[]) => void;
 	getSecret: (idx: number) => TSecretMetadata;
-	getNumberOfSecrets: () => number;
-	addNewSecret: () => void;
+	addNewSecret: (newSecret: TSecretMetadata) => void;
 	updateSecret: (idx: number, update: TSecretMetadata) => void;
 	removeSecret: (idx: number) => void;
+	isDuplicateSecret: (secretId: string) => boolean;
 };
 
 export const useSecretsStore = create<SecretsStore>((set, get) => ({
@@ -24,14 +24,10 @@ export const useSecretsStore = create<SecretsStore>((set, get) => ({
 			secrets,
 		}),
 	getSecret: (idx: number) => get().secrets[idx],
-	getNumberOfSecrets: () => get().secrets.length,
-	addNewSecret: () =>
+	addNewSecret: (newSecret: TSecretMetadata) =>
 		set(
 			produce((draft) => {
-				draft.secrets.unshift({
-					secretId: "",
-					secret: [{ key: "", value: "" }],
-				});
+				draft.secrets.unshift(newSecret);
 			}),
 		),
 	updateSecret: (idx: number, update: TSecretMetadata) =>
@@ -46,4 +42,7 @@ export const useSecretsStore = create<SecretsStore>((set, get) => ({
 				draft.secrets.splice(idx, 1);
 			}),
 		),
+	isDuplicateSecret: (secretId: string) =>
+		get().secrets.findIndex((secret) => secret.secretId === secretId) !==
+		-1,
 }));

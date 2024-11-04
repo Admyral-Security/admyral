@@ -6,6 +6,8 @@ from admyral.db.store_interface import StoreInterface
 from admyral.utils.crypto import decrypt_secret, encrypt_secret
 from admyral.models import Secret, SecretMetadata
 from admyral.config.config import CONFIG, SecretsManagerType
+from admyral.utils.collections import is_empty
+from admyral.secret.secret_registry import SecretRegistry
 
 
 class SecretsManager:
@@ -21,7 +23,20 @@ class SecretsManager:
         raise NotImplementedError("get method not implemented")
 
     @abstractmethod
-    async def set(self, user_id: str, secret: Secret) -> None:
+    async def update(self, user_id: str, delta_secret: Secret) -> SecretMetadata:
+        """
+        Update a secret for a user. If the secret does not exist, raise a ValueError.
+
+        Fields with an empty value are ignored and not updated.
+
+        Args:
+            user_id: The user id of the user whose secret is updated.
+            delta_secret: The secret to update.
+        """
+        raise NotImplementedError("update method not implemented")
+
+    @abstractmethod
+    async def set(self, user_id: str, secret: Secret) -> SecretMetadata:
         """
         Set a secret for a user. If the secret already exists, it is overwritten.
         The function takes care of encrypting the secret.
@@ -69,12 +84,35 @@ class SQLSecretsManager(SecretsManager):
             else None
         )
 
-    async def set(self, user_id: str, secret: Secret) -> None:
+    async def update(self, user_id: str, delta_secret: Secret) -> SecretMetadata:
+        secret = await self.get(user_id, delta_secret.secret_id)
+        if not secret:
+            raise ValueError(f"Secret {delta_secret.secret_id} does not exist")
+
+        for key, value in delta_secret.secret.items():
+            if is_empty(value):
+                continue
+            secret.secret[key] = value
+
+        # remove the keys which are not present
+        # we only allow editing the schema if the secret type is not valid
+        if not SecretRegistry.is_registered(delta_secret.secret_type):
+            removal_keys = set(secret.secret.keys()) - set(delta_secret.secret.keys())
+            for key in removal_keys:
+                secret.secret.pop(key)
+
+        return await self.set(user_id, secret)
+
+    async def set(self, user_id: str, secret: Secret) -> SecretMetadata:
         serialized_secret = json.dumps(secret.secret)
         encrypted_secret = encrypt_secret(serialized_secret)
         secret_schema = list(secret.secret.keys())
         return await self.db.store_secret(
-            user_id, secret.secret_id, encrypted_secret, secret_schema, secret.namespace
+            user_id,
+            secret.secret_id,
+            encrypted_secret,
+            secret_schema,
+            secret.secret_type,
         )
 
     async def delete(self, user_id: str, secret_id: str) -> None:

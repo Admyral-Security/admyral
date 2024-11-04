@@ -2,29 +2,58 @@
 
 import { useGetSecretsSchemas } from "@/hooks/use-get-secret-schemas-api";
 import { useToast } from "@/providers/toast";
-import { PlusIcon } from "@radix-ui/react-icons";
+import { MinusIcon, PlusIcon } from "@radix-ui/react-icons";
 import {
 	Box,
 	Button,
 	Dialog,
 	DropdownMenu,
 	Flex,
+	IconButton,
 	Text,
+	TextField,
 } from "@radix-ui/themes";
 import { useEffect, useState } from "react";
 import NamespaceIcon from "../workflow-editor/namespace-icon";
 import Image from "next/image";
+import { useSetSecretApi } from "@/hooks/use-set-secret-api";
+import { useSecretsStore } from "@/stores/secrets-store";
+import { useImmer } from "use-immer";
+import SecretTextField from "../utils/secret-text-field";
+import { snakeCaseToCapitalizedCase } from "@/lib/utils";
+
+function hasDuplicateSecretKeyFields(
+	secret: { key: string; value: string }[],
+): boolean {
+	return new Set(secret.map((kv) => kv.key)).size < secret.length;
+}
+
+function hasEmptyKeyOrValue(secret: { key: string; value: string }[]): boolean {
+	return (
+		secret.filter((kv) => kv.key.length === 0 || kv.value.length === 0)
+			.length > 0
+	);
+}
 
 export default function AddSecret() {
 	const { data: secretsSchemas, error } = useGetSecretsSchemas();
 	const { errorToast } = useToast();
-	const [dialogState, setDialogState] = useState<{
+	const [dialogState, setDialogState] = useImmer<{
 		open: boolean;
+		secretId: string;
 		secretType: string | null;
+		secret: { key: string; value: string }[];
+		error: string | null;
 	}>({
 		open: false,
+		secretId: "",
 		secretType: null,
+		secret: [],
+		error: null,
 	});
+	const setSecret = useSetSecretApi();
+	const { isDuplicateSecret, addNewSecret } = useSecretsStore();
+	const [isSaving, setIsSaving] = useState<boolean>(false);
 
 	useEffect(() => {
 		if (error) {
@@ -34,11 +63,49 @@ export default function AddSecret() {
 		}
 	}, [error]);
 
+	const handleSaveSecret = async () => {
+		try {
+			setIsSaving(true);
+			setDialogState((draft) => {
+				draft.error = null;
+			});
+
+			if (hasDuplicateSecretKeyFields(dialogState.secret)) {
+				setDialogState((draft) => {
+					draft.error = "Key fields must be unique.";
+				});
+				return;
+			}
+			if (hasEmptyKeyOrValue(dialogState.secret)) {
+				setDialogState((draft) => {
+					draft.error = "Key and value fields must not be empty.";
+				});
+				return;
+			}
+
+			const newSecret = await setSecret.mutateAsync({
+				secretId: dialogState.secretId,
+				secretType: dialogState.secretType,
+				secret: dialogState.secret,
+			});
+			addNewSecret(newSecret);
+
+			setDialogState({
+				...dialogState,
+				open: false,
+			});
+		} catch (error) {
+			errorToast("Failed to save secret. Please try again.");
+		} finally {
+			setIsSaving(false);
+		}
+	};
+
 	return (
 		<>
 			<DropdownMenu.Root>
 				<DropdownMenu.Trigger>
-					<Button>
+					<Button style={{ cursor: "pointer" }}>
 						Add Secret
 						<DropdownMenu.TriggerIcon />
 					</Button>
@@ -48,9 +115,23 @@ export default function AddSecret() {
 					{secretsSchemas &&
 						Object.keys(secretsSchemas).map((secretType) => (
 							<DropdownMenu.Item
-								onClick={() =>
-									setDialogState({ open: true, secretType })
-								}
+								style={{ cursor: "pointer" }}
+								onClick={() => {
+									if (secretsSchemas) {
+										setDialogState({
+											open: true,
+											secretId: "",
+											secretType,
+											secret: secretsSchemas![
+												secretType
+											].map((field) => ({
+												key: field,
+												value: "",
+											})),
+											error: null,
+										});
+									}
+								}}
 							>
 								<NamespaceIcon namespace={secretType} />{" "}
 								{secretType}
@@ -59,8 +140,15 @@ export default function AddSecret() {
 					<DropdownMenu.Separator />
 
 					<DropdownMenu.Item
+						style={{ cursor: "pointer" }}
 						onClick={() =>
-							setDialogState({ open: true, secretType: null })
+							setDialogState({
+								open: true,
+								secretId: "",
+								secretType: null,
+								secret: [{ key: "", value: "" }],
+								error: null,
+							})
 						}
 					>
 						<PlusIcon /> Custom Secret
@@ -70,9 +158,15 @@ export default function AddSecret() {
 
 			<Dialog.Root
 				open={dialogState.open}
-				onOpenChange={(_) =>
-					setDialogState({ ...dialogState, open: false })
-				}
+				onOpenChange={(_) => {
+					if (isSaving) {
+						// we don't allow to close while the secret is saving
+						return;
+					}
+					setDialogState((draft) => {
+						draft.open = false;
+					});
+				}}
 			>
 				<Dialog.Content maxWidth="540px">
 					<Dialog.Title>
@@ -115,6 +209,133 @@ export default function AddSecret() {
 						.
 					</Dialog.Description>
 
+					<Flex direction="column" mt="4" gap="4">
+						<label>
+							<Text as="div" size="2" mb="1" weight="bold">
+								Secret Name
+							</Text>
+							<TextField.Root
+								value={dialogState.secretId}
+								onChange={(event) =>
+									setDialogState((draft) => {
+										draft.secretId = event.target.value;
+									})
+								}
+								placeholder="Your Unique Secret Name"
+							/>
+							{isDuplicateSecret(dialogState.secretId) && (
+								<Text color="red" size="1">
+									Secret name must be unique!
+								</Text>
+							)}
+						</label>
+
+						{dialogState.secretType !== null ? (
+							dialogState.secret.map((keyValue, idx) => (
+								<label>
+									<Text
+										as="div"
+										size="2"
+										mb="1"
+										weight="bold"
+									>
+										{snakeCaseToCapitalizedCase(
+											keyValue.key,
+										)}
+									</Text>
+									<SecretTextField
+										value={keyValue.value}
+										onChange={(event) =>
+											setDialogState((draft) => {
+												draft.secret[idx].value =
+													event.target.value;
+											})
+										}
+										placeholder="Your Value"
+									/>
+								</label>
+							))
+						) : (
+							<Flex direction="column" gap="4">
+								{dialogState.secret.map((keyValue, idx) => (
+									<Flex direction="column">
+										<Flex justify="between" mb="1">
+											<Text
+												as="div"
+												size="2"
+												mb="1"
+												weight="bold"
+											>
+												Enter Key and Value
+											</Text>
+											<IconButton
+												variant="soft"
+												color="red"
+												size="1"
+												style={{
+													cursor: "pointer",
+												}}
+												onClick={() =>
+													setDialogState((draft) => {
+														draft.secret.splice(
+															idx,
+															1,
+														);
+													})
+												}
+											>
+												<MinusIcon />
+											</IconButton>
+										</Flex>
+										<TextField.Root
+											mb="2"
+											value={keyValue.key}
+											onChange={(event) =>
+												setDialogState((draft) => {
+													draft.secret[idx].key =
+														event.target.value;
+												})
+											}
+											placeholder="Key"
+										/>
+										<SecretTextField
+											value={keyValue.value}
+											onChange={(event) =>
+												setDialogState((draft) => {
+													draft.secret[idx].value =
+														event.target.value;
+												})
+											}
+											placeholder="Value"
+										/>
+									</Flex>
+								))}
+
+								<Button
+									variant="soft"
+									onClick={() =>
+										setDialogState((draft) => {
+											draft.secret.push({
+												key: "",
+												value: "",
+											});
+										})
+									}
+									style={{ cursor: "pointer" }}
+								>
+									<PlusIcon />
+									Add new field
+								</Button>
+							</Flex>
+						)}
+					</Flex>
+
+					{dialogState.error && (
+						<Flex>
+							<Text color="red">{dialogState.error}</Text>
+						</Flex>
+					)}
+
 					<Flex gap="3" mt="4" justify="end">
 						<Dialog.Close>
 							<Button
@@ -126,8 +347,17 @@ export default function AddSecret() {
 							</Button>
 						</Dialog.Close>
 
-						{/* TODO: */}
-						<Button style={{ cursor: "pointer" }}>Save</Button>
+						<Button
+							disabled={
+								dialogState.secretId.length == 0 ||
+								isDuplicateSecret(dialogState.secretId)
+							}
+							style={{ cursor: "pointer" }}
+							loading={isSaving}
+							onClick={handleSaveSecret}
+						>
+							Save
+						</Button>
 					</Flex>
 				</Dialog.Content>
 			</Dialog.Root>

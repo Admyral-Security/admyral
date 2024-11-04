@@ -933,12 +933,12 @@ class AdmyralStore(StoreInterface):
         encrypted_secret: Optional[str],
         schema: list[str],
         secret_type: Optional[str] = None,
-    ) -> None:
+    ) -> SecretMetadata:
         async with self._get_async_session() as db:
             secret = await self._get_secret(db, user_id, secret_id)
 
             if secret:
-                await db.exec(
+                secret_result = await db.exec(
                     update(SecretsSchema)
                     .where(SecretsSchema.user_id == user_id)
                     .where(SecretsSchema.secret_id == secret_id)
@@ -947,19 +947,36 @@ class AdmyralStore(StoreInterface):
                         schema_json_serialized=json.dumps(schema),
                         updated_at=utc_now(),
                     )
+                    .returning(SecretsSchema.created_at, SecretsSchema.updated_at)
                 )
+                secret_created_at_updated_at = secret_result.one()
             else:
-                await db.exec(
-                    insert(SecretsSchema).values(
+                secret_result = await db.exec(
+                    insert(SecretsSchema)
+                    .values(
                         user_id=user_id,
                         secret_id=secret_id,
                         encrypted_secret=encrypted_secret,
                         schema_json_serialized=json.dumps(schema),
                         secret_type=secret_type,
                     )
+                    .returning(SecretsSchema.created_at, SecretsSchema.updated_at)
                 )
+                secret_created_at_updated_at = secret_result.one()
 
             await db.commit()
+
+            result = await db.exec(select(UserSchema).where(UserSchema.id == user_id))
+            user = result.one()
+
+            return SecretMetadata(
+                secret_id=secret_id,
+                secret_schema=schema,
+                email=user.email,
+                created_at=secret_created_at_updated_at[0],
+                updated_at=secret_created_at_updated_at[1],
+                secret_type=secret_type,
+            )
 
     async def delete_secret(self, user_id: str, secret_id: str) -> None:
         async with self._get_async_session() as db:
