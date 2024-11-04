@@ -91,7 +91,7 @@ type WorkflowStoreState = TReactFlowGraph & {
 	deleteControlByIdx: (controlIdx: number) => void;
 	duplicateNodeByIdx: (nodeIdx: number) => void;
 	hasDeletedSecret: (nodeId: string, secretPlaceholer?: string) => boolean;
-	addDeletedSecrets: (missingSecrets: Map<string, Set<string>>) => void;
+	setDeletedSecrets: (deletedSecrets: Map<string, Set<string>>) => void;
 	removeDeletedSecretByPlaceholder: (
 		nodeId: string,
 		secretPlaceholer: string,
@@ -385,15 +385,15 @@ export const useWorkflowStore = create<WorkflowStoreState>((set, get) => ({
 		);
 	},
 	hasDeletedSecret: (nodeId: string, secretPlaceholder?: string) => {
-		const missingSecrets = get().deletedSecretsForNodes;
+		const deletedSecrets = get().deletedSecretsForNodes;
 		return !!(secretPlaceholder === undefined
-			? missingSecrets?.has(nodeId)
-			: missingSecrets?.get(nodeId)?.has(secretPlaceholder));
+			? deletedSecrets?.has(nodeId)
+			: deletedSecrets?.get(nodeId)?.has(secretPlaceholder));
 	},
-	addDeletedSecrets: (missingSecrets: Map<string, Set<string>>) =>
+	setDeletedSecrets: (deletedSecrets: Map<string, Set<string>>) =>
 		set(
 			produce((draft) => {
-				draft.deletedSecretsForNodes = missingSecrets;
+				draft.deletedSecretsForNodes = deletedSecrets;
 			}),
 		),
 	removeDeletedSecretByPlaceholder: (
@@ -402,10 +402,10 @@ export const useWorkflowStore = create<WorkflowStoreState>((set, get) => ({
 	) =>
 		set(
 			produce((draft) => {
-				const secretPlaceholdersWithMissingSecrets =
+				const secretPlaceholdersWithDeletedSecrets =
 					draft.deletedSecretsForNodes?.get(nodeId);
-				secretPlaceholdersWithMissingSecrets?.delete(secretPlaceholder);
-				if (secretPlaceholdersWithMissingSecrets?.size === 0) {
+				secretPlaceholdersWithDeletedSecrets?.delete(secretPlaceholder);
+				if (secretPlaceholdersWithDeletedSecrets?.size === 0) {
 					draft.deletedSecretsForNodes?.delete(nodeId);
 				}
 			}),
