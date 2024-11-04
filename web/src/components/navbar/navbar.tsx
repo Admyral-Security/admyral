@@ -34,18 +34,12 @@ export default function Nav() {
 					align="center"
 					justify="center"
 				>
-					<HoverCard.Root>
-						<HoverCard.Trigger>
-							<Box className="cursor-pointer">
-								<DashboardIcon />
-							</Box>
-						</HoverCard.Trigger>
-						<HoverCard.Content style={{ padding: 0 }}>
-							<Badge size="3" color="orange">
-								Dashboard: Coming soon!
-							</Badge>
-						</HoverCard.Content>
-					</HoverCard.Root>
+					<NavLink
+						pageName="Dashboard"
+						linkHref="/dashboard"
+						icon={<DashboardIcon />}
+						selectionCriteria={["/dashboard"]}
+					/>
 
 					<NavLink
 						pageName="Workflow Overview"

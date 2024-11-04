@@ -1,0 +1,30 @@
+#!/bin/bash
+
+admyral action push transform_google_drive_public_link_sharing_docs -a examples/access_review/workflows/google_drive_public_link_sharing_docs.py
+admyral workflow push google_drive_public_link_sharing_docs -f examples/access_review/workflows/google_drive_public_link_sharing_docs.py --activate
+
+admyral workflow push kandji_alert_for_unencrypted_devices -f examples/access_review/workflows/kandji_unencrypted_devices.py --activate
+admyral workflow push kandji_unencrypted_device_alert -f examples/access_review/workflows/kandji_unencrypted_devices.py --activate
+
+admyral workflow push monitor_merged_github_prs_without_approval -f examples/access_review/workflows/monitor_merged_github_prs_without_approval.py --activate
+
+admyral workflow push ms_intune_alert_for_unencrypted_devices -f examples/access_review/workflows/ms_intune_alert_for_unencrypted_devices.py --activate
+
+admyral action push get_time_range_of_last_full_hour -a examples/access_review/workflows/okta_password_policy_monitoring.py
+admyral action push get_okta_password_policy_update_logs -a examples/access_review/workflows/okta_password_policy_monitoring.py
+admyral action push format_okta_policy_update_message -a examples/access_review/workflows/okta_password_policy_monitoring.py
+admyral workflow push okta_password_policy_monitoring -f examples/access_review/workflows/okta_password_policy_monitoring.py --activate
+
+admyral workflow push google_docs_policy_revision_monitoring -f examples/access_review/workflows/google_docs_policy_revision_monitoring.py --activate
+admyral workflow push google_docs_policy_revision_monitoring_body -f examples/access_review/workflows/google_docs_policy_revision_monitoring.py --activate
+
+admyral workflow push alert_vulnerability_sla_breach_in_slack -f examples/vulnerability_monitoring/workflows/vulnerability_sla_breach.py --activate
+admyral workflow push vulnerability_sla_breach -f examples/vulnerability_monitoring/workflows/vulnerability_sla_breach.py --activate
+
+admyral action push get_time_range_of_last_full_hour -a examples/access_review/workflows/one_password_user_added_to_vault.py
+admyral action push filter_by_vault_and_build_slack_message -a examples/access_review/workflows/one_password_user_added_to_vault.py
+admyral workflow push one_password_user_added_to_vault -f examples/access_review/workflows/one_password_user_added_to_vault.py --activate
+
+admyral action push get_time_range_of_last_full_hour -a examples/access_review/workflows/github_audit_logs_owner_changes.py
+admyral action push build_info_message_owner_changes -a examples/access_review/workflows/github_audit_logs_owner_changes.py
+admyral workflow push github_audit_logs_owner_changes -f examples/access_review/workflows/github_audit_logs_owner_changes.py --activate
