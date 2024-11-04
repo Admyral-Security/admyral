@@ -1,9 +1,11 @@
 "use client";
 
 import { useGetWorkflowApi } from "@/hooks/use-get-workflow-api";
+import { useListSecretsApi } from "@/hooks/use-list-credentials-api";
 import { useListEditorActionsApi } from "@/hooks/use-list-editor-actions-api";
 import { useEditorActionStore } from "@/stores/editor-action-store";
 import { useWorkflowStore } from "@/stores/workflow-store";
+import { useSecretsStore } from "@/stores/secrets-store";
 import { Box, Flex, Grid, Tabs, Text } from "@radix-ui/themes";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -36,9 +38,11 @@ export default function WorkflowEditor({
 
 	const [view, setView] = useState<View>("workflowBuilder");
 
-	const { isNew, setWorkflow, clearWorkflowStore } = useWorkflowStore();
+	const { isNew, setWorkflow, clearWorkflowStore, setDeletedSecrets } =
+		useWorkflowStore();
 	const { setEditorActions } = useEditorActionStore();
 	const { errorToast } = useToast();
+	const { setSecrets, clearSecretsStore } = useSecretsStore();
 
 	// Loading Actions
 	const {
@@ -55,6 +59,15 @@ export default function WorkflowEditor({
 			errorToast("Failed to load actions. Please refresh the page.");
 		}
 	}, [editorActions, setEditorActions, editActionsError]);
+
+	const { data: encryptedSecrets } = useListSecretsApi();
+
+	useEffect(() => {
+		if (encryptedSecrets) {
+			setSecrets(encryptedSecrets);
+			return () => clearSecretsStore();
+		}
+	}, [encryptedSecrets, setSecrets, clearSecretsStore]);
 
 	// Load Workflow
 	// Note: we only load from the DB if the workflow is not newly created
@@ -97,6 +110,41 @@ export default function WorkflowEditor({
 		clearWorkflowStore,
 		router,
 	]);
+
+	useEffect(() => {
+		if (!workflow || !encryptedSecrets) {
+			return;
+		}
+		const secretIds = new Set(encryptedSecrets.map((s) => s.secretId));
+		const deletedSecrets = new Map(
+			workflow.nodes
+				.filter((node) => node.type === "action")
+				.map((node) => {
+					const secretsMapping = node.secretsMapping;
+					const deletedSecrets = new Set(
+						Object.keys(secretsMapping).filter(
+							(secretPlaceholder) =>
+								!secretIds.has(
+									secretsMapping[secretPlaceholder],
+								),
+						),
+					);
+					return [node.id, deletedSecrets] as [string, Set<string>];
+				})
+				.filter(
+					(nodeIdAndDeletedSecrets) =>
+						nodeIdAndDeletedSecrets[1].size > 0,
+				),
+		);
+		if (deletedSecrets) {
+			setDeletedSecrets(deletedSecrets);
+		}
+		if (deletedSecrets && deletedSecrets.size > 0) {
+			errorToast(
+				"Some secrets are missing. Please add them before running the workflow.",
+			);
+		}
+	}, [encryptedSecrets, workflow, setDeletedSecrets]);
 
 	// TODO(frontend): nicer loading screen
 	if (isLoadingEditorActions || (!isNew && isLoadingWorkflow)) {

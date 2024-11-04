@@ -4,7 +4,7 @@ import { produce } from "immer";
 
 type SecretsStore = {
 	secrets: TSecretMetadata[];
-	clear: () => void;
+	clearSecretsStore: () => void;
 	setSecrets: (secrets: TSecretMetadata[]) => void;
 	getSecret: (idx: number) => TSecretMetadata;
 	addNewSecret: (newSecret: TSecretMetadata) => void;
@@ -15,7 +15,7 @@ type SecretsStore = {
 
 export const useSecretsStore = create<SecretsStore>((set, get) => ({
 	secrets: [],
-	clear: () =>
+	clearSecretsStore: () =>
 		set({
 			secrets: [],
 		}),

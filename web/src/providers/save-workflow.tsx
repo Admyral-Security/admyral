@@ -20,12 +20,12 @@ class WorkflowValidationError extends Error {
 }
 
 interface SaveWorkflowContextType {
-	saveWorkflow: () => Promise<void>;
+	saveWorkflow: () => Promise<boolean>;
 	isPending: boolean;
 }
 
 const SaveWorkflowContext = createContext<SaveWorkflowContextType>({
-	saveWorkflow: async () => {},
+	saveWorkflow: async () => false,
 	isPending: false,
 });
 
@@ -41,9 +41,6 @@ export function SaveWorkflowProvider({
 	const [isPending, setIsPending] = useState(false);
 
 	const handleSaveWorkflow = async () => {
-		if (isPending) {
-			return;
-		}
 		setIsPending(true);
 
 		try {
@@ -59,8 +56,9 @@ export function SaveWorkflowProvider({
 				);
 			}
 			if (!isValidWorkflowName(workflow.workflowName)) {
-				errorToast(WORKFLOW_NAME_VALIDATION_ERROR_MESSAGE);
-				return;
+				throw new WorkflowValidationError(
+					WORKFLOW_NAME_VALIDATION_ERROR_MESSAGE,
+				);
 			}
 
 			// Make sure that we only save args which are present in the current
@@ -102,6 +100,7 @@ export function SaveWorkflowProvider({
 			if (webhookId && webhookSecret) {
 				updateWebhookIdAndSecret(webhookId, webhookSecret);
 			}
+			return true;
 		} catch (error) {
 			if (
 				error instanceof AxiosError &&
@@ -115,6 +114,7 @@ export function SaveWorkflowProvider({
 			} else {
 				errorToast("Failed to save workflow. Please try again.");
 			}
+			return false;
 		} finally {
 			setIsPending(false);
 		}

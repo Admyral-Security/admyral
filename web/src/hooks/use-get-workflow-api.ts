@@ -7,6 +7,8 @@ import { withSnakeCaseTransform } from "@/types/utils";
 import { EditorWorkflowGraph } from "@/types/react-flow";
 import { HTTPMethod } from "@/types/api";
 
+const DISABLE_CACHE = 0;
+
 // GET /editor/workflow
 const GetWorkflowRequest = withSnakeCaseTransform(
 	z.object({
@@ -29,5 +31,6 @@ export const useGetWorkflowApi = (workflowId: string, doApiCall: boolean) => {
 		queryKey: ["workflow", workflowId],
 		queryFn: () => getWorkflow({ workflowId }),
 		enabled: doApiCall,
+		gcTime: DISABLE_CACHE,
 	});
 };

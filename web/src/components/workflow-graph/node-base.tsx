@@ -3,7 +3,7 @@ import { NodeToolbar, Position } from "reactflow";
 import * as Toolbar from "@radix-ui/react-toolbar";
 import DuplicateIcon from "../icons/duplicate-icon";
 import { useWorkflowStore } from "@/stores/workflow-store";
-import { TrashIcon } from "@radix-ui/react-icons";
+import { TrashIcon, ExclamationTriangleIcon } from "@radix-ui/react-icons";
 
 export interface NodeBaseProps {
 	nodeId: string;
@@ -20,7 +20,8 @@ export default function NodeBase({
 	name,
 	selected,
 }: NodeBaseProps) {
-	const { nodes, duplicateNodeByIdx, deleteNodeByIdx } = useWorkflowStore();
+	const { nodes, duplicateNodeByIdx, deleteNodeByIdx, hasDeletedSecret } =
+		useWorkflowStore();
 
 	const nodeIdx = nodes.findIndex((node) => node.id === nodeId);
 	if (nodeIdx === -1) {
@@ -61,6 +62,41 @@ export default function NodeBase({
 					</Flex>
 				</Flex>
 			</Card>
+
+			<NodeToolbar
+				isVisible={hasDeletedSecret(nodeId)}
+				position={Position.Top}
+				offset={8}
+				align="end"
+			>
+				<Tooltip content="Missing Secret">
+					<Flex
+						style={{
+							transform: "translate(10px, 24px)",
+						}}
+					>
+						<Flex
+							inset="0"
+							position="absolute"
+							className="bg-[var(--red-9)] rounded-full"
+						/>
+						<Flex
+							position="relative"
+							className="rounded-full"
+							width="24px"
+							height="24px"
+							justify="center"
+							align="center"
+						>
+							<ExclamationTriangleIcon
+								color="white"
+								width="14px"
+								height="14px"
+							/>
+						</Flex>
+					</Flex>
+				</Tooltip>
+			</NodeToolbar>
 
 			<NodeToolbar
 				isVisible={selected && nodeId !== "start"}

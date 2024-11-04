@@ -13,14 +13,14 @@ export default function Secrets() {
 		isPending: isListingSecretsLoading,
 		error: listingSecretsError,
 	} = useListSecretsApi();
-	const { secrets, setSecrets, clear } = useSecretsStore();
+	const { secrets, setSecrets, clearSecretsStore } = useSecretsStore();
 
 	useEffect(() => {
 		if (encryptedSecrets) {
 			setSecrets(encryptedSecrets);
-			return () => clear();
+			return () => clearSecretsStore();
 		}
-	}, [encryptedSecrets, setSecrets, clear]);
+	}, [encryptedSecrets, setSecrets, clearSecretsStore]);
 
 	if (isListingSecretsLoading) {
 		return null;
