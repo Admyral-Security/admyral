@@ -59,7 +59,9 @@ export function SaveWorkflowProvider({
 				);
 			}
 			if (!isValidWorkflowName(workflow.workflowName)) {
-				errorToast(WORKFLOW_NAME_VALIDATION_ERROR_MESSAGE);
+				throw new WorkflowValidationError(
+					WORKFLOW_NAME_VALIDATION_ERROR_MESSAGE,
+				);
 			}
 
 			// Make sure that we only save args which are present in the current
