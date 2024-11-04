@@ -36,7 +36,7 @@ export default function ActionEditPanel() {
 			const actionDefinition = actionsIndex[action.data.actionType];
 			updateArgs(buildInitialArgs(actionData, actionDefinition));
 		}
-	}, [selectedNodeIdx, nodes, actionsIndex]);
+	}, [selectedNodeIdx, nodes, actionsIndex, updateArgs]);
 
 	if (selectedNodeIdx === null) {
 		return null;

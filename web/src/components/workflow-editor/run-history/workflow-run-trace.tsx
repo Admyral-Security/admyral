@@ -33,7 +33,7 @@ export default function WorkflowRunTrace({
 		if (error) {
 			errorToast("Failed to load workflow runs. Please reload the page.");
 		}
-	}, [data, error]);
+	}, [data, error, errorToast]);
 
 	useEffect(() => setSelectedStepIdx(0), [workflowRunId, setSelectedStepIdx]);
 

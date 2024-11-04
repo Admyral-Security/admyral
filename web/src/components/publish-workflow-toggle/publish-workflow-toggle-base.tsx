@@ -27,7 +27,7 @@ export default function PublishWorkflowToggleBase({
 					: "Workflow is deactivated.",
 			);
 		}
-	}, [publishWorkflow, isLive, updateIsLiveState]);
+	}, [publishWorkflow, isLive, updateIsLiveState, infoToast]);
 
 	return (
 		<Flex justify="start" gap="3" align="center">

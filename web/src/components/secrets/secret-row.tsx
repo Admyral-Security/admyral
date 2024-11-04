@@ -33,10 +33,8 @@ function hasNonEmptyValueFieldsForNewFields(
 	secret: { key: string; value: string }[],
 	isNew: boolean[],
 ): boolean {
-	return (
-		isNew.filter(
-			(isFieldNew, idx) => isFieldNew && secret[idx].value.length === 0,
-		).length > 0
+	return isNew.some(
+		(isFieldNew, idx) => isFieldNew && secret[idx].value.length === 0,
 	);
 }
 
@@ -231,7 +229,9 @@ export default function SecretRow({ secret, idx }: SecretRowProps) {
 
 						{secret.secretType !== null ? (
 							dialogState.secret.map((keyValue, idx) => (
-								<label>
+								<label
+									key={`secret_row_edit_${secret.secretType}_${idx}`}
+								>
 									<Text
 										as="div"
 										size="2"
@@ -257,7 +257,10 @@ export default function SecretRow({ secret, idx }: SecretRowProps) {
 						) : (
 							<Flex direction="column" gap="4">
 								{dialogState.secret.map((keyValue, idx) => (
-									<Flex direction="column">
+									<Flex
+										key={`secret_row_edit_custom_${idx}`}
+										direction="column"
+									>
 										<Flex justify="between" mb="1">
 											<Text
 												as="div"

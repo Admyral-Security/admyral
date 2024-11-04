@@ -11,15 +11,13 @@ export default async function ApiKeysPage() {
 					API Keys
 				</Text>
 
-				{/* {!DISABLE_AUTH && <CreateApiKey />} */}
-				<CreateApiKey />
+				{!DISABLE_AUTH && <CreateApiKey />}
 			</Flex>
 
-			{/* {!DISABLE_AUTH && <ApiKeys />}
+			{!DISABLE_AUTH && <ApiKeys />}
 			{DISABLE_AUTH && (
 				<Text>API Keys are not available for local hosting.</Text>
-			)} */}
-			<ApiKeys />
+			)}
 		</Flex>
 	);
 }

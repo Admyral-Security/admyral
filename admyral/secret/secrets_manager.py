@@ -90,12 +90,15 @@ class SQLSecretsManager(SecretsManager):
             raise ValueError(f"Secret {delta_secret.secret_id} does not exist")
 
         for key, value in delta_secret.secret.items():
+            # ignore empty values - empty values in the delta mean that no
+            # update was provided for the key-value pair.
             if is_empty(value):
                 continue
             secret.secret[key] = value
 
         # remove the keys which are not present
-        # we only allow editing the schema if the secret type is not valid
+        # we only allow editing the schema if the secret type is not valid, i.e.,
+        # the secret is a custom secret.
         if not SecretRegistry.is_registered(delta_secret.secret_type):
             removal_keys = set(secret.secret.keys()) - set(delta_secret.secret.keys())
             for key in removal_keys:

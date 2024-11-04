@@ -11,6 +11,15 @@ from admyral.server.deps import get_secrets_manager
 from admyral.secret.secret_registry import SecretRegistry
 
 
+def handle_secret_values(secret_key_values: dict[str, str]) -> dict[str, str]:
+    return dict(
+        [
+            (key, val.encode("utf-8").decode("unicode_escape"))
+            for key, val in secret_key_values.items()
+        ]
+    )
+
+
 router = APIRouter()
 
 
@@ -18,12 +27,7 @@ router = APIRouter()
 async def set_secret(
     secret: Secret, authenticated_user: AuthenticatedUser = Depends(authenticate)
 ) -> SecretMetadata:
-    secret.secret = dict(
-        [
-            (key, val.encode("utf-8").decode("unicode_escape"))
-            for key, val in secret.secret.items()
-        ]
-    )
+    secret.secret = handle_secret_values(secret.secret)
     return await get_secrets_manager().set(authenticated_user.user_id, secret)
 
 
@@ -31,12 +35,7 @@ async def set_secret(
 async def update_secret(
     secret: Secret, authenticated_user: AuthenticatedUser = Depends(authenticate)
 ) -> SecretMetadata:
-    secret.secret = dict(
-        [
-            (key, val.encode("utf-8").decode("unicode_escape"))
-            for key, val in secret.secret.items()
-        ]
-    )
+    secret.secret = handle_secret_values(secret.secret)
     return await get_secrets_manager().update(authenticated_user.user_id, secret)
 
 

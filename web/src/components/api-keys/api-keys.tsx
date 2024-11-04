@@ -70,8 +70,8 @@ export default function ApiKeys() {
 			</Table.Header>
 
 			<Table.Body>
-				{apiKeys.map((apiKey) => (
-					<Table.Row>
+				{apiKeys.map((apiKey, idx) => (
+					<Table.Row key={`api_key_row_${apiKey.name}_${idx}`}>
 						<Table.RowHeaderCell>{apiKey.name}</Table.RowHeaderCell>
 						<Table.Cell>
 							{apiKey.createdAt.toLocaleString("en-US")}

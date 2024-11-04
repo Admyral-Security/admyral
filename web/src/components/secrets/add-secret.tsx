@@ -29,10 +29,7 @@ function hasDuplicateSecretKeyFields(
 }
 
 function hasEmptyKeyOrValue(secret: { key: string; value: string }[]): boolean {
-	return (
-		secret.filter((kv) => kv.key.length === 0 || kv.value.length === 0)
-			.length > 0
-	);
+	return secret.some((kv) => kv.key.length === 0 || kv.value.length === 0);
 }
 
 export default function AddSecret() {
@@ -61,7 +58,7 @@ export default function AddSecret() {
 				"Failed to load secret schemas. Please reload the page.",
 			);
 		}
-	}, [error]);
+	}, [error, errorToast]);
 
 	const handleSaveSecret = async () => {
 		try {
@@ -113,8 +110,9 @@ export default function AddSecret() {
 
 				<DropdownMenu.Content variant="soft">
 					{secretsSchemas &&
-						Object.keys(secretsSchemas).map((secretType) => (
+						Object.keys(secretsSchemas).map((secretType, idx) => (
 							<DropdownMenu.Item
+								key={`add_secret_${secretType}_${idx}`}
 								style={{ cursor: "pointer" }}
 								onClick={() => {
 									if (secretsSchemas) {
@@ -232,7 +230,9 @@ export default function AddSecret() {
 
 						{dialogState.secretType !== null ? (
 							dialogState.secret.map((keyValue, idx) => (
-								<label>
+								<label
+									key={`secret_field_${dialogState.secretType}_${idx}`}
+								>
 									<Text
 										as="div"
 										size="2"
@@ -258,7 +258,10 @@ export default function AddSecret() {
 						) : (
 							<Flex direction="column" gap="4">
 								{dialogState.secret.map((keyValue, idx) => (
-									<Flex direction="column">
+									<Flex
+										key={`secret_field_custom_secret_${idx}`}
+										direction="column"
+									>
 										<Flex justify="between" mb="1">
 											<Text
 												as="div"

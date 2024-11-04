@@ -27,7 +27,7 @@ export default function RunWorkflowDialog({
 		if (triggerWorkflow.isSuccess || triggerWorkflow.isError) {
 			triggerWorkflow.reset();
 		}
-	}, [triggerWorkflow, closeDialog]);
+	}, [triggerWorkflow, closeDialog, infoToast, errorToast]);
 
 	const handleRunWorkflow = () => {
 		if (!isActive) {

@@ -72,12 +72,12 @@ def azure_openai_chat_completion(
         model_params["top_p"] = top_p
     if temperature is not None:
         model_params["temperature"] = temperature
-    if stop_tokens is not None and not secret.model.startswith("o1"):
+    if stop_tokens is not None and not secret.deployment_name.startswith("o1"):
         model_params["stop"] = stop_tokens
 
     chat_completion = client.chat.completions.create(
         messages=[{"role": "user", "content": prompt}],
-        model=secret.model,
+        model=secret.deployment_name,
         **model_params,
     )
     return chat_completion.choices[0].message.content

@@ -6,5 +6,5 @@ export function snakeCaseToCapitalizedCase(snakeCase: string): string {
 }
 
 export function hasEmptyKey(secret: { key: string; value: string }[]): boolean {
-	return secret.filter((kv) => kv.key.length === 0).length > 0;
+	return secret.some((kv) => kv.key.length === 0);
 }

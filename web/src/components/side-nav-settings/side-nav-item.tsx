@@ -19,12 +19,11 @@ export default function SideNavItem({
 	basePath,
 }: SideNavItemProps) {
 	const pathname = usePathname();
-	const isSelected =
-		selectionCriteria.filter(
-			(criteria) =>
-				(criteria === basePath && pathname === criteria) ||
-				(criteria !== basePath && pathname.startsWith(criteria)),
-		).length > 0;
+	const isSelected = selectionCriteria.some(
+		(criteria) =>
+			(criteria === basePath && pathname === criteria) ||
+			(criteria !== basePath && pathname.startsWith(criteria)),
+	);
 
 	const activateBackground = isSelected ? "bg-gray-200" : "";
 	const defaultClassName = "rounded cursor-pointer hover:bg-gray-200";

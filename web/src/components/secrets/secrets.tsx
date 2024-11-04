@@ -45,7 +45,11 @@ export default function Secrets() {
 
 			<Table.Body>
 				{secrets.map((secret, idx) => (
-					<SecretRow secret={secret} idx={idx} />
+					<SecretRow
+						key={`secret_row_${secret.secretId}`}
+						secret={secret}
+						idx={idx}
+					/>
 				))}
 			</Table.Body>
 		</Table.Root>

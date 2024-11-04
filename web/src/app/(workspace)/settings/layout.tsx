@@ -2,7 +2,7 @@ import { SideNavSettings } from "@/components/side-nav-settings/side-nav-setting
 import { Box, Flex, Grid, Text } from "@radix-ui/themes";
 import { ReactNode } from "react";
 
-export default async function SettingsPageLayout({
+export default function SettingsPageLayout({
 	children,
 }: {
 	children: ReactNode;

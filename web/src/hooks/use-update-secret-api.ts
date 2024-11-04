@@ -31,13 +31,7 @@ export const useUpdateSecretApi = () => {
 		mutationFn: ({ secretId, secret, secretType }: TSecret) => {
 			return updateSecret({
 				secretId,
-				secret: secret.reduce(
-					(prev, secret) => {
-						prev[secret.key] = secret.value;
-						return prev;
-					},
-					{} as Record<string, string>,
-				),
+				secret: Object.fromEntries(secret.map((s) => [s.key, s.value])),
 				secretType,
 			});
 		},
