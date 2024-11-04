@@ -47,5 +47,6 @@ class SecretsSchema(BaseSchema, table=True):
                 "secret_id": self.secret_id,
                 "encrypted_secret": self.encrypted_secret,
                 "secret_schema": json.loads(self.schema_json_serialized),
+                "secret_type": self.secret_type,
             }
         )

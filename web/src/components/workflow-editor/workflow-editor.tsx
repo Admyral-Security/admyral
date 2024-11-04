@@ -54,7 +54,7 @@ export default function WorkflowEditor({
 		if (editActionsError) {
 			errorToast("Failed to load actions. Please refresh the page.");
 		}
-	}, [editorActions, setEditorActions, editActionsError, errorToast]);
+	}, [editorActions, setEditorActions, editActionsError]);
 
 	// Load Workflow
 	// Note: we only load from the DB if the workflow is not newly created
@@ -96,7 +96,6 @@ export default function WorkflowEditor({
 		workflowError,
 		clearWorkflowStore,
 		router,
-		errorToast,
 	]);
 
 	// TODO(frontend): nicer loading screen

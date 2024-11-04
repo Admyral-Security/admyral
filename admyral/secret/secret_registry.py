@@ -23,6 +23,13 @@ class SecretRegistry(metaclass=Singleton):
     def is_registered(cls, secret_type: str) -> bool:
         return secret_type in cls._secrets
 
+    @classmethod
+    def validate_schema(cls, secret_type: str, secret: dict[str, str]) -> None:
+        if not cls.is_registered(secret_type):
+            raise ValueError(f"Secret type '{secret_type}' is not registered")
+        secret_model = cls._secrets[secret_type]
+        secret_model.model_validate(secret)
+
 
 # needs to be defined after SecretRegistry, such that SecretRegistry is fully defined
 # before any action is registered

@@ -25,6 +25,7 @@ export default function SecretsPage() {
 				<Link
 					href="https://docs.admyral.dev/integrations/integrations"
 					target="_blank"
+					rel="noopener noreferrer"
 				>
 					<Button variant="ghost" style={{ cursor: "pointer" }}>
 						<ReaderIcon />

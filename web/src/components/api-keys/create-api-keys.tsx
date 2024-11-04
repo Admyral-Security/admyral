@@ -42,7 +42,7 @@ export default function CreateApiKey() {
 			errorToast(`Failed to create API key. Please try again.`);
 			createApiKey.reset();
 		}
-	}, [createApiKey, setSecretKey, setState, addApiKey, errorToast]);
+	}, [createApiKey, setSecretKey, setState, addApiKey]);
 
 	return (
 		<Dialog.Root

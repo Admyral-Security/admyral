@@ -31,7 +31,7 @@ async def set_secret(
     return await get_secrets_manager().set(authenticated_user.user_id, secret)
 
 
-@router.post("/update", status_code=status.HTTP_201_CREATED)
+@router.post("/update", status_code=status.HTTP_200_OK)
 async def update_secret(
     secret: Secret, authenticated_user: AuthenticatedUser = Depends(authenticate)
 ) -> SecretMetadata:

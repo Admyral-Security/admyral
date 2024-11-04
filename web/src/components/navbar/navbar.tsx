@@ -61,6 +61,7 @@ export default function Nav() {
 							<Link
 								href="https://discord.com/invite/GqbJZT9Hbf"
 								target="_blank"
+								rel="noopener noreferrer"
 							>
 								<Image
 									src="/discord_logo.svg"
@@ -82,6 +83,7 @@ export default function Nav() {
 							<Link
 								href="https://github.com/admyral-security/admyral"
 								target="_blank"
+								rel="noopener noreferrer"
 							>
 								<Image
 									src="/github_logo.svg"

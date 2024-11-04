@@ -58,7 +58,7 @@ export default function AddSecret() {
 				"Failed to load secret schemas. Please reload the page.",
 			);
 		}
-	}, [error, errorToast]);
+	}, [error]);
 
 	const handleSaveSecret = async () => {
 		try {
@@ -80,8 +80,16 @@ export default function AddSecret() {
 				return;
 			}
 
+			const trimmedSecretId = dialogState.secretId.trim();
+			if (trimmedSecretId.length === 0) {
+				setDialogState((draft) => {
+					draft.error = "Secret Name must not be empty.";
+				});
+				return;
+			}
+
 			const newSecret = await setSecret.mutateAsync({
-				secretId: dialogState.secretId,
+				secretId: dialogState.secretId.trim(),
 				secretType: dialogState.secretType,
 				secret: dialogState.secret,
 			});
@@ -92,7 +100,9 @@ export default function AddSecret() {
 				open: false,
 			});
 		} catch (error) {
-			errorToast("Failed to save secret. Please try again.");
+			setDialogState((draft) => {
+				draft.error = "Failed to save secret. Please try again.";
+			});
 		} finally {
 			setIsSaving(false);
 		}
@@ -200,6 +210,7 @@ export default function AddSecret() {
 							<a
 								href="https://docs.admyral.dev/integrations/integrations"
 								target="_blank"
+								rel="noopener noreferrer"
 							>
 								View documentation
 							</a>
@@ -352,7 +363,7 @@ export default function AddSecret() {
 
 						<Button
 							disabled={
-								dialogState.secretId.length == 0 ||
+								dialogState.secretId.trim().length == 0 ||
 								isDuplicateSecret(dialogState.secretId)
 							}
 							style={{ cursor: "pointer" }}

@@ -29,7 +29,7 @@ import SecretTextField from "../utils/secret-text-field";
 import { useState } from "react";
 import { useUpdateSecretApi } from "@/hooks/use-update-secret-api";
 
-function hasNonEmptyValueFieldsForNewFields(
+function hasEmptyValueFieldsForNewFields(
 	secret: { key: string; value: string }[],
 	isNew: boolean[],
 ): boolean {
@@ -63,6 +63,12 @@ export default function SecretRow({ secret, idx }: SecretRowProps) {
 
 	const handleDeleteSecret = async () => {
 		try {
+			setDialogState((draft) => ({
+				open: false,
+				secret: secret.secretSchema.map((key) => ({ key, value: "" })),
+				isNew: Array(secret.secretSchema.length).fill(false),
+				error: null,
+			}));
 			await deleteSecret.mutateAsync({ secretId: secrets[idx].secretId });
 			removeSecret(idx);
 		} catch (error) {
@@ -85,7 +91,7 @@ export default function SecretRow({ secret, idx }: SecretRowProps) {
 			}
 
 			if (
-				hasNonEmptyValueFieldsForNewFields(
+				hasEmptyValueFieldsForNewFields(
 					dialogState.secret,
 					dialogState.isNew,
 				)
@@ -105,6 +111,11 @@ export default function SecretRow({ secret, idx }: SecretRowProps) {
 
 			setDialogState((draft) => {
 				draft.open = false;
+			});
+		} catch (error) {
+			setDialogState((draft) => {
+				draft.error =
+					"Failed to update secret. Please try again or contact support if the problem persists.";
 			});
 		} finally {
 			setIsUpdating(false);
@@ -161,7 +172,12 @@ export default function SecretRow({ secret, idx }: SecretRowProps) {
 							</DropdownMenu.Trigger>
 
 							<DropdownMenu.Content variant="soft">
-								<DropdownMenu.Item onClick={handleDeleteSecret}>
+								<DropdownMenu.Item
+									onClick={(e) => {
+										e.stopPropagation();
+										handleDeleteSecret();
+									}}
+								>
 									<TrashIcon />
 									Delete
 								</DropdownMenu.Item>
@@ -212,6 +228,7 @@ export default function SecretRow({ secret, idx }: SecretRowProps) {
 							<a
 								href="https://docs.admyral.dev/integrations/integrations"
 								target="_blank"
+								rel="noopener noreferrer"
 							>
 								View documentation
 							</a>

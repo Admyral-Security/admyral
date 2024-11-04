@@ -34,12 +34,24 @@ export default function Secrets() {
 		<Table.Root>
 			<Table.Header>
 				<Table.Row>
-					<Table.ColumnHeaderCell></Table.ColumnHeaderCell>
-					<Table.ColumnHeaderCell>Name</Table.ColumnHeaderCell>
-					<Table.ColumnHeaderCell>Updated</Table.ColumnHeaderCell>
-					<Table.ColumnHeaderCell>Created</Table.ColumnHeaderCell>
-					<Table.ColumnHeaderCell>Author</Table.ColumnHeaderCell>
-					<Table.ColumnHeaderCell></Table.ColumnHeaderCell>
+					<Table.ColumnHeaderCell
+						style={{ width: "24px" }}
+					></Table.ColumnHeaderCell>
+					<Table.ColumnHeaderCell style={{ width: "30%" }}>
+						Name
+					</Table.ColumnHeaderCell>
+					<Table.ColumnHeaderCell style={{ width: "15%" }}>
+						Updated
+					</Table.ColumnHeaderCell>
+					<Table.ColumnHeaderCell style={{ width: "15%" }}>
+						Created
+					</Table.ColumnHeaderCell>
+					<Table.ColumnHeaderCell style={{ width: "30%" }}>
+						Author
+					</Table.ColumnHeaderCell>
+					<Table.ColumnHeaderCell
+						style={{ width: "48px" }}
+					></Table.ColumnHeaderCell>
 				</Table.Row>
 			</Table.Header>
 

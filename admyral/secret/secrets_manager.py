@@ -1,5 +1,4 @@
 from abc import abstractmethod
-from typing import Optional
 import json
 
 from admyral.db.store_interface import StoreInterface
@@ -12,7 +11,7 @@ from admyral.secret.secret_registry import SecretRegistry
 
 class SecretsManager:
     @abstractmethod
-    async def get(self, user_id: str, secret_id: str) -> Optional[Secret]:
+    async def get(self, user_id: str, secret_id: str) -> Secret | None:
         """
         Retrieve a secret for a user. If the secret does not exist, return None.
 
@@ -73,7 +72,7 @@ class SQLSecretsManager(SecretsManager):
     def __init__(self, db: StoreInterface) -> None:
         self.db = db
 
-    async def get(self, user_id: str, secret_id: str) -> Secret:
+    async def get(self, user_id: str, secret_id: str) -> Secret | None:
         encrypted_secret = await self.db.get_secret(user_id, secret_id)
         return (
             Secret(
@@ -84,31 +83,53 @@ class SQLSecretsManager(SecretsManager):
             else None
         )
 
+    def _encrypt_secret(self, secret: dict[str, str]) -> str:
+        return encrypt_secret(json.dumps(secret))
+
     async def update(self, user_id: str, delta_secret: Secret) -> SecretMetadata:
-        secret = await self.get(user_id, delta_secret.secret_id)
-        if not secret:
-            raise ValueError(f"Secret {delta_secret.secret_id} does not exist")
+        if SecretRegistry.is_registered(delta_secret.secret_type):
+            SecretRegistry.validate_schema(
+                delta_secret.secret_type, delta_secret.secret
+            )
+
+        encrypted_secret = await self.db.get_secret(user_id, delta_secret.secret_id)
+        if not encrypt_secret:
+            raise ValueError(f"Secret {delta_secret.secret_id} does not exist.")
+
+        if encrypted_secret.secret_type != delta_secret.secret_type:
+            raise ValueError("Secret type cannot be changed.")
+
+        secret = json.loads(decrypt_secret(encrypted_secret.encrypted_secret))
 
         for key, value in delta_secret.secret.items():
             # ignore empty values - empty values in the delta mean that no
             # update was provided for the key-value pair.
             if is_empty(value):
                 continue
-            secret.secret[key] = value
+            secret[key] = value
 
         # remove the keys which are not present
         # we only allow editing the schema if the secret type is not valid, i.e.,
         # the secret is a custom secret.
         if not SecretRegistry.is_registered(delta_secret.secret_type):
-            removal_keys = set(secret.secret.keys()) - set(delta_secret.secret.keys())
+            removal_keys = set(secret.keys()) - set(delta_secret.secret.keys())
             for key in removal_keys:
-                secret.secret.pop(key)
+                secret.pop(key)
 
-        return await self.set(user_id, secret)
+        secret_schema = list(secret.keys())
+        updated_encrypted_secret = self._encrypt_secret(secret)
+
+        return await self.db.compare_and_swap_secret(
+            user_id,
+            delta_secret.secret_id,
+            encrypted_secret.encrypted_secret,
+            updated_encrypted_secret,
+            secret_schema,
+            delta_secret.secret_type,
+        )
 
     async def set(self, user_id: str, secret: Secret) -> SecretMetadata:
-        serialized_secret = json.dumps(secret.secret)
-        encrypted_secret = encrypt_secret(serialized_secret)
+        encrypted_secret = self._encrypt_secret(secret.secret)
         secret_schema = list(secret.secret.keys())
         return await self.db.store_secret(
             user_id,

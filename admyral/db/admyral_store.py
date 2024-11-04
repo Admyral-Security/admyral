@@ -150,6 +150,7 @@ class AdmyralStore(StoreInterface):
 
     async def delete_user(self, user_id: str) -> None:
         async with self._get_async_session() as db:
+            # Note: all associated data is deleted via cascade
             await db.exec(delete(UserSchema).where(UserSchema.id == user_id))
             await db.commit()
 
@@ -907,20 +908,22 @@ class AdmyralStore(StoreInterface):
                 ),
             )
 
-    async def _get_secret(
+    async def _get_secret_and_owner(
         self, db: AdmyralDatabaseSession, user_id: str, secret_id: str
-    ) -> SecretsSchema | None:
+    ) -> tuple | None:
         result = await db.exec(
-            select(SecretsSchema)
+            select(SecretsSchema, UserSchema)
+            .join(UserSchema)
             .where(SecretsSchema.user_id == user_id)
             .where(SecretsSchema.secret_id == secret_id)
+            .where(UserSchema.id == user_id)
         )
         return result.one_or_none()
 
     async def get_secret(self, user_id: str, secret_id: str) -> EncryptedSecret | None:
         async with self._get_async_session() as db:
-            secret = await self._get_secret(db, user_id, secret_id)
-            return secret.to_model() if secret else None
+            secret_and_user = await self._get_secret_and_owner(db, user_id, secret_id)
+            return secret_and_user[0].to_model() if secret_and_user else None
 
     async def store_secret(
         self,
@@ -931,9 +934,9 @@ class AdmyralStore(StoreInterface):
         secret_type: str | None = None,
     ) -> SecretMetadata:
         async with self._get_async_session() as db:
-            secret = await self._get_secret(db, user_id, secret_id)
+            secret_and_user = await self._get_secret_and_owner(db, user_id, secret_id)
 
-            if secret:
+            if secret_and_user:
                 secret_result = await db.exec(
                     update(SecretsSchema)
                     .where(SecretsSchema.user_id == user_id)
@@ -946,6 +949,8 @@ class AdmyralStore(StoreInterface):
                     .returning(SecretsSchema.created_at, SecretsSchema.updated_at)
                 )
                 secret_created_at_updated_at = secret_result.one()
+
+                user_email = secret_and_user[1].email
             else:
                 secret_result = await db.exec(
                     insert(SecretsSchema)
@@ -960,15 +965,17 @@ class AdmyralStore(StoreInterface):
                 )
                 secret_created_at_updated_at = secret_result.one()
 
-            await db.commit()
+                user_result = await db.exec(
+                    select(UserSchema).where(UserSchema.id == user_id).limit(1)
+                )
+                user_email = user_result.one().email
 
-            result = await db.exec(select(UserSchema).where(UserSchema.id == user_id))
-            user = result.one()
+            await db.commit()
 
             return SecretMetadata(
                 secret_id=secret_id,
                 secret_schema=schema,
-                email=user.email,
+                email=user_email,
                 created_at=secret_created_at_updated_at[0],
                 updated_at=secret_created_at_updated_at[1],
                 secret_type=secret_type,
@@ -982,3 +989,47 @@ class AdmyralStore(StoreInterface):
                 .where(SecretsSchema.secret_id == secret_id)
             )
             await db.commit()
+
+    async def compare_and_swap_secret(
+        self,
+        user_id: str,
+        secret_id: str,
+        expected_encrypted_secret: str | None,
+        encrypted_secret: str | None,
+        secret_schema: list[str],
+        secret_type: str | None = None,
+    ) -> SecretMetadata:
+        async with self._get_async_session() as db:
+            secret_and_owner = await self._get_secret_and_owner(db, user_id, secret_id)
+            if not secret_and_owner:
+                raise ValueError(
+                    f"Failed to update secret because the secret {secret_id} was not found."
+                )
+            if secret_and_owner[0].encrypted_secret != expected_encrypted_secret:
+                raise ValueError(
+                    "Failed to update secret because the secret was modified simultaneously."
+                )
+
+            secret_result = await db.exec(
+                update(SecretsSchema)
+                .where(SecretsSchema.user_id == user_id)
+                .where(SecretsSchema.secret_id == secret_id)
+                .values(
+                    encrypted_secret=encrypted_secret,
+                    schema_json_serialized=json.dumps(secret_schema),
+                    updated_at=utc_now(),
+                )
+                .returning(SecretsSchema.created_at, SecretsSchema.updated_at)
+            )
+            secret_created_at_updated_at = secret_result.one()
+
+            await db.commit()
+
+            return SecretMetadata(
+                secret_id=secret_id,
+                secret_schema=secret_schema,
+                email=secret_and_owner[1].email,
+                created_at=secret_created_at_updated_at[0],
+                updated_at=secret_created_at_updated_at[1],
+                secret_type=secret_type,
+            )

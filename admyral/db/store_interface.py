@@ -247,3 +247,14 @@ class StoreInterface(ABC):
 
     @abstractmethod
     async def delete_secret(self, user_id: str, secret_id: str) -> None: ...
+
+    @abstractmethod
+    async def compare_and_swap_secret(
+        self,
+        user_id: str,
+        secret_id: str,
+        expected_encrypted_secret: str | None,
+        encrypted_secret: str | None,
+        secret_schema: list[str],
+        secret_type: str | None = None,
+    ) -> SecretMetadata: ...

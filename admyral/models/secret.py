@@ -6,6 +6,7 @@ class EncryptedSecret(BaseModel):
     secret_id: str
     encrypted_secret: str
     secret_schema: list[str]
+    secret_type: str | None
 
 
 class Secret(BaseModel):

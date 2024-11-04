@@ -28,7 +28,7 @@ export default function WorkflowRunStep({
 				"Failed to load workflow run step. Please reload the page.",
 			);
 		}
-	}, [error, errorToast]);
+	}, [error]);
 
 	if (isPending) {
 		return (
