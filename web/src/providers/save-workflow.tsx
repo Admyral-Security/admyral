@@ -41,9 +41,6 @@ export function SaveWorkflowProvider({
 	const [isPending, setIsPending] = useState(false);
 
 	const handleSaveWorkflow = async () => {
-		if (isPending) {
-			return false;
-		}
 		setIsPending(true);
 
 		try {

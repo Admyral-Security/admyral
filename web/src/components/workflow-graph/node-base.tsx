@@ -69,7 +69,7 @@ export default function NodeBase({
 				offset={8}
 				align="end"
 			>
-				<Tooltip content="Missing secret">
+				<Tooltip content="Missing Secret">
 					<Flex
 						style={{
 							transform: "translate(10px, 24px)",
@@ -77,17 +77,19 @@ export default function NodeBase({
 					>
 						<Flex
 							inset="0"
-							className="absolute bg-[var(--red-9)] rounded-full"
+							position="absolute"
+							className="bg-[var(--red-9)] rounded-full"
 						/>
 						<Flex
-							className="relative rounded-full"
+							position="relative"
+							className="rounded-full"
 							width="24px"
 							height="24px"
 							justify="center"
 							align="center"
 						>
 							<ExclamationTriangleIcon
-								className="text-white"
+								color="white"
 								width="14px"
 								height="14px"
 							/>
