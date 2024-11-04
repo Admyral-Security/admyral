@@ -75,13 +75,22 @@ export default function NodeBase({
 							transform: "translate(10px, 24px)",
 						}}
 					>
-						<Flex className="absolute inset-0 bg-[var(--red-9)] rounded-full" />
 						<Flex
-							className="relative rounded-full w-6 h-6"
+							inset="0"
+							className="absolute bg-[var(--red-9)] rounded-full"
+						/>
+						<Flex
+							className="relative rounded-full"
+							width="24px"
+							height="24px"
 							justify="center"
 							align="center"
 						>
-							<ExclamationTriangleIcon className="text-white w-3.5 h-3.5" />
+							<ExclamationTriangleIcon
+								className="text-white"
+								width="14px"
+								height="14px"
+							/>
 						</Flex>
 					</Flex>
 				</Tooltip>
