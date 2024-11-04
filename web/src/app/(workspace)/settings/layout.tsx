@@ -1,4 +1,4 @@
-import { SideNavSettings } from "@/components/side-nav-settings/side-nav-settings";
+import SideNavSettings from "@/components/side-nav-settings/side-nav-settings";
 import { Box, Flex, Grid, Text } from "@radix-ui/themes";
 import { ReactNode } from "react";
 

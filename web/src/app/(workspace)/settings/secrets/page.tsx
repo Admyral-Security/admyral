@@ -1,7 +1,7 @@
 import AddSecret from "@/components/secrets/add-secret";
 import Secrets from "@/components/secrets/secrets";
-import { PlusIcon, ReaderIcon } from "@radix-ui/react-icons";
-import { Button, DropdownMenu, Flex, Text } from "@radix-ui/themes";
+import { ReaderIcon } from "@radix-ui/react-icons";
+import { Button, Flex, Text } from "@radix-ui/themes";
 import Link from "next/link";
 
 export default function SecretsPage() {
