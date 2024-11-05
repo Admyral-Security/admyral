@@ -37,6 +37,7 @@ def upgrade() -> None:
         ("azure openai", "Azure OpenAI"),
         ["Wiz", "Wiz"],
         ["turbot", "Database"],
+        ["steampipe", "Database"],
         ["slack", "Slack"],
         ["Github", "GitHub"],
         ["google", "Google"],
