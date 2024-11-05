@@ -7,7 +7,9 @@ import { HTTPMethod } from "@/types/api";
 
 // GET /api/v1/secrets/schemas
 const GetSecretsSchemasRequest = z.void();
-const GetSecretsSchemasResponse = z.record(z.string(), z.array(z.string()));
+const GetSecretsSchemasResponse = z.array(
+	z.tuple([z.string(), z.array(z.string())]),
+);
 
 const getSecretsSchemasApi = api<
 	z.input<typeof GetSecretsSchemasRequest>,

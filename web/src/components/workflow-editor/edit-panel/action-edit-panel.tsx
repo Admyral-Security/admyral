@@ -70,7 +70,7 @@ export default function ActionEditPanel() {
 	const saveWorkflowAndRedirect = async () => {
 		const saveSuccessful = await saveWorkflow();
 		if (saveSuccessful) {
-			router.push("/settings");
+			router.push("/settings/secrets");
 		}
 	};
 

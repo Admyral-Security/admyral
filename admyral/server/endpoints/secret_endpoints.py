@@ -59,5 +59,7 @@ async def delete_secret(
 @router.get("/schemas")
 async def get_secret_schemas(
     _authenticated_user: AuthenticatedUser = Depends(authenticate),
-) -> dict[str, list[str]]:
-    return SecretRegistry.get_secret_schemas()
+) -> list[tuple[str, list[str]]]:
+    schemas = SecretRegistry.get_secret_schemas()
+    schemas = list(schemas.items())
+    return sorted(schemas, key=lambda x: x[0])

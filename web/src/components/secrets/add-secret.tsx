@@ -120,29 +120,31 @@ export default function AddSecret() {
 
 				<DropdownMenu.Content variant="soft">
 					{secretsSchemas &&
-						Object.keys(secretsSchemas).map((secretType, idx) => (
+						secretsSchemas.map((secretTypeAndSchema, idx) => (
 							<DropdownMenu.Item
-								key={`add_secret_${secretType}_${idx}`}
+								key={`add_secret_${secretTypeAndSchema[0]}_${idx}`}
 								style={{ cursor: "pointer" }}
 								onClick={() => {
 									if (secretsSchemas) {
 										setDialogState({
 											open: true,
 											secretId: "",
-											secretType,
-											secret: secretsSchemas![
-												secretType
-											].map((field) => ({
-												key: field,
-												value: "",
-											})),
+											secretType: secretTypeAndSchema[0],
+											secret: secretTypeAndSchema[1].map(
+												(field) => ({
+													key: field,
+													value: "",
+												}),
+											),
 											error: null,
 										});
 									}
 								}}
 							>
-								<NamespaceIcon namespace={secretType} />{" "}
-								{secretType}
+								<NamespaceIcon
+									namespace={secretTypeAndSchema[0]}
+								/>{" "}
+								{secretTypeAndSchema[0]}
 							</DropdownMenu.Item>
 						))}
 					<DropdownMenu.Separator />

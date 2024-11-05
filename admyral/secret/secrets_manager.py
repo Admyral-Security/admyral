@@ -93,7 +93,7 @@ class SQLSecretsManager(SecretsManager):
             )
 
         encrypted_secret = await self.db.get_secret(user_id, delta_secret.secret_id)
-        if not encrypt_secret:
+        if not encrypted_secret:
             raise ValueError(f"Secret {delta_secret.secret_id} does not exist.")
 
         if encrypted_secret.secret_type != delta_secret.secret_type:
@@ -129,6 +129,9 @@ class SQLSecretsManager(SecretsManager):
         )
 
     async def set(self, user_id: str, secret: Secret) -> SecretMetadata:
+        if SecretRegistry.is_registered(secret.secret_type):
+            SecretRegistry.validate_schema(secret.secret_type, secret.secret)
+
         encrypted_secret = self._encrypt_secret(secret.secret)
         secret_schema = list(secret.secret.keys())
         return await self.db.store_secret(

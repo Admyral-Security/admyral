@@ -28,7 +28,7 @@ class SecretsSchema(BaseSchema, table=True):
     secret_id: str = Field(sa_type=TEXT(), primary_key=True)
 
     # foreign keys
-    user_id: str = Field(sa_type=TEXT(), index=True)
+    user_id: str = Field(sa_type=TEXT(), primary_key=True, index=True)
 
     # other fields
     encrypted_secret: Optional[str] = Field(sa_type=TEXT(), nullable=True)
