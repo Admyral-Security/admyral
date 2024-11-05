@@ -1,16 +1,23 @@
 from typing import Annotated
 from httpx import Client
+from pydantic import BaseModel
 
 from admyral.action import action, ArgumentMetadata
 from admyral.context import ctx
 from admyral.typings import JsonValue
+from admyral.secret.secret import register_secret
 
 
-def get_alienvault_otx_client(api_key: str) -> Client:
+@register_secret(secret_type="AlienVault OTX")
+class AlienVaultOTXSecret(BaseModel):
+    api_key: str
+
+
+def get_alienvault_otx_client(secret: AlienVaultOTXSecret) -> Client:
     return Client(
         base_url="https://otx.alienvault.com/api/v1",
         headers={
-            "X-OTX-API-KEY": api_key,
+            "X-OTX-API-KEY": secret.api_key,
             "Content-Type": "application/json",
             "Accept": "application/json",
         },
@@ -34,15 +41,9 @@ def alienvault_otx_analyze_domain(
 ) -> JsonValue:
     # https://otx.alienvault.com/assets/static/external_api.html
     secret = ctx.get().secrets.get("ALIENVAULT_OTX_SECRET")
-    api_key = secret["api_key"]
+    secret = AlienVaultOTXSecret.model_validate(secret)
 
-    with get_alienvault_otx_client(api_key) as client:
-        response = client.get(
-            f"/indicators/domain/{domain}/general",
-            headers={
-                "X-OTX-API-KEY": api_key,
-                "Content-Type": "application/json",
-            },
-        )
+    with get_alienvault_otx_client(secret) as client:
+        response = client.get(f"/indicators/domain/{domain}/general")
         response.raise_for_status()
         return response.json()

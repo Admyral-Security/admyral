@@ -1,8 +1,15 @@
 from typing import Annotated
 from openai import OpenAI
+from pydantic import BaseModel
 
 from admyral.action import action, ArgumentMetadata
 from admyral.context import ctx
+from admyral.secret.secret import register_secret
+
+
+@register_secret(secret_type="OpenAI")
+class OpenAISecret(BaseModel):
+    api_key: str
 
 
 @action(
@@ -58,7 +65,7 @@ def openai_chat_completion(
     # https://platform.openai.com/docs/api-reference/chat/create
     # TODO: error handling
     secret = ctx.get().secrets.get("OPENAI_SECRET")
-    api_key = secret["api_key"]
+    openai_secret = OpenAISecret.model_validate(secret)
 
     model_params = {}
     if top_p is not None:
@@ -68,7 +75,7 @@ def openai_chat_completion(
     if stop_tokens is not None and not model.startswith("o1"):
         model_params["stop"] = stop_tokens
 
-    client = OpenAI(api_key=api_key)
+    client = OpenAI(api_key=openai_secret.api_key)
     chat_completion = client.chat.completions.create(
         messages=[{"role": "user", "content": prompt}],
         model=model,

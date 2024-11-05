@@ -6,10 +6,10 @@ from admyral.typings import JsonValue
 from admyral.actions.integrations.shared.ms_graph import (
     ms_graph_list_alerts_v2,
     MsSecurityGraphAlertServiceSource,
+    AzureSecret,
 )
 
 
-# TODO: OCSF schema mapping
 @action(
     display_name="List Alerts",
     display_namespace="Microsoft Defender for Endpoint",
@@ -40,10 +40,9 @@ def list_ms_defender_for_endpoint_alerts(
     ] = 100,
 ) -> list[dict[str, JsonValue]]:
     secret = ctx.get().secrets.get("AZURE_SECRET")
+    secret = AzureSecret.model_validate(secret)
     return ms_graph_list_alerts_v2(
-        tenant_id=secret["tenant_id"],
-        client_id=secret["client_id"],
-        client_secret=secret["client_secret"],
+        secret=secret,
         start_time=start_time,
         end_time=end_time,
         limit=limit,

@@ -48,7 +48,7 @@ export default function ActionEditPanel() {
 			const actionDefinition = actionsIndex[action.data.actionType];
 			updateArgs(buildInitialArgs(actionData, actionDefinition));
 		}
-	}, [selectedNodeIdx, nodes, actionsIndex]);
+	}, [selectedNodeIdx, nodes, actionsIndex, updateArgs]);
 
 	if (selectedNodeIdx === null) {
 		return null;
@@ -70,7 +70,7 @@ export default function ActionEditPanel() {
 	const saveWorkflowAndRedirect = async () => {
 		const saveSuccessful = await saveWorkflow();
 		if (saveSuccessful) {
-			router.push("/settings");
+			router.push("/settings/secrets");
 		}
 	};
 

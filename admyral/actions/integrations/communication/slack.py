@@ -1,16 +1,23 @@
 from typing import Annotated
 from httpx import Client
+from pydantic import BaseModel
 
 from admyral.action import action, ArgumentMetadata
 from admyral.context import ctx
 from admyral.typings import JsonValue
+from admyral.secret.secret import register_secret
 
 
-def get_slack_client(api_key: str) -> Client:
+@register_secret(secret_type="Slack")
+class SlackSecret(BaseModel):
+    api_key: str
+
+
+def get_slack_client(secret: SlackSecret) -> Client:
     return Client(
         base_url="https://api.slack.com/api",
         headers={
-            "Authorization": f"Bearer {api_key}",
+            "Authorization": f"Bearer {secret.api_key}",
             "Content-Type": "application/json",
             "Accept": "application/json",
         },
@@ -55,11 +62,11 @@ def send_slack_message(
 ) -> JsonValue:
     # https://api.slack.com/methods/chat.postMessage
     secret = ctx.get().secrets.get("SLACK_SECRET")
-    api_key = secret["api_key"]
+    secret = SlackSecret.model_validate(secret)
 
     body = {"channel": channel_id, "text": text, "blocks": blocks}
 
-    with get_slack_client(api_key) as client:
+    with get_slack_client(secret) as client:
         response = client.post("/chat.postMessage", json=body)
         response.raise_for_status()
         response_body = response.json()
@@ -70,7 +77,7 @@ def send_slack_message(
         return response_body
 
 
-def _get_slack_user_id_by_email(client: Client, email: str, api_key: str) -> str:
+def _get_slack_user_id_by_email(client: Client, email: str) -> str:
     response = client.get("/users.lookupByEmail", params={"email": email})
     response.raise_for_status()
     response_body = response.json()
@@ -96,10 +103,10 @@ def lookup_slack_user_by_email(
 ) -> str:
     # https://api.slack.com/methods/users.lookupByEmail
     secret = ctx.get().secrets.get("SLACK_SECRET")
-    api_key = secret["api_key"]
+    secret = SlackSecret.model_validate(secret)
 
-    with get_slack_client(api_key) as client:
-        return _get_slack_user_id_by_email(client, email, api_key)
+    with get_slack_client(secret) as client:
+        return _get_slack_user_id_by_email(client, email)
 
 
 @action(
@@ -138,10 +145,10 @@ def send_slack_message_to_user_by_email(
     # https://api.slack.com/methods/users.lookupByEmail
 
     secret = ctx.get().secrets.get("SLACK_SECRET")
-    api_key = secret["api_key"]
+    secret = SlackSecret.model_validate(secret)
 
-    with get_slack_client(api_key) as client:
-        user_id = _get_slack_user_id_by_email(client, email, api_key)
+    with get_slack_client(secret) as client:
+        user_id = _get_slack_user_id_by_email(client, email)
 
         response = client.post(
             "/chat.postMessage",

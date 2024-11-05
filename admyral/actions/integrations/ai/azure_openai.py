@@ -1,11 +1,19 @@
 from typing import Annotated
 from openai import AzureOpenAI
+from pydantic import BaseModel
 
 from admyral.action import action, ArgumentMetadata
 from admyral.context import ctx
+from admyral.secret.secret import register_secret
 
 
-# TODO: test
+@register_secret(secret_type="Azure OpenAI")
+class AzureOpenAISecret(BaseModel):
+    endpoint: str
+    api_key: str
+    deployment_name: str
+
+
 @action(
     display_name="Chat Completion",
     display_namespace="Azure OpenAI",
@@ -53,12 +61,10 @@ def azure_openai_chat_completion(
     # TODO: add authentication via Entra ID: https://github.com/openai/openai-python/blob/main/examples/azure_ad.py
     # TODO: error handling
     secret = ctx.get().secrets.get("AZURE_OPENAI_SECRET")
-    endpoint = secret["endpoint"]
-    api_key = secret["api_key"]
-    model = secret["deployment_name"]
+    secret = AzureOpenAISecret.model_validate(secret)
 
     client = AzureOpenAI(
-        api_version="2024-06-01", azure_endpoint=endpoint, api_key=api_key
+        api_version="2024-06-01", azure_endpoint=secret.endpoint, api_key=secret.api_key
     )
 
     model_params = {}
@@ -66,10 +72,12 @@ def azure_openai_chat_completion(
         model_params["top_p"] = top_p
     if temperature is not None:
         model_params["temperature"] = temperature
-    if stop_tokens is not None and not model.startswith("o1"):
+    if stop_tokens is not None and not secret.deployment_name.startswith("o1"):
         model_params["stop"] = stop_tokens
 
     chat_completion = client.chat.completions.create(
-        messages=[{"role": "user", "content": prompt}], model=model, **model_params
+        messages=[{"role": "user", "content": prompt}],
+        model=secret.deployment_name,
+        **model_params,
     )
     return chat_completion.choices[0].message.content

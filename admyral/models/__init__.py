@@ -1,5 +1,5 @@
 from admyral.models.action import Argument, PythonAction, ActionMetadata
-from admyral.models.auth import AuthenticatedUser, User
+from admyral.models.auth import AuthenticatedUser, User, UserProfile
 from admyral.models.api_key import ApiKey
 from admyral.models.pip_lockfile import PipLockfile
 from admyral.models.schedule import Schedule, ScheduleType
@@ -123,4 +123,5 @@ __all__ = [
     "AuthenticatedUser",
     "User",
     "ApiKey",
+    "UserProfile",
 ]

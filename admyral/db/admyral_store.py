@@ -1,4 +1,4 @@
-from typing import Optional, Any, AsyncGenerator
+from typing import Any, AsyncGenerator
 from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy.exc import IntegrityError
 from sqlmodel import select, delete, insert, update
@@ -148,20 +148,22 @@ class AdmyralStore(StoreInterface):
             )
             await db.commit()
 
+    async def delete_user(self, user_id: str) -> None:
+        async with self._get_async_session() as db:
+            # Note: all associated data is deleted via cascade
+            await db.exec(delete(UserSchema).where(UserSchema.id == user_id))
+            await db.commit()
+
     ########################################################
     # API Key Management
     ########################################################
 
     async def store_api_key(self, user_id: str, name: str, key: str) -> ApiKey:
         async with self._get_async_session() as db:
-            api_key = ApiKey(
-                id=str(uuid4()),
-                name=name,
-                user_id=user_id,
-            )
+            api_key_id = str(uuid4())
             await db.exec(
                 insert(ApiKeySchema).values(
-                    id=api_key.id,
+                    id=api_key_id,
                     user_id=user_id,
                     name=name,
                     key=key,
@@ -169,16 +171,44 @@ class AdmyralStore(StoreInterface):
             )
             await db.commit()
 
-        return api_key
+            result = await db.exec(
+                select(ApiKeySchema, UserSchema)
+                .join(UserSchema)
+                .where(ApiKeySchema.user_id == user_id)
+                .where(ApiKeySchema.id == api_key_id)
+                .where(UserSchema.id == user_id)
+            )
+            row = result.one()
+
+            return ApiKey(
+                id=row[0].id,
+                name=row[0].name,
+                created_at=row[0].created_at,
+                user_email=row[1].email,
+            )
 
     async def list_api_keys(self, user_id: str) -> list[ApiKey]:
         async with self._get_async_session() as db:
             result = await db.exec(
-                select(ApiKeySchema).where(ApiKeySchema.user_id == user_id)
+                select(ApiKeySchema, UserSchema)
+                .join(UserSchema)
+                .where(ApiKeySchema.user_id == user_id)
             )
-            return [api_key.to_model() for api_key in result.all()]
+            return list(
+                map(
+                    lambda row: ApiKey.model_validate(
+                        {
+                            "id": row[0].id,
+                            "name": row[0].name,
+                            "created_at": row[0].created_at,
+                            "user_email": row[1].email,
+                        }
+                    ),
+                    result.all(),
+                )
+            )
 
-    async def search_api_key_owner(self, key: str) -> Optional[str]:
+    async def search_api_key_owner(self, key: str) -> str | None:
         async with self._get_async_session() as db:
             result = await db.exec(select(ApiKeySchema).where(ApiKeySchema.key == key))
             api_key = result.one_or_none()
@@ -206,7 +236,7 @@ class AdmyralStore(StoreInterface):
 
     async def _get_action(
         self, db: AdmyralDatabaseSession, user_id: str, action_type: str
-    ) -> Optional[PythonActionSchema]:
+    ) -> PythonActionSchema | None:
         result = await db.exec(
             select(PythonActionSchema)
             .where(PythonActionSchema.action_type == action_type)
@@ -214,9 +244,7 @@ class AdmyralStore(StoreInterface):
         )
         return result.one_or_none()
 
-    async def get_action(
-        self, user_id: str, action_type: str
-    ) -> Optional[PythonAction]:
+    async def get_action(self, user_id: str, action_type: str) -> PythonAction | None:
         async with self._get_async_session() as db:
             action = await self._get_action(db, user_id, action_type)
             return action.to_model() if action is not None else None
@@ -287,13 +315,13 @@ class AdmyralStore(StoreInterface):
 
     async def _get_cached_pip_lockfile(
         self, db: AdmyralDatabaseSession, hash: str
-    ) -> Optional[PipLockfileCacheSchema]:
+    ) -> PipLockfileCacheSchema | None:
         result = await db.exec(
             select(PipLockfileCacheSchema).where(PipLockfileCacheSchema.hash == hash)
         )
         return result.one_or_none()
 
-    async def get_cached_pip_lockfile(self, hash: str) -> Optional[PipLockfile]:
+    async def get_cached_pip_lockfile(self, hash: str) -> PipLockfile | None:
         async with self._get_async_session() as db:
             pip_lockfile = await self._get_cached_pip_lockfile(db, hash)
             return pip_lockfile.to_model() if pip_lockfile else None
@@ -365,7 +393,7 @@ class AdmyralStore(StoreInterface):
 
     async def _get_workflow_by_name(
         self, db: AdmyralDatabaseSession, user_id: str, workflow_name: str
-    ) -> Optional[WorkflowSchema]:
+    ) -> WorkflowSchema | None:
         result = await db.exec(
             select(WorkflowSchema)
             .where(WorkflowSchema.workflow_name == workflow_name)
@@ -375,14 +403,14 @@ class AdmyralStore(StoreInterface):
 
     async def get_workflow_by_name(
         self, user_id: str, workflow_name: str
-    ) -> Optional[Workflow]:
+    ) -> Workflow | None:
         async with self._get_async_session() as db:
             wf = await self._get_workflow_by_name(db, user_id, workflow_name)
             return wf.to_model() if wf else None
 
     async def _get_workflow_by_id(
         self, db: AdmyralDatabaseSession, user_id: str, workflow_id: str
-    ) -> Optional[WorkflowSchema]:
+    ) -> WorkflowSchema | None:
         result = await db.exec(
             select(WorkflowSchema)
             .where(WorkflowSchema.workflow_id == workflow_id)
@@ -392,7 +420,7 @@ class AdmyralStore(StoreInterface):
 
     async def get_workflow_by_id(
         self, user_id: str, workflow_id: str
-    ) -> Optional[Workflow]:
+    ) -> Workflow | None:
         async with self._get_async_session() as db:
             wf = await self._get_workflow_by_id(db, user_id, workflow_id)
             return wf.to_model() if wf else None
@@ -455,7 +483,7 @@ class AdmyralStore(StoreInterface):
 
     async def get_workflow_for_webhook(
         self, workflow_id: str
-    ) -> Optional[tuple[str, Workflow]]:
+    ) -> tuple[str, Workflow] | None:
         async with self._get_async_session() as db:
             result = await db.exec(
                 select(WorkflowSchema).where(WorkflowSchema.workflow_id == workflow_id)
@@ -496,7 +524,7 @@ class AdmyralStore(StoreInterface):
 
     async def get_webhook_for_workflow(
         self, user_id: str, workflow_id: str
-    ) -> Optional[WorkflowWebhook]:
+    ) -> WorkflowWebhook | None:
         async with self._get_async_session() as db:
             result = await db.exec(
                 select(WorkflowWebhookSchema)
@@ -517,7 +545,7 @@ class AdmyralStore(StoreInterface):
 
     async def _get_webhook(
         self, db: AdmyralDatabaseSession, webhook_id: str
-    ) -> Optional[WorkflowWebhook]:
+    ) -> WorkflowWebhook | None:
         result = await db.exec(
             select(WorkflowWebhookSchema).where(
                 WorkflowWebhookSchema.webhook_id == webhook_id
@@ -525,7 +553,7 @@ class AdmyralStore(StoreInterface):
         )
         return result.one_or_none()
 
-    async def get_webhook(self, webhook_id: str) -> Optional[WorkflowWebhook]:
+    async def get_webhook(self, webhook_id: str) -> WorkflowWebhook | None:
         async with self._get_async_session() as db:
             webhook = await self._get_webhook(db, webhook_id)
             return webhook.to_model() if webhook else None
@@ -611,7 +639,7 @@ class AdmyralStore(StoreInterface):
 
     async def _get_workflow_run(
         self, db: AdmyralDatabaseSession, user_id: str, workflow_id: str, run_id: str
-    ) -> Optional[WorkflowRunSchema]:
+    ) -> WorkflowRunSchema | None:
         result = await db.exec(
             select(WorkflowRunSchema)
             .join(WorkflowSchema)
@@ -623,7 +651,7 @@ class AdmyralStore(StoreInterface):
 
     async def get_workflow_run(
         self, user_id: str, workflow_id: str, run_id: str
-    ) -> Optional[WorkflowRun]:
+    ) -> WorkflowRun | None:
         async with self._get_async_session() as db:
             workflow_run = await self._get_workflow_run(
                 db, user_id, workflow_id, run_id
@@ -662,7 +690,7 @@ class AdmyralStore(StoreInterface):
         workflow_id: str,
         run_id: str,
         step_id: str,
-    ) -> Optional[WorkflowRunStepsSchema]:
+    ) -> WorkflowRunStepsSchema | None:
         result = await db.exec(
             select(WorkflowRunStepsSchema)
             .join(WorkflowRunSchema)
@@ -677,7 +705,7 @@ class AdmyralStore(StoreInterface):
 
     async def get_workflow_run_step(
         self, user_id: str, workflow_id: str, run_id: str, step_id: str
-    ) -> Optional[WorkflowRunStep]:
+    ) -> WorkflowRunStep | None:
         async with self._get_async_session() as db:
             workflow_run_step = await self._get_workflow_run_step(
                 db, user_id, workflow_id, run_id, step_id
@@ -731,7 +759,7 @@ class AdmyralStore(StoreInterface):
         db: AdmyralDatabaseSession,
         run_id: str,
         step_id: str,
-    ) -> Optional[WorkflowRunStepsSchema]:
+    ) -> WorkflowRunStepsSchema | None:
         result = await db.exec(
             select(WorkflowRunStepsSchema)
             .where(WorkflowRunStepsSchema.step_id == step_id)
@@ -859,39 +887,57 @@ class AdmyralStore(StoreInterface):
     ) -> list[SecretMetadata]:
         async with self._get_async_session() as db:
             result = await db.exec(
-                select(SecretsSchema).where(SecretsSchema.user_id == user_id)
+                select(SecretsSchema, UserSchema)
+                .join(UserSchema)
+                .where(SecretsSchema.user_id == user_id)
+                .where(UserSchema.id == user_id)
             )
-            return [secret.to_metadata() for secret in result.all()]
+            return list(
+                map(
+                    lambda row: SecretMetadata.model_validate(
+                        {
+                            "secret_id": row[0].secret_id,
+                            "secret_schema": json.loads(row[0].schema_json_serialized),
+                            "email": row[1].email,
+                            "created_at": row[0].created_at,
+                            "updated_at": row[0].updated_at,
+                            "secret_type": row[0].secret_type,
+                        }
+                    ),
+                    result.all(),
+                ),
+            )
 
-    async def _get_secret(
+    async def _get_secret_and_owner(
         self, db: AdmyralDatabaseSession, user_id: str, secret_id: str
-    ) -> Optional[SecretsSchema]:
+    ) -> tuple | None:
         result = await db.exec(
-            select(SecretsSchema)
+            select(SecretsSchema, UserSchema)
+            .join(UserSchema)
             .where(SecretsSchema.user_id == user_id)
             .where(SecretsSchema.secret_id == secret_id)
+            .where(UserSchema.id == user_id)
         )
         return result.one_or_none()
 
-    async def get_secret(
-        self, user_id: str, secret_id: str
-    ) -> Optional[EncryptedSecret]:
+    async def get_secret(self, user_id: str, secret_id: str) -> EncryptedSecret | None:
         async with self._get_async_session() as db:
-            secret = await self._get_secret(db, user_id, secret_id)
-            return secret.to_model() if secret else None
+            secret_and_user = await self._get_secret_and_owner(db, user_id, secret_id)
+            return secret_and_user[0].to_model() if secret_and_user else None
 
     async def store_secret(
         self,
         user_id: str,
         secret_id: str,
-        encrypted_secret: Optional[str],
+        encrypted_secret: str | None,
         schema: list[str],
-    ) -> None:
+        secret_type: str | None = None,
+    ) -> SecretMetadata:
         async with self._get_async_session() as db:
-            secret = await self._get_secret(db, user_id, secret_id)
+            secret_and_user = await self._get_secret_and_owner(db, user_id, secret_id)
 
-            if secret:
-                await db.exec(
+            if secret_and_user:
+                secret_result = await db.exec(
                     update(SecretsSchema)
                     .where(SecretsSchema.user_id == user_id)
                     .where(SecretsSchema.secret_id == secret_id)
@@ -900,18 +946,40 @@ class AdmyralStore(StoreInterface):
                         schema_json_serialized=json.dumps(schema),
                         updated_at=utc_now(),
                     )
+                    .returning(SecretsSchema.created_at, SecretsSchema.updated_at)
                 )
+                secret_created_at_updated_at = secret_result.one()
+
+                user_email = secret_and_user[1].email
             else:
-                await db.exec(
-                    insert(SecretsSchema).values(
+                secret_result = await db.exec(
+                    insert(SecretsSchema)
+                    .values(
                         user_id=user_id,
                         secret_id=secret_id,
                         encrypted_secret=encrypted_secret,
                         schema_json_serialized=json.dumps(schema),
+                        secret_type=secret_type,
                     )
+                    .returning(SecretsSchema.created_at, SecretsSchema.updated_at)
                 )
+                secret_created_at_updated_at = secret_result.one()
+
+                user_result = await db.exec(
+                    select(UserSchema).where(UserSchema.id == user_id).limit(1)
+                )
+                user_email = user_result.one().email
 
             await db.commit()
+
+            return SecretMetadata(
+                secret_id=secret_id,
+                secret_schema=schema,
+                email=user_email,
+                created_at=secret_created_at_updated_at[0],
+                updated_at=secret_created_at_updated_at[1],
+                secret_type=secret_type,
+            )
 
     async def delete_secret(self, user_id: str, secret_id: str) -> None:
         async with self._get_async_session() as db:
@@ -921,3 +989,47 @@ class AdmyralStore(StoreInterface):
                 .where(SecretsSchema.secret_id == secret_id)
             )
             await db.commit()
+
+    async def compare_and_swap_secret(
+        self,
+        user_id: str,
+        secret_id: str,
+        expected_encrypted_secret: str | None,
+        encrypted_secret: str | None,
+        secret_schema: list[str],
+        secret_type: str | None = None,
+    ) -> SecretMetadata:
+        async with self._get_async_session() as db:
+            secret_and_owner = await self._get_secret_and_owner(db, user_id, secret_id)
+            if not secret_and_owner:
+                raise ValueError(
+                    f"Failed to update secret because the secret {secret_id} was not found."
+                )
+            if secret_and_owner[0].encrypted_secret != expected_encrypted_secret:
+                raise ValueError(
+                    "Failed to update secret because the secret was modified simultaneously."
+                )
+
+            secret_result = await db.exec(
+                update(SecretsSchema)
+                .where(SecretsSchema.user_id == user_id)
+                .where(SecretsSchema.secret_id == secret_id)
+                .values(
+                    encrypted_secret=encrypted_secret,
+                    schema_json_serialized=json.dumps(secret_schema),
+                    updated_at=utc_now(),
+                )
+                .returning(SecretsSchema.created_at, SecretsSchema.updated_at)
+            )
+            secret_created_at_updated_at = secret_result.one()
+
+            await db.commit()
+
+            return SecretMetadata(
+                secret_id=secret_id,
+                secret_schema=secret_schema,
+                email=secret_and_owner[1].email,
+                created_at=secret_created_at_updated_at[0],
+                updated_at=secret_created_at_updated_at[1],
+                secret_type=secret_type,
+            )

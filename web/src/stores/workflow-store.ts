@@ -244,10 +244,9 @@ export const useWorkflowStore = create<WorkflowStoreState>((set, get) => ({
 	},
 	onNodesChange: (changes: NodeChange[]) => {
 		// Don't allow deleting start nodes
-		const isStartRemovalTry =
-			changes.filter(
-				(change) => change.type === "remove" && change.id === "start",
-			).length > 0;
+		const isStartRemovalTry = changes.some(
+			(change) => change.type === "remove" && change.id === "start",
+		);
 		if (isStartRemovalTry) {
 			// we ignore the deletion but we need to add the previously deleted
 			// edges back
@@ -260,8 +259,7 @@ export const useWorkflowStore = create<WorkflowStoreState>((set, get) => ({
 			return;
 		}
 
-		const isDeletion =
-			changes.filter((change) => change.type === "remove").length > 0;
+		const isDeletion = changes.some((change) => change.type === "remove");
 		set({
 			nodes: applyNodeChanges(changes, get().nodes),
 			detailPageType:

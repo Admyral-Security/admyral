@@ -10,11 +10,27 @@ from tenacity import (
     stop_after_attempt,
     wait_exponential,
 )
+from pydantic import BaseModel
 
 from admyral.action import action, ArgumentMetadata
 from admyral.context import ctx
 from admyral.typings import JsonValue
 from admyral.utils.collections import is_empty
+from admyral.secret.secret import register_secret
+
+
+@register_secret(secret_type="Google Drive")
+class GoogleDriveSecret(BaseModel):
+    type: str
+    project_id: str
+    private_key_id: str
+    private_key: str
+    client_email: str
+    auth_uri: str
+    token_uri: str
+    auth_provider_x509_cert_url: str
+    client_x509_cert_url: str
+    universe_domain: str
 
 
 @retry(
@@ -69,6 +85,7 @@ def list_google_docs_revisions(
     # https://googleapis.github.io/google-api-python-client/docs/dyn/drive_v3.revisions.html#list
 
     secret = ctx.get().secrets.get("GOOGLE_DRIVE_SECRET")
+    secret = GoogleDriveSecret.model_validate(secret)
     creds = ServiceAccountCredentials.from_service_account_info(
         info=secret, scopes=["https://www.googleapis.com/auth/drive.readonly"]
     )
@@ -166,6 +183,7 @@ def list_google_drive_files_with_link_sharing_enabled(
     ] = 100,
 ) -> list[dict[str, JsonValue]]:
     secret = ctx.get().secrets.get("GOOGLE_DRIVE_SECRET")
+    secret = GoogleDriveSecret.model_validate(secret)
     creds = ServiceAccountCredentials.from_service_account_info(
         info=secret,
         scopes=[

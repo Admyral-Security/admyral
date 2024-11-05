@@ -1,16 +1,24 @@
 from typing import Annotated
 from httpx import Client
+from pydantic import BaseModel
 
 from admyral.action import action, ArgumentMetadata
 from admyral.context import ctx
 from admyral.typings import JsonValue
+from admyral.secret.secret import register_secret
 
 
-def get_1password_client(domain: str, api_key: str) -> Client:
+@register_secret(secret_type="1Password")
+class OnePasswordSecret(BaseModel):
+    domain: str
+    api_key: str
+
+
+def get_1password_client(secret: OnePasswordSecret) -> Client:
     return Client(
-        base_url=f"https://{domain}",
+        base_url=f"https://{secret.domain}",
         headers={
-            "Authorization": f"Bearer {api_key}",
+            "Authorization": f"Bearer {secret.api_key}",
             "Content-Type": "application/json",
             "Accept": "application/json",
         },
@@ -65,10 +73,9 @@ def list_1password_audit_events(
     # https://developer.1password.com/docs/events-api/reference#post-apiv1auditevents
 
     secret = ctx.get().secrets.get("1PASSWORD_SECRET")
-    api_key = secret["api_key"]
-    domain = secret["domain"]
+    secret = OnePasswordSecret.model_validate(secret)
 
-    with get_1password_client(domain, api_key) as client:
+    with get_1password_client(secret) as client:
         events = []
 
         body = {

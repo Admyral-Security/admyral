@@ -18,12 +18,11 @@ export default function NavLink({
 	selectionCriteria,
 }: NavLinkProps) {
 	const pathname = usePathname();
-	const isSelected =
-		selectionCriteria.filter(
-			(criteria) =>
-				(criteria === "/" && pathname === criteria) ||
-				(criteria !== "/" && pathname.startsWith(criteria)),
-		).length > 0;
+	const isSelected = selectionCriteria.some(
+		(criteria) =>
+			(criteria === "/" && pathname === criteria) ||
+			(criteria !== "/" && pathname.startsWith(criteria)),
+	);
 
 	if (isSelected) {
 		return (

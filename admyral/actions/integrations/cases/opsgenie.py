@@ -2,22 +2,30 @@ from typing import Annotated, Literal
 from httpx import Client
 import time
 import random
+from pydantic import BaseModel
 
 from admyral.typings import JsonValue
 from admyral.action import action, ArgumentMetadata
 from admyral.context import ctx
+from admyral.secret.secret import register_secret
 
 
-def get_opsgenie_client(instance: str, api_key: str) -> Client:
+@register_secret(secret_type="OpsGenie")
+class OpsGenieSecret(BaseModel):
+    api_key: str
+    instance: str | None
+
+
+def get_opsgenie_client(secret: OpsGenieSecret) -> Client:
     base_api_url = (
         "https://api.eu.opsgenie.com"
-        if instance and instance.lower() == "eu"
+        if secret.instance and secret.instance.lower() == "eu"
         else "https://api.opsgenie.com"
     )
     return Client(
         base_url=base_api_url,
         headers={
-            "Authorization": f"GenieKey {api_key}",
+            "Authorization": f"GenieKey {secret.api_key}",
             "Content-Type": "application/json",
             "Accept": "application/json",
         },
@@ -125,8 +133,7 @@ def create_opsgenie_alert(
 ) -> JsonValue:
     # https://docs.opsgenie.com/docs/alert-api#section-create-alert
     opsgenie_secret = ctx.get().secrets.get("OPSGENIE_SECRET")
-    api_key = opsgenie_secret["api_key"]
-    instance = opsgenie_secret.get("instance")
+    opsgenie_secret = OpsGenieSecret.model_validate(opsgenie_secret)
 
     body = {
         "message": message,
@@ -156,7 +163,7 @@ def create_opsgenie_alert(
     if note:
         body["note"] = note
 
-    with get_opsgenie_client(instance, api_key) as client:
+    with get_opsgenie_client(opsgenie_secret) as client:
         response = client.post(
             "/v2/alerts",
             json=body,

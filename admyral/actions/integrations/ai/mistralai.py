@@ -1,8 +1,15 @@
 from typing import Annotated
 from mistralai.client import MistralClient
+from pydantic import BaseModel
 
 from admyral.action import action, ArgumentMetadata
 from admyral.context import ctx
+from admyral.secret.secret import register_secret
+
+
+@register_secret(secret_type="Mistral AI")
+class MistralAISecret(BaseModel):
+    api_key: str
 
 
 @action(
@@ -58,9 +65,9 @@ def mistralai_chat_completion(
     # https://docs.mistral.ai/api/#tag/chat
     # TODO: error handling
     secret = ctx.get().secrets.get("MISTRALAI_SECRET")
-    api_key = secret["api_key"]
+    secret = MistralAISecret.model_validate(secret)
 
-    client = MistralClient(api_key=api_key)
+    client = MistralClient(api_key=secret.api_key)
 
     model_params = {}
     if top_p is not None:

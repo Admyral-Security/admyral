@@ -1,16 +1,24 @@
 from typing import Annotated
 from httpx import Client
+from pydantic import BaseModel
 
 from admyral.action import action, ArgumentMetadata
 from admyral.context import ctx
 from admyral.typings import JsonValue
+from admyral.secret.secret import register_secret
 
 
-def get_sentinel_one_client(base_url: str, api_key: str) -> Client:
+@register_secret(secret_type="SentinelOne")
+class SentinelOneSecret(BaseModel):
+    base_url: str
+    api_key: str
+
+
+def get_sentinel_one_client(secret: SentinelOneSecret) -> Client:
     return Client(
-        base_url=f"{base_url}/web/api/v2.1",
+        base_url=f"{secret.base_url}/web/api/v2.1",
         headers={
-            "Authorization": f"ApiToken {api_key}",
+            "Authorization": f"ApiToken {secret.api_key}",
             "Accept": "application/json",
             "Content-Type": "application/json",
         },
@@ -49,15 +57,14 @@ def list_sentinel_one_alerts(
     # https://github.com/fragtastic/sentinelone-api-python/blob/67f8005576a6613f925edca93e22c8da7d6c3010/sentineloneapi/client.py#L98
 
     secret = ctx.get().secrets.get("SENTINEL_ONE_SECRET")
-    base_url = secret["base_url"]
-    api_key = secret["api_key"]
+    secret = SentinelOneSecret.model_validate(secret)
 
     params = {
         "createdAt__gte": start_time,
         "createdAt__lte": end_time,
     }
 
-    with get_sentinel_one_client(base_url, api_key) as client:
+    with get_sentinel_one_client(secret) as client:
         alerts = []
 
         while len(alerts) < limit:

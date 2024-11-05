@@ -5,18 +5,13 @@ export const SecretMetadata = withCamelCaseTransform(
 	z.object({
 		secret_id: z.string(),
 		secret_schema: z.array(z.string()),
+		email: z.string(),
+		created_at: z.coerce.date(),
+		updated_at: z.coerce.date(),
+		secret_type: z.string().nullable(),
 	}),
 );
 export type TSecretMetadata = z.infer<typeof SecretMetadata>;
-
-const SecretMetadataCamelCase = z.object({
-	secretId: z.string(),
-	secretSchema: z.array(z.string()),
-});
-
-export function isSecretMetadata(obj: any): boolean {
-	return SecretMetadataCamelCase.safeParse(obj).success;
-}
 
 export const Secret = z.object({
 	secretId: z.string(),
@@ -26,5 +21,6 @@ export const Secret = z.object({
 			value: z.string(),
 		}),
 	),
+	secretType: z.string().nullable(),
 });
 export type TSecret = z.infer<typeof Secret>;

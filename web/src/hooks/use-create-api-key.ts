@@ -13,7 +13,7 @@ const CreateApiKeyRequest = z.object({
 
 const createApiKeyApi = api<
 	z.input<typeof CreateApiKeyRequest>,
-	z.infer<typeof ApiKey>
+	z.input<typeof ApiKey>
 >({
 	method: HTTPMethod.POST,
 	path: "/api/v1/api-keys",

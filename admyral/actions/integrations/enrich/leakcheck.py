@@ -1,17 +1,24 @@
 from typing import Annotated
 from httpx import Client
+from pydantic import BaseModel
 
 from admyral.action import action, ArgumentMetadata
 from admyral.context import ctx
 from admyral.typings import JsonValue
 from admyral.exceptions import NonRetryableActionError
+from admyral.secret.secret import register_secret
 
 
-def _get_leakcheck_v2_client(api_key: str) -> Client:
+@register_secret(secret_type="LeakCheck")
+class LeakCheckSecret(BaseModel):
+    api_key: str
+
+
+def _get_leakcheck_v2_client(secret: LeakCheckSecret) -> Client:
     return Client(
         base_url="https://leakcheck.io/api/v2",
         headers={
-            "X-API-Key": api_key,
+            "X-API-Key": secret.api_key,
             "Content-Type": "application/json",
             "Accept": "application/json",
         },
@@ -58,12 +65,12 @@ def leakcheck_v2_lookup(
     ] = 100,
 ) -> list[dict[str, JsonValue]]:
     secret = ctx.get().secrets.get("LEAKCHECK_SECRET")
-    api_key = secret["api_key"]
+    secret = LeakCheckSecret.model_validate(secret)
 
     if limit > 1000:
         raise ValueError("Limit cannot be greater than 1000.")
 
-    with _get_leakcheck_v2_client(api_key) as client:
+    with _get_leakcheck_v2_client(secret) as client:
         params = {"limit": limit}
         if query_type:
             params["type"] = query_type

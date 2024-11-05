@@ -1,16 +1,24 @@
 from typing import Annotated
 from httpx import Client
+from pydantic import BaseModel
 
 from admyral.action import action, ArgumentMetadata
 from admyral.context import ctx
 from admyral.typings import JsonValue
+from admyral.secret.secret import register_secret
 
 
-def get_kandji_client(api_url: str, api_token: str) -> Client:
+@register_secret(secret_type="Kandji")
+class KandjiSecret(BaseModel):
+    api_url: str
+    api_token: str
+
+
+def get_kandji_client(secret: KandjiSecret) -> Client:
     return Client(
-        base_url=f"https://{api_url}/api/v1",
+        base_url=f"https://{secret.api_url}/api/v1",
         headers={
-            "Authorization": f"Bearer {api_token}",
+            "Authorization": f"Bearer {secret.api_token}",
             "Content-Type": "application/json",
             "Accept": "application/json",
         },
@@ -19,10 +27,9 @@ def get_kandji_client(api_url: str, api_token: str) -> Client:
 
 def _kandji_get_api_with_pagination(url: str, data_access_key: str | None = None):
     secret = ctx.get().secrets.get("KANDJI_SECRET")
-    api_token = secret["api_token"]
-    api_url = secret["api_url"]
+    secret = KandjiSecret.model_validate(secret)
 
-    with get_kandji_client(api_url, api_token) as client:
+    with get_kandji_client(secret) as client:
         offset = 0
         max_limit_per_page = 300
 
@@ -51,10 +58,9 @@ def _kandji_get_api_with_pagination(url: str, data_access_key: str | None = None
 
 def _kandji_get_api(url: str) -> dict[str, JsonValue]:
     secret = ctx.get().secrets.get("KANDJI_SECRET")
-    api_token = secret["api_token"]
-    api_url = secret["api_url"]
+    secret = KandjiSecret.model_validate(secret)
 
-    with get_kandji_client(api_url, api_token) as client:
+    with get_kandji_client(secret) as client:
         response = client.get(url=url)
         response.raise_for_status()
         return response.json()

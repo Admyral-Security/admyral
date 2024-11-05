@@ -21,7 +21,10 @@ def validate_and_decrypt_jwt(request: Request) -> dict:
 
 async def authenticate(request: Request) -> AuthenticatedUser:
     if DISABLE_AUTH:
-        return AuthenticatedUser(user_id=CONFIG.default_user_id)
+        return AuthenticatedUser(
+            user_id=CONFIG.default_user_id,
+            email=CONFIG.default_user_email,
+        )
 
     # extract user id from authentication method
     if "x-api-key" in request.headers:
@@ -48,4 +51,4 @@ async def authenticate(request: Request) -> AuthenticatedUser:
         # User not found
         raise HTTPException(status_code=401, detail="Invalid token")
 
-    return AuthenticatedUser(user_id=user_id)
+    return AuthenticatedUser(user_id=user_id, email=user.email)

@@ -1,19 +1,27 @@
 from typing import Annotated, Literal
 from httpx import Client
+from pydantic import BaseModel
 
 from admyral.action import action, ArgumentMetadata
 from admyral.context import ctx
 from admyral.typings import JsonValue
+from admyral.secret.secret import register_secret
 
 
-def get_pagerduty_client(email: str, api_key: str) -> Client:
+@register_secret(secret_type="PagerDuty")
+class PagerDutySecret(BaseModel):
+    api_key: str
+    email: str
+
+
+def get_pagerduty_client(secret: PagerDutySecret) -> Client:
     return Client(
         base_url="https://api.pagerduty.com",
         headers={
             "Content-Type": "application/json",
             "Accept": "application/json",
-            "Authorization": f"Token token={api_key}",
-            "From": email,
+            "Authorization": f"Token token={secret.api_key}",
+            "From": secret.email,
         },
     )
 
@@ -63,8 +71,7 @@ def create_pagerduty_incident(
 ) -> JsonValue:
     # https://developer.pagerduty.com/api-reference/a7d81b0e9200f-create-an-incident
     secret = ctx.get().secrets.get("PAGERDUTY_SECRET")
-    api_key = secret["api_key"]
-    email = secret["email"]
+    secret = PagerDutySecret.model_validate(secret)
 
     body = {
         "incident": {
@@ -88,7 +95,7 @@ def create_pagerduty_incident(
 
     # Note: ignoring incident key and escalation policy for now
 
-    with get_pagerduty_client(email, api_key) as client:
+    with get_pagerduty_client(secret) as client:
         response = client.post(
             "/incidents",
             json=body,

@@ -1,13 +1,11 @@
 "use client";
 
 import { useListSecretsApi } from "@/hooks/use-list-credentials-api";
-import { PlusIcon } from "@radix-ui/react-icons";
-import { Box, Button, Card, Flex, Text } from "@radix-ui/themes";
-import EncryptedSecret from "./encrypted-secret";
-import NewSecret from "./new-secret";
+import { Table } from "@radix-ui/themes";
 import { useEffect } from "react";
 import { useSecretsStore } from "@/stores/secrets-store";
 import ErrorCallout from "../utils/error-callout";
+import SecretRow from "./secret-row";
 
 export default function Secrets() {
 	const {
@@ -15,13 +13,7 @@ export default function Secrets() {
 		isPending: isListingSecretsLoading,
 		error: listingSecretsError,
 	} = useListSecretsApi();
-	const {
-		setSecrets,
-		getNumberOfSecrets,
-		addNewSecret,
-		isNewSecret,
-		clearSecretsStore,
-	} = useSecretsStore();
+	const { secrets, setSecrets, clearSecretsStore } = useSecretsStore();
 
 	useEffect(() => {
 		if (encryptedSecrets) {
@@ -39,42 +31,39 @@ export default function Secrets() {
 	}
 
 	return (
-		<Box width="50%">
-			<Card size="3" variant="classic">
-				<Flex direction="column" gap="5">
-					<Flex justify="between">
-						<Text size="4" weight="medium">
-							Secrets
-						</Text>
+		<Table.Root>
+			<Table.Header>
+				<Table.Row>
+					<Table.ColumnHeaderCell
+						style={{ width: "24px" }}
+					></Table.ColumnHeaderCell>
+					<Table.ColumnHeaderCell style={{ width: "30%" }}>
+						Name
+					</Table.ColumnHeaderCell>
+					<Table.ColumnHeaderCell style={{ width: "15%" }}>
+						Updated
+					</Table.ColumnHeaderCell>
+					<Table.ColumnHeaderCell style={{ width: "15%" }}>
+						Created
+					</Table.ColumnHeaderCell>
+					<Table.ColumnHeaderCell style={{ width: "30%" }}>
+						Author
+					</Table.ColumnHeaderCell>
+					<Table.ColumnHeaderCell
+						style={{ width: "48px" }}
+					></Table.ColumnHeaderCell>
+				</Table.Row>
+			</Table.Header>
 
-						<Button
-							style={{
-								cursor: "pointer",
-							}}
-							onClick={addNewSecret}
-						>
-							Add New Secret
-							<PlusIcon />
-						</Button>
-					</Flex>
-
-					{Array(getNumberOfSecrets())
-						.fill(0)
-						.map((_, idx) =>
-							isNewSecret(idx) ? (
-								<NewSecret
-									key={`new_secret_${idx}`}
-									idx={idx}
-								/>
-							) : (
-								<EncryptedSecret
-									key={`encrypted_secret_${idx}`}
-									idx={idx}
-								/>
-							),
-						)}
-				</Flex>
-			</Card>
-		</Box>
+			<Table.Body>
+				{secrets.map((secret, idx) => (
+					<SecretRow
+						key={`secret_row_${secret.secretId}`}
+						secret={secret}
+						idx={idx}
+					/>
+				))}
+			</Table.Body>
+		</Table.Root>
 	);
 }
