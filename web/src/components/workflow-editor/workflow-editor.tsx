@@ -184,7 +184,7 @@ export default function WorkflowEditor({
 							</Text>
 						</Flex>
 
-						<Flex justify="center" align="center" gap="4">
+						<Flex justify="center" align="center">
 							<Tabs.Root
 								value={view}
 								onValueChange={(page) => setView(page as View)}
