@@ -15,16 +15,12 @@ export function WorkflowRunStatus({ workflowId }: { workflowId: string }) {
 		}
 	}, [data]);
 
-	if (isPending) {
-		return <Text size="2">Loading latest run...</Text>;
+	if (isPending || !latestRun) {
+		return;
 	}
 
 	if (error) {
 		return <ErrorCallout />;
-	}
-
-	if (!latestRun) {
-		return;
 	}
 
 	return (
