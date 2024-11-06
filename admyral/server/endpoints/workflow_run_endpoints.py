@@ -15,7 +15,9 @@ router = APIRouter()
 
 @router.get("/{workflow_id}", status_code=status.HTTP_200_OK)
 async def list_workflow_runs(
-    workflow_id: str, authenticated_user: AuthenticatedUser = Depends(authenticate)
+    workflow_id: str,
+    limit: int | None = 100,
+    authenticated_user: AuthenticatedUser = Depends(authenticate),
 ) -> list[WorkflowRunMetadata]:
     """
     List all workflow runs.
@@ -27,7 +29,7 @@ async def list_workflow_runs(
         A list of workflow runs.
     """
     return await get_admyral_store().list_workflow_runs(
-        authenticated_user.user_id, workflow_id
+        authenticated_user.user_id, workflow_id, limit=limit
     )
 
 
