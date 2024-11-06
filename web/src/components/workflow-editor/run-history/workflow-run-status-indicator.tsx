@@ -11,7 +11,7 @@ export default function WorkflowRunStatusIndicator({
 		// In Progress
 		return (
 			<Flex align="center" gap="2">
-				<Spinner size="1" />
+				<Spinner size="1" aria-label="Workflow run in progress" />
 			</Flex>
 		);
 	}
@@ -20,7 +20,10 @@ export default function WorkflowRunStatusIndicator({
 		// Failure
 		return (
 			<Flex align="center" gap="2">
-				<CrossCircledIcon color="red" />
+				<CrossCircledIcon
+					color="red"
+					aria-label="Workflow run failed"
+				/>
 			</Flex>
 		);
 	}
@@ -28,7 +31,10 @@ export default function WorkflowRunStatusIndicator({
 	// Success
 	return (
 		<Flex align="center" gap="2">
-			<CheckCircledIcon color="green" />
+			<CheckCircledIcon
+				color="green"
+				aria-label="Workflow run succeeded"
+			/>
 		</Flex>
 	);
 }

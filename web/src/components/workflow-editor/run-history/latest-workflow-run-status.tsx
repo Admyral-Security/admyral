@@ -10,7 +10,7 @@ export function WorkflowRunStatus({ workflowId }: { workflowId: string }) {
 	const [latestRun, setLatestRun] = useState<TWorkflowRunMetadata>();
 
 	useEffect(() => {
-		if (data) {
+		if (data && data.length > 0) {
 			setLatestRun(data[0]);
 		}
 	}, [data]);
