@@ -25,7 +25,7 @@ const REFETCH_INTERVAL_1_SECOND = 1_000; // in ms
 
 export const useListWorkflowRunsApi = (workflowId: string, limit?: number) => {
 	return useQuery({
-		queryKey: ["workflowRuns", workflowId],
+		queryKey: ["workflowRuns", workflowId, limit],
 		queryFn: () => buildListWorkflowRunsApi(workflowId, limit)(),
 		refetchInterval: REFETCH_INTERVAL_1_SECOND,
 	});
