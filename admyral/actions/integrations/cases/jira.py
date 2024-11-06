@@ -373,6 +373,6 @@ def get_project(
     secret = JiraSecret.model_validate(secret)
 
     with get_jira_client(secret) as client:
-        response = client.get(f"/project/{projectIdOrKey}")
+        response = client.get(f"/project/{project_id_or_key}")
         response.raise_for_status()
         return response.json()
