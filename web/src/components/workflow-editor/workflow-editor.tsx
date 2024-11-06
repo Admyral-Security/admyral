@@ -24,6 +24,7 @@ import { AxiosError } from "axios";
 import { useRouter } from "next/navigation";
 import { SaveWorkflowProvider } from "@/providers/save-workflow";
 import NewWorkflowModal from "./new-workflow-modal";
+import { WorkflowRunStatus } from "./run-history/latest-workflow-run-status";
 
 type View = "workflowBuilder" | "runHistory";
 
@@ -162,7 +163,7 @@ export default function WorkflowEditor({
 						pt="2"
 						pl="4"
 						pr="4"
-						columns="1fr 200px 1fr"
+						columns="1fr auto 1fr"
 						className="border-b-2 border-gray-200"
 						align="center"
 						height="56px"
@@ -183,25 +184,30 @@ export default function WorkflowEditor({
 							</Text>
 						</Flex>
 
-						<Flex justify="center" align="center">
+						<Flex justify="center" align="center" gap="4">
 							<Tabs.Root
 								value={view}
 								onValueChange={(page) => setView(page as View)}
 							>
-								<Tabs.List size="1">
-									<Tabs.Trigger
-										value="workflowBuilder"
-										style={{ cursor: "pointer" }}
-									>
-										Workflow Builder
-									</Tabs.Trigger>
-									<Tabs.Trigger
-										value="runHistory"
-										style={{ cursor: "pointer" }}
-									>
-										Run History
-									</Tabs.Trigger>
-								</Tabs.List>
+								<Flex align="center">
+									<Tabs.List size="1">
+										<Tabs.Trigger
+											value="workflowBuilder"
+											style={{ cursor: "pointer" }}
+										>
+											Workflow Builder
+										</Tabs.Trigger>
+										<Tabs.Trigger
+											value="runHistory"
+											style={{ cursor: "pointer" }}
+										>
+											Run History
+										</Tabs.Trigger>
+									</Tabs.List>
+									<WorkflowRunStatus
+										workflowId={workflowId}
+									/>
+								</Flex>
 							</Tabs.Root>
 						</Flex>
 

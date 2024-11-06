@@ -1,43 +1,26 @@
 import { useListWorkflowRunsApi } from "@/hooks/use-list-workflow-runs-api";
 import { useToast } from "@/providers/toast";
-import { Box, Flex, Spinner, ScrollArea, Text } from "@radix-ui/themes";
+import { Box, Flex, ScrollArea, Text } from "@radix-ui/themes";
 import { useEffect, useState } from "react";
 import WorkflowRunTrace from "./workflow-run-trace";
 import Row from "./row";
 import ErrorCallout from "@/components/utils/error-callout";
-import { CheckCircledIcon, CrossCircledIcon } from "@radix-ui/react-icons";
 import { TWorkflowRunMetadata } from "@/types/workflow-runs";
+import WorkflowRunStatusIndicator from "./workflow-run-status-indicator";
 
 function WorkflowRunRow({
-	workflowRun: { createdAt, failedAt, completedAt },
+	workflowRun,
 }: {
 	workflowRun: TWorkflowRunMetadata;
 }) {
-	if (failedAt === null && completedAt === null) {
-		// In Progress
-		return (
-			<Flex align="center" justify="between" width="100%">
-				<Text size="1">{createdAt}</Text>
-				<Spinner size="1" />
-			</Flex>
-		);
-	}
+	const createdAtAsReadableString = new Date(
+		workflowRun.createdAt,
+	).toLocaleString("en-US");
 
-	if (completedAt === null) {
-		// Failure
-		return (
-			<Flex align="center" justify="between" width="100%">
-				<Text size="1">{createdAt}</Text>
-				<CrossCircledIcon color="red" />
-			</Flex>
-		);
-	}
-
-	// Success
 	return (
 		<Flex align="center" justify="between" width="100%">
-			<Text size="1">{createdAt}</Text>
-			<CheckCircledIcon color="green" />
+			<Text size="1">{createdAtAsReadableString}</Text>
+			<WorkflowRunStatusIndicator workflowRun={workflowRun} />
 		</Flex>
 	);
 }
