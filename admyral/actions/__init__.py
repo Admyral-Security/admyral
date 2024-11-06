@@ -106,6 +106,7 @@ from admyral.actions.integrations.cloud import (
     aws_list_iam_users,
 )
 from admyral.actions.integrations.database import run_sql_query
+from admyral.actions.controls import pass_control, fail_control
 
 
 __all__ = [
@@ -195,4 +196,6 @@ __all__ = [
     "get_jira_project",
     "get_jira_transitions",
     "select_fields_from_objects_in_list",
+    "pass_control",
+    "fail_control",
 ]

@@ -38,6 +38,7 @@ from admyral.db.schemas import (
     SecretsSchema,
     UserSchema,
     ApiKeySchema,
+    WorkflowControlSchema,
 )
 from admyral.db.alembic.database_manager import DatabaseManager
 from admyral.config.config import GlobalConfig, CONFIG
@@ -1053,3 +1054,23 @@ class AdmyralStore(StoreInterface):
                 updated_at=secret_created_at_updated_at[1],
                 secret_type=secret_type,
             )
+
+    ########################################################
+    # Controls
+    ########################################################
+
+    async def store_workflow_control_result(
+        self,
+        workflow_id: str,
+        run_id: str,
+        result: str,
+    ) -> None:
+        async with self._get_async_session() as db:
+            await db.exec(
+                insert(WorkflowControlSchema).values(
+                    workflow_id=workflow_id,
+                    run_id=run_id,
+                    result=result,
+                )
+            )
+            await db.commit()
