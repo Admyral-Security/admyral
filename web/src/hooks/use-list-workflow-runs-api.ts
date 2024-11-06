@@ -10,23 +10,23 @@ import { HTTPMethod } from "@/types/api";
 const ListWorkflowRunsRequest = z.void();
 const ListWorkflowRunsResponse = z.array(WorkflowRunMetadata);
 
-const buildListWorkflowRunsApi = (workflowId: string) =>
+const buildListWorkflowRunsApi = (workflowId: string, limit?: number) =>
 	api<
 		z.infer<typeof ListWorkflowRunsRequest>,
 		z.infer<typeof ListWorkflowRunsResponse>
 	>({
 		method: HTTPMethod.GET,
-		path: `/api/v1/runs/${workflowId}`,
+		path: `/api/v1/runs/${workflowId}${limit ? `?limit=${limit}` : ""}`,
 		requestSchema: ListWorkflowRunsRequest,
 		responseSchema: ListWorkflowRunsResponse,
 	});
 
 const REFETCH_INTERVAL_1_SECOND = 1_000; // in ms
 
-export const useListWorkflowRunsApi = (workflowId: string) => {
+export const useListWorkflowRunsApi = (workflowId: string, limit?: number) => {
 	return useQuery({
 		queryKey: ["workflowRuns", workflowId],
-		queryFn: () => buildListWorkflowRunsApi(workflowId)(),
+		queryFn: () => buildListWorkflowRunsApi(workflowId, limit)(),
 		refetchInterval: REFETCH_INTERVAL_1_SECOND,
 	});
 };
