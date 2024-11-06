@@ -351,3 +351,28 @@ def get_jira_audit_records(
                 break
 
         return logs if limit is None else logs[:limit]
+
+
+@action(
+    display_name="Get Project",
+    display_namespace="Jira",
+    description="Get a Jira project",
+    secrets_placeholders=["JIRA_SECRET"],
+)
+def get_project(
+    project_id_or_key: Annotated[
+        str,
+        ArgumentMetadata(
+            display_name="Project ID or Key",
+            description="The ID or the key of the project",
+        ),
+    ],
+) -> dict[str, JsonValue]:
+    # https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-projects/#api-rest-api-3-project-projectidorkey-get
+    secret = ctx.get().secrets.get("JIRA_SECRET")
+    secret = JiraSecret.model_validate(secret)
+
+    with get_jira_client(secret) as client:
+        response = client.get(f"/project/{projectIdOrKey}")
+        response.raise_for_status()
+        return response.json()
