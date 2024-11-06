@@ -78,12 +78,18 @@ export default function WorkflowRunTrace({
 							selected={idx === selectedStepIdx}
 							onClickOnUnselectedRow={() => handleClickStep(idx)}
 						>
-							<Flex align="center" justify="between" width="100%">
-								<ActionIcon
-									actionType={workflowStep.actionType}
-								/>
+							<Flex align="center" width="100%" gap="2">
+								<Flex
+									width="24px"
+									height="24px"
+									justify="center"
+								>
+									<ActionIcon
+										actionType={workflowStep.actionType}
+									/>
+								</Flex>
 								<Flex align="center" justify="center" gap="1">
-									<Text size="1">
+									<Text size="1" align="left">
 										{workflowStep.actionType === "start"
 											? "Start"
 											: actionsIndex[
