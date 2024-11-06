@@ -1,0 +1,26 @@
+category: Logical and Physical Access Controls
+# CC == common criteria
+id: CC6.3
+title: Implements Role-Based Access Controls with Least Privilege and Segregation of Duties
+description: >
+    The entity authorizes, modifies, or removes access to data, software, functions, and other protected information 
+    assets based on roles, responsibilities, or the system design and changes, giving consideration to the concepts 
+    of least privilege and segregation of duties, to meet the entity's objectives.
+# The following points of focus, specifically related to all engagements using the trust services cri- teria, highlight important characteristics relating to this criterion:
+# points of focus == evaluation framework, implementation guidance/details
+points_of_focus:
+    - name: Creates or Modifies Access to Protected Information Assets
+      description: >
+          Processes are in place to create or modify access to protected information assets based on authorization 
+          from the asset's owner.
+    - name: Removes Access to Protected Information Assets
+      description: >
+          Processes are in place to remove access to protected information assets when an individual no longer 
+          requires access.
+    - name: Uses Role-Based Access Controls
+      description: >
+          Role-based access control is utilized to support segregation of incompatible functions.
+    - name: Reviews Access Roles and Rules
+      description: >
+          The appropriateness of access roles and access rules is reviewed on a periodic basis for unnecessary and 
+          inappropriate individuals with access and access rules are modified as appropriate.

@@ -1,0 +1,50 @@
+category: Logical and Physical Access Controls
+# CC == common criteria
+id: CC6.1
+title: Implementation of Logical Access Security Controls and Architecture for Protected Information Assets
+description: >
+    The entity implements logical access security software, infrastructure, and architectures over 
+    protected information assets to protect them from security events to meet the entity's objectives.
+# The following points of focus, specifically related to all engagements using the trust services cri- teria, highlight important characteristics relating to this criterion:
+# points of focus == evaluation framework, implementation guidance/details
+points_of_focus:
+    - name: Identifies and Manages the Inventory of Information Assets
+      description: >
+          The entity identifies, inventories, classifies, and manages information assets.
+    - name: Restricts Logical Access
+      description: >
+          Logical access to information assets, including hardware, data (at-rest, during processing, or in transmission), 
+          software, administrative authorities, mobile devices, output, and offline system components is restricted through 
+          the use of access control software and rule sets.
+    - name: Identifies and Authenticates Users
+      description: >
+          Persons, infrastructure, and software are identified and authenticated prior to accessing information assets, 
+          whether locally or remotely
+    - name: Considers Network Segmentation
+      description: >
+          Network segmentation permits unrelated portions of the entity's information system to be isolated from each other.
+    - name: Manages Points of Access
+      description: >
+          Points of access by outside entities and the types of data that flow through the points of access are identified, 
+          inventoried, and managed. The types of individuals and systems using each point of access are identified, 
+          documented, and managed.
+    - name: Restricts Access to Information Assets
+      description: >
+          Combinations of data classification, separate data structures, port restrictions, access protocol restrictions, 
+          user identification, and digital certificates are used to establish access-control rules for information assets.
+    - name: Manages Identification and Authentication
+      description: >
+          Identification and authentication requirements are established, documented, and managed for individuals and systems 
+          accessing entity information, infrastructure, and software.
+    - name: Manages Credentials for Infrastructure and Software
+      description: >
+          New internal and external infrastructure and software are registered, authorized, and documented prior to being 
+          granted access credentials and implemented on the network or access point. Credentials are removed and access is 
+          disabled when access is no longer required or the infrastructure and software are no longer in use.
+    - name: Uses Encryption to Protect Data
+      description: >
+          The entity uses encryption to supplement other measures used to protect data at rest, when such protections 
+          are deemed appropriate based on assessed risk.
+    - name: Protects Encryption Keys
+      description: >
+          Processes are in place to protect encryption keys during generation, storage, use, and destruction.

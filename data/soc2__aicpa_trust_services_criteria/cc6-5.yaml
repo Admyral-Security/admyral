@@ -1,0 +1,18 @@
+category: Logical and Physical Access Controls
+# CC == common criteria
+id: CC6.5
+title: Implements Secure Data and Software Disposal for Decommissioned Physical Assets
+description: >
+    The entity discontinues logical and physical protections over physical assets only after the ability to read or recover 
+    data and software from those assets has been diminished and is no longer required to meet the entity's objectives.
+# The following points of focus, specifically related to all engagements using the trust services cri- teria, highlight important characteristics relating to this criterion:
+# points of focus == evaluation framework, implementation guidance/details
+points_of_focus:
+    - name: Identifies Data and Software for Disposal
+      description: >
+          Procedures are in place to identify data and software stored on equipment to be disposed and to render 
+          such data and software unreadable.
+    - name: Removes Data and Software From Entity Control
+      description: >
+          Procedures are in place to re- move data and software stored on equipment to be removed from the physical control 
+          of the entity and to render such data and software unreadable.

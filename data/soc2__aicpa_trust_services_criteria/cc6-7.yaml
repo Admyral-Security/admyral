@@ -1,0 +1,24 @@
+category: Logical and Physical Access Controls
+# CC == common criteria
+id: CC6.7
+title: Implements Data Protection Controls for Information Transmission, Movement, and Removal
+description: >
+    The entity restricts the transmission, movement, and removal of information to authorized internal and external users and processes, 
+    and protects it during transmission, movement, or removal to meet the entity’s objectives.
+# The following points of focus, specifically related to all engagements using the trust services cri- teria, highlight important characteristics relating to this criterion:
+# points of focus == evaluation framework, implementation guidance/details
+points_of_focus:
+    - name: Restricts the Ability to Perform Transmission
+      description: >
+          Data loss prevention processes and technologies are used to restrict ability to authorize and execute transmission, movement, 
+          and removal of information.
+    - name: Uses Encryption Technologies or Secure Communication Channels to Protect Data
+      description: >
+          Encryption technologies or secured communication channels are used to protect transmission of data and other communications 
+          beyond connectivity access points.
+    - name: Protects Removal Media
+      description: >
+          Encryption technologies and physical asset protections are used for removable media (such as USB drives and backup tapes), as appropriate.
+    - name: Protects Mobile Devices
+      description: >
+          Processes are in place to protect mobile devices (such as laptops, smart phones, and tablets) that serve as information assets.

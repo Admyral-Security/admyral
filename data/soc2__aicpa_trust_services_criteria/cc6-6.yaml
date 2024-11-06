@@ -1,0 +1,22 @@
+category: Logical and Physical Access Controls
+# CC == common criteria
+id: CC6.6
+title: Implements External Access Security Controls and Boundary Protection Systems
+description: >
+    The entity implements logical access security measures to protect against threats from sources out- side its system boundaries.
+# The following points of focus, specifically related to all engagements using the trust services cri- teria, highlight important characteristics relating to this criterion:
+# points of focus == evaluation framework, implementation guidance/details
+points_of_focus:
+    - name: Restricts Access
+      description: >
+          The types of activities that can occur through a communication channel (for example, FTP site, router port) are restricted.
+    - name: Protects Identification and Authentication Credentials
+      description: >
+          Identification and authentication credentials are protected during transmission outside its system boundaries.
+    - name: Requires Additional Authentication or Credentials
+      description: >
+          Additional authentication information or credentials are required when accessing the system from outside its boundaries.
+    - name: Implements Boundary Protection Systems
+      description: >
+          Boundary protection systems (for ex- ample, firewalls, demilitarized zones, and intrusion detection systems) are implemented 
+          to protect external access points from attempts and unauthorized access and are monitored to detect such attempts.

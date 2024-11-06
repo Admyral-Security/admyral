@@ -8,6 +8,7 @@ from admyral.server.endpoints.workflow_run_endpoints import (
 )
 from admyral.server.endpoints.api_key_endpoints import router as api_key_router
 from admyral.server.endpoints.user_endpoints import router as user_router
+from admyral.server.endpoints.policy_endpoints import router as policy_router
 
 __all__ = [
     "action_router",
@@ -18,4 +19,5 @@ __all__ = [
     "workflow_run_router",
     "api_key_router",
     "user_router",
+    "policy_router",
 ]

@@ -1,11 +1,10 @@
 import SideNavInnerPage from "@/components/side-nav-inner-page/side-nav-inner-page";
-import { Box, Flex, Grid, Text } from "@radix-ui/themes";
-import { ReactNode } from "react";
+import { Box, Button, Flex, Grid, Text } from "@radix-ui/themes";
 
-export default function SettingsPageLayout({
+export default function PoliciesLayout({
 	children,
 }: {
-	children: ReactNode;
+	children: React.ReactNode;
 }) {
 	return (
 		<Grid rows="56px 1fr" width="auto" height="100%">
@@ -27,7 +26,7 @@ export default function SettingsPageLayout({
 					}}
 				>
 					<Text size="4" weight="medium">
-						Settings
+						Policy Management
 					</Text>
 				</Flex>
 			</Box>
@@ -38,26 +37,27 @@ export default function SettingsPageLayout({
 				height="calculate(100vh - 56px)"
 			>
 				<SideNavInnerPage
-					basePath="/settings"
+					basePath="/policies"
 					paths={[
 						{
-							href: "/settings",
-							title: "Account",
-							selectionCriteria: ["/settings"],
+							href: "/policies",
+							title: "Policies",
+							selectionCriteria: [
+								"/policies",
+								"/policies/policy",
+							],
 						},
 						{
-							href: "/settings/secrets",
-							title: "Secrets",
-							selectionCriteria: ["/settings/secrets"],
-						},
-						{
-							href: "/settings/api-keys",
-							title: "API Keys",
-							selectionCriteria: ["/settings/api-keys"],
+							href: "/policies/audit",
+							title: "Audit",
+							selectionCriteria: ["/policies/audit"],
 						},
 					]}
 				/>
-				<Box>{children}</Box>
+
+				<Box width="100%" height="calc(100vh - 56px)">
+					{children}
+				</Box>
 			</Grid>
 		</Grid>
 	);

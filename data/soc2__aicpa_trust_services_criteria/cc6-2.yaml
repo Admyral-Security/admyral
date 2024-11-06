@@ -1,0 +1,23 @@
+category: Logical and Physical Access Controls
+# CC == common criteria
+id: CC6.2
+title: Implements Registration, Authorization, and Deprovisioning of System Credentials for User Access Management
+description: >
+    Prior to issuing system credentials and granting system access, the entity registers and authorizes
+    new internal and external users whose access is administered by the entity. For those users whose 
+    access is administered by the entity, user system credentials are removed when user access is no 
+    longer authorized.
+# The following points of focus, specifically related to all engagements using the trust services cri- teria, highlight important characteristics relating to this criterion:
+# points of focus == evaluation framework, implementation guidance/details
+points_of_focus:
+    - name: Controls Access Credentials to Protected Assets
+      description: >
+          Information asset access credentials are created based on an authorization from the system's 
+          asset owner or authorized custodian.
+    - name: Removes Access to Protected Assets When Appropriate
+      description: >
+          Processes are in place to remove credential access when an individual no longer requires such access.
+    - name: Reviews Appropriateness of Access Credentials
+      description: >
+          The appropriateness of access credentials is reviewed on a periodic basis for unnecessary and 
+          inappropriate individuals with credentials.

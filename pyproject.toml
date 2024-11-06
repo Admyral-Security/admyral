@@ -59,6 +59,12 @@ pymysql = "^1.1.1"
 google-api-python-client = "^2.149.0"
 python-dateutil = "^2.9.0.post0"
 tenacity = "^9.0.0"
+autogen-core = "0.4.0.dev4"
+langsmith = "^0.1.140"
+langchain-qdrant = "^0.2.0"
+tiktoken = "^0.8.0"
+langchain-openai = "^0.2.6"
+langchain-text-splitters = "^0.3.2"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.2.2"

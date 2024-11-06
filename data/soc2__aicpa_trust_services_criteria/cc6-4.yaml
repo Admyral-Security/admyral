@@ -1,0 +1,20 @@
+category: Logical and Physical Access Controls
+# CC == common criteria
+id: CC6.4
+title: Implements Physical Access Controls for Facilities and Protected Information Assets
+description: >
+    The entity restricts physical access to facilities and protected information assets (for example, data center facilities, 
+    backup media storage, and other sensitive locations) to authorized personnel to meet the entity's objectives.
+# The following points of focus, specifically related to all engagements using the trust services cri- teria, highlight important characteristics relating to this criterion:
+# points of focus == evaluation framework, implementation guidance/details
+points_of_focus:
+    - name: Creates or Modifies Physical Access
+      description: >
+          Processes are in place to create or modify physical access to facilities such as data centers, office spaces, and 
+          work areas, based on authorization from the system's asset owner.
+    - name: Removes Physical Access
+      description: >
+          Processes are in place to remove access to physical resources when an individual no longer requires access.
+    - name: Reviews Physical Access
+      description: >
+          Processes are in place to periodically review physical access to ensure consistency with job responsibilities.

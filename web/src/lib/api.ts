@@ -78,7 +78,7 @@ export default function api<Request, Response>({
 				const responseData =
 					contentLength && parseInt(contentLength, 10) > 0
 						? await response.json()
-						: "";
+						: await response.text();
 
 				return responseSchema.parse(responseData) as Response;
 			} catch (error) {

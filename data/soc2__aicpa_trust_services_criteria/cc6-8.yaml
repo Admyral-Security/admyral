@@ -1,0 +1,25 @@
+category: Logical and Physical Access Controls
+# CC == common criteria
+id: CC6.8
+title: Implements Controls for Prevention and Detection of Unauthorized Software
+description: >
+    The entity implements controls to prevent or detect and act upon the introduction of unauthorized or malicious software to meet the entity's objectives.
+# The following points of focus, specifically related to all engagements using the trust services cri- teria, highlight important characteristics relating to this criterion:
+# points of focus == evaluation framework, implementation guidance/details
+points_of_focus:
+    - name: Restricts Application and Software Installation
+      description: >
+          The ability to install applications and software is restricted to authorized individuals.
+    - name: Detects Unauthorized Changes to Software and Configuration Parameters
+      description: >
+          Processes are in place to detect changes to software and configuration parameters that may be indicative of unauthorized or malicious software.
+    - name: Uses a Defined Change Control Process
+      description: >
+          A management-defined change control process is used for the implementation of software.
+    - name: Uses Antivirus and Anti-Malware Software
+      description: >
+          Antivirus and anti-malware software is used to detect and remove unauthorized or malicious software.
+    - name: Scans Information Assets from Outside the Entity for Malware and Other Unauthor- ized Software
+      description: >
+          Procedures are in place to scan information assets that have been transferred or returned to the entity's custody for malware and other 
+          unauthorized software and to remove any items detected prior to its implementation on the network.

@@ -13,3 +13,6 @@ export const GITHUB_SECRET = process.env.AUTH_GITHUB_SECRET;
 
 export const GOOGLE_CLIENT_ID = process.env.AUTH_GOOGLE_ID;
 export const GOOGLE_CLIENT_SECRET = process.env.AUTH_GOOGLE_SECRET;
+
+export const SHOW_COPILOT_DEV_CONSOLE =
+	(process.env.SHOW_COPILOT_DEV_CONSOLE || "false") === "true";
