@@ -1,0 +1,41 @@
+import { Callout } from "nextra/components";
+
+# Get Transitions
+
+Get transitions for a Jira issue. **This is useful for updating the issue status.**
+
+<Callout type="info">
+	For more information on the API, see [Get
+	Transitions](https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issues/#api-rest-api-3-issue-issueidorkey-transitions-get).
+</Callout>
+
+**SDK Import:**
+
+```python
+from admyral.actions import get_jira_transitions
+```
+
+## Arguments:
+
+| Argument Name                         | Description                     | Required |
+| ------------------------------------- | ------------------------------- | :------: |
+| **Issue ID or Key** `issue_id_or_key` | The ID or the key of the issue. |   Yes    |
+
+## Returns
+
+A JSON object.
+
+## Required Secrets
+
+| Secret Placeholder | Description                                            |
+| ------------------ | ------------------------------------------------------ |
+| `JIRA_SECRET`      | Jira secret. See [Jira setup](/integrations/jira/jira) |
+
+## SDK Example
+
+```python
+get_jira_transitions(
+    issue_id_or_key="SJ-1",
+    secrets={"JIRA_SECRET": "my_stored_jira_secret"}
+)
+```

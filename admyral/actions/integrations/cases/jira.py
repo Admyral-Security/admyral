@@ -376,3 +376,28 @@ def get_project(
         response = client.get(f"/project/{project_id_or_key}")
         response.raise_for_status()
         return response.json()
+
+
+@action(
+    display_name="Get Transitions",
+    display_namespace="Jira",
+    description="Get a Jira transition",
+    secrets_placeholders=["JIRA_SECRET"],
+)
+def get_jira_transitions(
+    issue_id_or_key: Annotated[
+        str,
+        ArgumentMetadata(
+            display_name="Issue ID or Key",
+            description="The ID or the key of the issue",
+        ),
+    ],
+) -> list[dict[str, JsonValue]]:
+    # https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issues/#api-rest-api-3-issue-issueidorkey-transitions-get
+    secret = ctx.get().secrets.get("JIRA_SECRET")
+    secret = JiraSecret.model_validate(secret)
+
+    with get_jira_client(secret) as client:
+        response = client.get(f"/issue/{issue_id_or_key}/transitions")
+        response.raise_for_status()
+        return response.json()
