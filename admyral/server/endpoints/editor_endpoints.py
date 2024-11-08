@@ -1,7 +1,6 @@
 from fastapi import APIRouter, status, HTTPException, Depends
 from collections import defaultdict
 from sqlalchemy.exc import IntegrityError
-import re
 
 from admyral.action_registry import ActionRegistry
 from admyral.server.deps import get_admyral_store
@@ -20,9 +19,6 @@ from admyral.editor import (
 )
 from admyral.server.endpoints.workflow_endpoints import push_workflow_impl
 from admyral.server.auth import authenticate
-
-
-VALID_WORKFLOW_NAME_REGEX = re.compile(r"^[a-zA-Z][a-zA-Z0-9 ]*$")
 
 
 router = APIRouter()
@@ -117,12 +113,6 @@ async def save_workflow_from_react_flow_graph(
     """
     Save a workflow from a ReactFlow graph.
     """
-    if not VALID_WORKFLOW_NAME_REGEX.match(editor_workflow_graph.workflow_name):
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid workflow name. Workflow names must start with a letter and can only contain alphanumeric characters and spaces.",
-        )
-
     workflow = editor_workflow_graph_to_workflow(editor_workflow_graph)
     try:
         return await push_workflow_impl(
