@@ -1,3 +1,4 @@
+import CodeEditor from "@/components/code-editor/code-editor";
 import ErrorCallout from "@/components/utils/error-callout";
 import { useGetWorkflowRunStepApi } from "@/hooks/use-get-workflow-run-step-api";
 import { useToast } from "@/providers/toast";
@@ -129,28 +130,17 @@ export default function WorkflowRunStep({
 					</Tabs.List>
 
 					<Tabs.Content value="result">
-						<ScrollArea
-							type="hover"
-							scrollbars="both"
-							style={{
-								height: "calc((100vh - 56px) / 2 - 100px)",
-								fontSize: "14px",
-							}}
-						>
-							<CodeBlock
-								text={
+						<Flex height="calc((100vh - 56px) / 2 - 100px)" mt="2">
+							<CodeEditor
+								value={
 									isError
 										? data.error!
 										: JSON.stringify(data.result, null, 4)
 								}
 								language="json"
-								showLineNumbers
-								theme={a11yLight}
-								customStyle={{
-									overflow: "none",
-								}}
+								readOnly
 							/>
-						</ScrollArea>
+						</Flex>
 					</Tabs.Content>
 
 					<Tabs.Content value="logs">
