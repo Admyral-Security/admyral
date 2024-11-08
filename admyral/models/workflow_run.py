@@ -15,6 +15,16 @@ class WorkflowRunStep(BaseModel):
     input_args: JsonValue | None = None
 
 
+class WorkflowRunStepWithSerializedResult(BaseModel):
+    step_id: str
+    action_type: str
+    prev_step_id: str | None = None
+    logs: str | None = None
+    result: str | None = None
+    error: str | None = None
+    input_args: JsonValue | None = None
+
+
 class WorkflowRun(BaseModel):
     run_id: str
     trigger_id: int

@@ -27,7 +27,7 @@ export const WorkflowRunStep = withCamelCaseTransform(
 		action_type: z.string(),
 		prev_step_id: z.string().nullable(),
 		logs: z.string().nullable(),
-		result: Json.nullable(),
+		result: z.string().nullable(),
 		error: z.string().nullable(),
 		input_args: Json.nullable(),
 	}),
