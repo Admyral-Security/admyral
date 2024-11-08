@@ -1,4 +1,4 @@
-import CodeEditor from "@/components/code-editor/code-editor";
+import CodeEditorWithDialog from "@/components/code-editor-with-dialog/code-editor-with-dialog";
 import ErrorCallout from "@/components/utils/error-callout";
 import { useGetWorkflowRunStepApi } from "@/hooks/use-get-workflow-run-step-api";
 import { useToast } from "@/providers/toast";
@@ -130,8 +130,9 @@ export default function WorkflowRunStep({
 					</Tabs.List>
 
 					<Tabs.Content value="result">
-						<Flex height="calc((100vh - 56px) / 2 - 100px)" mt="2">
-							<CodeEditor
+						<Flex height="calc((100vh - 56px) / 2 - 110px)" mt="5">
+							<CodeEditorWithDialog
+								title={isError ? "Error" : "Result"}
 								value={
 									isError
 										? data.error!
