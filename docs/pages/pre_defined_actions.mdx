@@ -545,3 +545,42 @@ employee_departments = join_lists(
 #     }
 # ]
 ```
+
+## Select Fields from Objects in List
+
+Extract specific fields from each object in a list. For each object in the input list, create a new object containing only the specified fields. If a field doesn't exist in an object,
+that entry will raise a KeyError. The field names must exactly match the keys in the objects.
+
+Example field selections:
+
+```
+["name", "email"] - extracts just the name and email fields
+["id", "created_at", "status"] - extracts multiple top-level fields
+```
+
+| Parameter    | Type | Description                                      | Required/Optional |
+| ------------ | ---- | ------------------------------------------------ | ----------------- |
+| `input_list` | list | The list of JSON objects to extract fields from. | Required          |
+| `fields`     | list | The field names to select from each object.      | Required          |
+
+Usage Examples:
+
+```python
+# Given a list of user objects with multiple fields
+users = [
+    {"id": 1, "name": "John", "email": "john@example.com", "role": "admin"},
+    {"id": 2, "name": "Jane", "email": "jane@example.com", "role": "user"}
+]
+
+# Extract just the name and email fields
+simplified_users = select_fields_from_objects_in_list(
+    input_list=users,
+    fields=["name", "email"]
+)
+
+# Result:
+# [
+#     {"name": "John", "email": "john@example.com"},
+#     {"name": "Jane", "email": "jane@example.com"}
+# ]
+```

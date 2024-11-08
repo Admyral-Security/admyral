@@ -14,6 +14,7 @@ from admyral.actions.utilities import (
     build_lookup_table,
     filter,
     join_lists,
+    select_fields_from_objects_in_list,
 )
 from admyral.actions.integrations.communication import (
     send_slack_message,
@@ -193,4 +194,5 @@ __all__ = [
     "list_google_drive_files_with_link_sharing_enabled",
     "get_jira_project",
     "get_jira_transitions",
+    "select_fields_from_objects_in_list",
 ]

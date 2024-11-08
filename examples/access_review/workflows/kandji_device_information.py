@@ -1,7 +1,7 @@
 """
 
 admyral action push transform_kandji_devices_information -a workflows/kandji_device_information.py
-admyral workflow push kandji_device_information -f workflows/kandji_device_information.py
+admyral workflow push kandji_device_information -f workflows/kandji_device_information.py --activate
 
 Required Kandji Permissions:
 - Application Firewall
@@ -19,10 +19,10 @@ from admyral.actions import (
     list_kandji_devices,
     get_kandji_application_firewall,
     get_kandji_desktop_and_screensaver,
-    get_kandji_library_item_statuses,
     join_lists,
     format_json_to_list_view_string,
     send_slack_message,
+    select_fields_from_objects_in_list,
 )
 from admyral.action import action, ArgumentMetadata
 
@@ -52,7 +52,6 @@ def transform_kandji_devices_information(
             "Lock Screensaver Interval": device[
                 "desktop_and_screensaver_screensaver_interval"
             ],
-            "Passcode Profile Status": device["passcode_profile_status"],
         }
         formatted.append(formatted_device)
     return formatted
@@ -65,9 +64,17 @@ def transform_kandji_devices_information(
 def kandji_device_information(payload: dict[str, JsonValue]):
     # get OS version
     devices = list_kandji_devices(secrets={"KANDJI_SECRET": "kandji_secret"})
+    devices = select_fields_from_objects_in_list(
+        input_list=devices,
+        fields=["device_id", "device_name", "platform", "os_version"],
+    )
 
     device_status_application_firewall = get_kandji_application_firewall(
         secrets={"KANDJI_SECRET": "kandji_secret"},
+    )
+    device_status_application_firewall = select_fields_from_objects_in_list(
+        input_list=device_status_application_firewall,
+        fields=["device_id", "status"],
     )
     result = join_lists(
         list1=devices,
@@ -80,24 +87,16 @@ def kandji_device_information(payload: dict[str, JsonValue]):
     device_status_desktop_and_screensaver = get_kandji_desktop_and_screensaver(
         secrets={"KANDJI_SECRET": "kandji_secret"}
     )
+    device_status_desktop_and_screensaver = select_fields_from_objects_in_list(
+        input_list=device_status_desktop_and_screensaver,
+        fields=["device_id", "screensaver_interval"],
+    )
     result = join_lists(
         list1=result,
         list1_join_key_paths=[["device_id"]],
         list2=device_status_desktop_and_screensaver,
         list2_join_key_paths=[["device_id"]],
         key_prefix_list2="desktop_and_screensaver_",
-    )
-
-    device_status_passcode_profile = get_kandji_library_item_statuses(
-        library_item_id="46e31b6e-6d9e-43b8-adf1-9034e94d507e",  # TODO: set to your Passcode Profile ID here
-        secrets={"KANDJI_SECRET": "kandji_secret"},
-    )
-    result = join_lists(
-        list1=result,
-        list1_join_key_paths=[["device_id"]],
-        list2=device_status_passcode_profile,
-        list2_join_key_paths=[["computer", "id"]],
-        key_prefix_list2="passcode_profile_",
     )
 
     formatted_devices = transform_kandji_devices_information(devices=result)

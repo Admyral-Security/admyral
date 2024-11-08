@@ -387,3 +387,27 @@ def join_lists(
             join_result.append(new_entry)
 
     return join_result
+
+
+@action(
+    display_name="Select Fields from Objects in List",
+    display_namespace="Admyral",
+    description="Selects fields from a list of JSON objects.",
+)
+def select_fields_from_objects_in_list(
+    input_list: Annotated[
+        list[dict[str, JsonValue]],
+        ArgumentMetadata(
+            display_name="Input List",
+            description="The list of objects to select fields from.",
+        ),
+    ],
+    fields: Annotated[
+        list[str],
+        ArgumentMetadata(
+            display_name="Fields",
+            description="The keys to select from the objects.",
+        ),
+    ],
+) -> list[dict[str, JsonValue]]:
+    return [{field: x[field] for field in fields} for x in input_list]
