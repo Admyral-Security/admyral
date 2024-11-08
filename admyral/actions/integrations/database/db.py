@@ -41,6 +41,8 @@ def run_sql_query(
     db_uri = secret.uri
     if db_uri.startswith("mysql://"):
         db_uri = db_uri.replace("mysql://", "mysql+pymysql://")
+    if db_uri.startswith("postgres://"):
+        db_uri = db_uri.replace("postgres://", "postgresql://")
 
     with create_engine(db_uri).connect() as connection:
         result = connection.execute(text(sql_query))
