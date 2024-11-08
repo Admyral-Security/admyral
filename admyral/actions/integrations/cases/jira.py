@@ -8,6 +8,7 @@ from admyral.action import action, ArgumentMetadata
 from admyral.context import ctx
 from admyral.utils.collections import is_empty
 from admyral.secret.secret import register_secret
+from admyral.exceptions import NonRetryableActionError
 
 
 @register_secret(secret_type="Jira")
@@ -180,20 +181,38 @@ def update_jira_issue_status(
             description="The ID or the key of the issue",
         ),
     ],
-    transition_id: Annotated[
-        str,
+    status: Annotated[
+        str | None,
         ArgumentMetadata(
-            display_name="Transition ID",
-            description="The ID of the transition",
+            display_name="Status",
+            description="The status to set the issue to",
         ),
     ],
 ) -> None:
     # https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issues/#api-rest-api-3-issue-issueidorkey-transitions-post
     # https://community.atlassian.com/t5/Jira-questions/How-do-i-find-a-transition-ID/qaq-p/2113213
+    # https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issues/#api-rest-api-3-issue-issueidorkey-transitions-get
     secret = ctx.get().secrets.get("JIRA_SECRET")
     secret = JiraSecret.model_validate(secret)
 
     with get_jira_client(secret) as client:
+        response = client.get(f"/issue/{issue_id_or_key}/transitions")
+        response.raise_for_status()
+        transitions = response.json()
+        transition_id = next(
+            (
+                t["id"]
+                for t in transitions.get("transitions", [])
+                if t["name"].lower() == status.lower()
+            ),
+            None,
+        )
+        if transition_id is None:
+            raise NonRetryableActionError(
+                f"Could not move the Jira issue into status {status} because there is no transition "
+                "into this status from the current status."
+            )
+
         response = client.post(
             f"/issue/{issue_id_or_key}/transitions",
             json={
@@ -359,7 +378,7 @@ def get_jira_audit_records(
     description="Get a Jira project",
     secrets_placeholders=["JIRA_SECRET"],
 )
-def get_project(
+def get_jira_project(
     project_id_or_key: Annotated[
         str,
         ArgumentMetadata(
