@@ -126,9 +126,6 @@ async def download_workflow_run_step_result(
     if not step:
         raise HTTPException(status_code=404, detail="Step not found")
 
-    if not step.result:
-        raise HTTPException(status_code=404, detail="No result available")
-
     # Convert to JSON and create a string buffer
     json_str = json.dumps(step.result, indent=4)
     json_bytes = json_str.encode("utf-8")
