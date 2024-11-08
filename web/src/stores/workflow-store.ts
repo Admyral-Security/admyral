@@ -96,6 +96,7 @@ type WorkflowStoreState = TReactFlowGraph & {
 		nodeId: string,
 		secretPlaceholer: string,
 	) => void;
+	deleteEdge: (edgeId: string) => void;
 	// Settings Side Panel
 	detailPageType: "workflow" | "action" | null;
 	selectedNodeIdx: number | null;
@@ -406,6 +407,14 @@ export const useWorkflowStore = create<WorkflowStoreState>((set, get) => ({
 				if (secretPlaceholdersWithDeletedSecrets?.size === 0) {
 					draft.deletedSecretsForNodes?.delete(nodeId);
 				}
+			}),
+		),
+	deleteEdge: (edgeId: string) =>
+		set(
+			produce((draft) => {
+				draft.edges = draft.edges.filter(
+					(edge: TReactFlowEdge) => edge.id !== edgeId,
+				);
 			}),
 		),
 	deleteNodeByIdx: (nodeIdx: number) =>

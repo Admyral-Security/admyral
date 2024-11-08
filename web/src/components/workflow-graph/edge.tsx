@@ -1,4 +1,13 @@
-import { BaseEdge, EdgeProps, getBezierPath, Edge } from "reactflow";
+import { useWorkflowStore } from "@/stores/workflow-store";
+import { Cross1Icon } from "@radix-ui/react-icons";
+import { IconButton } from "@radix-ui/themes";
+import {
+	BaseEdge,
+	EdgeProps,
+	getBezierPath,
+	Edge,
+	EdgeLabelRenderer,
+} from "reactflow";
 
 export type DirectedEdge = Edge;
 
@@ -11,12 +20,13 @@ export default function DirectedEdgeComponent({
 	markerEnd,
 	selected,
 }: EdgeProps) {
-	const [edgePath] = getBezierPath({
+	const [edgePath, labelX, labelY] = getBezierPath({
 		sourceX,
 		sourceY,
 		targetX,
 		targetY,
 	});
+	const { deleteEdge } = useWorkflowStore();
 
 	return (
 		<>
@@ -41,6 +51,26 @@ export default function DirectedEdgeComponent({
 						strokeOpacity: 0.4,
 					}}
 				/>
+			)}
+			{selected && (
+				<EdgeLabelRenderer>
+					<IconButton
+						style={{
+							position: "absolute",
+							transform: `translate(-50%, -50%) translate(${labelX}px, ${labelY}px)`,
+							pointerEvents: "all",
+							cursor: "pointer",
+							height: "15px",
+							width: "15px",
+							backgroundColor:
+								"var(--Accent-color-Accent-9, #3E63DD)",
+							borderRadius: "50%",
+						}}
+						onClick={() => deleteEdge(id)}
+					>
+						<Cross1Icon height="8" width="8" color="white" />
+					</IconButton>
+				</EdgeLabelRenderer>
 			)}
 		</>
 	);
