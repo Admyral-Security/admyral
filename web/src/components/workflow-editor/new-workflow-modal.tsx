@@ -1,7 +1,7 @@
 "use client";
 
+import { useCreateWorkflow } from "@/hooks/use-create-workflow";
 import { isValidWorkflowName } from "@/lib/workflow-validation";
-import useSaveWorkflow from "@/providers/save-workflow";
 import { useWorkflowStore } from "@/stores/workflow-store";
 import { Button, Dialog, Flex, Text, TextField } from "@radix-ui/themes";
 import { useRouter } from "next/navigation";
@@ -9,17 +9,11 @@ import { useState } from "react";
 
 export default function NewWorkflowModal() {
 	const router = useRouter();
-	const { isNew, setIsNew, workflowName, setWorkflowName } =
-		useWorkflowStore();
-	const { saveWorkflow, isPending } = useSaveWorkflow();
+	const { isNew, workflowName, setWorkflowName } = useWorkflowStore();
+	const { createWorkflow, isPending, errorMessage } = useCreateWorkflow();
 	const [validWorkflowName, setValidWorkflowName] = useState<boolean>(true);
 
 	const handleCancelWorkflow = () => router.push("/");
-
-	const handleCreateWorkflow = async () => {
-		await saveWorkflow();
-		setIsNew(false);
-	};
 
 	return (
 		<Dialog.Root open={isNew}>
@@ -60,6 +54,12 @@ export default function NewWorkflowModal() {
 					</label>
 				</Flex>
 
+				{errorMessage && (
+					<Text as="div" size="2" mb="1" weight="bold" color="red">
+						{errorMessage}
+					</Text>
+				)}
+
 				<Flex gap="3" mt="4" justify="end">
 					<Button
 						variant="soft"
@@ -76,7 +76,7 @@ export default function NewWorkflowModal() {
 						}
 						style={{ cursor: "pointer" }}
 						loading={isPending}
-						onClick={handleCreateWorkflow}
+						onClick={createWorkflow}
 					>
 						Create Workflow
 					</Button>

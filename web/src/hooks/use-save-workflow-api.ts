@@ -10,7 +10,7 @@ import {
 import { withCamelCaseTransform } from "@/types/utils";
 import { HTTPMethod } from "@/types/api";
 
-// POST /editor/workflows
+// POST /editor/workflow
 const SaveWorkflowResponse = withCamelCaseTransform(
 	z.object({
 		webhook_id: z.string().nullable(),
