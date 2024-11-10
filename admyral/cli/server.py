@@ -72,12 +72,14 @@ def up() -> None:
         "temporal-ui",
         "temporal",
         "postgresql",
-        "temporal-elasticsearch",
     }
     if len(set(running_containers) & all_services) == len(all_services):
         click.echo("Admyral is already running.")
         click.echo(
             f"You can access the Admyral UI at http://localhost:{admyral_web_port} or use the Admyral CLI.\n"
+        )
+        click.echo(
+            "If you want to restart Admyral because of an update, please shut Admyral down first with the 'down' command."
         )
         return
 
