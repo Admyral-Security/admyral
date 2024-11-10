@@ -249,3 +249,8 @@ AUTH_SECRET = os.getenv(
 
 
 TEST_USER_ID = "a2f038f1-e35b-4509-bcc4-c08bd0e481a6"
+
+
+TEMPORAL_PAYLOAD_LIMIT = (
+    1.9 * 1024 * 1024
+)  # 2 MiB but we want to be safe and keep some room

@@ -24,6 +24,8 @@ with workflow.unsafe.imports_passed_through():
     from admyral.workers.references import evaluate_references
     from admyral.workers.if_condition_executor import ConditionReferenceResolution
     from admyral.utils.collections import is_not_empty
+    from admyral.utils.memory import count_json_payload_bytes
+    from admyral.config.config import TEMPORAL_PAYLOAD_LIMIT
 
 
 logger = get_logger(__name__)
@@ -64,6 +66,13 @@ class JobQueueEntry(BaseModel):
 
 
 async def _execute_activity(action_type: str, args: list[JsonValue]) -> JsonValue:
+    # Use Temporal's default converter
+    size_bytes = count_json_payload_bytes(args)
+    logger.info(f"Activity {action_type} args size: {size_bytes} bytes")
+
+    if size_bytes > TEMPORAL_PAYLOAD_LIMIT:
+        raise AdmyralFailureError("Input payload too large.")
+
     try:
         return await workflow.execute_activity(
             action_type,
@@ -72,8 +81,35 @@ async def _execute_activity(action_type: str, args: list[JsonValue]) -> JsonValu
             retry_policy=ACTION_RETRY_POLICY,
         )
     except ActivityError as e:
-        logger.error(f"Error executing activity of type {action_type}: {e.message}")
+        logger.error(
+            f"Error executing activity of type {action_type}: {e.message}. Cause: {e.cause}"
+        )
         raise e
+
+
+async def _execute_action(
+    action_type: str, args: list[JsonValue], error_args: list[JsonValue]
+) -> JsonValue:
+    try:
+        return await _execute_activity(action_type, args)
+    except AdmyralFailureError as e:
+        if e.message == "Input payload too large.":
+            await _execute_activity("store_action_input_too_large_error", error_args)
+        raise e
+
+
+async def _store_reference_resolution_error(
+    ctx_dict: dict[str, Any], error: str
+) -> None:
+    await _execute_activity(
+        "store_reference_resolution_error",
+        args=[
+            ctx_dict["run_id"],
+            ctx_dict["prev_step_id"],
+            ctx_dict["action_type"],
+            f"Failed to evaluate reference. {error}",
+        ],
+    )
 
 
 @workflow.defn(name="WorkflowExecutor")
@@ -265,13 +301,14 @@ class WorkflowExecutor:
             # Custom Python action
             # Note: we filter the action_args in execute_python_action
             # because first need to fetch the custom action.
-            return await _execute_activity(
+            return await _execute_action(
                 "execute_python_action",
                 args=[
                     ctx_dict,
                     node.secrets_mapping,
                     {"action_type": action_type, "action_args": action_args},
                 ],
+                error_args=[ctx_dict["run_id"], action_type, ctx_dict["prev_step_id"]],
             )
 
         # filter action_args based on action arguments
@@ -282,9 +319,10 @@ class WorkflowExecutor:
         defined_args = set(map(lambda arg: arg.arg_name, action.arguments))
         action_args = {k: v for k, v in action_args.items() if k in defined_args}
 
-        return await _execute_activity(
+        return await _execute_action(
             action_type,
             args=[ctx_dict, node.secrets_mapping, action_args],
+            error_args=[ctx_dict["run_id"], action_type, ctx_dict["prev_step_id"]],
         )
 
     async def _execute_if_condition(
@@ -313,9 +351,10 @@ class WorkflowExecutor:
         dag_node_copy_json = dag_node_copy.model_dump()
         condition_json = dag_node_copy_json["condition"]
 
-        step_id, condition_result = await _execute_activity(
+        step_id, condition_result = await _execute_action(
             "if_condition",
             args=[ctx_dict, {}, {"condition_expr": condition_json}],
+            error_args=[ctx_dict["run_id"], "if_condition", ctx_dict["prev_step_id"]],
         )
 
         # 2) path elimination: remove the untaken path from the execution order
@@ -330,20 +369,6 @@ class WorkflowExecutor:
             )
 
         return step_id, eliminated_nodes
-
-
-async def _store_reference_resolution_error(
-    ctx_dict: dict[str, Any], error: str
-) -> None:
-    await _execute_activity(
-        "store_reference_resolution_error",
-        args=[
-            ctx_dict["run_id"],
-            ctx_dict["prev_step_id"],
-            ctx_dict["action_type"],
-            f"Failed to evaluate reference. {error}",
-        ],
-    )
 
 
 def path_elimination(
