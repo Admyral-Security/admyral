@@ -6,7 +6,7 @@ import api from "@/lib/api";
 import { withSnakeCaseTransform } from "@/types/utils";
 import { HTTPMethod } from "@/types/api";
 
-// GET /api/v1/secret/delete
+// DELETE /api/v1/secret/delete
 const DeleteSecretRequest = withSnakeCaseTransform(
 	z.object({
 		secretId: z.string(),
