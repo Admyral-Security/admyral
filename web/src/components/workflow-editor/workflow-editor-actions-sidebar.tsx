@@ -38,10 +38,6 @@ export default function WorkflowEditorActionsSidebar() {
 					pl="4"
 					pr="4"
 					pb="4"
-					style={{
-						display: "flex",
-						flexDirection: "column",
-					}}
 				>
 					{editorActions.controlFlowActions.map(
 						(controlFlowAction, idx) => (

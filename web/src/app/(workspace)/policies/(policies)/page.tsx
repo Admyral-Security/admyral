@@ -57,9 +57,7 @@ export default function PoliciesPage() {
 								key={policy.id}
 								className="hover:bg-gray-50 cursor-pointer"
 								onClick={() => {
-									router.push(
-										`/policies/policy/${policy.id}`,
-									);
+									router.push(`/policy/${policy.id}`);
 								}}
 							>
 								<Table.Cell>{policy.name}</Table.Cell>

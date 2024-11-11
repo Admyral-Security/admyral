@@ -1,5 +1,5 @@
 import SideNavInnerPage from "@/components/side-nav-inner-page/side-nav-inner-page";
-import { Box, Button, Flex, Grid, Text } from "@radix-ui/themes";
+import { Box, Flex, Grid, Text } from "@radix-ui/themes";
 
 export default function PoliciesLayout({
 	children,
@@ -42,10 +42,12 @@ export default function PoliciesLayout({
 						{
 							href: "/policies",
 							title: "Policies",
-							selectionCriteria: [
-								"/policies",
-								"/policies/policy",
-							],
+							selectionCriteria: ["/policies", "/policy"],
+						},
+						{
+							href: "/policies/controls",
+							title: "Controls",
+							selectionCriteria: ["/policies/controls"],
 						},
 						{
 							href: "/policies/audit",
