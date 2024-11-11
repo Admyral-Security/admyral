@@ -1,6 +1,6 @@
 """
 
-admyral workflow push kandji_alert_for_unencrypted_devices -f workflows/kandji_unencrypted_devices2.py
+admyral workflow push kandji_alert_for_unencrypted_devices -f workflows/kandji_unencrypted_devices2.py --activate
 
 """
 
@@ -25,16 +25,16 @@ def kandji_alert_for_unencrypted_devices(payload: dict[str, JsonValue]):
     )
 
     selected_fields = select_fields_from_objects_in_list(
-        objects=unencrypted_devices,
+        input_list=unencrypted_devices,
         fields=["device_name", "device_id"],
     )
 
     formatted_string = format_json_to_list_view_string(
-        objects=selected_fields,
+        json_value=selected_fields,
     )
 
     send_slack_message_to_user_by_email(
         email="test@test.com",
-        text=formatted_string,
+        text=f"🚨 Unencrypted devices detected 🚨:\n\n{formatted_string}",
         secrets={"SLACK_SECRET": "slack_secret"},
     )
