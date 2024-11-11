@@ -1,6 +1,5 @@
 from fastapi import APIRouter, status, HTTPException, Depends
 from collections import defaultdict
-from sqlalchemy.exc import IntegrityError
 import re
 
 from admyral.action_registry import ActionRegistry
@@ -22,7 +21,7 @@ from admyral.server.endpoints.workflow_endpoints import push_workflow_impl
 from admyral.server.auth import authenticate
 
 
-VALID_WORKFLOW_NAME_REGEX = re.compile(r"^[a-zA-Z][a-zA-Z0-9 ]*$")
+VALID_WORKFLOW_NAME_REGEX = re.compile(r"^[a-zA-Z][a-zA-Z0-9 _]*$")
 
 
 router = APIRouter()
@@ -117,24 +116,41 @@ async def save_workflow_from_react_flow_graph(
     """
     Save a workflow from a ReactFlow graph.
     """
+    workflow = editor_workflow_graph_to_workflow(editor_workflow_graph)
+    return await push_workflow_impl(
+        user_id=authenticated_user.user_id,
+        workflow_name=workflow.workflow_name,
+        workflow_id=workflow.workflow_id,
+        request=WorkflowPushRequest(
+            workflow_dag=workflow.workflow_dag, activate=workflow.is_active
+        ),
+    )
+
+
+@router.post("/workflow/create", status_code=status.HTTP_204_NO_CONTENT)
+async def create_workflow_from_react_flow_graph(
+    editor_workflow_graph: EditorWorkflowGraph,
+    authenticated_user: AuthenticatedUser = Depends(authenticate),
+) -> None:
+    """
+    Create a new workflow from a ReactFlow graph.
+    """
     if not VALID_WORKFLOW_NAME_REGEX.match(editor_workflow_graph.workflow_name):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid workflow name. Workflow names must start with a letter and can only contain alphanumeric characters and spaces.",
+            detail="Invalid workflow name. Workflow names must start with a letter and can only contain alphanumeric characters, underscores, and spaces.",
         )
 
     workflow = editor_workflow_graph_to_workflow(editor_workflow_graph)
     try:
-        return await push_workflow_impl(
-            user_id=authenticated_user.user_id,
-            workflow_name=workflow.workflow_name,
-            workflow_id=workflow.workflow_id,
-            request=WorkflowPushRequest(
-                workflow_dag=workflow.workflow_dag, activate=workflow.is_active
-            ),
+        await get_admyral_store().create_workflow(
+            user_id=authenticated_user.user_id, workflow=workflow
         )
-    except IntegrityError:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"A workflow with the name '{workflow.workflow_name}' already exists. Workflow names must be unique.",
-        )
+    except ValueError as e:
+        if "already exists" in str(e):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"A workflow with the name '{workflow.workflow_name}' already exists. Workflow names must be unique.",
+            )
+        else:
+            raise e

@@ -11,13 +11,7 @@ import {
 	isValidWorkflowName,
 	WORKFLOW_NAME_VALIDATION_ERROR_MESSAGE,
 } from "@/lib/workflow-validation";
-
-class WorkflowValidationError extends Error {
-	constructor(message: string) {
-		super(message);
-		this.name = "WorkflowValidationError";
-	}
-}
+import { WorkflowValidationError } from "@/lib/errors";
 
 interface SaveWorkflowContextType {
 	saveWorkflow: () => Promise<boolean>;

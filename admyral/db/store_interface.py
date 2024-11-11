@@ -99,6 +99,9 @@ class StoreInterface(ABC):
     ) -> Workflow | None: ...
 
     @abstractmethod
+    async def create_workflow(self, user_id: str, workflow: Workflow) -> None: ...
+
+    @abstractmethod
     async def store_workflow(self, user_id: str, workflow: Workflow) -> None: ...
 
     @abstractmethod

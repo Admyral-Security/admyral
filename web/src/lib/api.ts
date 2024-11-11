@@ -4,30 +4,7 @@ Source: https://polvara.me/posts/effective-query-functions-for-react-query-with-
 import type { z } from "zod";
 import zod from "zod";
 import { HTTPMethod } from "@/types/api";
-
-export class ApiError extends Error {
-	constructor(
-		public statusCode: number,
-		public statusText: string,
-	) {
-		super(`API Error: ${statusCode} ${statusText}`);
-		this.name = "ApiError";
-	}
-}
-
-export class ValidationError extends Error {
-	constructor(public errors: z.ZodError) {
-		super("Validation Error");
-		this.name = "ValidationError";
-	}
-}
-
-export class NetworkError extends Error {
-	constructor(public originalError: Error) {
-		super("Network Error: " + originalError.message);
-		this.name = "NetworkError";
-	}
-}
+import { ApiError, ValidationError, NetworkError } from "@/lib/errors";
 
 export default function api<Request, Response>({
 	method,
@@ -71,7 +48,8 @@ export default function api<Request, Response>({
 				}
 
 				if (!response!.ok) {
-					throw new ApiError(response.status, response.statusText);
+					const responseData = await response.json();
+					throw new ApiError(response.status, responseData.detail);
 				}
 
 				const contentLength = response.headers.get("content-length");

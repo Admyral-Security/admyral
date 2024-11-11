@@ -1,4 +1,4 @@
-from fastapi import APIRouter, status, Body, Depends
+from fastapi import APIRouter, status, Body, Depends, HTTPException
 from typing import Optional, Annotated
 from uuid import uuid4
 from pydantic import BaseModel
@@ -26,7 +26,7 @@ logger = get_logger(__name__)
 
 MANUAL_TRIGGER_SOURCE_NAME = "manual"
 SPACE = " "
-SNAKE_CASE_REGEX = re.compile(r"^[a-zA-Z]+(_[a-zA-Z]+)*$")
+VALID_WORKFLOW_NAME_REGEX = re.compile(r"^[a-zA-Z][a-zA-Z0-9 _]*$")
 
 
 class WorkflowBody(BaseModel):
@@ -68,6 +68,13 @@ async def push_workflow_impl(
         workflow_name: The workflow name.
         workflow: The workflow object.
     """
+
+    if not VALID_WORKFLOW_NAME_REGEX.match(workflow_name):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid workflow name. Workflow names must start with a letter and can only contain alphanumeric characters, underscores, and spaces.",
+        )
+
     admyral_store = get_admyral_store()
     workers_client = get_workers_client()
 
@@ -187,16 +194,6 @@ async def push_workflow(
         workflow_name: The workflow name.
         workflow: The workflow object.
     """
-    # transform workflow name. expected: snake_case to Snake Case
-    if SNAKE_CASE_REGEX.match(workflow_name):
-        workflow_name = SPACE.join(
-            map(lambda x: x.capitalize(), workflow_name.split("_"))
-        )
-    if SNAKE_CASE_REGEX.match(request.workflow_dag.name):
-        request.workflow_dag.name = SPACE.join(
-            map(lambda x: x.capitalize(), request.workflow_dag.name.split("_"))
-        )
-
     return await push_workflow_impl(
         authenticated_user.user_id, workflow_name, None, request
     )

@@ -13,9 +13,12 @@ from admyral.secret.secrets_access import Secrets, SecretsStoreAccessImpl
 from admyral.workers.shared_worker_state import SharedWorkerState
 from admyral.typings import JsonValue
 from admyral.exceptions import NonRetryableActionError
+from admyral.utils.memory import count_json_payload_bytes
+from admyral.config.config import TEMPORAL_PAYLOAD_LIMIT
 
 if TYPE_CHECKING:
     F = TypeVar("F", bound=Callable[..., Any])
+
 
 logger = get_logger(__name__)
 
@@ -59,6 +62,15 @@ def action_executor(action_type: str, func: "F") -> "F":
                 # Store error
                 await _store_action_error(exec_ctx, str(e), args)
                 raise NonRetryableActionError(str(e))
+
+            result_size_bytes = count_json_payload_bytes(result)
+            if result_size_bytes > TEMPORAL_PAYLOAD_LIMIT:
+                await _store_action_error(
+                    exec_ctx, "Result payload too large. Exceeds 2 MB limit.", args
+                )
+                raise NonRetryableActionError(
+                    "Result payload too large. Exceeds 2 MB limit."
+                )
 
             await _store_action_result(exec_ctx, result, args)
 
@@ -105,6 +117,17 @@ def action_executor(action_type: str, func: "F") -> "F":
                 # Store error
                 execute_future(_store_action_error(exec_ctx, str(e), args))
                 raise NonRetryableActionError(str(e))
+
+            result_size_bytes = count_json_payload_bytes(result)
+            if result_size_bytes > TEMPORAL_PAYLOAD_LIMIT:
+                execute_future(
+                    _store_action_error(
+                        exec_ctx, "Result payload too large. Exceeds 2 MB limit.", args
+                    )
+                )
+                raise NonRetryableActionError(
+                    "Result payload too large. Exceeds 2 MB limit."
+                )
 
             execute_future(_store_action_result(exec_ctx, result, args))
 

@@ -14,6 +14,7 @@ from admyral.actions.utilities import (
     build_lookup_table,
     filter,
     join_lists,
+    select_fields_from_objects_in_list,
 )
 from admyral.actions.integrations.communication import (
     send_slack_message,
@@ -40,6 +41,8 @@ from admyral.actions.integrations.cases import (
     get_jira_audit_records,
     create_opsgenie_alert,
     create_pagerduty_incident,
+    get_jira_project,
+    get_jira_transitions,
 )
 from admyral.actions.integrations.vulnerability_management import (
     list_snyk_vulnerabilities,
@@ -189,4 +192,7 @@ __all__ = [
     "list_groups_and_apps_per_user",
     "list_used_groups_and_apps_per_user",
     "list_google_drive_files_with_link_sharing_enabled",
+    "get_jira_project",
+    "get_jira_transitions",
+    "select_fields_from_objects_in_list",
 ]

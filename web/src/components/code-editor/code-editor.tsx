@@ -4,9 +4,10 @@ import { editor } from "monaco-editor";
 interface CodeEditorProps {
 	defaultValue?: string;
 	value?: string;
-	onChange: (value: string) => void;
+	onChange?: (value: string) => void;
 	className?: string;
 	language?: string;
+	readOnly?: boolean;
 }
 
 export default function CodeEditor({
@@ -14,6 +15,7 @@ export default function CodeEditor({
 	language,
 	onChange,
 	value,
+	readOnly,
 	...props
 }: CodeEditorProps) {
 	const handleEditorDidMount = (
@@ -36,7 +38,9 @@ export default function CodeEditor({
 		<ReactMonacoEditor
 			{...(language && { language })}
 			onMount={handleEditorDidMount}
-			onChange={(value, _ev) => onChange(value || "")}
+			onChange={
+				onChange ? (value, _ev) => onChange(value || "") : undefined
+			}
 			theme="custom"
 			options={{
 				tabSize: 2,
@@ -51,6 +55,7 @@ export default function CodeEditor({
 				quickSuggestions: false,
 				wordBasedSuggestions: "off",
 				suggest: { preview: false },
+				readOnly: readOnly,
 			}}
 			width="100%"
 			wrapperProps={{ className: "editor-wrapper" }}

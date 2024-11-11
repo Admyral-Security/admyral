@@ -26,6 +26,7 @@ from admyral.models.workflow_run import (
     WorkflowRunStep,
     WorkflowRunMetadata,
     WorkflowRunStepMetadata,
+    WorkflowRunStepWithSerializedResult,
 )
 from admyral.models.workflow_webhook import WorkflowWebhook
 from admyral.models.workflow_schedule import WorkflowSchedule
@@ -124,4 +125,5 @@ __all__ = [
     "User",
     "ApiKey",
     "UserProfile",
+    "WorkflowRunStepWithSerializedResult",
 ]

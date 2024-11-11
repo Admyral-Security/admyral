@@ -1,10 +1,11 @@
+import CodeEditorWithDialog from "@/components/code-editor-with-dialog/code-editor-with-dialog";
+import { DownloadWorkflowStepResultButton } from "@/components/download-button/download-workflow-step-result-button";
 import ErrorCallout from "@/components/utils/error-callout";
 import { useGetWorkflowRunStepApi } from "@/hooks/use-get-workflow-run-step-api";
 import { useToast } from "@/providers/toast";
 import { TJson } from "@/types/json";
 import { Box, DataList, Flex, ScrollArea, Tabs, Text } from "@radix-ui/themes";
 import { useEffect } from "react";
-import { CodeBlock, a11yLight } from "react-code-blocks";
 
 export default function WorkflowRunStep({
 	workflowId,
@@ -129,28 +130,29 @@ export default function WorkflowRunStep({
 					</Tabs.List>
 
 					<Tabs.Content value="result">
-						<ScrollArea
-							type="hover"
-							scrollbars="both"
-							style={{
-								height: "calc((100vh - 56px) / 2 - 100px)",
-								fontSize: "14px",
-							}}
+						<Flex
+							direction="column"
+							height="calc((100vh - 56px) / 2 - 100px)"
+							mt="1"
+							gap="1"
 						>
-							<CodeBlock
-								text={
-									isError
-										? data.error!
-										: JSON.stringify(data.result, null, 4)
+							<Flex align="center" justify="start" gap="2">
+								<Text size="2">Download</Text>
+								<DownloadWorkflowStepResultButton
+									workflowId={workflowId}
+									runId={workflowRunId}
+									stepId={workflowRunStepId}
+								/>
+							</Flex>
+							<CodeEditorWithDialog
+								title={isError ? "Error" : "Result"}
+								value={
+									isError ? data.error! : data.result || ""
 								}
 								language="json"
-								showLineNumbers
-								theme={a11yLight}
-								customStyle={{
-									overflow: "none",
-								}}
+								readOnly
 							/>
-						</ScrollArea>
+						</Flex>
 					</Tabs.Content>
 
 					<Tabs.Content value="logs">

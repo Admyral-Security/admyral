@@ -18,10 +18,10 @@ from admyral.actions import update_jira_issue_status
 
 ## Arguments:
 
-| Arugment Name                         | Description                                                                                                                                                        | Required |
-| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | :------: |
-| **Issue ID or Key** `issue_id_or_key` | The ID or the key of the issue to transition.                                                                                                                      |   Yes    |
-| **Transition ID** `transition_id`     | The ID of the transition. See [here](https://community.atlassian.com/t5/Jira-questions/How-do-i-find-a-transition-ID/qaq-p/2113213) for finding the transition ID. |   Yes    |
+| Arugment Name                         | Description                                   | Required |
+| ------------------------------------- | --------------------------------------------- | :------: |
+| **Issue ID or Key** `issue_id_or_key` | The ID or the key of the issue to transition. |   Yes    |
+| **Status** `status`                   | The status to set the issue to.               |   Yes    |
 
 ## Returns
 
@@ -38,7 +38,7 @@ Nothing.
 ```python
 update_jira_issue_status(
 	issue_id_or_key="SJ-23",
-	transition_id="31",
+	status="31",
 	secrets={
 		"JIRA_SECRET": "my_stored_jira_secret"
 	}

@@ -7,9 +7,10 @@ interface CodeEditorWithDialogProps {
 	description?: string;
 	defaultValue?: string;
 	value?: string;
-	onChange: (value: string) => void;
+	onChange?: (value: string) => void;
 	className?: string;
 	language?: string;
+	readOnly?: boolean;
 }
 
 export default function CodeEditorWithDialog({
@@ -19,6 +20,7 @@ export default function CodeEditorWithDialog({
 	onChange,
 	language,
 	className,
+	readOnly,
 }: CodeEditorWithDialogProps) {
 	return (
 		<Flex width="100%" height="100%" position="relative">
@@ -27,6 +29,7 @@ export default function CodeEditorWithDialog({
 				onChange={onChange}
 				language={language}
 				className={className}
+				readOnly={readOnly}
 			/>
 
 			<Dialog.Root>
@@ -78,6 +81,7 @@ export default function CodeEditorWithDialog({
 								value={value}
 								onChange={onChange}
 								language={language}
+								readOnly={readOnly}
 							/>
 						</Flex>
 					</Flex>

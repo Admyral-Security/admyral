@@ -425,6 +425,26 @@ class AdmyralStore(StoreInterface):
             wf = await self._get_workflow_by_id(db, user_id, workflow_id)
             return wf.to_model() if wf else None
 
+    async def create_workflow(self, user_id: str, workflow: Workflow) -> None:
+        async with self._get_async_session() as db:
+            existing_workflow = await self._get_workflow_by_name(
+                db, user_id, workflow.workflow_name
+            )
+            if existing_workflow:
+                raise ValueError(f"Workflow {workflow.workflow_name} already exists.")
+
+            await db.exec(
+                insert(WorkflowSchema).values(
+                    workflow_id=workflow.workflow_id,
+                    user_id=user_id,
+                    workflow_name=workflow.workflow_name,
+                    workflow_dag=workflow.workflow_dag.model_dump(),
+                    is_active=workflow.is_active,
+                )
+            )
+
+            await db.commit()
+
     async def store_workflow(self, user_id: str, workflow: Workflow) -> None:
         async with self._get_async_session() as db:
             # if the workflow already exists, we update the workflow dag.
