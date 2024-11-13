@@ -29,7 +29,9 @@ class UserSchema(BaseSchema, table=True):
     id: str = Field(sa_type=TEXT(), primary_key=True)
     name: str | None = Field(sa_type=TEXT(), nullable=True)
     email: str = Field(sa_type=TEXT())
-    email_verified: datetime | None = Field(sa_type=TIMESTAMP(), nullable=True)
+    email_verified: datetime | None = Field(
+        sa_type=TIMESTAMP(timezone=True), nullable=True
+    )
     image: str | None = Field(sa_type=TEXT(), nullable=True)
 
     # relationship children
