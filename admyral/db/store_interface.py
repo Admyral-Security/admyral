@@ -271,5 +271,5 @@ class StoreInterface(ABC):
         self,
         workflow_id: str,
         run_id: str,
-        result: str,
+        result: bool,
     ) -> None: ...

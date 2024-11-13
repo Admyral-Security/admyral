@@ -38,7 +38,7 @@ from admyral.db.schemas import (
     SecretsSchema,
     UserSchema,
     ApiKeySchema,
-    WorkflowControlSchema,
+    WorkflowControlResultsSchema,
 )
 from admyral.db.alembic.database_manager import DatabaseManager
 from admyral.config.config import GlobalConfig, CONFIG
@@ -1067,7 +1067,7 @@ class AdmyralStore(StoreInterface):
     ) -> None:
         async with self._get_async_session() as db:
             await db.exec(
-                insert(WorkflowControlSchema).values(
+                insert(WorkflowControlResultsSchema).values(
                     workflow_id=workflow_id,
                     run_id=run_id,
                     result=result,
