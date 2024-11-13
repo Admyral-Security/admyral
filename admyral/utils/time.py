@@ -1,9 +1,9 @@
-from datetime import datetime, timezone
+from datetime import datetime, UTC
 
 
 def utc_now() -> datetime:
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)
 
 
 def utc_now_timestamp_seconds() -> int:
-    return int(datetime.now(timezone.utc).timestamp())
+    return int(datetime.now(UTC).timestamp())
