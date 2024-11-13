@@ -18,7 +18,7 @@ class PipLockfileCacheSchema(BaseSchema, table=True):
 
     # other fields
     lockfile: str = Field(sa_type=TEXT())
-    expiration_time: datetime = Field(sa_type=TIMESTAMP())
+    expiration_time: datetime = Field(sa_type=TIMESTAMP(timezone=True))
 
     def to_model(self) -> PipLockfile:
         return PipLockfile.model_validate(
