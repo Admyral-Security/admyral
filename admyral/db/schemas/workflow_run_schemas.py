@@ -34,9 +34,13 @@ class WorkflowRunSchema(BaseSchema, table=True):
 
     # other fields
     source_name: str = Field(sa_type=TEXT())
-    completed_at: datetime | None = Field(sa_type=TIMESTAMP(), nullable=True)
-    failed_at: datetime | None = Field(sa_type=TIMESTAMP(), nullable=True)
-    canceled_at: datetime | None = Field(sa_type=TIMESTAMP(), nullable=True)
+    completed_at: datetime | None = Field(
+        sa_type=TIMESTAMP(timezone=True), nullable=True
+    )
+    failed_at: datetime | None = Field(sa_type=TIMESTAMP(timezone=True), nullable=True)
+    canceled_at: datetime | None = Field(
+        sa_type=TIMESTAMP(timezone=True), nullable=True
+    )
 
     # relationship parents
     workflow: "WorkflowSchema" = Relationship(back_populates="workflow_runs")

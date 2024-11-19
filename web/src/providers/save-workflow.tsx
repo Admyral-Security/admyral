@@ -8,6 +8,7 @@ import { useEditorActionStore } from "@/stores/editor-action-store";
 import { EditorWorkflowNodeType } from "@/types/react-flow";
 import { useToast } from "@/providers/toast";
 import {
+	isValidResultName,
 	isValidWorkflowName,
 	WORKFLOW_NAME_VALIDATION_ERROR_MESSAGE,
 } from "@/lib/workflow-validation";
@@ -52,6 +53,22 @@ export function SaveWorkflowProvider({
 			if (!isValidWorkflowName(workflow.workflowName)) {
 				throw new WorkflowValidationError(
 					WORKFLOW_NAME_VALIDATION_ERROR_MESSAGE,
+				);
+			}
+
+			if (
+				workflow.nodes
+					.filter(
+						(node) => node.type === EditorWorkflowNodeType.ACTION,
+					)
+					.some(
+						(node) =>
+							node.resultName !== null &&
+							!isValidResultName(node.resultName),
+					)
+			) {
+				throw new WorkflowValidationError(
+					"Invalid node result name. Result names must be snake_case.",
 				);
 			}
 

@@ -22,6 +22,7 @@ from admyral.server.auth import authenticate
 
 
 VALID_WORKFLOW_NAME_REGEX = re.compile(r"^[a-zA-Z][a-zA-Z0-9 _]*$")
+SNAKE_CASE_REGEX = re.compile(r"^[a-zA-Z][a-zA-Z0-9_]*$")
 
 
 router = APIRouter()
@@ -139,6 +140,16 @@ async def create_workflow_from_react_flow_graph(
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Invalid workflow name. Workflow names must start with a letter and can only contain alphanumeric characters, underscores, and spaces.",
+        )
+
+    if any(
+        not SNAKE_CASE_REGEX.match(node.result_name)
+        for node in editor_workflow_graph.nodes
+        if node.type == "action" and node.result_name is not None
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid node result name. Result names must start with a letter and can only contain alphanumeric characters and underscores.",
         )
 
     workflow = editor_workflow_graph_to_workflow(editor_workflow_graph)

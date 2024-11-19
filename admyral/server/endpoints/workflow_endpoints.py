@@ -15,6 +15,7 @@ from admyral.models import (
     WorkflowSchedule,
     WorkflowTriggerResponse,
     WorkflowMetadata,
+    ActionNode,
 )
 from admyral.logger import get_logger
 from admyral.typings import JsonValue
@@ -27,6 +28,7 @@ logger = get_logger(__name__)
 MANUAL_TRIGGER_SOURCE_NAME = "manual"
 SPACE = " "
 VALID_WORKFLOW_NAME_REGEX = re.compile(r"^[a-zA-Z][a-zA-Z0-9 _]*$")
+SNAKE_CASE_REGEX = re.compile(r"^[a-zA-Z][a-zA-Z0-9_]*$")
 
 
 class WorkflowBody(BaseModel):
@@ -73,6 +75,16 @@ async def push_workflow_impl(
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Invalid workflow name. Workflow names must start with a letter and can only contain alphanumeric characters, underscores, and spaces.",
+        )
+
+    if any(
+        not SNAKE_CASE_REGEX.match(node.result_name)
+        for node in request.workflow_dag.dag.values()
+        if isinstance(node, ActionNode) and node.result_name is not None
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid node result name. Result names must be snake_case.",
         )
 
     admyral_store = get_admyral_store()

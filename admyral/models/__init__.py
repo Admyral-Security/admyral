@@ -62,6 +62,7 @@ from admyral.models.editor import (
     EditorWebhookTrigger,
     EditorScheduleType,
 )
+from admyral.models.workflow_control_result import WorkflowControlResult
 
 __all__ = [
     "PipLockfile",
@@ -125,5 +126,6 @@ __all__ = [
     "User",
     "ApiKey",
     "UserProfile",
+    "WorkflowControlResult",
     "WorkflowRunStepWithSerializedResult",
 ]

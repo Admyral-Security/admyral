@@ -14,6 +14,9 @@ from admyral.models import Workflow, WorkflowMetadata
 from admyral.db.schemas.workflow_run_schemas import WorkflowRunSchema
 from admyral.db.schemas.workflow_webhook_schemas import WorkflowWebhookSchema
 from admyral.db.schemas.workflow_schedule_schemas import WorkflowScheduleSchema
+from admyral.db.schemas.workflow_control_results_schemas import (
+    WorkflowControlResultsSchema,
+)
 from admyral.typings import JsonValue
 
 if TYPE_CHECKING:
@@ -61,6 +64,9 @@ class WorkflowSchema(BaseSchema, table=True):
         back_populates="workflow", sa_relationship_kwargs=dict(cascade="all, delete")
     )
     schedules: list[WorkflowScheduleSchema] = Relationship(
+        back_populates="workflow", sa_relationship_kwargs=dict(cascade="all, delete")
+    )
+    controls: list[WorkflowControlResultsSchema] = Relationship(
         back_populates="workflow", sa_relationship_kwargs=dict(cascade="all, delete")
     )
     is_active: bool = Field(sa_type=BOOLEAN(), default=False)

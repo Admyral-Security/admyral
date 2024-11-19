@@ -6,12 +6,13 @@ import { useSecretsStore } from "@/stores/secrets-store";
 import { useEditorActionStore } from "@/stores/editor-action-store";
 import { TEditorWorkflowActionNode } from "@/types/react-flow";
 import { produce } from "immer";
-import { ChangeEvent, useEffect } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 import { useImmer } from "use-immer";
 import { TActionMetadata } from "@/types/editor-actions";
 import CodeEditorWithDialog from "@/components/code-editor-with-dialog/code-editor-with-dialog";
 import useSaveWorkflow from "@/providers/save-workflow";
 import { useRouter } from "next/navigation";
+import { isValidResultName } from "@/lib/workflow-validation";
 
 function buildInitialArgs(
 	action: TEditorWorkflowActionNode,
@@ -38,7 +39,7 @@ export default function ActionEditPanel() {
 	const { actionsIndex } = useEditorActionStore();
 	const { secrets } = useSecretsStore();
 	const { saveWorkflow } = useSaveWorkflow();
-
+	const [validResultName, setValidResultName] = useState<boolean>(true);
 	const [args, updateArgs] = useImmer<string[]>([]);
 
 	useEffect(() => {
@@ -141,8 +142,18 @@ export default function ActionEditPanel() {
 					<TextField.Root
 						variant="surface"
 						value={actionData.resultName || ""}
-						onChange={onChangeResultName}
+						onChange={(event) => {
+							onChangeResultName(event);
+							setValidResultName(
+								isValidResultName(event.target.value),
+							);
+						}}
 					/>
+					{!validResultName && (
+						<Text color="red">
+							Result names must be snake_case.
+						</Text>
+					)}
 				</Flex>
 
 				{actionDefinition.secretsPlaceholders.length > 0 && (

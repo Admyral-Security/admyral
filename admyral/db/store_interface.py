@@ -261,3 +261,15 @@ class StoreInterface(ABC):
         secret_schema: list[str],
         secret_type: str | None = None,
     ) -> SecretMetadata: ...
+
+    ########################################################
+    # Controls
+    ########################################################
+
+    @abstractmethod
+    async def store_workflow_control_result(
+        self,
+        workflow_id: str,
+        run_id: str,
+        result: bool,
+    ) -> None: ...
