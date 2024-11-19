@@ -3,7 +3,7 @@ import { withCamelCaseTransform } from "./utils";
 
 const WorkflowMetadataBase = z.object({
 	workflow_id: z.string(),
-	workflow_name: z.string().nullable(),
+	workflow_name: z.string(),
 	workflow_description: z.string().nullable(),
 	controls: z.array(z.string()).nullable(),
 	created_at: z.string(),

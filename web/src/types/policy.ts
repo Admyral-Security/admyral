@@ -25,3 +25,35 @@ export const Policy = withCamelCaseTransform(
 	}),
 );
 export type TPolicy = z.infer<typeof Policy>;
+
+export const PolicyControlMetadata = withCamelCaseTransform(
+	z.object({
+		control_id: z.string(),
+		control_name: z.string(),
+	}),
+);
+export type TPolicyControlMetadata = z.infer<typeof PolicyControlMetadata>;
+
+export const PolicyControlWorkflows = withCamelCaseTransform(
+	z.object({
+		workflow_id: z.string(),
+		workflow_name: z.string(),
+	}),
+);
+export type TPolicyControlWorkflows = z.infer<typeof PolicyControlWorkflows>;
+
+export const PolicyControl = withCamelCaseTransform(
+	z.object({
+		control: PolicyControlMetadata,
+		workflows: z.array(PolicyControlWorkflows),
+	}),
+);
+export type TPolicyControl = z.infer<typeof PolicyControl>;
+
+export const PolicyWithControls = withCamelCaseTransform(
+	z.object({
+		policy: Policy,
+		controls: z.array(PolicyControl),
+	}),
+);
+export type TPolicyWithControls = z.infer<typeof PolicyWithControls>;

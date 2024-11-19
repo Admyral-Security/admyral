@@ -1,24 +1,19 @@
 from fastapi import APIRouter, status, Depends, HTTPException, BackgroundTasks
 from pydantic import BaseModel
 from datetime import datetime
-from enum import Enum
-import asyncio
 
 from admyral.server.auth import authenticate
-from admyral.models import AuthenticatedUser, UserProfile
-from admyral.server.deps import get_admyral_store
+from admyral.models import AuthenticatedUser
 from admyral.agents.audit.chunking import embed_policies
 from admyral.agents.audit.agents import (
     AuditExecutor,
     CommonCriterion,
     CommonCriterionPointOfFocus,
-    AuditAgentResult,
 )
 from admyral.logger import get_logger
 from admyral.agents.audit.models import (
     PolicyMetadata,
     Policy,
-    PolicyChunk,
     AuditResultStatus,
     AuditPointOfFocusResult,
     AuditResult,
@@ -146,6 +141,79 @@ POLICIES = {
 }
 
 
+class Control(BaseModel):
+    id: str
+    name: str
+    description: str
+    frameworks: list[str]
+
+
+CONTROLS = {
+    # TODO: add example controls
+    "CP5": Control(
+        id="CP5",
+        name="Acceptable Use of End-user Computing",
+        description="The organization establishes and communicates acceptable use policies for information technology resources, "
+        "including acceptable use of organizational information technology resources by individuals in the course of their employment.",
+        frameworks=["SOC2"],
+    ),
+    "CP6": Control(
+        id="CP6",
+        name="Support and Management of BYOD Devices",
+        description="The organization establishes and communicates acceptable use policies for information technology resources, "
+        "including acceptable use of organizational information technology resources by individuals in the course of their employment.",
+        frameworks=["SOC2"],
+    ),
+    "CP7": Control(
+        id="CP7",
+        name="Acceptable Use of Mobile Devices",
+        description="The organization establishes and communicates acceptable use policies for information technology resources, "
+        "including acceptable use of organizational information technology resources by individuals in the course of their employment.",
+        frameworks=["SOC2"],
+    ),
+}
+
+
+class PolicyToControlConnection(BaseModel):
+    control_id: str
+    control_name: str
+
+
+POLICY_TO_CONTROLS_MAPPING = {
+    "cryptography_policy": [
+        PolicyToControlConnection(
+            control_id="CP5",
+            control_name="Acceptable Use of End-user Computing",
+        ),
+        PolicyToControlConnection(
+            control_id="CP6",
+            control_name="Support and Management of BYOD Devices",
+        ),
+        PolicyToControlConnection(
+            control_id="CP7",
+            control_name="Acceptable Use of Mobile Devices",
+        ),
+    ],
+}
+
+
+class ControlToWorkflowConnection(BaseModel):
+    workflow_id: str
+    workflow_name: str
+
+
+CONTROLS_TO_WORKFLOWS_MAPPING = {
+    "CP5": [
+        ControlToWorkflowConnection(
+            workflow_id="71675b29-fa96-4309-8a16-036418d23b14",
+            workflow_name="kandji_alert_for_unencrypted_devices",
+        ),
+    ],
+    "CP6": [],
+    "CP7": [],
+}
+
+
 @router.get("", status_code=status.HTTP_200_OK)
 async def list_policies(
     authenticated_user: AuthenticatedUser = Depends(authenticate),
@@ -158,7 +226,7 @@ async def list_policies(
 async def get_policy(
     policy_id: str,
     authenticated_user: AuthenticatedUser = Depends(authenticate),
-) -> Policy:
+) -> dict:
     if policy_id not in POLICIES:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Policy not found."
@@ -167,12 +235,23 @@ async def get_policy(
     with open(f"data/policies/flowfuse/{policy_id}.md", "r") as f:
         policy_content = f.read()
 
-    return Policy.model_validate(
-        {
-            **POLICIES[policy_id].model_dump(),
-            "content": policy_content,
-        }
-    )
+    return {
+        "policy": Policy.model_validate(
+            {
+                **POLICIES[policy_id].model_dump(),
+                "content": policy_content,
+            }
+        ),
+        "controls": [
+            {
+                "control": control_connection,
+                "workflows": CONTROLS_TO_WORKFLOWS_MAPPING[
+                    control_connection.control_id
+                ],
+            }
+            for control_connection in POLICY_TO_CONTROLS_MAPPING[policy_id]
+        ],
+    }
 
 
 AUDIT_RESULTS = [
@@ -267,9 +346,9 @@ AUDIT_RESULTS = [
         name="Implements Registration, Authorization, and Deprovisioning of System Credentials for User Access Management",
         status=AuditResultStatus.NOT_AUDITED,
         description="Prior to issuing system credentials and granting system access, the entity registers and authorizes "
-            "new internal and external users whose access is administered by the entity. For those users whose "
-            "access is administered by the entity, user system credentials are removed when user access is no "
-            "longer authorized.",
+        "new internal and external users whose access is administered by the entity. For those users whose "
+        "access is administered by the entity, user system credentials are removed when user access is no "
+        "longer authorized.",
         category="Logical and Physical Access Controls",
         last_audit=None,
         gap_analysis="",
@@ -306,8 +385,8 @@ AUDIT_RESULTS = [
         name="Implements Role-Based Access Controls with Least Privilege and Segregation of Duties",
         status=AuditResultStatus.NOT_AUDITED,
         description="The entity authorizes, modifies, or removes access to data, software, functions, and other protected information "
-            "assets based on roles, responsibilities, or the system design and changes, giving consideration to the concepts "
-            "of least privilege and segregation of duties, to meet the entity's objectives.",
+        "assets based on roles, responsibilities, or the system design and changes, giving consideration to the concepts "
+        "of least privilege and segregation of duties, to meet the entity's objectives.",
         category="Logical and Physical Access Controls",
         last_audit=None,
         gap_analysis="",
@@ -316,7 +395,7 @@ AUDIT_RESULTS = [
             AuditPointOfFocusResult(
                 name="Creates or Modifies Access to Protected Information Assets",
                 description="Processes are in place to create or modify access to protected information assets based on authorization "
-                    "from the asset's owner.",
+                "from the asset's owner.",
                 status=AuditResultStatus.NOT_AUDITED,
                 gap_analysis="",
                 recommendation="",
@@ -338,7 +417,7 @@ AUDIT_RESULTS = [
             AuditPointOfFocusResult(
                 name="Reviews Access Roles and Rules",
                 description="The appropriateness of access roles and access rules is reviewed on a periodic basis for unnecessary and "
-                    "inappropriate individuals with access and access rules are modified as appropriate.",
+                "inappropriate individuals with access and access rules are modified as appropriate.",
                 status=AuditResultStatus.NOT_AUDITED,
                 gap_analysis="",
                 recommendation="",
@@ -351,7 +430,7 @@ AUDIT_RESULTS = [
         name="Implements Physical Access Controls for Facilities and Protected Information Assets",
         status=AuditResultStatus.NOT_AUDITED,
         description="The entity restricts physical access to facilities and protected information assets (for example, data center facilities, "
-            "backup media storage, and other sensitive locations) to authorized personnel to meet the entity's objectives.",
+        "backup media storage, and other sensitive locations) to authorized personnel to meet the entity's objectives.",
         category="Logical and Physical Access Controls",
         last_audit=None,
         gap_analysis="",
@@ -360,7 +439,7 @@ AUDIT_RESULTS = [
             AuditPointOfFocusResult(
                 name="Creates or Modifies Physical Access",
                 description="Processes are in place to create or modify physical access to facilities such as data centers, office spaces, and "
-                    "work areas, based on authorization from the system's asset owner.",
+                "work areas, based on authorization from the system's asset owner.",
                 status=AuditResultStatus.NOT_AUDITED,
                 gap_analysis="",
                 recommendation="",
@@ -387,7 +466,7 @@ AUDIT_RESULTS = [
         name="Implements Secure Data and Software Disposal for Decommissioned Physical Assets",
         status=AuditResultStatus.NOT_AUDITED,
         description="The entity discontinues logical and physical protections over physical assets only after the ability to read or recover "
-            "data and software from those assets has been diminished and is no longer required to meet the entity's objectives.",
+        "data and software from those assets has been diminished and is no longer required to meet the entity's objectives.",
         category="Logical and Physical Access Controls",
         last_audit=None,
         gap_analysis="",
@@ -396,7 +475,7 @@ AUDIT_RESULTS = [
             AuditPointOfFocusResult(
                 name="Identifies Data and Software for Disposal",
                 description="Procedures are in place to identify data and software stored on equipment to be disposed and to render such data "
-                    "and software unreadable.",
+                "and software unreadable.",
                 status=AuditResultStatus.NOT_AUDITED,
                 gap_analysis="",
                 recommendation="",
@@ -446,7 +525,7 @@ AUDIT_RESULTS = [
             AuditPointOfFocusResult(
                 name="Implements Boundary Protection Systems",
                 description="Boundary protection systems (for example, firewalls, demilitarized zones, and intrusion detection systems) are implemented "
-                    "to protect external access points from attempts and unauthorized access and are monitored to detect such attempts.",
+                "to protect external access points from attempts and unauthorized access and are monitored to detect such attempts.",
                 status=AuditResultStatus.NOT_AUDITED,
                 gap_analysis="",
                 recommendation="",
@@ -459,7 +538,7 @@ AUDIT_RESULTS = [
         name="Implements Data Protection Controls for Information Transmission, Movement, and Removal",
         status=AuditResultStatus.NOT_AUDITED,
         description="The entity restricts the transmission, movement, and removal of information to authorized internal and "
-            "external users and processes, and protects it during transmission, movement, or removal to meet the entity's objectives.",
+        "external users and processes, and protects it during transmission, movement, or removal to meet the entity's objectives.",
         category="Logical and Physical Access Controls",
         last_audit=None,
         gap_analysis="",
@@ -468,7 +547,7 @@ AUDIT_RESULTS = [
             AuditPointOfFocusResult(
                 name="Restricts the Ability to Perform Transmission",
                 description="Data loss prevention processes and technologies are used to restrict ability to authorize and execute "
-                    "transmission, movement, and removal of information.",
+                "transmission, movement, and removal of information.",
                 status=AuditResultStatus.NOT_AUDITED,
                 gap_analysis="",
                 recommendation="",
@@ -484,7 +563,7 @@ AUDIT_RESULTS = [
             AuditPointOfFocusResult(
                 name="Protects Removal Media",
                 description="Encryption technologies and physical asset protections are used for removable media (such as USB drives "
-                    "and backup tapes), as appropriate.",
+                "and backup tapes), as appropriate.",
                 status=AuditResultStatus.NOT_AUDITED,
                 gap_analysis="",
                 recommendation="",
@@ -505,7 +584,7 @@ AUDIT_RESULTS = [
         name="Implements Controls for Prevention and Detection of Unauthorized Software",
         status=AuditResultStatus.NOT_AUDITED,
         description="The entity implements controls to prevent or detect and act upon the introduction of unauthorized or malicious software to "
-            "meet the entity's objectives.",
+        "meet the entity's objectives.",
         category="Logical and Physical Access Controls",
         last_audit=None,
         gap_analysis="",
@@ -656,3 +735,43 @@ async def get_audit_results(
     authenticated_user: AuthenticatedUser = Depends(authenticate),
 ) -> list[AuditResult]:
     return AUDIT_RESULTS
+
+
+def _get_control(control_id: str) -> dict:
+    return {
+        "control": CONTROLS[control_id],
+        "workflows": CONTROLS_TO_WORKFLOWS_MAPPING[control_id],
+    }
+
+
+@router.get("/controls", status_code=status.HTTP_200_OK)
+async def get_controls(
+    authenticated_user: AuthenticatedUser = Depends(authenticate),
+) -> list[dict]:
+    return [_get_control(control_id) for control_id in CONTROLS_TO_WORKFLOWS_MAPPING]
+
+
+@router.get("/control/{control_id}", status_code=status.HTTP_200_OK)
+async def get_control(
+    control_id: str,
+    authenticated_user: AuthenticatedUser = Depends(authenticate),
+) -> dict:
+    return _get_control(control_id)
+
+
+class SaveControlRequest(BaseModel):
+    control: Control
+    workflows: list[ControlToWorkflowConnection]
+
+
+@router.post("/control/{control_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def save_control(
+    control_id: str,
+    request: SaveControlRequest,
+    authenticated_user: AuthenticatedUser = Depends(authenticate),
+):
+    CONTROLS[control_id] = request.control
+    CONTROLS_TO_WORKFLOWS_MAPPING[control_id] = request.workflows
+
+
+# TODO: add/remove controls per policy

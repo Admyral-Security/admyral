@@ -9,6 +9,7 @@ import { CopilotChat } from "@copilotkit/react-ui";
 import {
 	CalendarIcon,
 	ChevronRightIcon,
+	MinusIcon,
 	Pencil1Icon,
 } from "@radix-ui/react-icons";
 import {
@@ -23,144 +24,20 @@ import {
 	Text,
 	TextField,
 	ScrollArea,
+	Dialog,
 } from "@radix-ui/themes";
 import MDEditor from "@uiw/react-md-editor";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import { TPolicyControl, TPolicyWithControls } from "@/types/policy";
+import { useImmer } from "use-immer";
+import { useListControls } from "@/hooks/use-list-controls";
+import { TControlDetails } from "@/types/controls";
 
 const SYSTEM_INSTRUCTIONS =
 	"You are a helpful assistant with expert knowledge in security compliance (e.g., SOC2, ISO27001, PCI-DSS). Answer in the best way possible given the data you have. You have access to a security policy. Answer questions about the policy truthfully.";
 
-const CONTROLS = [
-	{
-		id: "CP5",
-		name: "Acceptable Use of End-user Computing",
-		workflows: [
-			{
-				id: "c30cf771-2029-4a27-818a-6d130b9e124d",
-				name: "Kandji Device Information",
-			},
-			{
-				id: "b148808a-4902-4a1a-ba51-6ec50a9effae",
-				name: "Kandji Alert for Unencrypted Devices",
-			},
-		],
-	},
-	{
-		id: "CP6",
-		name: "Support and Management of BYOD Devices",
-		workflows: [
-			{
-				id: "c30cf771-2029-4a27-818a-6d130b9e124d",
-				name: "Kandji Device Information",
-			},
-			{
-				id: "b148808a-4902-4a1a-ba51-6ec50a9effae",
-				name: "Kandji Alert for Unencrypted Devices",
-			},
-		],
-	},
-	{
-		id: "CP12",
-		name: "Encryption Key Management",
-		workflows: [
-			{
-				id: "c30cf771-2029-4a27-818a-6d130b9e124d",
-				name: "Kandji Device Information",
-			},
-			{
-				id: "b148808a-4902-4a1a-ba51-6ec50a9effae",
-				name: "Kandji Alert for Unencrypted Devices",
-			},
-		],
-	},
-	{
-		id: "CP15",
-		name: "User Endpoint Security Controls and Configuration",
-		workflows: [
-			{
-				id: "c30cf771-2029-4a27-818a-6d130b9e124d",
-				name: "Kandji Device Information",
-			},
-			{
-				id: "b148808a-4902-4a1a-ba51-6ec50a9effae",
-				name: "Kandji Alert for Unencrypted Devices",
-			},
-		],
-	},
-	{
-		id: "CP16",
-		name: "Server Hardening Guidelines and Processes",
-		workflows: [
-			{
-				id: "c30cf771-2029-4a27-818a-6d130b9e124d",
-				name: "Kandji Device Information",
-			},
-			{
-				id: "b148808a-4902-4a1a-ba51-6ec50a9effae",
-				name: "Kandji Alert for Unencrypted Devices",
-			},
-		],
-	},
-	{
-		id: "CP17",
-		name: "Encryption Key Management",
-		workflows: [
-			{
-				id: "c30cf771-2029-4a27-818a-6d130b9e124d",
-				name: "Kandji Device Information",
-			},
-			{
-				id: "b148808a-4902-4a1a-ba51-6ec50a9effae",
-				name: "Kandji Alert for Unencrypted Devices",
-			},
-		],
-	},
-	{
-		id: "CP18",
-		name: "Configuration and Management of Network Controls",
-		workflows: [
-			{
-				id: "c30cf771-2029-4a27-818a-6d130b9e124d",
-				name: "Kandji Device Information",
-			},
-			{
-				id: "b148808a-4902-4a1a-ba51-6ec50a9effae",
-				name: "Kandji Alert for Unencrypted Devices",
-			},
-		],
-	},
-	{
-		id: "CP19",
-		name: "Office Network and Wireless Access",
-		workflows: [
-			{
-				id: "c30cf771-2029-4a27-818a-6d130b9e124d",
-				name: "Kandji Device Information",
-			},
-			{
-				id: "b148808a-4902-4a1a-ba51-6ec50a9effae",
-				name: "Kandji Alert for Unencrypted Devices",
-			},
-		],
-	},
-	{
-		id: "CP27",
-		name: "Data Protection Implementation and Processes",
-		workflows: [
-			{
-				id: "c30cf771-2029-4a27-818a-6d130b9e124d",
-				name: "Kandji Device Information",
-			},
-			{
-				id: "b148808a-4902-4a1a-ba51-6ec50a9effae",
-				name: "Kandji Alert for Unencrypted Devices",
-			},
-		],
-	},
-];
-
-const Control = ({ control }: { control: (typeof CONTROLS)[0] }) => {
+const Control = ({ control }: { control: TPolicyControl }) => {
 	const [open, setOpen] = useState(false);
 
 	return (
@@ -168,8 +45,10 @@ const Control = ({ control }: { control: (typeof CONTROLS)[0] }) => {
 			<Flex direction="column" gap="2" pr="4">
 				<Flex justify="between" align="center">
 					<Text size="2">
-						<Link href={`/policies/controls`}>{control.id}</Link>{" "}
-						{control.name}
+						<Link href={`/policies/controls`}>
+							{control.control.controlId}
+						</Link>{" "}
+						{control.control.controlName}
 					</Text>
 					<Collapsible.Trigger>
 						<IconButton
@@ -186,43 +65,157 @@ const Control = ({ control }: { control: (typeof CONTROLS)[0] }) => {
 					</Collapsible.Trigger>
 				</Flex>
 
-				<Collapsible.Content>
-					<Flex direction="column" gap="2">
-						{control.workflows.map((workflow) => (
-							<Link size="2" href={`/editor/${workflow.id}`}>
-								{workflow.name}
-							</Link>
-						))}
-					</Flex>
-				</Collapsible.Content>
+				{control.workflows && control.workflows.length > 0 && (
+					<Collapsible.Content>
+						<Flex direction="column" gap="2">
+							{control.workflows.map((workflow) => (
+								<Link
+									size="2"
+									href={`/editor/${workflow.workflowId}`}
+								>
+									{workflow.workflowName}
+								</Link>
+							))}
+						</Flex>
+					</Collapsible.Content>
+				)}
 			</Flex>
 		</Collapsible.Root>
 	);
 };
 
+const EditControls = ({
+	mappedControls,
+	controls,
+	addControl,
+	removeControl,
+}: {
+	mappedControls: TPolicyControl[];
+	controls: TControlDetails[];
+	addControl: (control: TPolicyControl) => void;
+	removeControl: (idx: number) => void;
+}) => {
+	const [selectedControlId, setSelectedControlId] = useState<
+		string | undefined
+	>(undefined);
+
+	return (
+		<Dialog.Root>
+			<Dialog.Trigger>
+				<Button variant="ghost" size="1" style={{ cursor: "pointer" }}>
+					<Pencil1Icon />
+					Edit
+				</Button>
+			</Dialog.Trigger>
+
+			<Dialog.Content>
+				<Dialog.Title>Edit Control Mapping</Dialog.Title>
+
+				<Flex direction="column" gap="4">
+					<Flex direction="column" gap="3">
+						{mappedControls.map((mappedControl, idx) => (
+							<Flex key={mappedControl.control.controlId} gap="2">
+								<Text>{mappedControl.control.controlName}</Text>
+
+								<IconButton
+									variant="soft"
+									color="red"
+									style={{ cursor: "pointer" }}
+									size="1"
+									onClick={() => removeControl(idx)}
+								>
+									<MinusIcon />
+								</IconButton>
+							</Flex>
+						))}
+
+						<Flex gap="2">
+							<Select.Root
+								value={selectedControlId}
+								onValueChange={setSelectedControlId}
+							>
+								<Select.Trigger placeholder="Select Control" />
+								<Select.Content>
+									{controls.map((control) => (
+										<Select.Item value={control.control.id}>
+											{control.control.name}
+										</Select.Item>
+									))}
+								</Select.Content>
+							</Select.Root>
+
+							<Button
+								style={{ cursor: "pointer" }}
+								onClick={() => {
+									const idx = controls.findIndex(
+										(control) =>
+											control.control.id ===
+											selectedControlId,
+									);
+									addControl({
+										control: {
+											controlId: controls[idx].control.id,
+											controlName:
+												controls[idx].control.name,
+										},
+										workflows: controls[idx].workflows,
+									});
+									setSelectedControlId(undefined);
+								}}
+							>
+								Add
+							</Button>
+						</Flex>
+					</Flex>
+
+					<Flex justify="end">
+						<Dialog.Close>
+							<Button
+								style={{ cursor: "pointer" }}
+								variant="soft"
+								color="gray"
+							>
+								Close
+							</Button>
+						</Dialog.Close>
+					</Flex>
+				</Flex>
+			</Dialog.Content>
+		</Dialog.Root>
+	);
+};
+
 export default function PolicyPage() {
 	const { policyId } = useParams();
-	const { data: policy, isPending, error } = useGetPolicy(policyId as string);
-	const [policyTitle, setPolicyTitle] = useState<string>("");
-	const [value, setValue] = useState<string>("");
+	const {
+		data: policyWithControls,
+		isPending,
+		error,
+	} = useGetPolicy(policyId as string);
+	const {
+		data: controls,
+		isPending: isControlsPending,
+		error: controlsError,
+	} = useListControls();
+	const [policyWithControlsState, setPolicyWithControlsState] =
+		useImmer<TPolicyWithControls | null>(null);
 
 	useCopilotReadable({
-		description: `The current policy is "${policyTitle}".`,
-		value,
+		description: `The current policy is "${policyWithControlsState?.policy.name}".`,
+		value: policyWithControlsState?.policy.content || "",
 	});
 
 	useEffect(() => {
-		if (policy) {
-			setPolicyTitle(policy.name);
-			setValue(policy.content);
+		if (policyWithControls) {
+			setPolicyWithControlsState(policyWithControls);
 		}
-	}, [policy]);
+	}, [policyWithControls]);
 
-	if (isPending) {
+	if (isPending || isControlsPending) {
 		return <div>Loading...</div>;
 	}
 
-	if (error) {
+	if (error || controlsError) {
 		return <ErrorCallout />;
 	}
 
@@ -250,11 +243,19 @@ export default function PolicyPage() {
 							<BackIcon />
 						</Link>
 						<Text size="4" weight="medium">
-							{policy?.name || ""}
+							{policyWithControlsState?.policy.name || ""}
 						</Text>
 					</Flex>
 
-					<Button>Request Approval</Button>
+					<Flex gap="2">
+						<Button style={{ cursor: "pointer" }} color="red">
+							Delete
+						</Button>
+						<Button style={{ cursor: "pointer" }}>Save</Button>
+						<Button style={{ cursor: "pointer" }} color="green">
+							Request Approval
+						</Button>
+					</Flex>
 				</Flex>
 			</Box>
 
@@ -266,8 +267,14 @@ export default function PolicyPage() {
 						style={{
 							width: "100%",
 						}}
-						value={value}
-						onChange={(newValue) => setValue(newValue || "")}
+						value={policyWithControlsState?.policy.content || ""}
+						onChange={(newValue) =>
+							setPolicyWithControlsState((draft) => {
+								if (draft) {
+									draft.policy.content = newValue || "";
+								}
+							})
+						}
 						preview="preview"
 					/>
 				</div>
@@ -286,7 +293,9 @@ export default function PolicyPage() {
 
 					<Flex direction="column" gap="2">
 						<Text>Policy Owner</Text>
-						<Select.Root value={policy?.owner}>
+						<Select.Root
+							value={policyWithControlsState?.policy.owner}
+						>
 							<Select.Trigger />
 							<Select.Content>
 								<Select.Item value="default.user@admyral.ai">
@@ -298,7 +307,9 @@ export default function PolicyPage() {
 
 					<Flex direction="column" gap="2">
 						<Text>Version</Text>
-						<TextField.Root value={policy?.version} />
+						<TextField.Root
+							value={policyWithControlsState?.policy.version}
+						/>
 					</Flex>
 
 					<Flex direction="column" gap="2">
@@ -313,14 +324,26 @@ export default function PolicyPage() {
 					<Flex direction="column" height="100%" gap="4">
 						<Flex justify="between" align="center">
 							<Text>Controls</Text>
-							<Button
-								variant="ghost"
-								size="1"
-								style={{ cursor: "pointer" }}
-							>
-								<Pencil1Icon />
-								Edit
-							</Button>
+							<EditControls
+								addControl={(control) => {
+									setPolicyWithControlsState((draft) => {
+										if (draft) {
+											draft.controls.push(control);
+										}
+									});
+								}}
+								removeControl={(idx) => {
+									setPolicyWithControlsState((draft) => {
+										if (draft) {
+											draft.controls.splice(idx, 1);
+										}
+									});
+								}}
+								mappedControls={
+									policyWithControlsState?.controls || []
+								}
+								controls={controls || []}
+							/>
 						</Flex>
 
 						<ScrollArea
@@ -336,9 +359,12 @@ export default function PolicyPage() {
 								width="100%"
 								height="100%"
 							>
-								{CONTROLS.map((control) => (
-									<Control control={control} />
-								))}
+								{policyWithControlsState &&
+									policyWithControlsState.controls.map(
+										(control) => (
+											<Control control={control} />
+										),
+									)}
 							</Flex>
 						</ScrollArea>
 					</Flex>
