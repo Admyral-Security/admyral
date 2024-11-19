@@ -287,13 +287,14 @@ def filter(
         ),
     ],
     values: Annotated[
-        dict[str, JsonValue],
+        dict[str, JsonValue] | None,
         ArgumentMetadata(
             display_name="Values",
             description='Values (results from previous actions) to use in the filter condition for comparisons (e.g., {"okta_users": okta_users}).',
         ),
-    ],
+    ] = None,
 ) -> list[JsonValue]:
+    values = values or {}
     compiled_filter_expr = compile_condition_str(filter)
     filtered_input_list = []
     for x in input_list:

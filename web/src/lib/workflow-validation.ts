@@ -9,5 +9,5 @@ export function isValidWorkflowName(name: string): boolean {
 }
 
 export function isValidResultName(name: string): boolean {
-	return SNAKE_CASE_REGEX.test(name);
+	return name.length === 0 || SNAKE_CASE_REGEX.test(name);
 }

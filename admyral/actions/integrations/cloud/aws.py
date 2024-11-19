@@ -34,7 +34,7 @@ def steampipe_query_aws(
 
 
 @action(
-    display_name="Control: S3 Bucket Access Logging",
+    display_name="S3 Bucket Access Logging",
     display_namespace="AWS",
     description="S3 server access logging provides a method to monitor the network for potential cybersecurity events.",
     secrets_placeholders=["AWS_SECRET"],
@@ -67,7 +67,7 @@ from
 
 
 @action(
-    display_name="Control: S3 Bucket Enforce SSL",
+    display_name="S3 Bucket Enforce SSL",
     display_namespace="AWS",
     description="To help protect data in transit, ensure that your S3 buckets require requests to use SSL.",
     secrets_placeholders=["AWS_SECRET"],
@@ -120,7 +120,7 @@ left join ssl_ok as ok on ok.name = b.name;
 
 
 @action(
-    display_name="Control: S3 Bucket Restrict Public Read Access",
+    display_name="S3 Bucket Public Read Access",
     display_namespace="AWS",
     description="S3 public read access should be blocked.",
     secrets_placeholders=["AWS_SECRET"],
@@ -167,24 +167,28 @@ def aws_s3_restrict_public_read_access(
             or action ilike 's3:list%'
         )
 )
-select
-    b.arn as resource,
-    case
-        when (block_public_acls or a.name is null) and not bucket_policy_is_public then 'ok'
-        when (block_public_acls or a.name is null) and (bucket_policy_is_public and block_public_policy) then 'ok'
-        when (block_public_acls or a.name is null) and (bucket_policy_is_public and p.name is null) then 'ok'
-        else 'alarm'
-    end as status,
-    case
-        when (block_public_acls or a.name is null) and not bucket_policy_is_public then b.title || ' not publicly readable.'
-        when (block_public_acls or a.name is null) and (bucket_policy_is_public and block_public_policy) then b.title || ' not publicly readable.'
-        when (block_public_acls or a.name is null) and (bucket_policy_is_public and p.name is null) then  b.title || ' not publicly readable.'
-        else b.title || ' publicly readable.'
-    end as reason
-from
-    aws_s3_bucket as b
-    left join public_acl as a on b.name = a.name
-    left join read_access_policy as p on b.name = p.name;
+select resource
+from (
+    select
+        b.arn as resource,
+        case
+            when (block_public_acls or a.name is null) and not bucket_policy_is_public then 'ok'
+            when (block_public_acls or a.name is null) and (bucket_policy_is_public and block_public_policy) then 'ok'
+            when (block_public_acls or a.name is null) and (bucket_policy_is_public and p.name is null) then 'ok'
+            else 'alarm'
+        end as status,
+        case
+            when (block_public_acls or a.name is null) and not bucket_policy_is_public then b.title || ' not publicly readable.'
+            when (block_public_acls or a.name is null) and (bucket_policy_is_public and block_public_policy) then b.title || ' not publicly readable.'
+            when (block_public_acls or a.name is null) and (bucket_policy_is_public and p.name is null) then  b.title || ' not publicly readable.'
+            else b.title || ' publicly readable.'
+        end as reason
+    from
+        aws_s3_bucket as b
+        left join public_acl as a on b.name = a.name
+        left join read_access_policy as p on b.name = p.name
+) as result
+where status = 'alarm';
     """,
 ) -> JsonValue:
     secret = get_aws_secret()
@@ -194,7 +198,7 @@ from
 
 
 @action(
-    display_name="Control: S3 Bucket Restrict Public Write Access",
+    display_name="S3 Bucket Public Write Access",
     display_namespace="AWS",
     description="S3 public write access should be blocked.",
     secrets_placeholders=["AWS_SECRET"],
@@ -245,24 +249,28 @@ def aws_s3_restrict_public_write_access(
             or action ilike 's3:restore%'
         )
 )
-select
-    b.arn as resource,
-    case
-        when (block_public_acls or a.name is null) and not bucket_policy_is_public then 'ok'
-        when (block_public_acls or a.name is null) and (bucket_policy_is_public and block_public_policy) then 'ok'
-        when bucket_policy_is_public and p.name is null then 'ok'
-        else 'alarm'
-    end status,
-    case
-        when (block_public_acls or a.name is null ) and not bucket_policy_is_public then b.title || ' not publicly writable.'
-        when (block_public_acls or a.name is null) and (bucket_policy_is_public and block_public_policy) then b.title || ' not publicly writable.'
-        when (block_public_acls or a.name is null) and (bucket_policy_is_public and p.name is null) then b.title || ' not publicly writable.'
-        else b.title || ' publicly writable.'
-    end reason
-from
-    aws_s3_bucket as b
-    left join public_acl as a on b.name = a.name
-    left join write_access_policy as p on b.name = p.name;
+select resource
+from (
+    select
+        b.arn as resource,
+        case
+            when (block_public_acls or a.name is null) and not bucket_policy_is_public then 'ok'
+            when (block_public_acls or a.name is null) and (bucket_policy_is_public and block_public_policy) then 'ok'
+            when bucket_policy_is_public and p.name is null then 'ok'
+            else 'alarm'
+        end status,
+        case
+            when (block_public_acls or a.name is null ) and not bucket_policy_is_public then b.title || ' not publicly writable.'
+            when (block_public_acls or a.name is null) and (bucket_policy_is_public and block_public_policy) then b.title || ' not publicly writable.'
+            when (block_public_acls or a.name is null) and (bucket_policy_is_public and p.name is null) then b.title || ' not publicly writable.'
+            else b.title || ' publicly writable.'
+        end reason
+    from
+        aws_s3_bucket as b
+        left join public_acl as a on b.name = a.name
+        left join write_access_policy as p on b.name = p.name
+) as result
+where status = 'alarm';
     """,
 ) -> JsonValue:
     secret = get_aws_secret()
@@ -272,7 +280,7 @@ from
 
 
 @action(
-    display_name="Control: S3 Bucket Default Encryption Enabled",
+    display_name="S3 Bucket Default Encryption Enabled",
     display_namespace="AWS",
     description="S3 bucket default encryption should be enabled.",
     secrets_placeholders=["AWS_SECRET"],

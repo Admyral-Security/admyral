@@ -176,7 +176,7 @@ def editor_workflow_graph_to_workflow(
                 id=node.id,
                 type=node.action_type,
                 result_name=node.result_name
-                if is_not_empty(node.result_name)
+                if node.result_name is not None and is_not_empty(node.result_name)
                 else None,
                 secrets_mapping=node.secrets_mapping,
                 args={
