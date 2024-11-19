@@ -34,23 +34,11 @@ export default function WorkflowEditorActionsSidebar() {
 					gap="2"
 					width="100%"
 					height="100%"
-					pt="5"
+					pt="3"
 					pl="4"
 					pr="4"
 					pb="4"
 				>
-					{editorActions.controlFlowActions.map(
-						(controlFlowAction, idx) => (
-							<EditorActionCard
-								key={`control_flow_action_${idx}`}
-								label={
-									controlFlowAction.displayName ||
-									controlFlowAction.actionType
-								}
-								actionType={controlFlowAction.actionType}
-							/>
-						),
-					)}
 					{editorActions.namespaces.map((namespace, idx) => (
 						<ActionAccordion
 							key={`action_accordion_${idx}`}

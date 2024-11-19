@@ -50,25 +50,27 @@ async def load_workflow_actions(
         # ActionMetadata(
         #     action_type="transform",
         #     display_name="Transform",
-        #     display_namespace="Control Flow",
+        #     display_namespace="Admyral",
         # ),
         ActionMetadata(
             action_type="if_condition",
             display_name="If Condition",
-            display_namespace="Control Flow",
+            display_namespace="Admyral",
         ),
         # ActionMetadata(
         #     action_type="python",
         #     display_name="Python",
-        #     display_namespace="Control Flow",
+        #     display_namespace="Admyral",
         # ),
         # ActionMetadata(action_type="for_loop", display_name="For Loop"),
         # ActionMetadata(
         #     action_type="note",
         #     display_name="Note",
-        #     display_namespace="Control Flow",
+        #     display_namespace="Admyral",
         # ),
     ]
+    for action in control_flow_actions:
+        actions_by_namespace[action.display_namespace].append(action)
 
     admyral_namespace_actions = actions_by_namespace.pop("Admyral", [])
     namespaces = [
@@ -79,9 +81,7 @@ async def load_workflow_actions(
         ActionNamespace(namespace="Admyral", actions=admyral_namespace_actions)
     ] + sorted(namespaces, key=lambda namespace: namespace.namespace)
 
-    return EditorActions(
-        control_flow_actions=control_flow_actions, namespaces=namespaces
-    )
+    return EditorActions(control_flow_actions=[], namespaces=namespaces)
 
 
 @router.get("/workflow", status_code=status.HTTP_200_OK)
