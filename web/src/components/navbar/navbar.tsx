@@ -1,17 +1,12 @@
 "use client";
 
-import { Badge, Box, Flex, HoverCard, Separator } from "@radix-ui/themes";
+import { Flex } from "@radix-ui/themes";
 import Logo from "@/components/icons/logo";
 import Link from "next/link";
 import SettingsIcon from "@/components/icons/settings-icon";
 import WorkflowOverviewIcon from "@/components/icons/workflow-overview-icon";
-import Image from "next/image";
 import NavLink from "./navlink";
-import {
-	CheckboxIcon,
-	DashboardIcon,
-	FileTextIcon,
-} from "@radix-ui/react-icons";
+import { DashboardIcon, FileTextIcon } from "@radix-ui/react-icons";
 
 export default function Nav() {
 	return (
@@ -38,18 +33,12 @@ export default function Nav() {
 					align="center"
 					justify="center"
 				>
-					<HoverCard.Root>
-						<HoverCard.Trigger>
-							<Box className="cursor-pointer">
-								<DashboardIcon height={18} width={18} />
-							</Box>
-						</HoverCard.Trigger>
-						<HoverCard.Content style={{ padding: 0 }}>
-							<Badge size="3" color="orange">
-								Dashboard: Coming soon!
-							</Badge>
-						</HoverCard.Content>
-					</HoverCard.Root>
+					<NavLink
+						pageName="Dashboard"
+						linkHref="/dashboard"
+						icon={<DashboardIcon height={18} width={18} />}
+						selectionCriteria={["/dashboard"]}
+					/>
 
 					<NavLink
 						pageName="Policy Management"
