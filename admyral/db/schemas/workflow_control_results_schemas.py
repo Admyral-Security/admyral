@@ -32,7 +32,7 @@ class WorkflowControlResultsSchema(BaseSchema, table=True):
     result: bool
 
     # relationship parents
-    workflow: "WorkflowSchema" = Relationship(back_populates="controls")
+    workflow: "WorkflowSchema" = Relationship(back_populates="control_results")
 
     def to_model(self, include_resources: bool = False) -> WorkflowControlResult:
         return WorkflowControlResult.model_validate(
