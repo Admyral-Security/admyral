@@ -1,19 +1,17 @@
 import { create } from "zustand";
 import { TActionMetadata, TEditorActions } from "@/types/editor-actions";
+import _ from "lodash";
 
 function buildActionsIndex(
 	editorActions: TEditorActions,
 ): Record<string, TActionMetadata> {
-	const index = {} as Record<string, TActionMetadata>;
-	editorActions.controlFlowActions.forEach(
-		(action) => (index[action.actionType] = action),
-	);
-	editorActions.namespaces.forEach((namespace) =>
-		namespace.actions.forEach(
-			(action) => (index[action.actionType] = action),
+	return Object.fromEntries(
+		_.flatten(
+			editorActions.namespaces.map((namespace) =>
+				namespace.actions.map((action) => [action.actionType, action]),
+			),
 		),
 	);
-	return index;
 }
 
 type EditorActionStoreState = {

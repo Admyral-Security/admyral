@@ -16,7 +16,6 @@ class ActionNamespace(BaseModel):
 
 
 class EditorActions(BaseModel):
-    control_flow_actions: list[ActionMetadata]
     namespaces: list[ActionNamespace]
 
 

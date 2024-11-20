@@ -25,6 +25,9 @@ VALID_WORKFLOW_NAME_REGEX = re.compile(r"^[a-zA-Z][a-zA-Z0-9 _]*$")
 SNAKE_CASE_REGEX = re.compile(r"^[a-zA-Z][a-zA-Z0-9_]*$")
 
 
+ADMYRAL_NAMESPACE = "Admyral"
+
+
 router = APIRouter()
 
 
@@ -45,43 +48,37 @@ async def load_workflow_actions(
     for action in actions:
         actions_by_namespace[action.display_namespace].append(action)
 
-    # TODO: implement other control flow actions
     control_flow_actions = [
-        # ActionMetadata(
-        #     action_type="transform",
-        #     display_name="Transform",
-        #     display_namespace="Control Flow",
-        # ),
         ActionMetadata(
             action_type="if_condition",
             display_name="If Condition",
-            display_namespace="Control Flow",
+            display_namespace=ADMYRAL_NAMESPACE,
         ),
         # ActionMetadata(
         #     action_type="python",
         #     display_name="Python",
-        #     display_namespace="Control Flow",
+        #     display_namespace="Admyral",
         # ),
         # ActionMetadata(action_type="for_loop", display_name="For Loop"),
         # ActionMetadata(
         #     action_type="note",
         #     display_name="Note",
-        #     display_namespace="Control Flow",
+        #     display_namespace="Admyral",
         # ),
     ]
+    for control_flow_action in control_flow_actions:
+        actions_by_namespace[ADMYRAL_NAMESPACE].append(control_flow_action)
 
-    admyral_namespace_actions = actions_by_namespace.pop("Admyral", [])
+    admyral_namespace_actions = actions_by_namespace.pop(ADMYRAL_NAMESPACE, [])
     namespaces = [
         ActionNamespace(namespace=namespace, actions=actions)
         for namespace, actions in actions_by_namespace.items()
     ]
     namespaces = [
-        ActionNamespace(namespace="Admyral", actions=admyral_namespace_actions)
+        ActionNamespace(namespace=ADMYRAL_NAMESPACE, actions=admyral_namespace_actions)
     ] + sorted(namespaces, key=lambda namespace: namespace.namespace)
 
-    return EditorActions(
-        control_flow_actions=control_flow_actions, namespaces=namespaces
-    )
+    return EditorActions(namespaces=namespaces)
 
 
 @router.get("/workflow", status_code=status.HTTP_200_OK)

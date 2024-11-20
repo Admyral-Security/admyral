@@ -34,7 +34,6 @@ export type TActionNamespace = z.infer<typeof ActionNamespace>;
 
 export const EditorActions = withCamelCaseTransform(
 	z.object({
-		control_flow_actions: z.array(ActionMetadata),
 		namespaces: z.array(ActionNamespace),
 	}),
 );
