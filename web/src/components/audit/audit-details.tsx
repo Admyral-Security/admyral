@@ -205,7 +205,9 @@ export default function AuditDetails({
 											<Flex direction="column" gap="2">
 												{auditResult.analyzedPolicies.map(
 													(policy) => (
-														<Box>
+														<Box
+															key={`analyzed_policy_${policy.id}`}
+														>
 															<Button
 																variant="outline"
 																style={{
@@ -213,7 +215,7 @@ export default function AuditDetails({
 																}}
 																onClick={() =>
 																	router.push(
-																		`/policies/policy/${policy.id}`,
+																		`/policy/${policy.id}`,
 																	)
 																}
 															>

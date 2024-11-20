@@ -70,6 +70,7 @@ const Control = ({ control }: { control: TPolicyControl }) => {
 						<Flex direction="column" gap="2">
 							{control.workflows.map((workflow) => (
 								<Link
+									key={`workflow_${workflow.workflowId}`}
 									size="2"
 									href={`/editor/${workflow.workflowId}`}
 								>
@@ -137,7 +138,10 @@ const EditControls = ({
 								<Select.Trigger placeholder="Select Control" />
 								<Select.Content>
 									{controls.map((control) => (
-										<Select.Item value={control.control.id}>
+										<Select.Item
+											key={`select_control_${control.control.id}`}
+											value={control.control.id}
+										>
 											{control.control.name}
 										</Select.Item>
 									))}
@@ -248,11 +252,17 @@ export default function PolicyPage() {
 					</Flex>
 
 					<Flex gap="2">
-						<Button style={{ cursor: "pointer" }} color="red">
+						<Button
+							style={{ cursor: "pointer" }}
+							variant="outline"
+							color="red"
+						>
 							Delete
 						</Button>
-						<Button style={{ cursor: "pointer" }}>Save</Button>
-						<Button style={{ cursor: "pointer" }} color="green">
+						<Button style={{ cursor: "pointer" }} variant="outline">
+							Save
+						</Button>
+						<Button style={{ cursor: "pointer" }}>
 							Request Approval
 						</Button>
 					</Flex>
@@ -362,7 +372,10 @@ export default function PolicyPage() {
 								{policyWithControlsState &&
 									policyWithControlsState.controls.map(
 										(control) => (
-											<Control control={control} />
+											<Control
+												key={`controls_${control.control.controlId}`}
+												control={control}
+											/>
 										),
 									)}
 							</Flex>

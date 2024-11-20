@@ -2,7 +2,6 @@
 
 import { useEditorActionStore } from "@/stores/editor-action-store";
 import { Card, Flex, ScrollArea } from "@radix-ui/themes";
-import EditorActionCard from "./editor-action-card";
 import ActionAccordion from "./action-accordion";
 
 export default function WorkflowEditorActionsSidebar() {

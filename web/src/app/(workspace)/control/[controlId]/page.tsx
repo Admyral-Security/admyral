@@ -50,7 +50,7 @@ export default function ControlPage() {
 		if (controlDetails) {
 			setControlState(controlDetails as TControlDetails);
 		}
-	}, [controlDetails]);
+	}, [controlDetails, setControlState]);
 
 	if (isPending || workflowsPending) {
 		return <div>Loading...</div>;
@@ -178,7 +178,11 @@ export default function ControlPage() {
 
 					<Flex gap="2" direction="column">
 						{controlState?.control.frameworks.map((framework) => (
-							<Flex gap="1" align="center">
+							<Flex
+								key={`control-state-${framework}`}
+								gap="1"
+								align="center"
+							>
 								<Badge size="2">{framework}</Badge>
 								<IconButton
 									variant="soft"
@@ -197,7 +201,10 @@ export default function ControlPage() {
 							<Select.Trigger placeholder="Select Framework" />
 							<Select.Content>
 								{["SOC2"].map((framework) => (
-									<Select.Item value={framework}>
+									<Select.Item
+										key={framework}
+										value={framework}
+									>
 										{framework}
 									</Select.Item>
 								))}
@@ -259,7 +266,10 @@ export default function ControlPage() {
 							<Select.Trigger placeholder="Select Workflow" />
 							<Select.Content>
 								{workflows?.map((workflow) => (
-									<Select.Item value={workflow.workflowId}>
+									<Select.Item
+										key={`map-workflow-${workflow.workflowId}`}
+										value={workflow.workflowId}
+									>
 										{workflow.workflowName}
 									</Select.Item>
 								))}

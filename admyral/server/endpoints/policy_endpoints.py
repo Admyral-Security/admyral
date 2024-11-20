@@ -245,11 +245,11 @@ async def get_policy(
         "controls": [
             {
                 "control": control_connection,
-                "workflows": CONTROLS_TO_WORKFLOWS_MAPPING[
-                    control_connection.control_id
-                ],
+                "workflows": CONTROLS_TO_WORKFLOWS_MAPPING.get(
+                    control_connection.control_id, []
+                ),
             }
-            for control_connection in POLICY_TO_CONTROLS_MAPPING[policy_id]
+            for control_connection in POLICY_TO_CONTROLS_MAPPING.get(policy_id, [])
         ],
     }
 

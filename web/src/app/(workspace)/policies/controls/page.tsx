@@ -53,7 +53,7 @@ export default function ControlsPage() {
 
 					<Table.Body>
 						{controls !== null &&
-							controls.map((control) => (
+							controls.map((control, idx) => (
 								<Table.Row
 									key={control.control.id}
 									className="hover:bg-gray-50 cursor-pointer"
@@ -75,7 +75,11 @@ export default function ControlsPage() {
 									<Table.Cell>
 										{control.control.frameworks.map(
 											(framework) => (
-												<Badge>{framework}</Badge>
+												<Badge
+													key={`row_${idx}_${framework}`}
+												>
+													{framework}
+												</Badge>
 											),
 										)}
 									</Table.Cell>
