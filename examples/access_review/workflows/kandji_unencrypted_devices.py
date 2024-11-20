@@ -1,7 +1,6 @@
 """
 
-admyral workflow push kandji_alert_for_unencrypted_devices -f workflows/kandji_unencrypted_devices.py
-admyral workflow push kandji_unencrypted_device_alert -f workflows/kandji_unencrypted_devices.py
+admyral workflow push kandji_alert_for_unencrypted_devices -f workflows/kandji_unencrypted_devices.py --activate
 
 """
 
@@ -9,9 +8,10 @@ from admyral.workflow import workflow, Schedule
 from admyral.typings import JsonValue
 
 from admyral.actions import (
-    list_kandji_unencrypted_devices,
-    send_list_elements_to_workflow,
+    list_kandji_devices,
+    format_json_to_list_view_string,
     send_slack_message,
+    select_fields_from_objects_in_list,
 )
 
 
@@ -20,21 +20,28 @@ from admyral.actions import (
     triggers=[Schedule(interval_days=7)],
 )
 def kandji_alert_for_unencrypted_devices(payload: dict[str, JsonValue]):
-    unencrypted_devices = list_kandji_unencrypted_devices(
+    unencrypted_devices = list_kandji_devices(
+        last_checkin_within_days=90,
+        blueprints=[
+            "Default Blueprint"
+        ],  # TODO: set your blueprints here if you want to filter by blueprints
+        platform="Mac",
+        filevault_enabled=False,
         secrets={"KANDJI_SECRET": "kandji_secret"},
     )
-    send_list_elements_to_workflow(
-        workflow_name="kandji_unencrypted_device_alert",
-        elements=unencrypted_devices,
-    )
 
+    if unencrypted_devices:
+        selected_fields = select_fields_from_objects_in_list(
+            input_list=unencrypted_devices,
+            fields=["device_name", "device_id"],
+        )
 
-@workflow(
-    description="Alert for unencrypted managed devices in Kandji via Slack",
-)
-def kandji_unencrypted_device_alert(payload: dict[str, JsonValue]):
-    send_slack_message(
-        channel_id="C06QP0KV1L2",  # TODO: set your slack channel here
-        text=f"Unencrypted device identified:\n\nDevice name: {payload["element"]["device_name"]}\nDevice ID: {payload["element"]["device_id"]}",
-        secrets={"SLACK_SECRET": "slack_secret"},
-    )
+        formatted_string = format_json_to_list_view_string(
+            json_value=selected_fields,
+        )
+
+        send_slack_message(
+            channel_id="C06QP0KV1L2",  # TODO: set your channel id here
+            text=f"🚨 Unencrypted devices detected 🚨\n\n{formatted_string}",
+            secrets={"SLACK_SECRET": "slack_secret"},
+        )

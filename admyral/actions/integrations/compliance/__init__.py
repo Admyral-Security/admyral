@@ -27,7 +27,6 @@ from admyral.actions.integrations.compliance.ms_intune import (
 from admyral.actions.integrations.compliance.kandji import (
     list_kandji_devices,
     get_kandji_device_details,
-    list_kandji_unencrypted_devices,
     get_kandji_device_apps,
     get_kandji_application_firewall,
     get_kandji_desktop_and_screensaver,
@@ -51,7 +50,6 @@ __all__ = [
     "list_github_issue_comments",
     "list_kandji_devices",
     "get_kandji_device_details",
-    "list_kandji_unencrypted_devices",
     "get_kandji_device_apps",
     "list_zendesk_users",
     "get_kandji_application_firewall",

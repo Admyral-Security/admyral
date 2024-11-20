@@ -12,6 +12,7 @@ Get a list of all devices in an organization from Kandji.
 **Required permissions:**
 
 -   `Device list`
+-   `Device details`
 
 **SDK Import:**
 
@@ -21,8 +22,12 @@ from admyral.actions import list_kandji_devices
 
 ## Arguments:
 
-| Argument Name | Description | Required |
-| ------------- | ----------- | :------: |
+| Argument Name             | Description                                                                                    | Required |
+| ------------------------- | ---------------------------------------------------------------------------------------------- | :------: |
+| Last Check In Within Days | Only keep devices that have checked in within the last defined days.                           |    No    |
+| Platform                  | Only keep devices that match the defined platform. Possible values: Mac, iPad, iPhone, AppleTV |    No    |
+| Blueprints                | Only keep devices that match the defined blueprints.                                           |    No    |
+| FileVault Enabled         | Only keep devices that have FileVault enabled. Only for Mac devices.                           |    No    |
 
 ## Returns
 
@@ -38,6 +43,10 @@ A JSON array of managed devices.
 
 ```python
 devices = list_kandji_devices(
+	last_checkin_within_days=90,
+	blueprints=["Default Blueprint"],
+	platform="Mac",
+	filevault_enabled=False,
 	secrets={"KANDJI_SECRET": "my_kandji_secret"}
 )
 ```
