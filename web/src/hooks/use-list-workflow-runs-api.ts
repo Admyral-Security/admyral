@@ -12,7 +12,7 @@ const ListWorkflowRunsRequest = z.object({
 });
 const ListWorkflowRunsResponse = z.array(WorkflowRunMetadata);
 
-const buildListWorkflowRunsApi = (workflowId: string, limit?: number) =>
+const buildListWorkflowRunsApi = (workflowId: string) =>
 	api<
 		z.infer<typeof ListWorkflowRunsRequest>,
 		z.infer<typeof ListWorkflowRunsResponse>
@@ -28,7 +28,7 @@ const REFETCH_INTERVAL_1_SECOND = 1_000; // in ms
 export const useListWorkflowRunsApi = (workflowId: string, limit?: number) => {
 	return useQuery({
 		queryKey: ["workflowRuns", workflowId, limit],
-		queryFn: () => buildListWorkflowRunsApi(workflowId, limit)({}),
+		queryFn: () => buildListWorkflowRunsApi(workflowId)({ limit }),
 		refetchInterval: REFETCH_INTERVAL_1_SECOND,
 	});
 };
