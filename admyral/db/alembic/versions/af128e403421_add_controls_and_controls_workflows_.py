@@ -1,8 +1,8 @@
 """add controls and controls_workflows tables
 
-Revision ID: 65425e014cb2
+Revision ID: af128e403421
 Revises: 7985f1c159a3
-Create Date: 2024-11-20 14:22:52.076582
+Create Date: 2024-11-20 15:15:35.528059
 
 """
 
@@ -14,7 +14,7 @@ import sqlmodel  # noqa F401
 
 
 # revision identifiers, used by Alembic.
-revision: str = "65425e014cb2"
+revision: str = "af128e403421"
 down_revision: Union[str, None] = "7985f1c159a3"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -41,16 +41,12 @@ def upgrade() -> None:
         sa.Column("control_name", sa.TEXT(), nullable=False),
         sa.Column("control_description", sa.TEXT(), nullable=False),
         sa.ForeignKeyConstraint(["user_id"], ["User.id"], ondelete="CASCADE"),
-        sa.PrimaryKeyConstraint("control_id"),
+        sa.PrimaryKeyConstraint("control_id", "user_id"),
         sa.UniqueConstraint("user_id", "control_id", name="unique_control_id"),
-    )
-    op.create_index(
-        op.f("ix_controls_control_id"), "controls", ["control_id"], unique=False
     )
     op.create_index(
         op.f("ix_controls_control_name"), "controls", ["control_name"], unique=False
     )
-    op.create_index(op.f("ix_controls_user_id"), "controls", ["user_id"], unique=False)
     op.create_table(
         "controls_workflows",
         sa.Column(
@@ -66,14 +62,17 @@ def upgrade() -> None:
             nullable=False,
         ),
         sa.Column("control_id", sa.Integer(), nullable=False),
+        sa.Column("user_id", sa.TEXT(), nullable=False),
         sa.Column("workflow_id", sa.TEXT(), nullable=False),
         sa.ForeignKeyConstraint(
-            ["control_id"], ["controls.control_id"], ondelete="CASCADE"
+            ["control_id", "user_id"],
+            ["controls.control_id", "controls.user_id"],
+            ondelete="CASCADE",
         ),
         sa.ForeignKeyConstraint(
             ["workflow_id"], ["workflows.workflow_id"], ondelete="CASCADE"
         ),
-        sa.PrimaryKeyConstraint("control_id", "workflow_id"),
+        sa.PrimaryKeyConstraint("control_id", "user_id", "workflow_id"),
     )
     op.drop_column("workflow_controls_results", "control_id")
     # ### end Alembic commands ###
@@ -86,8 +85,6 @@ def downgrade() -> None:
         sa.Column("control_id", sa.INTEGER(), autoincrement=False, nullable=False),
     )
     op.drop_table("controls_workflows")
-    op.drop_index(op.f("ix_controls_user_id"), table_name="controls")
     op.drop_index(op.f("ix_controls_control_name"), table_name="controls")
-    op.drop_index(op.f("ix_controls_control_id"), table_name="controls")
     op.drop_table("controls")
     # ### end Alembic commands ###

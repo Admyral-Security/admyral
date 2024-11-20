@@ -23,8 +23,8 @@ class ControlsWorkflowsMappingSchema(BaseSchema, table=True):
     __tablename__ = "controls_workflows"
     __table_args__ = (
         ForeignKeyConstraint(
-            ["control_id"],
-            ["controls.control_id"],
+            ["control_id", "user_id"],
+            ["controls.control_id", "controls.user_id"],
             ondelete="CASCADE",
         ),
         ForeignKeyConstraint(
@@ -36,6 +36,7 @@ class ControlsWorkflowsMappingSchema(BaseSchema, table=True):
 
     # primary keys
     control_id: int = Field(primary_key=True)
+    user_id: str = Field(sa_type=TEXT(), primary_key=True)
     workflow_id: str = Field(sa_type=TEXT(), primary_key=True)
 
     # relationships
@@ -69,13 +70,8 @@ class ControlSchema(BaseSchema, table=True):
     )
 
     # primary keys
-    control_id: int = Field(
-        primary_key=True,
-        index=True,
-    )
-
-    # foreign keys
-    user_id: str = Field(sa_type=TEXT(), index=True)
+    control_id: int = Field(primary_key=True)
+    user_id: str = Field(sa_type=TEXT(), primary_key=True)
 
     # other fields
     control_name: str = Field(sa_type=TEXT(), index=True)
