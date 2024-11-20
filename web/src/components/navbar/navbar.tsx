@@ -53,52 +53,6 @@ export default function Nav() {
 						icon={<WorkflowOverviewIcon />}
 						selectionCriteria={["/", "/workflows"]}
 					/>
-
-					<Separator size="2" color="gray" />
-
-					<HoverCard.Root>
-						<HoverCard.Trigger>
-							<Link
-								href="https://discord.com/invite/GqbJZT9Hbf"
-								target="_blank"
-								rel="noopener noreferrer"
-							>
-								<Image
-									src="/discord_logo.svg"
-									alt="Discord"
-									width={18}
-									height={18}
-								/>
-							</Link>
-						</HoverCard.Trigger>
-						<HoverCard.Content style={{ padding: 0 }}>
-							<Badge size="3" color="green">
-								Join us on Discord!
-							</Badge>
-						</HoverCard.Content>
-					</HoverCard.Root>
-
-					<HoverCard.Root>
-						<HoverCard.Trigger>
-							<Link
-								href="https://github.com/admyral-security/admyral"
-								target="_blank"
-								rel="noopener noreferrer"
-							>
-								<Image
-									src="/github_logo.svg"
-									alt="Slack"
-									width={18}
-									height={18}
-								/>
-							</Link>
-						</HoverCard.Trigger>
-						<HoverCard.Content style={{ padding: 0 }}>
-							<Badge size="3" color="green">
-								Visit us on GitHub!
-							</Badge>
-						</HoverCard.Content>
-					</HoverCard.Root>
 				</Flex>
 			</Flex>
 
