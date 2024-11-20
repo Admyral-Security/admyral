@@ -1,12 +1,11 @@
 "use client";
 
-import { Badge, Box, Flex, HoverCard, Separator } from "@radix-ui/themes";
+import { Badge, Box, Flex, HoverCard } from "@radix-ui/themes";
 import Logo from "@/components/icons/logo";
 import Link from "next/link";
 import SettingsIcon from "@/components/icons/settings-icon";
 import WorkflowOverviewIcon from "@/components/icons/workflow-overview-icon";
 import DashboardIcon from "@/components/icons/dashboard-icon";
-import Image from "next/image";
 import NavLink from "./navlink";
 
 export default function Nav() {
