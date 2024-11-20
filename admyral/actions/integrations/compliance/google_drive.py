@@ -87,7 +87,8 @@ def list_google_docs_revisions(
     secret = ctx.get().secrets.get("GOOGLE_DRIVE_SECRET")
     secret = GoogleDriveSecret.model_validate(secret)
     creds = ServiceAccountCredentials.from_service_account_info(
-        info=secret, scopes=["https://www.googleapis.com/auth/drive.readonly"]
+        info=secret.model_dump(),
+        scopes=["https://www.googleapis.com/auth/drive.readonly"],
     )
 
     drive_service = build("drive", "v3", credentials=creds)
@@ -185,7 +186,7 @@ def list_google_drive_files_with_link_sharing_enabled(
     secret = ctx.get().secrets.get("GOOGLE_DRIVE_SECRET")
     secret = GoogleDriveSecret.model_validate(secret)
     creds = ServiceAccountCredentials.from_service_account_info(
-        info=secret,
+        info=secret.model_dump(),
         scopes=[
             "https://www.googleapis.com/auth/drive.readonly",
             "https://www.googleapis.com/auth/admin.directory.user.readonly",
