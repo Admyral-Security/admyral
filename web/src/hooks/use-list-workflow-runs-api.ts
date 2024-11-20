@@ -8,7 +8,7 @@ import { HTTPMethod } from "@/types/api";
 
 // GET /api/v1/runs/<workflow-id>
 const ListWorkflowRunsRequest = z.object({
-	limit: z.number().optional(),
+	limit: z.number().min(0).optional(),
 });
 const ListWorkflowRunsResponse = z.array(WorkflowRunMetadata);
 
@@ -29,7 +29,7 @@ export const useListWorkflowRunsApi = (workflowId: string, limit?: number) => {
 	return useQuery({
 		queryKey: ["workflowRuns", workflowId, limit],
 		queryFn: () => {
-			const params = limit ? { limit } : {};
+			const params = typeof limit === "number" ? { limit } : {};
 			return buildListWorkflowRunsApi(workflowId)(params);
 		},
 		refetchInterval: REFETCH_INTERVAL_1_SECOND,
