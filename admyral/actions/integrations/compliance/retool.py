@@ -226,7 +226,7 @@ def list_groups_and_apps_per_user() -> list[dict[str, JsonValue]]:
                 app_details = app_details_cache.get(app_id)
                 if app_details is None:
                     app_details = _list_retool_api(client, f"/apps/{app_id}")
-                    app_details_cache[app_id] = app_details
+                    app_details_cache[app_id] = app_details["data"]
 
                 apps_by_access_level[access_level].append(app_details["name"])
 
@@ -295,9 +295,6 @@ def list_used_groups_and_apps_per_user(
         end_date = _validate_date_format(end_date)
 
     with get_retool_client(secret) as client:
-        # https://docs.retool.com/reference/api/#tag/Users/paths/~1users/get
-        users = _list_retool_api_with_pagination(client, "/users")
-
         app_id_to_groups = defaultdict(list)
         # https://docs.retool.com/reference/api/#tag/Groups/paths/~1groups/get
         groups = _list_retool_api_with_pagination(client, "/groups")
@@ -319,6 +316,10 @@ def list_used_groups_and_apps_per_user(
                 app_id_to_groups[app["id"]].append(group["name"])
 
         result = []
+
+        # https://docs.retool.com/reference/api/#tag/Users/paths/~1users/get
+        users = _list_retool_api_with_pagination(client, "/users")
+
         for user in users:
             # fetch the app usage for the user
             # https://docs.retool.com/reference/api/#tag/Usage/paths/~1usage~1user_details/get
