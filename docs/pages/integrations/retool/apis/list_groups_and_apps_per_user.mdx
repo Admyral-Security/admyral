@@ -22,7 +22,7 @@ List all groups a user is a member of and all the apps a user has access to.
 **SDK Import:**
 
 ```python
-from admyral.actions import list_groups_and_apps_per_user
+from admyral.actions import list_retool_groups_and_apps_per_user
 ```
 
 ## Arguments
@@ -57,7 +57,7 @@ Schema:
 ## SDK Example
 
 ```python
-groups_per_user = list_groups_and_apps_per_user(
+groups_per_user = list_retool_groups_and_apps_per_user(
 	secrets={"RETOOL_SECRET": "my_stored_retool_secret"}
 )
 ```

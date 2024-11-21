@@ -10,8 +10,8 @@ from typing import Annotated
 from admyral.workflow import workflow
 from admyral.typings import JsonValue
 from admyral.actions import (
-    list_groups_and_apps_per_user,
-    list_used_groups_and_apps_per_user,
+    list_retool_groups_and_apps_per_user,
+    list_retool_used_groups_and_apps_per_user,
     join_lists,
     format_json_to_list_view_string,
     send_slack_message_to_user_by_email,
@@ -63,13 +63,13 @@ def retool_access_optimization(payload: dict[str, JsonValue]):
         only_date=True,
     )
 
-    used_groups_and_apps_per_user = list_used_groups_and_apps_per_user(
+    used_groups_and_apps_per_user = list_retool_used_groups_and_apps_per_user(
         start_date=start_and_end_time[0],
         end_date=start_and_end_time[1],
         secrets={"RETOOL_SECRET": "retool_secret"},
     )
 
-    groups_and_apps_per_user = list_groups_and_apps_per_user(
+    groups_and_apps_per_user = list_retool_groups_and_apps_per_user(
         secrets={"RETOOL_SECRET": "retool_secret"}
     )
 

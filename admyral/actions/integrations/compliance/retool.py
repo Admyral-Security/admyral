@@ -136,7 +136,7 @@ def list_retool_inactive_users(
     description="List all groups a user is a member of as well as the last time a user was active in Retool.",
     secrets_placeholders=["RETOOL_SECRET"],
 )
-def list_groups_per_user() -> dict[str, JsonValue]:
+def list_retool_groups_per_user() -> dict[str, JsonValue]:
     # Get all permission groups for an organization or space. The API token must have the "Groups > Read" scope.
     # https://docs.retool.com/reference/api/#tag/Users/paths/~1users~1%7BuserId%7D/patch
     # https://docs.retool.com/reference/api/v2/#tag/Groups/paths/~1groups~1%7BgroupId%7D/put
@@ -171,7 +171,7 @@ def list_groups_per_user() -> dict[str, JsonValue]:
     description="List all groups a user is a member of and all the apps a user has access to.",
     secrets_placeholders=["RETOOL_SECRET"],
 )
-def list_groups_and_apps_per_user() -> list[dict[str, JsonValue]]:
+def list_retool_groups_and_apps_per_user() -> list[dict[str, JsonValue]]:
     secret = ctx.get().secrets.get("RETOOL_SECRET")
     secret = RetoolSecret.model_validate(secret)
 
@@ -271,7 +271,7 @@ def _validate_date_format(date_str: str) -> str:
     description="List all apps a user has used as viewer and/or editor within a certain time range.",
     secrets_placeholders=["RETOOL_SECRET"],
 )
-def list_used_groups_and_apps_per_user(
+def list_retool_used_groups_and_apps_per_user(
     start_date: Annotated[
         str,
         ArgumentMetadata(

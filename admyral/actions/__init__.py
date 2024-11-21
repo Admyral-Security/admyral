@@ -72,7 +72,7 @@ from admyral.actions.integrations.iam import (
 )
 from admyral.actions.integrations.compliance import (
     list_retool_inactive_users,
-    list_groups_per_user,
+    list_retool_groups_per_user,
     list_1password_audit_events,
     search_github_enterprise_audit_logs,
     list_github_merged_pull_requests,
@@ -91,8 +91,8 @@ from admyral.actions.integrations.compliance import (
     get_kandji_application_firewall,
     get_kandji_desktop_and_screensaver,
     get_kandji_library_item_statuses,
-    list_groups_and_apps_per_user,
-    list_used_groups_and_apps_per_user,
+    list_retool_groups_and_apps_per_user,
+    list_retool_used_groups_and_apps_per_user,
     list_google_drive_files_with_link_sharing_enabled,
 )
 from admyral.actions.integrations.cloud import (
@@ -146,7 +146,7 @@ __all__ = [
     "list_sentinel_one_alerts",
     "list_wiz_alerts",
     "list_retool_inactive_users",
-    "list_groups_per_user",
+    "list_retool_groups_per_user",
     "list_1password_audit_events",
     "okta_search_users",
     "okta_get_all_user_types",
@@ -188,8 +188,8 @@ __all__ = [
     "join_lists",
     "leakcheck_v2_lookup",
     "leakcheck_public_lookup",
-    "list_groups_and_apps_per_user",
-    "list_used_groups_and_apps_per_user",
+    "list_retool_groups_and_apps_per_user",
+    "list_retool_used_groups_and_apps_per_user",
     "list_google_drive_files_with_link_sharing_enabled",
     "get_jira_project",
     "get_jira_transitions",

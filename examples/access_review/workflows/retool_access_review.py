@@ -4,7 +4,7 @@ import json
 from admyral.workflow import workflow
 from admyral.typings import JsonValue
 from admyral.actions import (
-    list_groups_per_user,
+    list_retool_groups_per_user,
     batched_send_slack_message_to_user_by_email,
 )
 from admyral.action import action, ArgumentMetadata
@@ -166,7 +166,9 @@ def build_review_requests_as_slack_message_for_managers(
     description="This workflow sends Slack messages to managers for Retool access review.",
 )
 def retool_access_review(payload: dict[str, JsonValue]):
-    groups_per_user = list_groups_per_user(secrets={"RETOOL_SECRET": "retool_secret"})
+    groups_per_user = list_retool_groups_per_user(
+        secrets={"RETOOL_SECRET": "retool_secret"}
+    )
     messages = build_review_requests_as_slack_message_for_managers(
         groups_per_user=groups_per_user,
     )

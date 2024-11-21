@@ -25,7 +25,7 @@ List all apps a user has used as viewer and/or editor within a certain time rang
 **SDK Import:**
 
 ```python
-from admyral.actions import list_used_groups_and_apps_per_user
+from admyral.actions import list_retool_used_groups_and_apps_per_user
 ```
 
 ## Arguments
@@ -61,7 +61,7 @@ Schema:
 ## SDK Example
 
 ```python
-groups_per_user = list_used_groups_and_apps_per_user(
+groups_per_user = list_retool_used_groups_and_apps_per_user(
     start_date="2024-10-01",
     end_date="2024-10-31",
 	secrets={"RETOOL_SECRET": "my_stored_retool_secret"}
