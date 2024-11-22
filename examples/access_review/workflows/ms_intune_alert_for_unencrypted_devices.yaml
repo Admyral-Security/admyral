@@ -1,0 +1,63 @@
+controls: null
+dag:
+    format_json_to_list_view_string:
+        args:
+            json_value: "{{ unencrypted_devices }}"
+        children:
+            - send_slack_message
+        id: format_json_to_list_view_string
+        result_name: formatted_unencrytped_devices
+        secrets_mapping: {}
+        type: format_json_to_list_view_string
+    if:
+        condition:
+            type: constant
+            value: "{{ unencrypted_devices }}"
+        condition_str: unencrypted_devices
+        false_children: []
+        id: if
+        true_children:
+            - format_json_to_list_view_string
+        type: if_condition
+    list_ms_intune_unencrypted_managed_devices:
+        args: {}
+        children:
+            - if
+        id: list_ms_intune_unencrypted_managed_devices
+        result_name: unencrypted_devices
+        secrets_mapping:
+            AZURE_SECRET: azure_secret
+        type: list_ms_intune_unencrypted_managed_devices
+    send_slack_message:
+        args:
+            channel_id: C06QP0KV1L2
+            text: "Unencrypted devices identified:
+
+
+                {{ formatted_unencrytped_devices }}"
+        children: []
+        id: send_slack_message
+        result_name: null
+        secrets_mapping:
+            SLACK_SECRET: slack_secret
+        type: send_slack_message
+    start:
+        args: {}
+        children:
+            - list_ms_intune_unencrypted_managed_devices
+        id: start
+        result_name: payload
+        secrets_mapping: {}
+        type: start
+description: Alert for unencrypted managed devices in Microsoft Intune via Slack
+name: ms_intune_alert_for_unencrypted_devices
+start:
+    triggers:
+        - cron: null
+          default_args: []
+          interval_days: 7
+          interval_hours: null
+          interval_minutes: null
+          interval_seconds: null
+          type: schedule
+version: "1"

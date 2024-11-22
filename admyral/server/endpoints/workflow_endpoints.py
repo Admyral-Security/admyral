@@ -2,7 +2,6 @@ from fastapi import APIRouter, status, Body, Depends, HTTPException
 from typing import Optional, Annotated
 from uuid import uuid4
 from pydantic import BaseModel
-import re
 
 from admyral.utils.collections import is_not_empty
 from admyral.server.deps import get_admyral_store, get_workers_client
@@ -15,20 +14,21 @@ from admyral.models import (
     WorkflowSchedule,
     WorkflowTriggerResponse,
     WorkflowMetadata,
-    ActionNode,
+    WorkflowDAG,
 )
 from admyral.logger import get_logger
 from admyral.typings import JsonValue
 from admyral.server.auth import authenticate
+from admyral.compiler.yaml_workflow_compiler import (
+    compile_from_yaml_workflow,
+    validate_workflow,
+)
 
 
 logger = get_logger(__name__)
 
 
 MANUAL_TRIGGER_SOURCE_NAME = "manual"
-SPACE = " "
-VALID_WORKFLOW_NAME_REGEX = re.compile(r"^[a-zA-Z][a-zA-Z0-9 _]*$")
-SNAKE_CASE_REGEX = re.compile(r"^[a-zA-Z][a-zA-Z0-9_]*$")
 
 
 class WorkflowBody(BaseModel):
@@ -60,7 +60,8 @@ async def push_workflow_impl(
     user_id: str,
     workflow_name: str,
     workflow_id: str | None,
-    request: WorkflowPushRequest,
+    workflow_dag: WorkflowDAG,
+    activate: bool,
 ) -> WorkflowPushResponse:
     """
     Push a workflow to the store. If the workflow for the provided workflow id already exists,
@@ -71,21 +72,13 @@ async def push_workflow_impl(
         workflow: The workflow object.
     """
 
-    if not VALID_WORKFLOW_NAME_REGEX.match(workflow_name):
+    try:
+        await validate_workflow(user_id, get_admyral_store(), workflow_dag)
+    except ValueError as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid workflow name. Workflow names must start with a letter and can only contain alphanumeric characters, underscores, and spaces.",
-        )
-
-    if any(
-        not SNAKE_CASE_REGEX.match(node.result_name)
-        for node in request.workflow_dag.dag.values()
-        if isinstance(node, ActionNode) and node.result_name is not None
-    ):
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid node result name. Result names must be snake_case.",
-        )
+            detail=str(e),
+        ) from e
 
     admyral_store = get_admyral_store()
     workers_client = get_workers_client()
@@ -116,8 +109,8 @@ async def push_workflow_impl(
     workflow = Workflow(
         workflow_id=workflow_id,
         workflow_name=workflow_name,
-        workflow_dag=request.workflow_dag,
-        is_active=request.activate,
+        workflow_dag=workflow_dag,
+        is_active=activate,
     )
 
     await admyral_store.store_workflow(user_id, workflow)
@@ -134,7 +127,7 @@ async def push_workflow_impl(
     new_schedules = list(
         filter(
             lambda trigger: trigger.type == WorkflowTriggerType.SCHEDULE,
-            request.workflow_dag.start.triggers,
+            workflow_dag.start.triggers,
         )
     )
     if is_not_empty(new_schedules):
@@ -151,7 +144,7 @@ async def push_workflow_impl(
             )
             await admyral_store.store_schedule(user_id, new_workflow_schedule)
 
-            if request.activate:
+            if activate:
                 await workers_client.schedule_workflow(
                     user_id, workflow, new_workflow_schedule
                 )
@@ -160,7 +153,7 @@ async def push_workflow_impl(
     filtered_webhooks = list(
         filter(
             lambda trigger: trigger.type == WorkflowTriggerType.WEBHOOK,
-            request.workflow_dag.start.triggers,
+            workflow_dag.start.triggers,
         )
     )
     if len(filtered_webhooks) > 1:
@@ -192,9 +185,8 @@ async def push_workflow_impl(
 router = APIRouter()
 
 
-@router.post("/{workflow_name}/push", status_code=status.HTTP_201_CREATED)
+@router.post("/push", status_code=status.HTTP_201_CREATED)
 async def push_workflow(
-    workflow_name: str,
     request: WorkflowPushRequest,
     authenticated_user: AuthenticatedUser = Depends(authenticate),
 ) -> WorkflowPushResponse:
@@ -206,8 +198,10 @@ async def push_workflow(
         workflow_name: The workflow name.
         workflow: The workflow object.
     """
+    workflow_dag = compile_from_yaml_workflow(request.workflow_code)
+    workflow_name = workflow_dag.name
     return await push_workflow_impl(
-        authenticated_user.user_id, workflow_name, None, request
+        authenticated_user.user_id, workflow_name, None, workflow_dag, request.activate
     )
 
 

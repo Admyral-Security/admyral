@@ -1,0 +1,67 @@
+controls: null
+dag:
+    get_time_interval_of_last_n_days:
+        args:
+            n_days: 1
+        children:
+            - list_google_docs_revisions
+        id: get_time_interval_of_last_n_days
+        result_name: start_and_end_yesterday
+        secrets_mapping: {}
+        type: get_time_interval_of_last_n_days
+    if:
+        condition:
+            type: constant
+            value: "{{ revisions }}"
+        condition_str: revisions
+        false_children: []
+        id: if
+        true_children:
+            - send_list_elements_to_workflow
+        type: if_condition
+    list_google_docs_revisions:
+        args:
+            end_time: "{{ start_and_end_yesterday[1] }}"
+            file_id: "{{ payload['file_id'] }}"
+            start_time: "{{ start_and_end_yesterday[0] }}"
+        children:
+            - if
+        id: list_google_docs_revisions
+        result_name: revisions
+        secrets_mapping:
+            GOOGLE_DRIVE_SECRET: google_drive_secret
+        type: list_google_docs_revisions
+    send_list_elements_to_workflow:
+        args:
+            elements: "{{ revisions }}"
+            shared_data:
+                file_id: "{{ payload['file_id'] }}"
+                latest_version: "{{ revisions[-1]['content'] }}"
+            workflow_name: google_docs_policy_revision_monitoring_body
+        children: []
+        id: send_list_elements_to_workflow
+        result_name: null
+        secrets_mapping: {}
+        type: send_list_elements_to_workflow
+    start:
+        args: {}
+        children:
+            - get_time_interval_of_last_n_days
+        id: start
+        result_name: payload
+        secrets_mapping: {}
+        type: start
+description: Monitor Google Docs Policy Revision
+name: google_docs_policy_revision_monitoring
+start:
+    triggers:
+        - cron: null
+          default_args:
+              - name: file_id
+                value: 1ozuJuLT2MOOlJX_DjQ8dAtbI7Xm03JTdp2QbaFU5caY
+          interval_days: 1
+          interval_hours: null
+          interval_minutes: null
+          interval_seconds: null
+          type: schedule
+version: "1"

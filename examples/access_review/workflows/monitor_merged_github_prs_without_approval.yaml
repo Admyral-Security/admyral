@@ -1,0 +1,75 @@
+controls: null
+dag:
+    format_json_to_list_view_string:
+        args:
+            json_value: "{{ unreviewed_prs }}"
+        children:
+            - send_slack_message
+        id: format_json_to_list_view_string
+        result_name: formatted_unreviewed_prs
+        secrets_mapping: {}
+        type: format_json_to_list_view_string
+    get_time_interval_of_last_n_days:
+        args:
+            n_days: 1
+        children:
+            - list_github_merged_pull_requests_without_approval
+        id: get_time_interval_of_last_n_days
+        result_name: last_day_time_interval
+        secrets_mapping: {}
+        type: get_time_interval_of_last_n_days
+    if:
+        condition:
+            type: constant
+            value: "{{ unreviewed_prs }}"
+        condition_str: unreviewed_prs
+        false_children: []
+        id: if
+        true_children:
+            - format_json_to_list_view_string
+        type: if_condition
+    list_github_merged_pull_requests_without_approval:
+        args:
+            end_time: "{{ last_day_time_interval[1] }}"
+            repo_name: Admyral_Github_Integration_Test
+            repo_owner: Admyral-Security
+            start_time: "{{ last_day_time_interval[0] }}"
+        children:
+            - if
+        id: list_github_merged_pull_requests_without_approval
+        result_name: unreviewed_prs
+        secrets_mapping:
+            GITHUB_SECRET: github_secret
+        type: list_github_merged_pull_requests_without_approval
+    send_slack_message:
+        args:
+            channel_id: C06QP0KV1L2
+            text: "Merged PRs with unreviewed commits identified:
+
+                {{ formatted_unreviewed_prs }}"
+        children: []
+        id: send_slack_message
+        result_name: null
+        secrets_mapping:
+            SLACK_SECRET: slack_secret
+        type: send_slack_message
+    start:
+        args: {}
+        children:
+            - get_time_interval_of_last_n_days
+        id: start
+        result_name: payload
+        secrets_mapping: {}
+        type: start
+description: Monitor Merged GitHub PRs Without Approval
+name: monitor_merged_github_prs_without_approval
+start:
+    triggers:
+        - cron: null
+          default_args: []
+          interval_days: 1
+          interval_hours: null
+          interval_minutes: null
+          interval_seconds: null
+          type: schedule
+version: "1"

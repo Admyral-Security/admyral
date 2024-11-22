@@ -45,7 +45,7 @@ class ActionNode(NodeBase):
 
     @classmethod
     def build_start_node(cls) -> "ActionNode":
-        return cls(id="start", type="start")
+        return cls(id="start", type="start", result_name="payload")
 
 
 class IfNode(NodeBase):
@@ -53,10 +53,6 @@ class IfNode(NodeBase):
     condition: Condition = Field(..., discriminator="type")
     condition_str: str
 
-    # Children must be sets
-    # Why?
-    # if we have act5(a, b) and a, b are emitted variables from an if-condition block
-    # then we connect each leaf node twice to act5(a, b) (once for a and once for b)
     true_children: list[str] = []
     false_children: list[str] = []
 
@@ -99,7 +95,7 @@ class WorkflowDefaultArgument(BaseModel):
 
 class WorkflowTriggerBase(BaseModel):
     type: WorkflowTriggerType
-    default_args: list[WorkflowDefaultArgument]
+    default_args: list[WorkflowDefaultArgument] = []
 
     @property
     def default_args_dict(self) -> dict[str, JsonValue]:
@@ -156,7 +152,7 @@ class Workflow(BaseModel):
 
 
 class WorkflowPushRequest(BaseModel):
-    workflow_dag: WorkflowDAG
+    workflow_code: str
     activate: bool
 
 

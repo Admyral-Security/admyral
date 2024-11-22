@@ -1,0 +1,79 @@
+controls: null
+dag:
+    format_json_to_list_view_string:
+        args:
+            json_value: "{{ selected_fields }}"
+        children:
+            - send_slack_message
+        id: format_json_to_list_view_string
+        result_name: formatted_string
+        secrets_mapping: {}
+        type: format_json_to_list_view_string
+    if:
+        condition:
+            type: constant
+            value: "{{ unencrypted_devices }}"
+        condition_str: unencrypted_devices
+        false_children: []
+        id: if
+        true_children:
+            - select_fields_from_objects_in_list
+        type: if_condition
+    list_kandji_devices:
+        args:
+            blueprints:
+                - Default Blueprint
+            filevault_enabled: false
+            last_checkin_within_days: 90
+            platform: Mac
+        children:
+            - if
+        id: list_kandji_devices
+        result_name: unencrypted_devices
+        secrets_mapping:
+            KANDJI_SECRET: kandji_secret
+        type: list_kandji_devices
+    select_fields_from_objects_in_list:
+        args:
+            fields:
+                - device_name
+                - device_id
+            input_list: "{{ unencrypted_devices }}"
+        children:
+            - format_json_to_list_view_string
+        id: select_fields_from_objects_in_list
+        result_name: selected_fields
+        secrets_mapping: {}
+        type: select_fields_from_objects_in_list
+    send_slack_message:
+        args:
+            channel_id: C06QP0KV1L2
+            text:
+                "\U0001F6A8 Unencrypted devices detected \U0001F6A8\n\n{{ formatted_string\
+                \ }}"
+        children: []
+        id: send_slack_message
+        result_name: null
+        secrets_mapping:
+            SLACK_SECRET: slack_secret
+        type: send_slack_message
+    start:
+        args: {}
+        children:
+            - list_kandji_devices
+        id: start
+        result_name: payload
+        secrets_mapping: {}
+        type: start
+description: Alert for unencrypted managed devices in Kandji via Slack
+name: kandji_alert_for_unencrypted_devices
+start:
+    triggers:
+        - cron: null
+          default_args: []
+          interval_days: 7
+          interval_hours: null
+          interval_minutes: null
+          interval_seconds: null
+          type: schedule
+version: "1"

@@ -36,11 +36,6 @@ function ActionNode({ id, data, selected }: ActionNodeProps) {
 				selected={selected}
 				icon={<ActionIcon actionType={data.actionType} />}
 				name={actionDefinition?.displayName}
-				type={
-					data.resultName
-						? `${data.resultName} = ${data.actionType}(...)`
-						: `${data.actionType}(...)`
-				}
 			/>
 			<Handle
 				type="source"

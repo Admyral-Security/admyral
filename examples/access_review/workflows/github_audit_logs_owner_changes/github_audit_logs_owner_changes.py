@@ -1,13 +1,17 @@
+"""
+
+admyral action push get_time_range_of_last_full_hour -a workflows/github_audit_logs_owner_changes/github_audit_logs_owner_changes.py
+admyral action push build_info_message_owner_changes -a workflows/github_audit_logs_owner_changes/github_audit_logs_owner_changes.py
+
+admyral workflow push workflows/github_audit_logs_owner_changes/github_audit_logs_owner_changes.yaml
+
+"""
+
 from typing import Annotated
 from datetime import datetime, timedelta, UTC
 
-from admyral.workflow import workflow, Schedule
 from admyral.typings import JsonValue
 from admyral.action import action, ArgumentMetadata
-from admyral.actions import (
-    search_github_enterprise_audit_logs,
-    batched_send_slack_message_to_user_by_email,
-)
 
 
 @action(
@@ -56,30 +60,3 @@ def build_info_message_owner_changes(
                 )
             )
     return messages
-
-
-@workflow(
-    description="Alert on GitHub Orga Owner Changes",
-    triggers=[Schedule(cron="0 * * * *")],
-)
-def github_audit_logs_owner_changes(payload: dict[str, JsonValue]):
-    start_and_end_time = get_time_range_of_last_full_hour()
-
-    logs = search_github_enterprise_audit_logs(
-        enterprise="admyral",  # TODO: set your enterprise slug here
-        filter="action:org.update_member",
-        start_time=start_and_end_time[0],
-        end_time=start_and_end_time[1],
-        secrets={"GITHUB_ENTERPRISE_SECRET": "github_enterprise_secret"},
-    )
-
-    if logs:
-        messages = build_info_message_owner_changes(
-            logs=logs,
-            email="daniel@admyral.dev",  # TODO: set your Slack email here
-        )
-
-        batched_send_slack_message_to_user_by_email(
-            messages=messages,
-            secrets={"SLACK_SECRET": "slack_secret"},
-        )

@@ -1,0 +1,56 @@
+controls: null
+dag:
+    get_time_interval_of_last_n_days:
+        args:
+            n_days: 1
+        children:
+            - list_github_merged_pull_requests_without_approval
+        id: get_time_interval_of_last_n_days
+        result_name: last_day_time_interval
+        secrets_mapping: {}
+        type: get_time_interval_of_last_n_days
+    list_github_merged_pull_requests_without_approval:
+        args:
+            end_time: "{{ last_day_time_interval[1] }}"
+            repo_name: Admyral_Github_Integration_Test
+            repo_owner: Admyral-Security
+            start_time: "{{ last_day_time_interval[0] }}"
+        children:
+            - send_list_elements_to_workflow
+        id: list_github_merged_pull_requests_without_approval
+        result_name: unreviewed_prs
+        secrets_mapping:
+            GITHUB_SECRET: github_secret
+        type: list_github_merged_pull_requests_without_approval
+    send_list_elements_to_workflow:
+        args:
+            elements: "{{ unreviewed_prs }}"
+            shared_data:
+                repo_name: Admyral_Github_Integration_Test
+                repo_owner: Admyral-Security
+            workflow_name: handle_merged_github_pr_without_approval
+        children: []
+        id: send_list_elements_to_workflow
+        result_name: null
+        secrets_mapping: {}
+        type: send_list_elements_to_workflow
+    start:
+        args: {}
+        children:
+            - get_time_interval_of_last_n_days
+        id: start
+        result_name: payload
+        secrets_mapping: {}
+        type: start
+description: Monitor Merged GitHub PRs Without Approval
+name: monitor_merged_github_prs_without_approval
+start:
+    triggers:
+        - cron: null
+          default_args: []
+          interval_days: 1
+          interval_hours: null
+          interval_minutes: null
+          interval_seconds: null
+          type: schedule
+version: "1"

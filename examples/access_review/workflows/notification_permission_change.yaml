@@ -1,0 +1,56 @@
+controls: null
+dag:
+    get_jira_audit_records:
+        args:
+            filter:
+                - User
+                - created
+            start_date: "2024-08-01T00:00:00"
+        children:
+            - send_slack_message_to_user_by_email
+        id: get_jira_audit_records
+        result_name: records
+        secrets_mapping:
+            JIRA_SECRET: jira_secret
+        type: get_jira_audit_records
+    send_slack_message_to_user_by_email:
+        args:
+            email: ch.grittner@gmail.com
+            text: "*A new user was created*
+
+
+                User ID: {{ records[0]['objectItem']['id'] }}
+
+                Created on: {{ records[0]['created'] }}"
+        children: []
+        id: send_slack_message_to_user_by_email
+        result_name: null
+        secrets_mapping:
+            SLACK_SECRET: slack_secret
+        type: send_slack_message_to_user_by_email
+    start:
+        args: {}
+        children:
+            - get_jira_audit_records
+        id: start
+        result_name: payload
+        secrets_mapping: {}
+        type: start
+description:
+    Monitors Jira for newly created user accounts and sends a Slack notification
+    with relevant details. This workflow automatically retrieves audit records for user
+    creation events and notifies the specified recipient via Slack with the user ID
+    and creation timestamp.
+name: notification_permission_change
+start:
+    triggers:
+        - default_args: []
+          type: webhook
+        - cron: null
+          default_args: []
+          interval_days: 1
+          interval_hours: null
+          interval_minutes: null
+          interval_seconds: null
+          type: schedule
+version: "1"

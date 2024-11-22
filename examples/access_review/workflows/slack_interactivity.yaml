@@ -1,0 +1,110 @@
+controls: null
+dag:
+    deserialize_json_string:
+        args:
+            serialized_json: "{{ payload['actions'][0]['value'] }}"
+        children:
+            - send_slack_message
+        id: deserialize_json_string
+        result_name: value
+        secrets_mapping: {}
+        type: deserialize_json_string
+    deserialize_json_string_1:
+        args:
+            serialized_json:
+                "{{ payload['actions'][0]['selected_option']['value']
+                }}"
+        children:
+            - if_2
+        id: deserialize_json_string_1
+        result_name: value
+        secrets_mapping: {}
+        type: deserialize_json_string
+    if:
+        condition:
+            lhs:
+                type: constant
+                value: "{{ payload['actions'][0]['action_id'] }}"
+            op: EQUALS
+            rhs:
+                type: constant
+                value: use_it_or_loose_it-no
+            type: binary
+        condition_str: payload['actions'][0]['action_id'] == 'use_it_or_loose_it-no'
+        false_children: []
+        id: if
+        true_children:
+            - deserialize_json_string
+        type: if_condition
+    if_1:
+        condition:
+            lhs:
+                type: constant
+                value: "{{ payload['actions'][0]['action_id'] }}"
+            op: EQUALS
+            rhs:
+                type: constant
+                value: access_review
+            type: binary
+        condition_str: payload['actions'][0]['action_id'] == 'access_review'
+        false_children: []
+        id: if_1
+        true_children:
+            - deserialize_json_string_1
+        type: if_condition
+    if_2:
+        condition:
+            lhs:
+                type: constant
+                value: "{{ value['response'] }}"
+            op: EQUALS
+            rhs:
+                type: constant
+                value: remove
+            type: binary
+        condition_str: value['response'] == 'remove'
+        false_children: []
+        id: if_2
+        true_children:
+            - send_slack_message_1
+        type: if_condition
+    send_slack_message:
+        args:
+            channel_id: "TODO(user): set Slack channel ID"
+            text:
+                "Please deactivate Retool access for the following user: {{ value['user']
+                }}. Reason: User responded with no longer needed."
+        children: []
+        id: send_slack_message
+        result_name: null
+        secrets_mapping:
+            SLACK_SECRET: slack_secret
+        type: send_slack_message
+    send_slack_message_1:
+        args:
+            channel_id: "TODO(user): set Slack channel ID"
+            text:
+                'Please remove the user {{ value[''user''] }} from the group "{{ value[''group'']
+                }}" in Retool. Reason: {{ value[''reason''] }}'
+        children: []
+        id: send_slack_message_1
+        result_name: null
+        secrets_mapping:
+            SLACK_SECRET: slack_secret
+        type: send_slack_message
+    start:
+        args: {}
+        children:
+            - if
+            - if_1
+        id: start
+        result_name: payload
+        secrets_mapping: {}
+        type: start
+description: This workflow handles Slack interactivity responses.
+name: slack_interactivity
+start:
+    triggers:
+        - default_args: []
+          type: webhook
+version: "1"

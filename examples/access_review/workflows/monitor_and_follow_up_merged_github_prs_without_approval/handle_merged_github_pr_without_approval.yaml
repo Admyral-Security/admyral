@@ -1,0 +1,323 @@
+controls: null
+dag:
+    clean_git_diff:
+        args:
+            git_diff: "{{ commit_diff }}"
+        children:
+            - openai_chat_completion
+        id: clean_git_diff
+        result_name: commit_diff_cleaned
+        secrets_mapping: {}
+        type: clean_git_diff
+    compare_two_github_commits:
+        args:
+            base: "{{ payload['element']['last_approved_commit_id'] }}"
+            diff_type: json
+            head: "{{ payload['element']['last_commit_id'] }}"
+            repo_name: "{{ payload['shared']['repo_name'] }}"
+            repo_owner: "{{ payload['shared']['repo_owner'] }}"
+        children:
+            - count_number_of_changes_in_git_diff
+        id: compare_two_github_commits
+        result_name: commit_diff_info
+        secrets_mapping:
+            GITHUB_SECRET: github_secret
+        type: compare_two_github_commits
+    compare_two_github_commits_1:
+        args:
+            base: "{{ payload['element']['last_approved_commit_id'] }}"
+            diff_type: diff
+            head: "{{ payload['element']['last_commit_id'] }}"
+            repo_name: "{{ payload['shared']['repo_name'] }}"
+            repo_owner: "{{ payload['shared']['repo_owner'] }}"
+        children:
+            - clean_git_diff
+        id: compare_two_github_commits_1
+        result_name: commit_diff
+        secrets_mapping:
+            GITHUB_SECRET: github_secret
+        type: compare_two_github_commits
+    contains_pull_request_approval_as_comment_after_merge:
+        args:
+            approval_keywords:
+                - approved
+            comments: "{{ comments }}"
+            merged_at: "{{ payload['element']['merged_at'] }}"
+        children:
+            - if_2
+        id: contains_pull_request_approval_as_comment_after_merge
+        result_name: has_approval_as_comment
+        secrets_mapping: {}
+        type: contains_pull_request_approval_as_comment_after_merge
+    count_number_of_changes_in_git_diff:
+        args:
+            git_diff: "{{ commit_diff_info }}"
+        children:
+            - if
+        id: count_number_of_changes_in_git_diff
+        result_name: line_changes_count
+        secrets_mapping: {}
+        type: count_number_of_changes_in_git_diff
+    create_jira_issue:
+        args:
+            description:
+                content:
+                    - content:
+                          - text: "Title: {{ payload['element']['title'] }}
+
+                                Repository: {{ payload['shared']['repo_owner'] }}/{{ payload['shared']['repo_name']
+                                }}
+
+                                User: {{ payload['element']['user'] }}
+
+                                Link: {{ payload['element']['html_url'] }}
+
+                                Merged At: {{ payload['element']['merged_at'] }}"
+                            type: text
+                      type: paragraph
+                type: doc
+                version: 1
+            issue_type: Bug
+            priority: High
+            project_id: "10001"
+            summary:
+                "Unreviewed commits were merged. Pull Request: {{ payload['element']['title']
+                }}"
+        children:
+            - send_slack_message
+        id: create_jira_issue
+        result_name: jira_issue
+        secrets_mapping:
+            JIRA_SECRET: jira_secret
+        type: create_jira_issue
+    if:
+        condition:
+            lhs:
+                type: constant
+                value: "{{ line_changes_count }}"
+            op: LESS_THAN
+            rhs:
+                type: constant
+                value: 50
+            type: binary
+        condition_str: line_changes_count < 50
+        false_children:
+            - transform
+        id: if
+        true_children:
+            - compare_two_github_commits_1
+        type: if_condition
+    if_1:
+        condition:
+            lhs:
+                type: constant
+                value: "{{ is_major_change }}"
+            op: EQUALS
+            rhs:
+                type: constant
+                value: "1"
+            type: binary
+        condition_str: is_major_change == '1'
+        false_children: []
+        id: if_1
+        true_children:
+            - create_jira_issue
+        type: if_condition
+    if_2:
+        condition:
+            expr:
+                type: constant
+                value: "{{ has_approval_as_comment }}"
+            op: NOT
+            type: unary
+        condition_str: not has_approval_as_comment
+        false_children: []
+        id: if_2
+        true_children:
+            - send_slack_message_to_user_by_email
+        type: if_condition
+    list_github_issue_comments:
+        args:
+            number: "{{ payload['element']['number'] }}"
+            repo_name: "{{ payload['shared']['repo_name'] }}"
+            repo_owner: "{{ payload['shared']['repo_owner'] }}"
+        children:
+            - contains_pull_request_approval_as_comment_after_merge
+        id: list_github_issue_comments
+        result_name: comments
+        secrets_mapping:
+            GITHUB_SECRET: github_secret
+        type: list_github_issue_comments
+    openai_chat_completion:
+        args:
+            model: gpt-4o
+            prompt:
+                "You are an expert level software engineer and should summarize git\
+                \ diffs.For the git differences, it's important to check for code additions\
+                \ (+) or code deletions (-). Lines which are not prefixed with + or - did\
+                \ not change. Please\npay close attention to the +/- and only consider true\
+                \ code changes in your summary! Here are some examples:\n\nExample 1: \n<diff>\n\
+                diff --git a/src/union_find.rs b/src/union_find.rs\nindex ee49a24..8e3eb35\
+                \ 100644 \n--- a/src/union_find.rs \n+++ b/src/union_find.rs \n@@ -19,16 +19,6\
+                \ @@ pub struct UnionFind<T: Debug + Eq + Hash> {{ \n}} \n\nimpl<T: Debug\
+                \ + Eq + Hash> UnionFind<T> {{ \n-    /// Creates an empty Union-Find structure\
+                \ with a specified capacity. \n-    pub fn with_capacity(capacity: usize)\
+                \ -> Self {{ \n-        Self {{ \n-            parent_links: Vec::with_capacity(capacity),\
+                \ \n-            sizes: Vec::with_capacity(capacity), \n-            payloads:\
+                \ HashMap::with_capacity(capacity), \n-            count: 0, \n-        }}\
+                \ \n-    }} \n-  \n    /// Inserts a new item (disjoint set) into the data\
+                \ structure. \n    pub fn insert(&mut self, item: T) {{ \n        let key\
+                \ = self.payloads.len(); \n</diff>\n\n<Summary>\nThis diff removes the with_capacity\
+                \ method from the UnionFind struct implementation in the file union_find.rs.\
+                \ The method was used to create an empty Union-Find structure with a \nspecified\
+                \ initial capacity. Its removal simplifies the API by eliminating this initialization\
+                \ option. \n</Summary>\n\nExample 2: \n<diff>\ndiff --git a/web/src/components/workflow-editor/edit-panel/action-edit-panel.tsx\
+                \ b/web/src/components/workflow-editor/edit-panel/action-edit-panel.tsx \n\
+                index ea112c9..e457dd0 100644 \n--- a/web/src/components/workflow-editor/edit-panel/action-edit-panel.tsx\
+                \ \n+++ b/web/src/components/workflow-editor/edit-panel/action-edit-panel.tsx\
+                \ \n@@ -167,18 +167,20 @@ export default function ActionEditPanel() {{ \n\
+                \        <Text color=\"gray\" weight=\"light\" size=\"1\"> \n            \
+                \    Type: {{argument.argType}} \n        </Text> \n-       <TextArea \n-\
+                \               variant=\"surface\" \n-               value={{args[argIdx]}}\
+                \ \n-               resize=\"vertical\" \n-               onChange={{(event)\
+                \ => \n-                       onChangeActionArgument( \n-               \
+                \                argument.argName, \n-                               argIdx,\
+                \ \n-                               event, \n-                       ) \n\
+                -               }} \n-       /> \n+       <Flex> \n+               <CodeEditorWithDialog\
+                \ \n+                       title=\"Edit Default Value\" \n+             \
+                \          value={{defaultArg[1]}} \n+                       onChange={{(value)\
+                \ => handleScheduleDefaultArgValue( \n+                               scheduleIdx,\
+                \ \n+                               defaultArgIdx, \n+                   \
+                \            value || \"\", \n+                       )}} \n+            \
+                \           language=\"json\" \n+               /> \n+       </Flex> \n  \
+                \      <Flex justify=\"end\"> \n                <Text color=\"gray\" weight=\"\
+                light\" size=\"1\"> \n                {{argument.isOptional ? \"Optional\"\
+                \ : \"Required\"}} \n</diff>\n\n<Summary>\nThis diff replaces a simple TextArea\
+                \ for editing action arguments with a more advanced CodeEditorWithDialog component.\
+                \ The new component is specifically for editing default values in JSON format,\
+                \ suggesting an improved user interface for this task. \n</Summary>\n\nExample\
+                \ 3: \n<diff>\ndiff --git a/admyral/workers/shared_worker_state.py b/admyral/workers/shared_worker_state.py\n\
+                index 1d1a58a..8af5d91 100644\n--- a/admyral/workers/shared_worker_state.py\n\
+                +++ b/admyral/workers/shared_worker_state.py\n@@ -18,12 +18,28 @@ class SharedWorkerState(metaclass=Singleton):\n\
+                \n    @classmethod\n    def get_store(cls) -> StoreInterface:\n+        \"\
+                \"\" \n+        Retrieve the shared store instance.\n+ \n+        Returns:\n\
+                +            StoreInterface: The shared store instance.\n+        Raises:\n\
+                +            RuntimeError: If the shared store has not been initialized.\n\
+                +        \"\"\" \n        if not cls._store:\n            raise RuntimeError(\"\
+                SharedWorkerState not initialized.\")\n        return cls._store\n\n    @classmethod\n\
+                \    def get_secrets_manager(cls) -> SecretsManager:\n+        \"\"\"\n+ \
+                \       Retrieve the SecretsManager instance.\n+ \n+        Returns: \n+ \
+                \           SecretsManager: The instance of SecretsManager.\n+        Raises:\n\
+                +            RuntimeError: If the SharedWorkerState is not initialized.\n\
+                +        \"\"\"\n        if not cls._secrets_manager:\n            raise RuntimeError(\"\
+                SharedWorkerState not initialized.\")\n        return cls._secrets_manager\n\
+                </diff>\n\n<Summary>\nThis git diff shows changes to the file shared_worker_state.py\
+                \ in the admyral/workers/ directory. The changes include:\n- Adding docstrings\
+                \ to two methods: get_store() and get_secrets_manager().\n- The docstrings\
+                \ provide information about what each method returns and what exceptions they\
+                \ might raise.\n- No functional changes were made to the code itself; the\
+                \ modifications are purely for documentation purposes.\n</Summary>\n\nPlease\
+                \ now carefully summarize the following git diff: \n<diff>\n{{ commit_diff_cleaned\
+                \ }}</diff>\n"
+        children:
+            - openai_chat_completion_1
+        id: openai_chat_completion
+        result_name: git_diff_summary
+        secrets_mapping:
+            OPENAI_SECRET: openai_secret
+        type: openai_chat_completion
+    openai_chat_completion_1:
+        args:
+            model: gpt-4o
+            prompt:
+                "You are an expert software engineer and should interpret summaries\
+                \ of git diffs, if there were major or only minor changes.\nMajor changes\
+                \ include adding new features or functions, changes to functionality (logic,\
+                \ functions, APIs, etc.), new APIs, or potentially breaking changes.\nMinor\
+                \ changes on the other hand would be adding / fixing a comment, documentation,\
+                \ renaming a parameter, hence changes that don't influence the functionality\
+                \ of the code.\nYour task is to classify the following git diff together with\
+                \ its summary whether the changes include major or minor changes. \nIf the\
+                \ changes are major, please answer with 1 and nothing else. Otherwise, if\
+                \ the changes are minor, please answer with 2 and nothing else. \nHere is\
+                \ the git diff and its summary:\n<diff>\n{{ commit_diff_cleaned }}\n</diff>\n\
+                \n<Summary>\n{{ git_diff_summary }}\n</Summary>\n"
+            stop_tokens:
+                - "
+
+                  "
+        children:
+            - if_1
+        id: openai_chat_completion_1
+        result_name: is_major_change
+        secrets_mapping:
+            OPENAI_SECRET: openai_secret
+        type: openai_chat_completion
+    send_slack_message:
+        args:
+            channel_id: C06QP0KV1L2
+            text: 'Unreviewed commits were merged.
+
+                Pull Request: {{ payload[''element''][''title''] }}
+
+                {{ payload[''element''][''html_url''] }}
+
+                User: {{ payload[''element''][''user''] }}
+
+                Jira issue: https://admyral.atlassian.net/browse/{{ jira_issue[''key''] }}
+
+
+                Please let the changes be approved by letting a peer comment the merged PR
+                with "approved" within the next 24 hours and close the ticket after the review.'
+        children:
+            - wait
+        id: send_slack_message
+        result_name: first_message
+        secrets_mapping:
+            SLACK_SECRET: slack_secret
+        type: send_slack_message
+    send_slack_message_to_user_by_email:
+        args:
+            email: daniel@admyral.ai
+            text:
+                "ATTENTION: There was no follow up on the merged unreviewed commits of
+                pull request {{ payload['element']['title'] }}.
+
+                Jira Ticket: https://admyral.atlassian.net/browse/{{ jira_issue['key'] }}."
+        children: []
+        id: send_slack_message_to_user_by_email
+        result_name: null
+        secrets_mapping:
+            SLACK_SECRET: slack_secret
+        type: send_slack_message_to_user_by_email
+    start:
+        args: {}
+        children:
+            - compare_two_github_commits
+        id: start
+        result_name: payload
+        secrets_mapping: {}
+        type: start
+    transform:
+        args:
+            value: "1"
+        children:
+            - if_1
+        id: transform
+        result_name: is_major_change
+        secrets_mapping: {}
+        type: transform
+    wait:
+        args:
+            seconds: 120
+        children:
+            - list_github_issue_comments
+        id: wait
+        result_name: wait_res
+        secrets_mapping: {}
+        type: wait
+description: Handle Merged GitHub PRs Without Approval
+name: handle_merged_github_pr_without_approval
+start:
+    triggers: []
+version: "1"

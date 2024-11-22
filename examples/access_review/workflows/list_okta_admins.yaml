@@ -1,0 +1,34 @@
+controls: null
+dag:
+  okta_get_all_user_types:
+    args: {}
+    children:
+    - okta_search_users
+    id: okta_get_all_user_types
+    result_name: user_types
+    secrets_mapping:
+      OKTA_SECRET: okta_secret
+    type: okta_get_all_user_types
+  okta_search_users:
+    args:
+      search: type.id eq "{{ user_types[0]['id'] }}"
+    children: []
+    id: okta_search_users
+    result_name: null
+    secrets_mapping:
+      OKTA_SECRET: okta_secret
+    type: okta_search_users
+  start:
+    args: {}
+    children:
+    - okta_get_all_user_types
+    id: start
+    result_name: payload
+    secrets_mapping: {}
+    type: start
+description: Retrieves all user types from Okta and lists the corresponding admin
+  users.
+name: list_okta_admins
+start:
+  triggers: []
+version: '1'

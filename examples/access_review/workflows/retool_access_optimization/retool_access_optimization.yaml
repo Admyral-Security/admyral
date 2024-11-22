@@ -1,0 +1,91 @@
+controls: null
+dag:
+    format_json_to_list_view_string:
+        args:
+            json_value: "{{ users }}"
+        children:
+            - send_slack_message_to_user_by_email
+        id: format_json_to_list_view_string
+        result_name: formatted_str
+        secrets_mapping: {}
+        type: format_json_to_list_view_string
+    get_time_interval_of_last_n_days:
+        args:
+            n: 60
+            only_date: true
+        children:
+            - list_retool_used_groups_and_apps_per_user
+        id: get_time_interval_of_last_n_days
+        result_name: start_and_end_time
+        secrets_mapping: {}
+        type: get_time_interval_of_last_n_days
+    join_lists:
+        args:
+            list1: "{{ used_groups_and_apps_per_user }}"
+            list1_join_key_paths:
+                - - user
+            list2: "{{ groups_and_apps_per_user }}"
+            list2_join_key_paths:
+                - - user
+        children:
+            - transform_retool_access_optimization
+        id: join_lists
+        result_name: users
+        secrets_mapping: {}
+        type: join_lists
+    list_retool_groups_and_apps_per_user:
+        args: {}
+        children:
+            - join_lists
+        id: list_retool_groups_and_apps_per_user
+        result_name: groups_and_apps_per_user
+        secrets_mapping:
+            RETOOL_SECRET: retool_secret
+        type: list_retool_groups_and_apps_per_user
+    list_retool_used_groups_and_apps_per_user:
+        args:
+            end_date: "{{ start_and_end_time[1] }}"
+            start_date: "{{ start_and_end_time[0] }}"
+        children:
+            - join_lists
+        id: list_retool_used_groups_and_apps_per_user
+        result_name: used_groups_and_apps_per_user
+        secrets_mapping:
+            RETOOL_SECRET: retool_secret
+        type: list_retool_used_groups_and_apps_per_user
+    send_slack_message_to_user_by_email:
+        args:
+            email: daniel@admyral.ai
+            text: "Retool Access Overview:
+
+
+                {{ formatted_str }}"
+        children: []
+        id: send_slack_message_to_user_by_email
+        result_name: null
+        secrets_mapping:
+            SLACK_SECRET: slack_secret
+        type: send_slack_message_to_user_by_email
+    start:
+        args: {}
+        children:
+            - get_time_interval_of_last_n_days
+            - list_retool_groups_and_apps_per_user
+        id: start
+        result_name: payload
+        secrets_mapping: {}
+        type: start
+    transform_retool_access_optimization:
+        args:
+            users: "{{ users }}"
+        children:
+            - format_json_to_list_view_string
+        id: transform_retool_access_optimization
+        result_name: users
+        secrets_mapping: {}
+        type: transform_retool_access_optimization
+description: This workflow sends Slack messages to managers for Retool access review.
+name: retool_access_optimization
+start:
+    triggers: []
+version: "1"

@@ -1,7 +1,7 @@
 """
 
-admyral action push transform_google_drive_public_link_sharing_docs -a workflows/google_drive_public_link_sharing_docs.py
-admyral workflow push google_drive_public_link_sharing_docs -f workflows/google_drive_public_link_sharing_docs.py --activate
+admyral action push transform_google_drive_public_link_sharing_docs -a workflows/google_drive_public_link_sharing/google_drive_public_link_sharing_docs.py
+admyral workflow push workflows/google_drive_public_link_sharing/google_drive_public_link_sharing_docs.yaml --activate
 
 """
 
@@ -9,13 +9,7 @@ from typing import Annotated
 from collections import defaultdict
 
 from admyral.action import action, ArgumentMetadata
-from admyral.workflow import workflow
 from admyral.typings import JsonValue
-from admyral.actions import (
-    list_google_drive_files_with_link_sharing_enabled,
-    batched_send_slack_message_to_user_by_email,
-    send_slack_message_to_user_by_email,
-)
 
 
 @action(
@@ -94,35 +88,3 @@ def transform_google_drive_public_link_sharing_docs(
         )
 
     return slack_messages
-
-
-@workflow(
-    description="Ask users whether the files they own in Google Drive with public link sharing enabled should be really public.",
-)
-def google_drive_public_link_sharing_docs(payload: dict[str, JsonValue]):
-    public_files = list_google_drive_files_with_link_sharing_enabled(
-        customer_id="d43sg123m",
-        admin_email="daniel@admyral.ai",
-        secrets={"GOOGLE_DRIVE_SECRET": "google_drive_secret"},
-    )
-
-    # group by user and also group by no user and transform the files
-    public_files_slack_messages = transform_google_drive_public_link_sharing_docs(
-        public_files=public_files,
-        user_message="Please review the following public files in Google Drive. Are you sure they should be public?",
-        organization_domains=["@admyral.ai"],  # TODO: update
-    )
-
-    # send slack message to each owner
-    batched_send_slack_message_to_user_by_email(
-        messages=public_files_slack_messages["owner"],
-        secrets={"SLACK_SECRET": "slack_secret"},
-    )
-
-    # send slack message to compliance for all the files
-    # which do not have an owner
-    send_slack_message_to_user_by_email(
-        email="daniel@admyral.ai",  # TODO: update
-        text=public_files_slack_messages["no_owner"],
-        secrets={"SLACK_SECRET": "slack_secret"},
-    )

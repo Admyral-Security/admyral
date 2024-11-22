@@ -8,7 +8,7 @@ import { TrashIcon, ExclamationTriangleIcon } from "@radix-ui/react-icons";
 export interface NodeBaseProps {
 	nodeId: string;
 	icon: React.ReactNode;
-	type: string;
+	type?: string | undefined;
 	name: string;
 	selected: boolean;
 }
@@ -51,14 +51,16 @@ export default function NodeBase({
 						<Text size="3" weight="bold">
 							{name}
 						</Text>
-						<Text
-							size="2"
-							style={{
-								color: "var(--Neutral-color-Neutral-9, #8B8D98)",
-							}}
-						>
-							{type}
-						</Text>
+						{type && (
+							<Text
+								size="2"
+								style={{
+									color: "var(--Neutral-color-Neutral-9, #8B8D98)",
+								}}
+							>
+								{type}
+							</Text>
+						)}
 					</Flex>
 				</Flex>
 			</Card>

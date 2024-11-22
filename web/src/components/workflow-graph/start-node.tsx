@@ -23,7 +23,6 @@ function StartNode({ id, selected }: StartNodeProps) {
 				selected={selected}
 				icon={<StartWorkflowActionIcon />}
 				name={"Start Workflow"}
-				type={`def ${toSnakeCase(workflowName)}(payload)`}
 			/>
 			<Handle
 				type="source"

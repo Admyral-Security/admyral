@@ -1,0 +1,61 @@
+controls: null
+dag:
+    batched_send_slack_message_to_user_by_email:
+        args:
+            messages: "{{ messages }}"
+        children: []
+        id: batched_send_slack_message_to_user_by_email
+        result_name: null
+        secrets_mapping:
+            SLACK_SECRET: slack_secret
+        type: batched_send_slack_message_to_user_by_email
+    build_okta_inactivity_messages:
+        args:
+            inactive_users: "{{ inactive_users }}"
+        children:
+            - batched_send_slack_message_to_user_by_email
+        id: build_okta_inactivity_messages
+        result_name: messages
+        secrets_mapping: {}
+        type: build_okta_inactivity_messages
+    filter_inactive_okta_users:
+        args:
+            inactivity_threshold: 90
+            users: "{{ all_users }}"
+        children:
+            - build_okta_inactivity_messages
+        id: filter_inactive_okta_users
+        result_name: inactive_users
+        secrets_mapping: {}
+        type: filter_inactive_okta_users
+    okta_search_users:
+        args:
+            limit: 1000
+            search: null
+        children:
+            - filter_inactive_okta_users
+        id: okta_search_users
+        result_name: all_users
+        secrets_mapping:
+            OKTA_SECRET: okta_secret
+        type: okta_search_users
+    start:
+        args: {}
+        children:
+            - okta_search_users
+        id: start
+        result_name: payload
+        secrets_mapping: {}
+        type: start
+description: Check Okta user inactivity and ask if access is still required
+name: okta_use_it_or_lose_it
+start:
+    triggers:
+        - cron: null
+          default_args: []
+          interval_days: 1
+          interval_hours: null
+          interval_minutes: null
+          interval_seconds: null
+          type: schedule
+version: "1"

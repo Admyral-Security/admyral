@@ -6,12 +6,11 @@ from uuid import uuid4
 from tests.workers.utils import execute_test_workflow
 
 from admyral.db.admyral_store import AdmyralStore
-from admyral.workflow import workflow
 from admyral.action import action, ArgumentMetadata
-from admyral.typings import JsonValue
 from admyral.workers.action_executor import action_executor
 from admyral.context import ctx
 from admyral.actions import wait
+from admyral.models import WorkflowStart, WorkflowDAG, ActionNode
 
 
 #########################################################################################################
@@ -27,15 +26,28 @@ def action_test_missing_secret() -> dict[str, str]:
     return secret
 
 
-@workflow
-def workflow_test_missing_secret(payload: dict[str, JsonValue]):
-    action_test_missing_secret(secrets={"DUMMY": "123"})
+WORKFLOW_MISSING_SECRET = WorkflowDAG(
+    name="workflow_test_missing_secret",
+    start=WorkflowStart(triggers=[]),
+    dag={
+        "start": ActionNode(
+            id="start",
+            type="start",
+            children=["action_test_missing_secret"],
+        ),
+        "action_test_missing_secret": ActionNode(
+            id="action_test_missing_secret",
+            type="action_test_missing_secret",
+            secrets_mapping={"DUMMY": "123"},
+        ),
+    },
+)
 
 
 @pytest.mark.asyncio
 async def test_missing_secret(store: AdmyralStore):
     workflow_id = str(uuid4())
-    workflow_name = workflow_test_missing_secret.func.__name__ + workflow_id
+    workflow_name = WORKFLOW_MISSING_SECRET.name + workflow_id
 
     run, run_steps, exception = await execute_test_workflow(
         store=store,
@@ -46,7 +58,7 @@ async def test_missing_secret(store: AdmyralStore):
                 action_test_missing_secret.action_type, action_test_missing_secret.func
             )
         ],
-        workflow_code=workflow_test_missing_secret,
+        workflow_dag=WORKFLOW_MISSING_SECRET,
     )
 
     assert exception is None
@@ -65,15 +77,27 @@ def action_test_raise_error() -> dict[str, str]:
     raise Exception("This is an error.")
 
 
-@workflow
-def workflow_test_action_raises_error(payload: dict[str, JsonValue]):
-    action_test_raise_error()
+WORKFLOW_TEST_ACTION_RAISES_ERROR = WorkflowDAG(
+    name="workflow_test_action_raises_error",
+    start=WorkflowStart(triggers=[]),
+    dag={
+        "start": ActionNode(
+            id="start",
+            type="start",
+            children=["action_test_raise_error"],
+        ),
+        "action_test_raise_error": ActionNode(
+            id="action_test_raise_error",
+            type="action_test_raise_error",
+        ),
+    },
+)
 
 
 @pytest.mark.asyncio
 async def test_action_raises_error(store: AdmyralStore):
     workflow_id = str(uuid4())
-    workflow_name = workflow_test_action_raises_error.func.__name__ + workflow_id
+    workflow_name = WORKFLOW_TEST_ACTION_RAISES_ERROR.name + workflow_id
 
     run, run_steps, exception = await execute_test_workflow(
         store=store,
@@ -84,7 +108,7 @@ async def test_action_raises_error(store: AdmyralStore):
                 action_test_raise_error.action_type, action_test_raise_error.func
             )
         ],
-        workflow_code=workflow_test_action_raises_error,
+        workflow_dag=WORKFLOW_TEST_ACTION_RAISES_ERROR,
     )
 
     assert exception is None
@@ -112,15 +136,27 @@ def action_test_missing_params(
         raise Exception("num is not an int.")
 
 
-@workflow
-def workflow_test_action_missing_params(payload: dict[str, JsonValue]):
-    action_test_missing_params()
+WORKFLOW_TEST_ACTION_MISSING_PARAMS = WorkflowDAG(
+    name="workflow_test_action_missing_params",
+    start=WorkflowStart(triggers=[]),
+    dag={
+        "start": ActionNode(
+            id="start",
+            type="start",
+            children=["action_test_missing_params"],
+        ),
+        "action_test_missing_params": ActionNode(
+            id="action_test_missing_params",
+            type="action_test_missing_params",
+        ),
+    },
+)
 
 
 @pytest.mark.asyncio
 async def test_action_missing_params(store: AdmyralStore):
     workflow_id = str(uuid4())
-    workflow_name = workflow_test_action_missing_params.func.__name__ + workflow_id
+    workflow_name = WORKFLOW_TEST_ACTION_MISSING_PARAMS.name + workflow_id
 
     run, run_steps, exception = await execute_test_workflow(
         store=store,
@@ -131,7 +167,7 @@ async def test_action_missing_params(store: AdmyralStore):
                 action_test_missing_params.action_type, action_test_missing_params.func
             )
         ],
-        workflow_code=workflow_test_action_missing_params,
+        workflow_dag=WORKFLOW_TEST_ACTION_MISSING_PARAMS,
     )
 
     assert exception is None
@@ -153,17 +189,27 @@ def action_test_missing_custom_action() -> str:
     return "Hello world"
 
 
-@workflow
-def workflow_test_action_missing_custom_action(payload: dict[str, JsonValue]):
-    action_test_missing_custom_action()
+WORKFLOW_TEST_ACTION_MISSING_CUSTOM_ACTION = WorkflowDAG(
+    name="workflow_test_action_missing_custom_action",
+    start=WorkflowStart(triggers=[]),
+    dag={
+        "start": ActionNode(
+            id="start",
+            type="start",
+            children=["action_test_missing_custom_action"],
+        ),
+        "action_test_missing_custom_action": ActionNode(
+            id="action_test_missing_custom_action",
+            type="action_test_missing_custom_action",
+        ),
+    },
+)
 
 
 @pytest.mark.asyncio
 async def test_missing_custom_action(store: AdmyralStore):
     workflow_id = str(uuid4())
-    workflow_name = (
-        workflow_test_action_missing_custom_action.func.__name__ + workflow_id
-    )
+    workflow_name = WORKFLOW_TEST_ACTION_MISSING_CUSTOM_ACTION.name + workflow_id
 
     run, run_steps, exception = await execute_test_workflow(
         store=store,
@@ -171,7 +217,7 @@ async def test_missing_custom_action(store: AdmyralStore):
         workflow_name=workflow_name,
         workflow_actions=[],
         custom_actions=[action_test_missing_custom_action.action_type],
-        workflow_code=workflow_test_action_missing_custom_action,
+        workflow_dag=WORKFLOW_TEST_ACTION_MISSING_CUSTOM_ACTION,
     )
 
     assert exception is None
@@ -185,15 +231,28 @@ async def test_missing_custom_action(store: AdmyralStore):
 #########################################################################################################
 
 
-@workflow
-def workflow_test_wait_action(payload: dict[str, JsonValue]):
-    wait(seconds=3)
+WORKFLOW_TEST_WAIT_ACTION = WorkflowDAG(
+    name="workflow_test_wait_action",
+    start=WorkflowStart(triggers=[]),
+    dag={
+        "start": ActionNode(
+            id="start",
+            type="start",
+            children=["wait"],
+        ),
+        "wait": ActionNode(
+            id="wait",
+            type="wait",
+            args={"seconds": 3},
+        ),
+    },
+)
 
 
 @pytest.mark.asyncio
 async def test_wait_action(store: AdmyralStore):
     workflow_id = str(uuid4())
-    workflow_name = workflow_test_wait_action.func.__name__ + workflow_id
+    workflow_name = WORKFLOW_TEST_WAIT_ACTION.name + workflow_id
 
     start = time.time()
 
@@ -202,7 +261,7 @@ async def test_wait_action(store: AdmyralStore):
         workflow_id=workflow_id,
         workflow_name=workflow_name,
         workflow_actions=[action_executor(wait.action_type, wait.func)],
-        workflow_code=workflow_test_wait_action,
+        workflow_dag=WORKFLOW_TEST_WAIT_ACTION,
     )
 
     end = time.time()

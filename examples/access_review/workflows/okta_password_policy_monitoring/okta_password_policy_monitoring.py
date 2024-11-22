@@ -1,11 +1,20 @@
+"""
+
+admyral action push get_time_range_of_last_full_hour -a workflows/okta_password_policy_monitoring/okta_password_policy_monitoring.py
+admyral action push get_okta_password_policy_update_logs -a workflows/okta_password_policy_monitoring/okta_password_policy_monitoring.py
+admyral action push format_okta_policy_update_message -a workflows/okta_password_policy_monitoring/okta_password_policy_monitoring.py
+
+admyral workflow push workflows/okta_password_policy_monitoring/okta_password_policy_monitoring.yaml --activate
+
+"""
+
 from typing import Annotated
 from datetime import datetime, timedelta, UTC
 import json
 
-from admyral.workflow import workflow, Schedule
 from admyral.typings import JsonValue
 from admyral.action import action, ArgumentMetadata
-from admyral.actions import get_okta_logs, send_slack_message_to_user_by_email
+from admyral.actions import get_okta_logs
 
 
 @action(
@@ -95,26 +104,3 @@ def format_okta_policy_update_message(
 
         message += "---\n"
     return message
-
-
-@workflow(
-    description="Monitor Okta password policy changes and notify via Slack",
-    triggers=[Schedule(cron="0 * * * *")],
-)
-def okta_password_policy_monitoring(payload: dict[str, JsonValue]):
-    time_range = get_time_range_of_last_full_hour()
-
-    logs = get_okta_password_policy_update_logs(
-        start_time=time_range[0],
-        end_time=time_range[1],
-        secrets={"OKTA_SECRET": "okta_secret"},
-    )
-
-    if logs:
-        message = format_okta_policy_update_message(logs=logs)
-
-        send_slack_message_to_user_by_email(
-            email="daniel@admyral.dev",
-            text=message,
-            secrets={"SLACK_SECRET": "slack_secret"},
-        )

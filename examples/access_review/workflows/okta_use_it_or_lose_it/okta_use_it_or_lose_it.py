@@ -1,14 +1,18 @@
+"""
+
+admyral action push filter_inactive_okta_users -a workflows/okta_use_it_or_lose_it/okta_use_it_or_lose_it.py
+admyral action push build_okta_inactivity_messages -a workflows/okta_use_it_or_lose_it/okta_use_it_or_lose_it.py
+
+admyral workflow push workflows/okta_use_it_or_lose_it/okta_use_it_or_lose_it.yaml --activate
+
+"""
+
 from typing import Annotated
 import json
 from datetime import datetime, timedelta
 
-from admyral.workflow import workflow, Schedule
 from admyral.typings import JsonValue
 from admyral.action import action, ArgumentMetadata
-from admyral.actions import (
-    batched_send_slack_message_to_user_by_email,
-    okta_search_users,
-)
 
 
 @action(
@@ -118,33 +122,3 @@ def build_okta_inactivity_messages(
             )
         )
     return [message for message in messages if not message[0].endswith("@admyral.dev")]
-
-
-@workflow(
-    description="Check Okta user inactivity and ask if access is still required",
-    triggers=[Schedule(interval_days=1)],
-)
-def okta_use_it_or_lose_it(payload: dict[str, JsonValue]):
-    # Search for all Okta users
-    all_users = okta_search_users(
-        search=None,  # No filter, get all users
-        limit=1000,  # Adjust as needed
-        secrets={"OKTA_SECRET": "okta_secret"},
-    )
-
-    # Filter inactive users (90 days threshold)
-    inactive_users = filter_inactive_okta_users(
-        users=all_users,
-        inactivity_threshold=90,
-    )
-
-    # Build messages for inactive users
-    messages = build_okta_inactivity_messages(
-        inactive_users=inactive_users,
-    )
-
-    # Send Slack messages to inactive users
-    batched_send_slack_message_to_user_by_email(
-        messages=messages,
-        secrets={"SLACK_SECRET": "slack_secret"},
-    )

@@ -1,0 +1,60 @@
+controls: null
+dag:
+  batched_send_slack_message_to_user_by_email:
+    args:
+      messages: '{{ public_files_slack_messages[''owner''] }}'
+    children: []
+    id: batched_send_slack_message_to_user_by_email
+    result_name: null
+    secrets_mapping:
+      SLACK_SECRET: slack_secret
+    type: batched_send_slack_message_to_user_by_email
+  list_google_drive_files_with_link_sharing_enabled:
+    args:
+      admin_email: daniel@admyral.ai
+      customer_id: d43sg123m
+    children:
+    - transform_google_drive_public_link_sharing_docs
+    id: list_google_drive_files_with_link_sharing_enabled
+    result_name: public_files
+    secrets_mapping:
+      GOOGLE_DRIVE_SECRET: google_drive_secret
+    type: list_google_drive_files_with_link_sharing_enabled
+  send_slack_message_to_user_by_email:
+    args:
+      email: daniel@admyral.ai
+      text: '{{ public_files_slack_messages[''no_owner''] }}'
+    children: []
+    id: send_slack_message_to_user_by_email
+    result_name: null
+    secrets_mapping:
+      SLACK_SECRET: slack_secret
+    type: send_slack_message_to_user_by_email
+  start:
+    args: {}
+    children:
+    - list_google_drive_files_with_link_sharing_enabled
+    id: start
+    result_name: payload
+    secrets_mapping: {}
+    type: start
+  transform_google_drive_public_link_sharing_docs:
+    args:
+      organization_domains:
+      - '@admyral.ai'
+      public_files: '{{ public_files }}'
+      user_message: Please review the following public files in Google Drive. Are
+        you sure they should be public?
+    children:
+    - batched_send_slack_message_to_user_by_email
+    - send_slack_message_to_user_by_email
+    id: transform_google_drive_public_link_sharing_docs
+    result_name: public_files_slack_messages
+    secrets_mapping: {}
+    type: transform_google_drive_public_link_sharing_docs
+description: Ask users whether the files they own in Google Drive with public link
+  sharing enabled should be really public.
+name: google_drive_public_link_sharing_docs
+start:
+  triggers: []
+version: '1'

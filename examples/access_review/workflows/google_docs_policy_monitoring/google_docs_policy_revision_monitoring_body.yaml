@@ -1,0 +1,173 @@
+controls: null
+dag:
+    if:
+        condition:
+            lhs:
+                type: constant
+                value: "{{ is_material_change }}"
+            op: IN
+            rhs:
+                type: constant
+                value:
+                    - "yes"
+                    - "Yes"
+            type: binary
+        condition_str: is_material_change in ['yes', 'Yes']
+        false_children: []
+        id: if
+        true_children:
+            - split_text
+            - split_text_1
+        type: if_condition
+    if_1:
+        condition:
+            lhs:
+                type: constant
+                value: "{{ is_modified_date_in_revision_history }}"
+            op: IN
+            rhs:
+                type: constant
+                value:
+                    - "No"
+                    - "no"
+            type: binary
+        condition_str: is_modified_date_in_revision_history in ['No', 'no']
+        false_children: []
+        id: if_1
+        true_children:
+            - send_slack_message_to_user_by_email
+        type: if_condition
+    openai_chat_completion:
+        args:
+            model: gpt-4o
+            prompt:
+                "Carefully review the following diff of a Google Doc defining a company
+                policy:
+
+
+                <Company Policy Diff>
+
+                {{ payload['element']['diff'] }}
+
+                </Company Policy Diff>
+
+
+                Does the diff contain any material change? A material change of the policy
+                is, for example, if sections were added, removed, or the content was modified.
+                Some examples of changes which are not material changes are fixing typos,
+                changing the order of sections, uppercasing or lowercasing, changing a date,
+                or reformulating sentences while the meaning remains the same. Answer with
+                'yes' if it is a material change and answer with 'no' otherwise. You must
+                only answer with 'yes' or 'no' and nothing else."
+            stop_tokens:
+                - "
+
+                  "
+        children:
+            - if
+        id: openai_chat_completion
+        result_name: is_material_change
+        secrets_mapping:
+            OPENAI_SECRET: openai_secret
+        type: openai_chat_completion
+    openai_chat_completion_1:
+        args:
+            model: gpt-4o
+            prompt:
+                "Carefully review the following revision history to check whether it
+                contains the date {{ modified_date }}. Be aware that the date could also be
+                in another format, e.g., 2024-02-01 could exist as 02/01/2024 or Feb 1, 2024!
+                Answer with 'yes' if the revision history contains the date and answer with
+                'no' otherwise. You must only answer with 'yes' or 'no' and nothing
+                else. Here is the revision history which you should check for the date {{
+                modified_date }}:
+
+
+                <Revision History>
+
+                {{ revision_history }}
+
+                </Revision History>
+
+                "
+            stop_tokens:
+                - "
+
+                  "
+        children:
+            - if_1
+        id: openai_chat_completion_1
+        result_name: is_modified_date_in_revision_history
+        secrets_mapping:
+            OPENAI_SECRET: openai_secret
+        type: openai_chat_completion
+    send_slack_message_to_user_by_email:
+        args:
+            email: daniel@admyral.ai
+            text:
+                "Potential material change without revision history update detected in
+                Google Docs revision:
+
+                Link: https://docs.google.com/document/d/{{ payload['shared']['file_id']
+                }}/edit
+
+                User: {{ payload['element']['lastModifyingUser'] }}
+
+                Modification Time: {{ payload['element']['modifiedTime'] }}"
+        children: []
+        id: send_slack_message_to_user_by_email
+        result_name: null
+        secrets_mapping:
+            SLACK_SECRET: slack_secret
+        type: send_slack_message_to_user_by_email
+    split_text:
+        args:
+            pattern: Revision history
+            text: "{{ payload['shared']['latest_version'] }}"
+        children:
+            - transform
+        id: split_text
+        result_name: splitted_text
+        secrets_mapping: {}
+        type: split_text
+    split_text_1:
+        args:
+            pattern: T
+            text: "{{ payload['element']['modifiedTime'] }}"
+        children:
+            - transform_1
+        id: split_text_1
+        result_name: modified_date
+        secrets_mapping: {}
+        type: split_text
+    start:
+        args: {}
+        children:
+            - openai_chat_completion
+        id: start
+        result_name: payload
+        secrets_mapping: {}
+        type: start
+    transform:
+        args:
+            value: "{{ splitted_text[-1] }}"
+        children:
+            - openai_chat_completion_1
+        id: transform
+        result_name: revision_history
+        secrets_mapping: {}
+        type: transform
+    transform_1:
+        args:
+            value: "{{ modified_date[0] }}"
+        children:
+            - openai_chat_completion_1
+        id: transform_1
+        result_name: modified_date
+        secrets_mapping: {}
+        type: transform
+description: Handle the single revisions for workflow "Review Google Docs Policy Revision"
+name: google_docs_policy_revision_monitoring_body
+start:
+    triggers: []
+version: "1"

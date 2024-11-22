@@ -1,0 +1,42 @@
+controls: null
+dag:
+    batched_send_slack_message_to_user_by_email:
+        args:
+            messages: "{{ messages }}"
+        children: []
+        id: batched_send_slack_message_to_user_by_email
+        result_name: null
+        secrets_mapping:
+            SLACK_SECRET: slack_secret
+        type: batched_send_slack_message_to_user_by_email
+    build_review_requests_as_slack_message_for_managers:
+        args:
+            groups_per_user: "{{ groups_per_user }}"
+        children:
+            - batched_send_slack_message_to_user_by_email
+        id: build_review_requests_as_slack_message_for_managers
+        result_name: messages
+        secrets_mapping: {}
+        type: build_review_requests_as_slack_message_for_managers
+    list_retool_groups_per_user:
+        args: {}
+        children:
+            - build_review_requests_as_slack_message_for_managers
+        id: list_retool_groups_per_user
+        result_name: groups_per_user
+        secrets_mapping:
+            RETOOL_SECRET: retool_secret
+        type: list_retool_groups_per_user
+    start:
+        args: {}
+        children:
+            - list_retool_groups_per_user
+        id: start
+        result_name: payload
+        secrets_mapping: {}
+        type: start
+description: This workflow sends Slack messages to managers for Retool access review.
+name: retool_access_review
+start:
+    triggers: []
+version: "1"

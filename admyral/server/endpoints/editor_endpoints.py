@@ -10,7 +10,6 @@ from admyral.models import (
     ActionNamespace,
     EditorActions,
     EditorWorkflowGraph,
-    WorkflowPushRequest,
     WorkflowPushResponse,
 )
 from admyral.editor import (
@@ -19,6 +18,7 @@ from admyral.editor import (
 )
 from admyral.server.endpoints.workflow_endpoints import push_workflow_impl
 from admyral.server.auth import authenticate
+from admyral.compiler.yaml_workflow_compiler import validate_workflow
 
 
 VALID_WORKFLOW_NAME_REGEX = re.compile(r"^[a-zA-Z][a-zA-Z0-9 _]*$")
@@ -119,9 +119,8 @@ async def save_workflow_from_react_flow_graph(
         user_id=authenticated_user.user_id,
         workflow_name=workflow.workflow_name,
         workflow_id=workflow.workflow_id,
-        request=WorkflowPushRequest(
-            workflow_dag=workflow.workflow_dag, activate=workflow.is_active
-        ),
+        workflow_dag=workflow.workflow_dag,
+        activate=workflow.is_active,
     )
 
 
@@ -133,25 +132,21 @@ async def create_workflow_from_react_flow_graph(
     """
     Create a new workflow from a ReactFlow graph.
     """
-    if not VALID_WORKFLOW_NAME_REGEX.match(editor_workflow_graph.workflow_name):
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid workflow name. Workflow names must start with a letter and can only contain alphanumeric characters, underscores, and spaces.",
-        )
-
-    if any(
-        not SNAKE_CASE_REGEX.match(node.result_name)
-        for node in editor_workflow_graph.nodes
-        if node.type == "action" and node.result_name is not None
-    ):
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid node result name. Result names must start with a letter and can only contain alphanumeric characters and underscores.",
-        )
+    store = get_admyral_store()
 
     workflow = editor_workflow_graph_to_workflow(editor_workflow_graph)
     try:
-        await get_admyral_store().create_workflow(
+        await validate_workflow(
+            authenticated_user.user_id, store, workflow.workflow_dag
+        )
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e),
+        ) from e
+
+    try:
+        await store.create_workflow(
             user_id=authenticated_user.user_id, workflow=workflow
         )
     except ValueError as e:

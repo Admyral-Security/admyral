@@ -3,7 +3,6 @@ import os
 import json
 
 from admyral.cli.cli import cli
-from admyral.compiler.workflow_compiler import WorkflowCompiler
 from admyral.models import TriggerStatus
 from admyral.client import AdmyralClient
 from admyral.utils.telemetry import capture
@@ -14,17 +13,13 @@ def workflow() -> None:
     """Workflow Management"""
 
 
-# TODO: add option for pushing all used Python actions automatically
 @workflow.command(
     "push",
     help="Push a workflow to Admyral",
 )
-@click.argument("workflow_name", type=str)
-@click.option(
-    "--file",
-    "-f",
+@click.argument(
+    "file",
     type=str,
-    help="Path to the Python file containing the workflow",
 )
 @click.option(
     "--activate",
@@ -32,7 +27,7 @@ def workflow() -> None:
     help="Activate the workflow after pushing it to Admyral",
 )
 @click.pass_context
-def push(ctx: click.Context, workflow_name: str, file: str, activate: bool) -> None:
+def push(ctx: click.Context, file: str, activate: bool) -> None:
     """Push workflow to Admyral"""
     capture(event_name="workflow:push")
     client: AdmyralClient = ctx.obj
@@ -43,19 +38,18 @@ def push(ctx: click.Context, workflow_name: str, file: str, activate: bool) -> N
         return
     with open(file, "r") as f:
         workflow_code = f.read()
-    workflow_dag = WorkflowCompiler().compile_from_module(workflow_code, workflow_name)
 
     # Push workflow to Admyral
     try:
         workflow_push_response = client.push_workflow(
-            workflow_name=workflow_name, workflow_dag=workflow_dag, is_active=activate
+            workflow_code=workflow_code, is_active=activate
         )
     except Exception as e:
-        click.echo(f"Failed to push workflow {workflow_name}.")
+        click.echo(f"Failed to push workflow from {file}.")
         click.echo(f"Error: {e}")
         return
 
-    click.echo(f"Workflow {workflow_name} pushed successfully.")
+    click.echo("Workflow pushed successfully.")
 
     if workflow_push_response.webhook_id:
         click.echo(f"Webhook ID: {workflow_push_response.webhook_id}")

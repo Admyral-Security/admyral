@@ -1,13 +1,8 @@
 from typing import Annotated
 import json
 
-from admyral.workflow import workflow, Schedule
 from admyral.typings import JsonValue
 from admyral.action import action, ArgumentMetadata
-from admyral.actions import (
-    batched_send_slack_message_to_user_by_email,
-    list_retool_inactive_users,
-)
 
 
 @action(
@@ -80,23 +75,3 @@ def build_retool_inactivity_question_as_slack_messages(
             )
         )
     return messages
-
-
-@workflow(
-    description="Check Retool user inactivity and ask if access is still required. This worfklow "
-    "handles the extraction of inactive users and sending messages to them. The response is handled "
-    "in the Slack interactivity workflow.",
-    triggers=[Schedule(interval_days=1)],
-)
-def retool_use_it_or_loose_it(payload: dict[str, JsonValue]):
-    inactive_users = list_retool_inactive_users(
-        inactivity_threshold_in_days=60,
-        secrets={"RETOOL_SECRET": "retool_secret"},
-    )
-    messages = build_retool_inactivity_question_as_slack_messages(
-        inactive_users=inactive_users,
-    )
-    batched_send_slack_message_to_user_by_email(
-        messages=messages,
-        secrets={"SLACK_SECRET": "slack_secret"},
-    )

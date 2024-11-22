@@ -5,11 +5,11 @@ from concurrent.futures import ThreadPoolExecutor
 from uuid import uuid4
 
 from admyral.workers.workflow_executor import WorkflowExecutor
-from admyral.workflow import Workflow
 from admyral.models import (
     Workflow as WorkflowModel,
     WorkflowRunMetadata,
     WorkflowRunStep,
+    WorkflowDAG,
 )
 from admyral.db.admyral_store import AdmyralStore
 from admyral.secret.secrets_manager import secrets_manager_factory
@@ -40,7 +40,7 @@ async def execute_test_workflow(
     workflow_id: str,
     workflow_name: str,
     workflow_actions: list[Action],
-    workflow_code: Workflow,
+    workflow_dag: WorkflowDAG,
     custom_actions: list[str] = [],
     payload: dict[str, JsonValue] = {},
     thread_pool_size: int = 100,
@@ -69,13 +69,13 @@ async def execute_test_workflow(
     """
     await _setup_shared_worker_state_for_testing(store)
 
-    compiled_workflow = WorkflowModel(
+    workflow = WorkflowModel(
         workflow_id=workflow_id,
         workflow_name=workflow_name,
-        workflow_dag=workflow_code.compile(),
+        workflow_dag=workflow_dag,
         is_active=True,
     )
-    await store.store_workflow(TEST_USER_ID, compiled_workflow)
+    await store.store_workflow(TEST_USER_ID, workflow)
 
     task_queue_name = "test_queue"
 
@@ -108,7 +108,7 @@ async def execute_test_workflow(
                 WorkflowExecutor.run,
                 {
                     "user_id": TEST_USER_ID,
-                    "workflow": compiled_workflow,
+                    "workflow": workflow,
                     "source_name": "test",
                     "payload": payload,
                     "trigger_default_args": {},

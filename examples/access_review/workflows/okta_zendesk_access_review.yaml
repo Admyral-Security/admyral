@@ -1,0 +1,94 @@
+controls: null
+dag:
+    build_lookup_table:
+        args:
+            input_list: "{{ okta_users }}"
+            key_path:
+                - profile
+                - email
+        children:
+            - filter
+        id: build_lookup_table
+        result_name: okta_user_table
+        secrets_mapping: {}
+        type: build_lookup_table
+    filter:
+        args:
+            filter: x['email'] not in okta_users
+            input_list: "{{ zendesk_users }}"
+            values:
+                okta_users: "{{ okta_user_table }}"
+        children:
+            - if
+        id: filter
+        result_name: invalid_zendesk_users
+        secrets_mapping: {}
+        type: filter
+    format_json_to_list_view_string:
+        args:
+            json_value: "{{ invalid_zendesk_users }}"
+        children:
+            - send_slack_message
+        id: format_json_to_list_view_string
+        result_name: invalid_zendesk_users_str
+        secrets_mapping: {}
+        type: format_json_to_list_view_string
+    if:
+        condition:
+            type: constant
+            value: "{{ invalid_zendesk_users }}"
+        condition_str: invalid_zendesk_users
+        false_children: []
+        id: if
+        true_children:
+            - format_json_to_list_view_string
+        type: if_condition
+    list_zendesk_users:
+        args:
+            user_role:
+                - agent
+                - admin
+            user_status: active
+        children:
+            - filter
+        id: list_zendesk_users
+        result_name: zendesk_users
+        secrets_mapping:
+            ZENDESK_SECRET: zendesk_secret
+        type: list_zendesk_users
+    okta_search_users:
+        args:
+            query: status eq "ACTIVE"
+        children:
+            - build_lookup_table
+        id: okta_search_users
+        result_name: okta_users
+        secrets_mapping:
+            OKTA_SECRET: okta_secret
+        type: okta_search_users
+    send_slack_message:
+        args:
+            channel_id: C06QP0KV1L2
+            text: "Found Zendesk users with no active Okta account:
+
+                {{ invalid_zendesk_users_str }}"
+        children: []
+        id: send_slack_message
+        result_name: null
+        secrets_mapping:
+            SLACK_SECRET: slack_secret
+        type: send_slack_message
+    start:
+        args: {}
+        children:
+            - okta_search_users
+            - list_zendesk_users
+        id: start
+        result_name: payload
+        secrets_mapping: {}
+        type: start
+description: Verify that there is no Zendesk users which is not an active Okta account.
+name: okta_zendesk_access_review
+start:
+    triggers: []
+version: "1"

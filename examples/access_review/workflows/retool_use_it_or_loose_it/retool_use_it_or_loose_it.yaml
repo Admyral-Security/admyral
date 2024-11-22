@@ -1,0 +1,53 @@
+controls: null
+dag:
+    batched_send_slack_message_to_user_by_email:
+        args:
+            messages: "{{ messages }}"
+        children: []
+        id: batched_send_slack_message_to_user_by_email
+        result_name: null
+        secrets_mapping:
+            SLACK_SECRET: slack_secret
+        type: batched_send_slack_message_to_user_by_email
+    build_retool_inactivity_question_as_slack_messages:
+        args:
+            inactive_users: "{{ inactive_users }}"
+        children:
+            - batched_send_slack_message_to_user_by_email
+        id: build_retool_inactivity_question_as_slack_messages
+        result_name: messages
+        secrets_mapping: {}
+        type: build_retool_inactivity_question_as_slack_messages
+    list_retool_inactive_users:
+        args:
+            inactivity_threshold_in_days: 60
+        children:
+            - build_retool_inactivity_question_as_slack_messages
+        id: list_retool_inactive_users
+        result_name: inactive_users
+        secrets_mapping:
+            RETOOL_SECRET: retool_secret
+        type: list_retool_inactive_users
+    start:
+        args: {}
+        children:
+            - list_retool_inactive_users
+        id: start
+        result_name: payload
+        secrets_mapping: {}
+        type: start
+description:
+    Check Retool user inactivity and ask if access is still required. This
+    worfklow handles the extraction of inactive users and sending messages to them.
+    The response is handled in the Slack interactivity workflow.
+name: retool_use_it_or_loose_it
+start:
+    triggers:
+        - cron: null
+          default_args: []
+          interval_days: 1
+          interval_hours: null
+          interval_minutes: null
+          interval_seconds: null
+          type: schedule
+version: "1"

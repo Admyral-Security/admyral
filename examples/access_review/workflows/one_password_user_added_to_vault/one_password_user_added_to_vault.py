@@ -1,13 +1,16 @@
+"""
+
+admyral action push get_time_range_of_last_full_hour -a workflows/one_password_user_added_to_vault/one_password_user_added_to_vault.py
+admyral action push filter_by_vault_and_build_slack_message -a workflows/one_password_user_added_to_vault/one_password_user_added_to_vault.py
+
+admyral workflow push workflows/one_password_user_added_to_vault/one_password_user_added_to_vault.yaml --activate
+
+"""
+
 from typing import Annotated
 from datetime import datetime, timedelta, UTC
 
-
-from admyral.workflow import workflow, Schedule
 from admyral.typings import JsonValue
-from admyral.actions import (
-    list_1password_audit_events,
-    batched_send_slack_message_to_user_by_email,
-)
 from admyral.action import ArgumentMetadata, action
 
 
@@ -64,29 +67,3 @@ def filter_by_vault_and_build_slack_message(
                 )
             )
     return messages
-
-
-@workflow(
-    description="Retrieves all user types from Okta and lists the corresponding admin users.",
-    triggers=[Schedule(cron="0 * * * *")],
-)
-def one_password_user_added_to_vault(payload: dict[str, JsonValue]):
-    start_and_end_time = get_time_range_of_last_full_hour()
-
-    events = list_1password_audit_events(
-        action_type_filter="grant",
-        object_type_filter="uva",
-        start_time=start_and_end_time[0],
-        end_time=start_and_end_time[1],
-        secrets={"1PASSWORD_SECRET": "1password_secret"},
-    )
-
-    messages = filter_by_vault_and_build_slack_message(
-        user_email="daniel@admyral.dev",  # TODO: set your email here
-        vault_id="ut22fmh7v55235s6t5gjd3t4cy",  # TODO: set your vault ID here
-        audit_events=events,
-    )
-
-    batched_send_slack_message_to_user_by_email(
-        messages=messages, secrets={"SLACK_SECRET": "slack_secret"}
-    )
