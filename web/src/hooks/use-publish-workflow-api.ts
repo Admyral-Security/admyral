@@ -6,8 +6,8 @@ import api from "@/lib/api";
 import { withSnakeCaseTransform } from "@/types/utils";
 import { HTTPMethod } from "@/types/api";
 
-// GET /api/v1/workflows/{workflowId}/activate
-// GET /api/v1/workflows/{workflowId}/deactivate
+// GET /api/v1/workflows/activate
+// GET /api/v1/workflows/deactivate
 const PublishWorkflowRequest = withSnakeCaseTransform(
 	z.object({
 		workflowId: z.string(),

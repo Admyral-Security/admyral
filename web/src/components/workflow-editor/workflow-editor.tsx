@@ -25,6 +25,7 @@ import { useRouter } from "next/navigation";
 import { SaveWorkflowProvider } from "@/providers/save-workflow";
 import NewWorkflowModal from "./new-workflow-modal";
 import { WorkflowRunStatus } from "./run-history/latest-workflow-run-status";
+import ExportWorkflowButton from "../export-workflow-button/export-workflow-button";
 
 type View = "workflowBuilder" | "runHistory";
 
@@ -212,6 +213,8 @@ export default function WorkflowEditor({
 						</Flex>
 
 						<Flex justify="end" align="center" gap="3">
+							<ExportWorkflowButton workflowId={workflowId} />
+
 							<RunWorkflowButton />
 
 							<SaveWorkflowButton />

@@ -1,4 +1,3 @@
-from typing import Any
 import yaml
 import re
 
@@ -150,5 +149,5 @@ def compile_from_yaml_workflow(yaml_workflow_str: str) -> WorkflowDAG:
     return WorkflowDAG.model_validate(yaml_workflow_dict)
 
 
-def decompile_workflow_to_yaml(workflow_dag: WorkflowDAG) -> dict[str, Any]:
-    return workflow_dag.model_dump()
+def decompile_workflow_to_yaml(workflow_dag: WorkflowDAG) -> str:
+    return yaml.dump(workflow_dag.model_dump(mode="json"))

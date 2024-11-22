@@ -12,7 +12,6 @@ import {
 	isValidWorkflowName,
 	WORKFLOW_NAME_VALIDATION_ERROR_MESSAGE,
 } from "@/lib/workflow-validation";
-import { useToast } from "@/providers/toast";
 import { useWorkflowStore } from "@/stores/workflow-store";
 import { useState } from "react";
 import { ApiError } from "@/lib/errors";
@@ -41,7 +40,6 @@ export function useCreateWorkflow() {
 	const createWorkflowApi = useCreateWorkflowApi();
 	const [isPending, setIsPending] = useState(false);
 	const { getWorkflow, setIsNew } = useWorkflowStore();
-	const { errorToast } = useToast();
 	const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
 	const createWorkflow = async () => {
@@ -50,13 +48,13 @@ export function useCreateWorkflow() {
 		try {
 			const workflow = getWorkflow();
 			if (workflow.workflowName.length === 0) {
-				errorToast(
+				setErrorMessage(
 					"Workflow name must not be empty. Go to settings to set one.",
 				);
 				return;
 			}
 			if (!isValidWorkflowName(workflow.workflowName)) {
-				errorToast(WORKFLOW_NAME_VALIDATION_ERROR_MESSAGE);
+				setErrorMessage(WORKFLOW_NAME_VALIDATION_ERROR_MESSAGE);
 				return;
 			}
 			await createWorkflowApi.mutateAsync(workflow);

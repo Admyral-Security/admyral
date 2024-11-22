@@ -11,7 +11,7 @@ enum TriggerStatus {
 	INACTIVE = "INACTIVE",
 }
 
-// GET /api/v1/workflows/<workflow-id>/trigger
+// POST /api/v1/workflows/trigger/<workflow-name>
 const WorkflowTriggerRequest = Json;
 const WorkflowTriggerResponse = z.object({
 	status: z.nativeEnum(TriggerStatus),
@@ -23,7 +23,7 @@ const buildTriggerWorkflowApi = (workflowName: string) =>
 		z.infer<typeof WorkflowTriggerResponse>
 	>({
 		method: HTTPMethod.POST,
-		path: `/api/v1/workflows/${workflowName}/trigger`,
+		path: `/api/v1/workflows/trigger/${workflowName}`,
 		requestSchema: WorkflowTriggerRequest,
 		responseSchema: WorkflowTriggerResponse,
 	});

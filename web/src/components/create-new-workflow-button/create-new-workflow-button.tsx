@@ -22,7 +22,7 @@ export default function CreateNewWorkflowButton() {
 			style={{ cursor: "pointer" }}
 			onClick={handleCreateNewWorkflow}
 		>
-			Create New Workflow
+			New Workflow
 		</Button>
 	);
 }

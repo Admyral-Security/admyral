@@ -93,7 +93,7 @@ class AdmyralClient:
         Returns:
             The workflow with the given name if it exists, otherwise None.
         """
-        result = self._get(f"{API_V1_STR}/workflows/{workflow_name}")
+        result = self._get(f"{API_V1_STR}/workflows/get/{workflow_name}")
         return Workflow.model_validate(result) if result else None
 
     def push_workflow(
@@ -139,7 +139,7 @@ class AdmyralClient:
             payload: The payload to send to the workflow.
         """
         response = self._post(
-            f"{API_V1_STR}/workflows/{workflow_name}/trigger", payload
+            f"{API_V1_STR}/workflows/trigger/{workflow_name}", payload
         )
         return WorkflowTriggerResponse.model_validate(response)
 
