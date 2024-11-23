@@ -47,18 +47,26 @@ def parse_action(module_str: str, action_name: str) -> PythonAction:
     }
 
     # extract the action decorator arguments
-    if (
-        len(decorator_list) != 1
-        or (
-            isinstance(decorator_list[0], ast.Call)
-            and decorator_list[0].func.id != "action"
-        )
-        or (
-            isinstance(decorator_list[0], ast.Name) and decorator_list[0].id != "action"
-        )
-    ):
-        raise ValueError("Action function should only have the @action decorator.")
-    action_decorator = decorator_list[0]
+    action_decorator = None
+    for decorator in decorator_list:
+        if isinstance(decorator, ast.Call) and decorator.func.id == "action":
+            action_decorator = decorator
+            break
+        elif isinstance(decorator, ast.Name) and decorator.id == "action":
+            action_decorator = decorator
+            break
+
+    if action_decorator is None:
+        raise ValueError("Action functions must implement the @action decorator.")
+
+    if isinstance(action_decorator, ast.Call):
+        # Ensure the decorator has arguments if expected
+        if not action_decorator.keywords:
+            raise ValueError("The @action decorator must include arguments.")
+
+        for arg in action_decorator.keywords:
+            if not isinstance(arg.value, (ast.Constant, ast.List)):
+                raise ValueError(f"Invalid argument type in @action decorator: {arg.arg} must be a constant or list.")
 
     decorator_args = {}
 
@@ -205,11 +213,7 @@ def _parse_type_annotation(arg: ast.arg) -> tuple[str, bool, dict[str, str]]:
     arg_type_ast = subscript.slice.elts[0]
     argument_metadata_ast = subscript.slice.elts[1]
 
-    # get type and check whether it is optional
-    arg_type = astor.to_source(arg_type_ast).strip()  # TODO: improve this
-    is_optional = is_optional_type(arg_type_ast)
-
-    # get ArgumentMetadata info
+    # Ensure ArgumentMetadata is provided
     if (
         not isinstance(argument_metadata_ast, ast.Call)
         or argument_metadata_ast.func.id != "ArgumentMetadata"
@@ -218,18 +222,26 @@ def _parse_type_annotation(arg: ast.arg) -> tuple[str, bool, dict[str, str]]:
             "Argument metadata must be provided using ArgumentMetadata(...)."
         )
 
-    arg_metadata_parmas = {}
+    # get type and check whether it is optional
+    arg_type = astor.to_source(arg_type_ast).strip()  # TODO: improve this
+    is_optional = is_optional_type(arg_type_ast)
+
+    arg_metadata_params = {}
     for keyword in argument_metadata_ast.keywords:
         if not isinstance(keyword.value, ast.Constant) or not isinstance(
             keyword.value.value, str
         ):
             raise ValueError("Argument metadata parameters must be a string.")
-        if keyword.arg in arg_metadata_parmas:
+        if keyword.arg in arg_metadata_params:
             raise ValueError(
                 f"Found duplicate ArgumentMetadata parameter: {keyword.arg}. ArgumentMetadata parameters must be unique."
             )
-        arg_metadata_parmas[keyword.arg] = keyword.value.value
-    arg_metadata = ArgumentMetadata.model_validate(arg_metadata_parmas)
+        arg_metadata_params[keyword.arg] = keyword.value.value
+
+    if not arg_metadata_params:
+        raise ValueError("ArgumentMetadata must contain at least one parameter.")
+
+    arg_metadata = ArgumentMetadata.model_validate(arg_metadata_params)
 
     return arg_type, is_optional, arg_metadata.model_dump()
 
