@@ -41,7 +41,7 @@ from admyral.db.schemas import (
     WorkflowControlResultsSchema,
 )
 from admyral.db.alembic.database_manager import DatabaseManager
-from admyral.config.config import GlobalConfig, CONFIG
+from admyral.config.config import CONFIG
 from admyral.logger import get_logger
 from admyral.utils.time import utc_now
 from admyral.utils.crypto import generate_hs256
@@ -74,11 +74,11 @@ class AdmyralDatabaseSession:
 
 
 class AdmyralStore(StoreInterface):
-    def __init__(self, config: GlobalConfig) -> None:
-        self.config = config
+    def __init__(self, database_url: str) -> None:
+        self.database_url = database_url
 
         self.engine = create_async_engine(
-            self.config.database_url, echo=True, future=True, pool_pre_ping=True
+            database_url, echo=True, future=True, pool_pre_ping=True
         )
         self.async_session_maker = sessionmaker(
             self.engine, class_=AsyncSession, expire_on_commit=False
@@ -90,8 +90,10 @@ class AdmyralStore(StoreInterface):
 
     # TODO: pass down config
     @classmethod
-    async def create_store(cls, skip_setup: bool = False) -> "AdmyralStore":
-        store = cls(CONFIG)
+    async def create_store(
+        cls, skip_setup: bool = False, database_url: str | None = None
+    ) -> "AdmyralStore":
+        store = cls(database_url or CONFIG.database_url)
         if not skip_setup:
             await store.setup()
         store.performed_setup = True
@@ -105,7 +107,7 @@ class AdmyralStore(StoreInterface):
     async def setup(self):
         logger.info("Setting up Admyral store.")
 
-        database_manager = DatabaseManager(self.engine, self.config)
+        database_manager = DatabaseManager(self.engine, self.database_url)
 
         does_db_exist = await database_manager.database_exists()
         if not does_db_exist:

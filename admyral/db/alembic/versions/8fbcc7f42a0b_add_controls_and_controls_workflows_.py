@@ -1,8 +1,8 @@
 """add controls and controls_workflows tables
 
-Revision ID: af128e403421
+Revision ID: 8fbcc7f42a0b
 Revises: 7985f1c159a3
-Create Date: 2024-11-20 15:15:35.528059
+Create Date: 2024-11-25 17:42:24.701175
 
 """
 
@@ -14,7 +14,7 @@ import sqlmodel  # noqa F401
 
 
 # revision identifiers, used by Alembic.
-revision: str = "af128e403421"
+revision: str = "8fbcc7f42a0b"
 down_revision: Union[str, None] = "7985f1c159a3"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None

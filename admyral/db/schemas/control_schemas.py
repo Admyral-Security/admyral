@@ -35,7 +35,7 @@ class ControlsWorkflowsMappingSchema(BaseSchema, table=True):
     )
 
     # primary keys
-    control_id: int = Field(primary_key=True)
+    control_id: int = Field(primary_key=True, default=None)
     user_id: str = Field(sa_type=TEXT(), primary_key=True)
     workflow_id: str = Field(sa_type=TEXT(), primary_key=True)
 
@@ -70,7 +70,7 @@ class ControlSchema(BaseSchema, table=True):
     )
 
     # primary keys
-    control_id: int = Field(primary_key=True)
+    control_id: int = Field(primary_key=True, default=None)
     user_id: str = Field(sa_type=TEXT(), primary_key=True)
 
     # other fields
