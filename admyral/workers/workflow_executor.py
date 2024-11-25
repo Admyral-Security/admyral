@@ -17,8 +17,9 @@ with workflow.unsafe.imports_passed_through():
     from admyral.models import (
         ActionNode,
         IfNode,
-        WorkflowDAG,
         Workflow,
+        LoopNode,
+        LoopType,
     )
     from admyral.action_registry import ActionRegistry
     from admyral.workers.references import evaluate_references
@@ -26,6 +27,7 @@ with workflow.unsafe.imports_passed_through():
     from admyral.utils.collections import is_not_empty
     from admyral.utils.memory import count_json_payload_bytes
     from admyral.config.config import TEMPORAL_PAYLOAD_LIMIT
+    from admyral.utils.graph import calculate_in_deg
 
 
 logger = get_logger(__name__)
@@ -117,12 +119,11 @@ class WorkflowExecutor:
     @workflow.run
     async def run(self, params: WorkflowParams) -> None:
         workflow_dag = params.workflow.workflow_dag
-        in_deg = workflow_dag.get_in_deg()
 
         # initialize workflow run
         payload = self._inject_default_args(params.payload, params.trigger_default_args)
 
-        workflow_run_id = await _execute_activity(
+        workflow_run_id, start_step_id = await _execute_activity(
             "init_workflow_run",
             args=[params.workflow.workflow_id, params.source_name, payload],
         )
@@ -134,125 +135,227 @@ class WorkflowExecutor:
         # setup states for workflow execution
         execution_state = {"payload": payload}
 
-        eliminated_nodes = set()
-        resolved_dependencies = defaultdict(int)
+        async def execution_loop(
+            dag: dict[str, ActionNode | IfNode | LoopNode],
+            execution_state: dict,
+            prev_step_id: str | None = None,
+            is_loop_body: bool = False,
+        ) -> dict[str, JsonValue]:
+            # calculate in_deg for current top-level DAG
+            in_deg = calculate_in_deg(dag)
 
-        number_of_running_tasks = 0
+            # determine start nodes
+            if is_loop_body:
+                start_node_ids = [
+                    node_id for node_id in dag.keys() if in_deg[node_id] == 0
+                ]
+                if len(start_node_ids) != 1:
+                    raise ValueError("Workflow must have exactly one start node.")
+            else:
+                start_node_ids = ["start"]
 
-        job_queue = asyncio.Queue()
-        job_queue_length = 0
+            eliminated_nodes = set()
+            resolved_dependencies = defaultdict(int)
 
-        async def push_job(job: JobQueueEntry | None):
-            nonlocal job_queue_length
-            job_queue_length += 1
-            await job_queue.put(job)
+            number_of_running_tasks = 0
 
-        exception_queue = asyncio.Queue()
+            job_queue = asyncio.Queue()
+            job_queue_length = 0
 
-        async def task(action_id: str, prev_step_id: str):
-            nonlocal number_of_running_tasks
-            nonlocal eliminated_nodes
-            nonlocal resolved_dependencies
+            async def push_job(job: JobQueueEntry | None) -> None:
+                nonlocal job_queue_length
+                job_queue_length += 1
+                await job_queue.put(job)
 
-            try:
-                node = params.workflow.workflow_dag.dag[action_id]
+            exception_queue = asyncio.Queue()
 
-                # TODO: strong type?
-                ctx_dict = {
-                    "user_id": params.user_id,
-                    "workflow_id": params.workflow.workflow_id,
-                    "run_id": workflow_run_id,
-                    "action_type": node.type,
-                    "prev_step_id": prev_step_id,
-                }
+            async def task(action_id: str, prev_step_id: str) -> None:
+                nonlocal number_of_running_tasks
+                nonlocal eliminated_nodes
+                nonlocal resolved_dependencies
 
-                logger.info(f"Executing action: {action_id}")
-
-                # execution
-                if isinstance(node, IfNode):
-                    step_id, newly_eliminated_nodes = await self._execute_if_condition(
-                        node,
-                        execution_state,
-                        params.workflow.workflow_dag,
-                        in_deg,
-                        ctx_dict,
-                    )
-                    eliminated_nodes |= newly_eliminated_nodes
-                    candidates = node.true_children + node.false_children
-                elif isinstance(node, ActionNode):
-                    if node.id != "start":
-                        if node.type == "wait":
-                            await asyncio.sleep(node.args.get("seconds", 0))
-
-                        step_id, execution_result = await self._execute_action_node(
-                            node, execution_state, ctx_dict
-                        )
-                        if node.result_name is not None:
-                            execution_state[node.result_name] = execution_result
-                    else:
-                        step_id = None
-                    candidates = node.children
-                else:
-                    raise RuntimeError(f"Invalid node type: {type(node)}")
-
-                # schedule next actions
-                for child_id in candidates:
-                    # mark the current node as resolved for each child
-                    resolved_dependencies[child_id] += 1
-                    # we only schedule a child if all its dependencies (i.e., its parents) are resolved
-                    if (
-                        child_id not in eliminated_nodes
-                        and resolved_dependencies[child_id] == in_deg[child_id]
-                    ):
-                        await push_job(
-                            JobQueueEntry(action_id=child_id, prev_step_id=step_id)
-                        )
-
-            except Exception as e:
-                logger.error(f"Error executing task: {action_id}. Exception: {e}")
-                await push_job(None)
-                await exception_queue.put(e)
-
-            finally:
-                number_of_running_tasks -= 1
-                if job_queue_length == 0:
-                    await push_job(None)
-
-                job_queue.task_done()
-
-        # job trigger loop
-        await push_job(JobQueueEntry(action_id="start", prev_step_id=None))
-
-        exception = None
-        async with asyncio.TaskGroup() as tg:
-            # we run the scheduling loop until all tasks are completed and no
-            # more task needs to be executed.
-            while job_queue_length > 0 or number_of_running_tasks > 0:
-                job = await job_queue.get()
-                job_queue_length -= 1
-
-                # Check for exceptions
                 try:
-                    exception = exception_queue.get_nowait()
-                    # an exception occurred! we stop the scheduling loop
-                    # but we let the currently running tasks complete
-                    break
-                except asyncio.QueueEmpty:
-                    pass
+                    node = dag[action_id]
 
-                if job is None:
-                    continue
+                    # TODO: strong type?
+                    ctx_dict = {
+                        "user_id": params.user_id,
+                        "workflow_id": params.workflow.workflow_id,
+                        "run_id": workflow_run_id,
+                        "action_type": node.type,
+                        "prev_step_id": prev_step_id,
+                    }
 
-                # launch new task
-                logger.info(
-                    f"Scheduling action: {job.action_id}"
-                )  # TODO: better log message
-                number_of_running_tasks += 1
-                tg.create_task(task(job.action_id, job.prev_step_id))
+                    logger.info(f"Executing action: {action_id}")
 
-        if exception:
+                    # execution
+                    if isinstance(node, IfNode):
+                        (
+                            step_id,
+                            newly_eliminated_nodes,
+                        ) = await self._execute_if_condition(
+                            node,
+                            execution_state,
+                            dag,
+                            in_deg,
+                            ctx_dict,
+                        )
+                        eliminated_nodes |= newly_eliminated_nodes
+                        candidates = node.true_children + node.false_children
+
+                    elif isinstance(node, ActionNode):
+                        if node.id != "start":
+                            if node.type == "wait":
+                                await asyncio.sleep(node.args.get("seconds", 0))
+
+                            step_id, execution_result = await self._execute_action_node(
+                                node, execution_state, ctx_dict
+                            )
+                            if node.result_name is not None:
+                                execution_state[node.result_name] = execution_result
+                        else:
+                            # start node
+                            step_id = start_step_id
+                        candidates = node.children
+
+                    elif isinstance(node, LoopNode):
+                        aggregated_result = []
+
+                        # initialize loop state
+                        step_id = await _execute_activity(
+                            "init_loop_action",
+                            args=[
+                                workflow_run_id,
+                                prev_step_id,
+                                node.loop_name,
+                                node.loop_condition,
+                                node.loop_type,
+                            ],
+                        )
+
+                        match node.loop_type:
+                            case LoopType.LIST | LoopType.COUNT:
+                                loop_condition = evaluate_references(
+                                    node.loop_condition, execution_state
+                                )
+
+                                if node.loop_type == LoopType.LIST and not isinstance(
+                                    loop_condition, list
+                                ):
+                                    raise ValueError(
+                                        "Loop list parameter must be a list."
+                                    )
+
+                                if node.loop_type == LoopType.COUNT and not isinstance(
+                                    node.loop_condition, int
+                                ):
+                                    raise ValueError("Loop count must be an integer.")
+
+                                if node.loop_type == LoopType.LIST:
+                                    iter_values = loop_condition
+                                else:
+                                    assert isinstance(node.loop_type, LoopType.COUNT)
+                                    iter_values = range(node.loop_condition)
+
+                                for value in iter_values:
+                                    loop_body_execution_state = deepcopy(
+                                        execution_state
+                                    )
+                                    loop_body_execution_state[
+                                        f"{node.loop_name}_value"
+                                    ] = value
+
+                                    loop_iter_execution_state = await execution_loop(
+                                        node.loop_body_dag,
+                                        loop_body_execution_state,
+                                        prev_step_id=step_id,
+                                        is_loop_body=True,
+                                    )
+                                    aggregated_result.append(
+                                        loop_iter_execution_state
+                                    )  # TODO: filter loop_iter_execution_state down
+
+                            case LoopType.CONDITION:
+                                raise ValueError(
+                                    "Condition loop type is not yet available."
+                                )
+
+                        execution_state[node.loop_name] = aggregated_result
+                        candidates = node.children
+
+                    else:
+                        raise RuntimeError(f"Invalid node type: {type(node)}")
+
+                    # schedule next actions
+                    for child_id in candidates:
+                        # mark the current node as resolved for each child
+                        resolved_dependencies[child_id] += 1
+                        # we only schedule a child if all its dependencies (i.e., its parents) are resolved
+                        if (
+                            child_id not in eliminated_nodes
+                            and resolved_dependencies[child_id] == in_deg[child_id]
+                        ):
+                            await push_job(
+                                JobQueueEntry(action_id=child_id, prev_step_id=step_id)
+                            )
+
+                except Exception as e:
+                    logger.error(f"Error executing task: {action_id}. Exception: {e}")
+                    await push_job(None)
+                    await exception_queue.put(e)
+
+                finally:
+                    number_of_running_tasks -= 1
+                    if job_queue_length == 0:
+                        await push_job(None)
+
+                    job_queue.task_done()
+
+            # job trigger loop
+            for node_id in start_node_ids:
+                await push_job(
+                    JobQueueEntry(action_id=node_id, prev_step_id=prev_step_id)
+                )
+
+            exception = None
+            async with asyncio.TaskGroup() as tg:
+                # we run the scheduling loop until all tasks are completed and no
+                # more task needs to be executed.
+                while job_queue_length > 0 or number_of_running_tasks > 0:
+                    job = await job_queue.get()
+                    job_queue_length -= 1
+
+                    # Check for exceptions
+                    try:
+                        exception = exception_queue.get_nowait()
+                        # an exception occurred! we stop the scheduling loop
+                        # but we let the currently running tasks complete
+                        break
+                    except asyncio.QueueEmpty:
+                        pass
+
+                    if job is None:
+                        continue
+
+                    # launch new task
+                    logger.info(
+                        f"Scheduling action: {job.action_id}"
+                    )  # TODO: better log message
+                    number_of_running_tasks += 1
+                    tg.create_task(task(job.action_id, job.prev_step_id))
+
+            if exception:
+                raise AdmyralFailureError(
+                    f"An exception occurred during workflow execution. Error: {str(exception)}"
+                )
+
+            return execution_state
+
+        try:
+            await execution_loop(workflow_dag.dag, execution_state)
+        except Exception as e:
             logger.error(
-                f"An exception occurred during workflow execution. Error: {str(exception)}"
+                f"An exception occurred during workflow execution. Error: {str(e)}"
             )
             return
 
@@ -329,7 +432,7 @@ class WorkflowExecutor:
         self,
         dag_node: IfNode,
         execution_state: dict,
-        workflow_dag: WorkflowDAG,
+        dag: dict[str, ActionNode | IfNode | LoopNode],
         in_deg: dict[str, int],
         ctx_dict: dict[str, Any],
     ) -> tuple[str, set[str]]:
@@ -360,19 +463,17 @@ class WorkflowExecutor:
         # 2) path elimination: remove the untaken path from the execution order
         eliminated_nodes = set()
         if condition_result:
-            eliminated_nodes |= path_elimination(
-                dag_node.false_children, workflow_dag, in_deg
-            )
+            eliminated_nodes |= path_elimination(dag_node.false_children, dag, in_deg)
         else:
-            eliminated_nodes |= path_elimination(
-                dag_node.true_children, workflow_dag, in_deg
-            )
+            eliminated_nodes |= path_elimination(dag_node.true_children, dag, in_deg)
 
         return step_id, eliminated_nodes
 
 
 def path_elimination(
-    node_ids: list[str], workflow_dag: WorkflowDAG, in_deg: dict[str, int]
+    node_ids: list[str],
+    dag: dict[str, ActionNode | IfNode | LoopNode],
+    in_deg: dict[str, int],
 ) -> set[str]:
     """
     Path Elimination for if-conditions.
@@ -402,7 +503,7 @@ def path_elimination(
         eliminated_nodes.add(current_node_id)
 
         # reduce in_deg of children
-        node = workflow_dag.dag[current_node_id]
+        node = dag[current_node_id]
         if isinstance(node, IfNode):
             for child_id in node.true_children:
                 in_deg[child_id] -= 1

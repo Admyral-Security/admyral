@@ -16,6 +16,7 @@ from admyral.workers.workflow_run_initializer import init_workflow_run
 from admyral.workers.workflow_run_completor import mark_workflow_as_completed
 from admyral.secret.secrets_manager import secrets_manager_factory
 from admyral.workers.if_condition_executor import execute_if_condition
+from admyral.workers.loop_initializer import init_loop_action
 from admyral.utils.future_executor import capture_main_event_loop
 from admyral.workers.store_reference_error import store_reference_resolution_error
 from admyral.workers.store_workflow_error import store_action_input_too_large_error
@@ -51,6 +52,7 @@ async def run_worker(
     ] + [
         action_executor("execute_python_action", execute_python_action),
         action_executor("if_condition", execute_if_condition),
+        init_loop_action,
         init_workflow_run,
         mark_workflow_as_completed,
         store_reference_resolution_error,

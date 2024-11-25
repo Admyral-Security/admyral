@@ -4,7 +4,10 @@ import { memo } from "react";
 import { NodeProps, Handle, Position } from "reactflow";
 import NodeBase from "./node-base";
 import { Flex } from "@radix-ui/themes";
-import { TEditorWorkflowActionNode } from "@/types/react-flow";
+import {
+	EditorWorkflowHandleType,
+	TEditorWorkflowActionNode,
+} from "@/types/react-flow";
 import ActionIcon from "../workflow-editor/action-icon";
 import { useEditorActionStore } from "@/stores/editor-action-store";
 
@@ -17,6 +20,7 @@ function ActionNode({ id, data, selected }: ActionNodeProps) {
 		<>
 			<Handle
 				type="target"
+				id={EditorWorkflowHandleType.TARGET}
 				position={Position.Top}
 				style={{
 					height: "16px",
@@ -31,14 +35,17 @@ function ActionNode({ id, data, selected }: ActionNodeProps) {
 				}}
 				isConnectableStart={false}
 			/>
+
 			<NodeBase
 				nodeId={id}
 				selected={selected}
 				icon={<ActionIcon actionType={data.actionType} />}
 				name={actionDefinition?.displayName}
 			/>
+
 			<Handle
 				type="source"
+				id={EditorWorkflowHandleType.SOURCE}
 				position={Position.Bottom}
 				style={{
 					height: "16px",

@@ -3,6 +3,7 @@ from pydantic import BaseModel
 from enum import Enum
 
 from admyral.models.action import ActionMetadata
+from admyral.models.workflow import LoopType
 
 
 ########################################################
@@ -67,6 +68,15 @@ class EditorWorkflowActionNode(EditorWorkflowBaseNode):
     args: dict[str, str]
 
 
+class EditorWorkflowLoopNode(EditorWorkflowBaseNode):
+    type: Literal["loop"] = "loop"
+    action_type: Literal["loop"] = "loop"
+
+    loop_name: str
+    loop_type: LoopType
+    loop_condition: str | int
+
+
 class EditorWorkflowIfNode(EditorWorkflowBaseNode):
     type: Literal["if_condition"] = "if_condition"
     action_type: Literal["if_condition"] = "if_condition"
@@ -74,20 +84,27 @@ class EditorWorkflowIfNode(EditorWorkflowBaseNode):
 
 
 type EditorWorkflowNode = (
-    EditorWorkflowStartNode | EditorWorkflowActionNode | EditorWorkflowIfNode
+    EditorWorkflowStartNode
+    | EditorWorkflowActionNode
+    | EditorWorkflowIfNode
+    | EditorWorkflowLoopNode
 )
 
 
-class EditorWorkflowEdgeType(str, Enum):
-    DEFAULT = "default"
+class EditorWorkflowEdgeHandle(str, Enum):
+    SOURCE = "source"
+    TARGET = "target"
     TRUE = "true"
     FALSE = "false"
+    LOOP_BODY_START = "loop_body_start"
+    LOOP_BODY_END = "loop_body_end"
 
 
 class EditorWorkflowEdge(BaseModel):
     source: str
+    source_handle: EditorWorkflowEdgeHandle
     target: str
-    type: EditorWorkflowEdgeType
+    target_handle: EditorWorkflowEdgeHandle
 
 
 class EditorWorkflowGraph(BaseModel):

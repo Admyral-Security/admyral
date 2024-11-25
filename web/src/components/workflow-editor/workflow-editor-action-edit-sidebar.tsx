@@ -6,6 +6,7 @@ import WorkflowSettingsEditPanel from "./workflow-settings-edit-panel";
 import ActionEditPanel from "./edit-panel/action-edit-panel";
 import StartActionEditPanel from "./edit-panel/start-action-edit-panel";
 import IfConditionEditPanel from "./edit-panel/if-condition-edit-panel";
+import LoopEditPanel from "./edit-panel/loop-edit-panel";
 
 export default function WorkflowEditorActionEditSidebar({
 	apiBaseUrl,
@@ -47,6 +48,9 @@ export default function WorkflowEditorActionEditSidebar({
 	}
 	if (actionType === "if_condition") {
 		return <IfConditionEditPanel />;
+	}
+	if (actionType === "loop") {
+		return <LoopEditPanel />;
 	}
 	return <ActionEditPanel />;
 }

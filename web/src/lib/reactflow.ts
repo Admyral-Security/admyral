@@ -5,6 +5,7 @@ import {
 	TReactFlowEdge,
 	TReactFlowGraph,
 	EditorWorkflowNodeType,
+	LoopType,
 } from "@/types/react-flow";
 import Dagre from "dagre";
 import { MarkerType } from "reactflow";
@@ -72,10 +73,10 @@ export function prepareForReactFlow(
 	const edges: TReactFlowEdge[] = workflow.edges.map((edge) => ({
 		id: `${edge.source}_${edge.target}`,
 		source: edge.source,
-		sourceHandle: edge.type as string,
+		sourceHandle: edge.sourceHandle,
 		target: edge.target,
-		targetHandle: "target",
-		type: edge.type,
+		targetHandle: edge.targetHandle,
+		type: "default",
 		markerEnd: {
 			type: MarkerType.ArrowClosed,
 			height: 15,
@@ -108,7 +109,6 @@ export function buildReactFlowActionNode(
 			type: EditorWorkflowNodeType.ACTION,
 			actionType,
 			resultName: null,
-			// TODO: How to initialize secrets mapping and args?
 			secretsMapping: {},
 			args: {},
 		},
@@ -129,6 +129,26 @@ export function buildReactFlowIfNode(
 			type: EditorWorkflowNodeType.IF_CONDITION,
 			actionType: "if_condition",
 			condition: "",
+		},
+		selected: false,
+	};
+}
+
+export function buildReactFlowLoopNode(
+	id: string,
+	position: { x: number; y: number },
+): TReactFlowNode {
+	return {
+		id,
+		type: EditorWorkflowNodeType.LOOP,
+		position,
+		data: {
+			id,
+			type: EditorWorkflowNodeType.LOOP,
+			actionType: "loop",
+			loopName: "",
+			loopType: LoopType.LIST,
+			loopCondition: "",
 		},
 		selected: false,
 	};

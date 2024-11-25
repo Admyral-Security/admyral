@@ -4,7 +4,10 @@ import NodeBase from "./node-base";
 import { Box, Flex, Text } from "@radix-ui/themes";
 import IfConditionActionIcon from "../icons/if-condition-action-icon";
 import { ibmPlexMono } from "@/app/fonts";
-import { TEditorWorkflowIfNode } from "@/types/react-flow";
+import {
+	EditorWorkflowHandleType,
+	TEditorWorkflowIfNode,
+} from "@/types/react-flow";
 
 type IfConditionNodeProps = NodeProps<TEditorWorkflowIfNode>;
 
@@ -13,6 +16,7 @@ function IfConditionNode({ id, data, selected }: IfConditionNodeProps) {
 		<>
 			<Handle
 				type="target"
+				id={EditorWorkflowHandleType.TARGET}
 				position={Position.Top}
 				style={{
 					height: "16px",
@@ -38,7 +42,7 @@ function IfConditionNode({ id, data, selected }: IfConditionNodeProps) {
 			<Handle
 				type="source"
 				position={Position.Bottom}
-				id="true"
+				id={EditorWorkflowHandleType.TRUE}
 				style={{
 					width: "48px",
 					height: "18px",
@@ -98,7 +102,7 @@ function IfConditionNode({ id, data, selected }: IfConditionNodeProps) {
 			<Handle
 				type="source"
 				position={Position.Bottom}
-				id="false"
+				id={EditorWorkflowHandleType.FALSE}
 				style={{
 					width: "52px",
 					height: "18px",

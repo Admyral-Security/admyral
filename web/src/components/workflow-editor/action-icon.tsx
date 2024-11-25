@@ -7,6 +7,7 @@ import StartWorkflowActionIcon from "../icons/start-workflow-icon";
 import TransformActionIcon from "../icons/transform-action-icon";
 import Image from "next/image";
 import NamespaceIcon from "./namespace-icon";
+import { LoopIcon } from "@radix-ui/react-icons";
 
 export default function ActionIcon({ actionType }: { actionType: string }) {
 	const { queryActionByActionType } = useEditorActionStore();
@@ -33,15 +34,10 @@ export default function ActionIcon({ actionType }: { actionType: string }) {
 			);
 
 		case "python":
-		case "for_loop":
-			return (
-				<Image
-					src="/python_logo.svg"
-					alt="Python"
-					height={18}
-					width={18}
-				/>
-			);
+			return null;
+
+		case "loop":
+			return <LoopIcon height={24} width={24} color="#96dda2" />;
 
 		case "note":
 			return <NoteActionIcon />;

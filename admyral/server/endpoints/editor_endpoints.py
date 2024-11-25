@@ -54,6 +54,11 @@ async def load_workflow_actions(
             display_name="If Condition",
             display_namespace=ADMYRAL_NAMESPACE,
         ),
+        ActionMetadata(
+            action_type="loop",
+            display_name="Loop",
+            display_namespace=ADMYRAL_NAMESPACE,
+        ),
         # ActionMetadata(
         #     action_type="python",
         #     display_name="Python",

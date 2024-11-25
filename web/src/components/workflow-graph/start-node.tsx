@@ -4,18 +4,15 @@ import { memo } from "react";
 import { NodeProps, Handle, Position } from "reactflow";
 import NodeBase from "./node-base";
 import { Flex } from "@radix-ui/themes";
-import { TEditorWorkflowStartNode } from "@/types/react-flow";
+import {
+	EditorWorkflowHandleType,
+	TEditorWorkflowStartNode,
+} from "@/types/react-flow";
 import StartWorkflowActionIcon from "../icons/start-workflow-icon";
-import { useWorkflowStore } from "@/stores/workflow-store";
-
-function toSnakeCase(name: string): string {
-	return name.replaceAll(" ", "_").toLowerCase();
-}
 
 type StartNodeProps = NodeProps<TEditorWorkflowStartNode>;
 
 function StartNode({ id, selected }: StartNodeProps) {
-	const { workflowName } = useWorkflowStore();
 	return (
 		<>
 			<NodeBase
@@ -26,6 +23,7 @@ function StartNode({ id, selected }: StartNodeProps) {
 			/>
 			<Handle
 				type="source"
+				id={EditorWorkflowHandleType.SOURCE}
 				position={Position.Bottom}
 				style={{
 					height: "16px",

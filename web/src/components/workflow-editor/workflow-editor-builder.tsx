@@ -7,10 +7,7 @@ import ReactFlow, {
 	Controls,
 	ReactFlowProvider,
 } from "reactflow";
-import {
-	EditorWorkflowEdgeType,
-	EditorWorkflowNodeType,
-} from "@/types/react-flow";
+import { EditorWorkflowNodeType } from "@/types/react-flow";
 import DirectedEdgeComponent from "../workflow-graph/edge";
 import StartNode from "@/components/workflow-graph/start-node";
 import ActionNode from "@/components/workflow-graph/action-node";
@@ -20,20 +17,21 @@ import { useEditorActionStore } from "@/stores/editor-action-store";
 import {
 	buildReactFlowActionNode,
 	buildReactFlowIfNode,
+	buildReactFlowLoopNode,
 } from "@/lib/reactflow";
 import "reactflow/dist/style.css";
 import ConnectionLine from "../workflow-graph/connection-line";
+import LoopNode from "../workflow-graph/loop-node";
 
 const nodeTypes = {
 	[EditorWorkflowNodeType.START]: StartNode,
 	[EditorWorkflowNodeType.ACTION]: ActionNode,
 	[EditorWorkflowNodeType.IF_CONDITION]: IfConditionNode,
+	[EditorWorkflowNodeType.LOOP]: LoopNode,
 };
 
 const edgeTypes = {
-	[EditorWorkflowEdgeType.DEFAULT]: DirectedEdgeComponent,
-	[EditorWorkflowEdgeType.TRUE]: DirectedEdgeComponent,
-	[EditorWorkflowEdgeType.FALSE]: DirectedEdgeComponent,
+	default: DirectedEdgeComponent,
 };
 
 export default function WorkflowEditorBuilder() {
@@ -74,15 +72,24 @@ export default function WorkflowEditorBuilder() {
 			// generate new node
 			const id = getNodeId();
 			const action = actionsIndex[actionType];
-			const newNode =
-				actionType === "if_condition"
-					? buildReactFlowIfNode(id, position)
-					: buildReactFlowActionNode(
-							id,
-							position,
-							actionType,
-							action,
-						);
+			let newNode;
+			switch (actionType) {
+				case "if_condition":
+					newNode = buildReactFlowIfNode(id, position);
+					break;
+
+				case "loop":
+					newNode = buildReactFlowLoopNode(id, position);
+					break;
+
+				default:
+					newNode = buildReactFlowActionNode(
+						id,
+						position,
+						actionType,
+						action,
+					);
+			}
 
 			addNode(newNode);
 		},

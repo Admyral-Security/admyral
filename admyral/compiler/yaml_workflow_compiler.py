@@ -1,35 +1,27 @@
 import yaml
 import re
 
-from admyral.models import WorkflowDAG, WorkflowTriggerType, ActionNode
+from admyral.models import (
+    WorkflowDAG,
+    WorkflowTriggerType,
+    ActionNode,
+    LoopNode,
+    IfNode,
+)
 from admyral.action_registry import ActionRegistry
 from admyral.db.store_interface import StoreInterface
+from admyral.utils.graph import is_dag
 
 
 SNAKE_CASE_REGEX = re.compile(r"^[a-z]+(_[a-z]+)*$")
 VALID_WORKFLOW_NAME_REGEX = re.compile(r"^[a-zA-Z][a-zA-Z0-9 _]*$")
 
 
-def has_cycle(workflow: WorkflowDAG) -> bool:
-    def dfs(node_id: str, visited: set[str]) -> bool:
-        if node_id in visited:
-            return True
-        visited.add(node_id)
-        node = workflow.dag[node_id]
-        children = (
-            node.children
-            if isinstance(node, ActionNode)
-            else node.true_children + node.false_children
-        )
-        for child_id in children:
-            if dfs(child_id, visited):
-                return True
-        visited.remove(node_id)
-        return False
-
-    return dfs("start", set())
-
-
+# TODO: disallow self-loops
+# TODO: add loop validation => edges should not leave the loop and no edges should enter the loop
+# TODO: no cycle within the loop
+# TODO: loop start and loop end connection
+# TODO: loop body must be strongly connected
 async def validate_workflow(
     user_id: str, db: StoreInterface, workflow: WorkflowDAG
 ) -> None:
@@ -98,6 +90,16 @@ async def validate_workflow(
         raise ValueError(
             "If a result name is provided, then the result name must be in snake_case."
         )
+    if not all(
+        node.loop_name is None
+        or node.loop_name == ""
+        or SNAKE_CASE_REGEX.match(node.loop_name)
+        for node in workflow.dag.values()
+        if isinstance(node, LoopNode)
+    ):
+        raise ValueError(
+            "If a loop name is provided, then the loop name must be in snake_case."
+        )
 
     # check all node IDs are unique
     node_id_and_dag_key_mismatches = [
@@ -113,9 +115,9 @@ async def validate_workflow(
     # check that all children are valid node IDs
     for node in workflow.dag.values():
         children = (
-            node.children
-            if isinstance(node, ActionNode)
-            else node.true_children + node.false_children
+            node.true_children + node.false_children
+            if isinstance(node, IfNode)
+            else node.children
         )
         for child_id in children:
             # start node must not have incoming edges
@@ -126,7 +128,7 @@ async def validate_workflow(
 
     # check whether the action types are valid
     for node in workflow.dag.values():
-        if node.type == "start" or node.type == "if_condition":
+        if node.type in ("start", "if_condition", "loop"):
             continue
 
         # check action registry
@@ -140,7 +142,8 @@ async def validate_workflow(
         raise ValueError(f"Invalid action '{node.type}'.")
 
     # check for cycles
-    if has_cycle(workflow):
+    adj_list = {node.id: node.children for node in workflow.dag.values()}
+    if not is_dag(adj_list, "start"):
         raise ValueError("Cycles are not allowed for workflows.")
 
 

@@ -72,6 +72,16 @@ export function SaveWorkflowProvider({
 				);
 			}
 
+			if (
+				workflow.nodes
+					.filter((node) => node.type === EditorWorkflowNodeType.LOOP)
+					.some((node) => !isValidResultName(node.loopName))
+			) {
+				throw new WorkflowValidationError(
+					"Invalid loop loop name. Loop names must be snake_case.",
+				);
+			}
+
 			// Make sure that we only save args which are present in the current
 			// action definition. If an action is updated and an argument is
 			// removed, we want to clean it up here.

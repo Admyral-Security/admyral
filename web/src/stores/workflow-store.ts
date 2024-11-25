@@ -1,6 +1,5 @@
 import { create } from "zustand";
 import {
-	EditorWorkflowEdgeType,
 	EditorWorkflowNodeType,
 	TEditorWorkflowActionNode,
 	TEditorWorkflowIfNode,
@@ -9,6 +8,7 @@ import {
 	TReactFlowGraph,
 	TReactFlowNode,
 	TReactFlowEdge,
+	TEditorWorkflowLoopNode,
 } from "@/types/react-flow";
 import { produce, enableMapSet } from "immer";
 import {
@@ -80,7 +80,8 @@ type WorkflowStoreState = TReactFlowGraph & {
 		data:
 			| TEditorWorkflowStartNode
 			| TEditorWorkflowActionNode
-			| TEditorWorkflowIfNode,
+			| TEditorWorkflowIfNode
+			| TEditorWorkflowLoopNode,
 	) => void;
 	updateWebhookIdAndSecret: (
 		webhookId: string,
@@ -206,24 +207,17 @@ export const useWorkflowStore = create<WorkflowStoreState>((set, get) => ({
 			nodes: get().nodes.map((node) => node.data),
 			edges: get().edges.map((edge) => ({
 				source: edge.source,
+				sourceHandle: edge.sourceHandle,
 				target: edge.target,
-				type: edge.type!,
+				targetHandle: edge.targetHandle,
 			})),
 		} as TEditorWorkflowGraph;
 	},
 	onConnect: (connection: Connection) => {
-		let edgeType = EditorWorkflowEdgeType.DEFAULT;
-		if (connection.sourceHandle === "true") {
-			edgeType = EditorWorkflowEdgeType.TRUE;
-		}
-		if (connection.sourceHandle === "false") {
-			edgeType = EditorWorkflowEdgeType.FALSE;
-		}
-
 		const edge = {
 			...connection,
 			id: get().getEdgeId(),
-			type: edgeType,
+			type: "default",
 			markerEnd: {
 				type: MarkerType.ArrowClosed,
 				height: 15,
@@ -329,7 +323,8 @@ export const useWorkflowStore = create<WorkflowStoreState>((set, get) => ({
 		data:
 			| TEditorWorkflowStartNode
 			| TEditorWorkflowActionNode
-			| TEditorWorkflowIfNode,
+			| TEditorWorkflowIfNode
+			| TEditorWorkflowLoopNode,
 	) =>
 		set(
 			produce((draft) => {

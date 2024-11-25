@@ -15,7 +15,7 @@ async def init_workflow_run(
     workflow_id: str,
     source_name: str,
     payload: dict[str, Any],
-) -> str:
+) -> tuple[str, str]:
     start = time.monotonic_ns()
     run_id = str(uuid4())
     step_id = str(uuid4())
@@ -28,4 +28,4 @@ async def init_workflow_run(
     )
     end = time.monotonic_ns()
     logger.info(f"Initialized workflow run {run_id} in {(end - start) / 1_000_000}ms")
-    return run_id
+    return run_id, step_id

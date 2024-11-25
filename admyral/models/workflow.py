@@ -1,7 +1,6 @@
 from typing import Optional, Literal
 from pydantic import BaseModel, Field
 from enum import Enum
-from collections import defaultdict
 from datetime import datetime
 
 from admyral.typings import JsonValue
@@ -22,12 +21,6 @@ class ActionNode(NodeBase):
     secrets_mapping: dict[str, str] = {}
     """ The mapping of secret placeholders to secret IDs. """
     children: list[str] = []
-
-    def add_edge(self, child_node: str) -> None:
-        # Note: children must be a set but we can't use a set type due to the following error
-        # TypeError: Object of type set is not JSON serializable
-        if child_node not in self.children:
-            self.children.append(child_node)
 
     def __str__(self) -> str:
         return f"ActionNode(id={self.id}, type={self.type}, result_name={self.result_name}, args={self.args}, secrets_mapping={self.secrets_mapping}, children={self.children})"
@@ -56,18 +49,6 @@ class IfNode(NodeBase):
     true_children: list[str] = []
     false_children: list[str] = []
 
-    def add_true_edge(self, child_node: str) -> None:
-        # Note: children must be a set but we can't use a set type due to the following error
-        # TypeError: Object of type set is not JSON serializable
-        if child_node not in self.true_children:
-            self.true_children.append(child_node)
-
-    def add_false_edge(self, child_node: str) -> None:
-        # Note: children must be a set but we can't use a set type due to the following error
-        # TypeError: Object of type set is not JSON serializable
-        if child_node not in self.false_children:
-            self.false_children.append(child_node)
-
     def __str__(self) -> str:
         return f"IfNode(id={self.id}, type={self.type}, condition={self.condition}, true_children={self.true_children}, false_children={self.false_children})"
 
@@ -81,6 +62,25 @@ class IfNode(NodeBase):
             and self.true_children == value.true_children
             and self.false_children == value.false_children
         )
+
+
+class LoopType(str, Enum):
+    LIST = "list"
+    COUNT = "count"
+    CONDITION = "condition"
+
+
+class LoopNode(NodeBase):
+    type: Literal["loop"] = "loop"
+    # loop_body is a sub-workflow
+    loop_body_dag: "dict[str, IfNode | ActionNode | LoopNode]"
+    # loop_name must be snake_case
+    loop_name: str
+    loop_type: LoopType
+    loop_condition: str | int
+
+    # children are the edges that leave the loop
+    children: list[str] = []
 
 
 class WorkflowTriggerType(str, Enum):
@@ -125,23 +125,8 @@ class WorkflowDAG(BaseModel):
     description: str | None = None
     controls: list[str] | None = None
     start: WorkflowStart
-    dag: dict[str, IfNode | ActionNode]
+    dag: dict[str, IfNode | ActionNode | LoopNode]
     version: str = "1"
-
-    # TODO: make this a property
-    def get_in_deg(self) -> dict[str, int]:
-        in_deg = defaultdict(int)
-        for node in self.dag.values():
-            if isinstance(node, IfNode):
-                for true_child in node.true_children:
-                    in_deg[true_child] += 1
-                for false_child in node.false_children:
-                    in_deg[false_child] += 1
-            else:
-                assert isinstance(node, ActionNode)
-                for child in node.children:
-                    in_deg[child] += 1
-        return in_deg
 
 
 class Workflow(BaseModel):

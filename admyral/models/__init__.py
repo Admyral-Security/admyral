@@ -20,6 +20,8 @@ from admyral.models.workflow import (
     WorkflowTriggerResponse,
     TriggerStatus,
     WorkflowMetadata,
+    LoopNode,
+    LoopType,
 )
 from admyral.models.workflow_run import (
     WorkflowRun,
@@ -55,12 +57,13 @@ from admyral.models.editor import (
     EditorWorkflowStartNode,
     EditorWorkflowActionNode,
     EditorWorkflowIfNode,
-    EditorWorkflowEdgeType,
+    EditorWorkflowEdgeHandle,
     EditorWorkflowEdge,
     EditorWorkflowGraph,
     EditorScheduleTrigger,
     EditorWebhookTrigger,
     EditorScheduleType,
+    EditorWorkflowLoopNode,
 )
 from admyral.models.workflow_control_result import WorkflowControlResult
 
@@ -116,7 +119,7 @@ __all__ = [
     "EditorWorkflowStartNode",
     "EditorWorkflowActionNode",
     "EditorWorkflowIfNode",
-    "EditorWorkflowEdgeType",
+    "EditorWorkflowEdgeHandle",
     "EditorWorkflowEdge",
     "EditorWorkflowGraph",
     "EditorScheduleTrigger",
@@ -128,4 +131,7 @@ __all__ = [
     "UserProfile",
     "WorkflowControlResult",
     "WorkflowRunStepWithSerializedResult",
+    "LoopNode",
+    "LoopType",
+    "EditorWorkflowLoopNode",
 ]

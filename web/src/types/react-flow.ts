@@ -22,6 +22,7 @@ export enum EditorWorkflowNodeType {
 	START = "start",
 	ACTION = "action",
 	IF_CONDITION = "if_condition",
+	LOOP = "loop",
 }
 
 const EditorWebhookTrigger = withCamelCaseTransform(
@@ -76,17 +77,39 @@ export const EditorWorkflowIfNode = withCamelCaseTransform(
 );
 export type TEditorWorkflowIfNode = z.infer<typeof EditorWorkflowIfNode>;
 
-export enum EditorWorkflowEdgeType {
-	DEFAULT = "default",
+export enum LoopType {
+	LIST = "list",
+	COUNT = "count",
+	CONDITION = "condition",
+}
+
+export const EditorWorkflowLoopNode = withCamelCaseTransform(
+	z.object({
+		id: z.string(),
+		type: z.literal(EditorWorkflowNodeType.LOOP),
+		action_type: z.literal("loop"),
+		loop_name: z.string(),
+		loop_condition: z.union([z.string(), z.number()]),
+		loop_type: z.nativeEnum(LoopType),
+	}),
+);
+export type TEditorWorkflowLoopNode = z.infer<typeof EditorWorkflowLoopNode>;
+
+export enum EditorWorkflowHandleType {
+	SOURCE = "source",
+	TARGET = "target",
 	TRUE = "true",
 	FALSE = "false",
+	LOOP_BODY_START = "loop_body_start",
+	LOOP_BODY_END = "loop_body_end",
 }
 
 export const EditorWorkflowEdge = withCamelCaseTransform(
 	z.object({
 		source: z.string(),
+		source_handle: z.nativeEnum(EditorWorkflowHandleType),
 		target: z.string(),
-		type: z.nativeEnum(EditorWorkflowEdgeType),
+		target_handle: z.nativeEnum(EditorWorkflowHandleType),
 	}),
 );
 export type TEditorWorkflowEdge = z.infer<typeof EditorWorkflowEdge>;
@@ -103,6 +126,7 @@ export const EditorWorkflowGraph = withCamelCaseTransform(
 				EditorWorkflowStartNode,
 				EditorWorkflowActionNode,
 				EditorWorkflowIfNode,
+				EditorWorkflowLoopNode,
 			]),
 		),
 		edges: z.array(EditorWorkflowEdge),
@@ -111,7 +135,10 @@ export const EditorWorkflowGraph = withCamelCaseTransform(
 export type TEditorWorkflowGraph = z.infer<typeof EditorWorkflowGraph>;
 
 export type TReactFlowNode = Node<
-	TEditorWorkflowStartNode | TEditorWorkflowActionNode | TEditorWorkflowIfNode
+	| TEditorWorkflowStartNode
+	| TEditorWorkflowActionNode
+	| TEditorWorkflowIfNode
+	| TEditorWorkflowLoopNode
 >;
 export type TReactFlowEdge = Edge;
 export type TReactFlowGraph = {
@@ -172,11 +199,23 @@ export const EditorWorkflowIfNodeSnakeCase = withSnakeCaseTransform(
 	}),
 );
 
+export const EditorWorkflowLoopNodeSnakeCase = withSnakeCaseTransform(
+	z.object({
+		id: z.string(),
+		type: z.literal(EditorWorkflowNodeType.LOOP),
+		actionType: z.literal("loop"),
+		loopName: z.string(),
+		loopType: z.nativeEnum(LoopType),
+		loopCondition: z.union([z.string(), z.number()]),
+	}),
+);
+
 export const EditorWorkflowEdgeSnakeCase = withSnakeCaseTransform(
 	z.object({
 		source: z.string(),
+		sourceHandle: z.nativeEnum(EditorWorkflowHandleType),
 		target: z.string(),
-		type: z.nativeEnum(EditorWorkflowEdgeType),
+		targetHandle: z.nativeEnum(EditorWorkflowHandleType),
 	}),
 );
 
@@ -192,6 +231,7 @@ export const EditorWorkflowGraphSnakeCase = withSnakeCaseTransform(
 				EditorWorkflowStartNodeSnakeCase,
 				EditorWorkflowActionNodeSnakeCase,
 				EditorWorkflowIfNodeSnakeCase,
+				EditorWorkflowLoopNodeSnakeCase,
 			]),
 		),
 		edges: z.array(EditorWorkflowEdge),
