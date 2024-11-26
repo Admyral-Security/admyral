@@ -31,6 +31,7 @@ class EditorWorkflowBaseNode(BaseModel):
     """ Node Type """
     action_type: str
     """ Action Type """
+    position: tuple[float, float] | None = None
 
 
 class EditorWebhookTrigger(BaseModel):
@@ -75,6 +76,7 @@ class EditorWorkflowLoopNode(EditorWorkflowBaseNode):
     loop_name: str
     loop_type: LoopType
     loop_condition: str | int
+    results_to_collect: str
 
 
 class EditorWorkflowIfNode(EditorWorkflowBaseNode):

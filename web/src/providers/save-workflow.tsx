@@ -13,6 +13,7 @@ import {
 	WORKFLOW_NAME_VALIDATION_ERROR_MESSAGE,
 } from "@/lib/workflow-validation";
 import { WorkflowValidationError } from "@/lib/errors";
+import { ZodError } from "zod";
 
 interface SaveWorkflowContextType {
 	saveWorkflow: () => Promise<boolean>;
@@ -132,6 +133,10 @@ export function SaveWorkflowProvider({
 				errorToast((error.response?.data as any).detail);
 			} else if (error instanceof WorkflowValidationError) {
 				errorToast(error.message);
+			} else if (error instanceof ZodError) {
+				errorToast(
+					"Failed to save workflow due to internal error. Please contact support.",
+				);
 			} else {
 				errorToast("Failed to save workflow. Please try again.");
 			}

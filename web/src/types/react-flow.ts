@@ -49,6 +49,7 @@ export const EditorWorkflowStartNode = withCamelCaseTransform(
 		action_type: z.literal("start"),
 		webhook: EditorWebhookTrigger.nullable(),
 		schedules: z.array(EditorScheduleTrigger),
+		position: z.tuple([z.number(), z.number()]).nullable(),
 	}),
 );
 export type TEditorWorkflowStartNode = z.infer<typeof EditorWorkflowStartNode>;
@@ -61,6 +62,7 @@ export const EditorWorkflowActionNode = withCamelCaseTransform(
 		result_name: z.string().nullable(),
 		secrets_mapping: z.record(z.string(), z.string()),
 		args: z.record(z.string(), z.string()),
+		position: z.tuple([z.number(), z.number()]).nullable(),
 	}),
 );
 export type TEditorWorkflowActionNode = z.infer<
@@ -73,6 +75,7 @@ export const EditorWorkflowIfNode = withCamelCaseTransform(
 		type: z.literal(EditorWorkflowNodeType.IF_CONDITION),
 		action_type: z.literal("if_condition"),
 		condition: z.string(),
+		position: z.tuple([z.number(), z.number()]).nullable(),
 	}),
 );
 export type TEditorWorkflowIfNode = z.infer<typeof EditorWorkflowIfNode>;
@@ -91,6 +94,8 @@ export const EditorWorkflowLoopNode = withCamelCaseTransform(
 		loop_name: z.string(),
 		loop_condition: z.union([z.string(), z.number()]),
 		loop_type: z.nativeEnum(LoopType),
+		results_to_collect: z.string(),
+		position: z.tuple([z.number(), z.number()]).nullable(),
 	}),
 );
 export type TEditorWorkflowLoopNode = z.infer<typeof EditorWorkflowLoopNode>;
@@ -176,6 +181,7 @@ export const EditorWorkflowStartNodeSnakeCase = withSnakeCaseTransform(
 		actionType: z.literal("start"),
 		webhook: EditorWebhookTriggerSnakeCase.nullable(),
 		schedules: z.array(EditorScheduleTriggerSnakeCase),
+		position: z.tuple([z.number(), z.number()]).nullable(),
 	}),
 );
 
@@ -187,6 +193,7 @@ export const EditorWorkflowActionNodeSnakeCase = withSnakeCaseTransform(
 		resultName: z.string().nullable(),
 		secretsMapping: z.record(z.string(), z.string()),
 		args: z.record(z.string(), z.string()),
+		position: z.tuple([z.number(), z.number()]).nullable(),
 	}),
 );
 
@@ -196,6 +203,7 @@ export const EditorWorkflowIfNodeSnakeCase = withSnakeCaseTransform(
 		type: z.literal(EditorWorkflowNodeType.IF_CONDITION),
 		actionType: z.literal("if_condition"),
 		condition: z.string(),
+		position: z.tuple([z.number(), z.number()]).nullable(),
 	}),
 );
 
@@ -207,6 +215,8 @@ export const EditorWorkflowLoopNodeSnakeCase = withSnakeCaseTransform(
 		loopName: z.string(),
 		loopType: z.nativeEnum(LoopType),
 		loopCondition: z.union([z.string(), z.number()]),
+		resultsToCollect: z.string(),
+		position: z.tuple([z.number(), z.number()]).nullable(),
 	}),
 );
 
@@ -234,6 +244,6 @@ export const EditorWorkflowGraphSnakeCase = withSnakeCaseTransform(
 				EditorWorkflowLoopNodeSnakeCase,
 			]),
 		),
-		edges: z.array(EditorWorkflowEdge),
+		edges: z.array(EditorWorkflowEdgeSnakeCase),
 	}),
 );

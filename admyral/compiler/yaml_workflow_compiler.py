@@ -142,7 +142,14 @@ async def validate_workflow(
         raise ValueError(f"Invalid action '{node.type}'.")
 
     # check for cycles
-    adj_list = {node.id: node.children for node in workflow.dag.values()}
+    adj_list = {
+        node.id: (
+            node.true_children + node.false_children
+            if isinstance(node, IfNode)
+            else node.children
+        )
+        for node in workflow.dag.values()
+    }
     if not is_dag(adj_list, "start"):
         raise ValueError("Cycles are not allowed for workflows.")
 

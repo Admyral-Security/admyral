@@ -47,6 +47,15 @@ export default function LoopEditPanel() {
 		);
 	};
 
+	const onChangeResultsToCollect = (value: string) => {
+		updateNodeData(
+			selectedNodeIdx,
+			produce(data, (draft) => {
+				draft.resultsToCollect = value;
+			}),
+		);
+	};
+
 	const data = nodes[selectedNodeIdx].data as TEditorWorkflowLoopNode;
 	let title;
 	if (data.loopType === LoopType.CONDITION) {
@@ -140,6 +149,22 @@ export default function LoopEditPanel() {
 							title={title}
 							value={data.loopCondition.toString()}
 							onChange={onChangeLoopCondition}
+						/>
+					</Flex>
+				</Flex>
+
+				<Flex direction="column" gap="2">
+					<Text>Results to Collect</Text>
+					<Text size="2" color="gray" weight="light">
+						Enter the names of the results you want to collect from
+						each iteration of the loop. Separate multiple names with
+						a comma. Leave blank to collect all results.
+					</Text>
+					<Flex width="100%" height="86px">
+						<CodeEditorWithDialog
+							title="Results to Collect"
+							value={data.resultsToCollect}
+							onChange={onChangeResultsToCollect}
 						/>
 					</Flex>
 				</Flex>

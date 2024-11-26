@@ -123,9 +123,13 @@ class WorkflowExecutor:
         # initialize workflow run
         payload = self._inject_default_args(params.payload, params.trigger_default_args)
 
-        workflow_run_id, start_step_id = await _execute_activity(
+        init_workflow_run_result = await _execute_activity(
             "init_workflow_run",
             args=[params.workflow.workflow_id, params.source_name, payload],
+        )
+        workflow_run_id, start_step_id = (
+            init_workflow_run_result["run_id"],
+            init_workflow_run_result["step_id"],
         )
 
         logger.info(
@@ -229,7 +233,7 @@ class WorkflowExecutor:
                                 prev_step_id,
                                 node.loop_name,
                                 node.loop_condition,
-                                node.loop_type,
+                                node.loop_type.value,
                             ],
                         )
 
@@ -247,15 +251,15 @@ class WorkflowExecutor:
                                     )
 
                                 if node.loop_type == LoopType.COUNT and not isinstance(
-                                    node.loop_condition, int
+                                    loop_condition, int
                                 ):
                                     raise ValueError("Loop count must be an integer.")
 
                                 if node.loop_type == LoopType.LIST:
                                     iter_values = loop_condition
                                 else:
-                                    assert isinstance(node.loop_type, LoopType.COUNT)
-                                    iter_values = range(node.loop_condition)
+                                    assert node.loop_type == LoopType.COUNT
+                                    iter_values = range(loop_condition)
 
                                 for value in iter_values:
                                     loop_body_execution_state = deepcopy(
@@ -271,9 +275,28 @@ class WorkflowExecutor:
                                         prev_step_id=step_id,
                                         is_loop_body=True,
                                     )
-                                    aggregated_result.append(
-                                        loop_iter_execution_state
-                                    )  # TODO: filter loop_iter_execution_state down
+
+                                    # aggregate results from iteration
+                                    if node.results_to_collect:
+                                        if len(node.results_to_collect) == 1:
+                                            aggregated_result.append(
+                                                loop_iter_execution_state[
+                                                    node.results_to_collect[0]
+                                                ]
+                                            )
+                                        else:
+                                            aggregated_result.append(
+                                                {
+                                                    result_name: loop_iter_execution_state.get(
+                                                        result_name
+                                                    )
+                                                    for result_name in node.results_to_collect
+                                                }
+                                            )
+                                    else:
+                                        aggregated_result.append(
+                                            loop_iter_execution_state
+                                        )
 
                             case LoopType.CONDITION:
                                 raise ValueError(

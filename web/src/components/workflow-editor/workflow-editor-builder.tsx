@@ -71,7 +71,6 @@ export default function WorkflowEditorBuilder() {
 
 			// generate new node
 			const id = getNodeId();
-			const action = actionsIndex[actionType];
 			let newNode;
 			switch (actionType) {
 				case "if_condition":
@@ -87,7 +86,6 @@ export default function WorkflowEditorBuilder() {
 						id,
 						position,
 						actionType,
-						action,
 					);
 			}
 

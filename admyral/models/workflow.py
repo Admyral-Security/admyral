@@ -12,6 +12,7 @@ class NodeBase(BaseModel):
     """ Unique ID of the node used for building edges. """
     type: str
     """ The type of the node. """
+    position: tuple[float, float] | None = None
 
 
 class ActionNode(NodeBase):
@@ -78,6 +79,7 @@ class LoopNode(NodeBase):
     loop_name: str
     loop_type: LoopType
     loop_condition: str | int
+    results_to_collect: list[str] | None = None
 
     # children are the edges that leave the loop
     children: list[str] = []

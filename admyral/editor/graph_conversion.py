@@ -75,7 +75,9 @@ def workflow_to_editor_workflow_graph(
             if isinstance(node, IfNode):
                 # IF CONDITION NODES
                 nodes.append(
-                    EditorWorkflowIfNode(id=node_id, condition=node.condition_str)
+                    EditorWorkflowIfNode(
+                        id=node_id, condition=node.condition_str, position=node.position
+                    )
                 )
                 for true_child in node.true_children:
                     edges.append(
@@ -104,6 +106,10 @@ def workflow_to_editor_workflow_graph(
                         loop_name=node.loop_name,
                         loop_type=node.loop_type,
                         loop_condition=str(node.loop_condition),
+                        results_to_collect=""
+                        if node.results_to_collect is None
+                        else ", ".join(node.results_to_collect),
+                        position=node.position,
                     )
                 )
 
@@ -171,7 +177,10 @@ def workflow_to_editor_workflow_graph(
                 # START NODES
                 nodes.append(
                     EditorWorkflowStartNode(
-                        id=node_id, webhook=webhook_trigger, schedules=schedule_triggers
+                        id=node_id,
+                        webhook=webhook_trigger,
+                        schedules=schedule_triggers,
+                        position=node.position,
                     )
                 )
                 for child in node.children:
@@ -196,6 +205,7 @@ def workflow_to_editor_workflow_graph(
                             k: serialize_json_with_reference(v)
                             for k, v in node.args.items()
                         },
+                        position=node.position,
                     )
                 )
                 for child in node.children:
@@ -209,10 +219,6 @@ def workflow_to_editor_workflow_graph(
                     )
 
     _process_dag(workflow.workflow_dag.dag)
-
-    print("\n\nworkflow_to_editor_workflow_graph")  # FIXME:
-    print("DAG: ", workflow.workflow_dag.dag)  # FIXME:
-    print("EDGES: ", edges)  # FIXME:
 
     return EditorWorkflowGraph(
         workflow_id=workflow.workflow_id,
@@ -268,14 +274,13 @@ def validate_editor_workflow_graph(editor_workflow_graph: EditorWorkflowGraph) -
             loop_nodes.add(node.id)
             adj_list[f"{node.id}_end"] = []
 
-    print("Edges: ", editor_workflow_graph.edges)  # FIXME:
     for edge in editor_workflow_graph.edges:
         # disallow self-loops
         if edge.source == edge.target:
             raise ValueError("Self-loops are not allowed.")
 
-        if isinstance(edge.target, LoopNode):
-            if edge.source_handle == EditorWorkflowEdgeHandle.LOOP_BODY_END:
+        if edge.target in loop_nodes:
+            if edge.target_handle == EditorWorkflowEdgeHandle.LOOP_BODY_END:
                 adj_list[edge.source].append(f"{edge.target}_end")
                 if len(adj_list[edge.source]) > 1:
                     raise ValueError(
@@ -283,7 +288,7 @@ def validate_editor_workflow_graph(editor_workflow_graph: EditorWorkflowGraph) -
                     )
             else:
                 adj_list[edge.source].append(edge.target)
-        elif isinstance(edge.source, LoopNode):
+        elif edge.source in loop_nodes:
             if edge.target_handle == EditorWorkflowEdgeHandle.LOOP_BODY_START:
                 adj_list[edge.source].append(edge.target)
             else:
@@ -291,7 +296,6 @@ def validate_editor_workflow_graph(editor_workflow_graph: EditorWorkflowGraph) -
         else:
             adj_list[edge.source].append(edge.target)
 
-    print("Adj List: ", adj_list)  # FIXME:
     if not is_dag(adj_list, "start"):
         raise ValueError(
             "Cycles are not allowed for workflows. Workflow must be a DAG."
@@ -326,6 +330,7 @@ def editor_workflow_graph_to_workflow(
             if node.id in workflow_dag:
                 raise ValueError("Multiple start nodes found.")
             workflow_dag[node.id] = ActionNode.build_start_node()
+            workflow_dag[node.id].position = node.position
 
             if node.webhook:
                 triggers.append(
@@ -353,6 +358,7 @@ def editor_workflow_graph_to_workflow(
                 args={
                     k: deserialize_json_with_reference(v) for k, v in node.args.items()
                 },
+                position=node.position,
             )
             continue
 
@@ -361,6 +367,7 @@ def editor_workflow_graph_to_workflow(
                 id=node.id,
                 condition=compile_condition_str(node.condition),
                 condition_str=node.condition,
+                position=node.position,
             )
             continue
 
@@ -373,21 +380,30 @@ def editor_workflow_graph_to_workflow(
                 if node.loop_condition < 0:
                     raise ValueError("Loop count must not be negative.")
 
+            results_to_collect = None
+            if node.results_to_collect:
+                results_to_collect = [
+                    result_name.strip()
+                    for result_name in node.results_to_collect.split(",")
+                ]
+
             workflow_dag[node.id] = LoopNode(
                 id=node.id,
                 loop_name=node.loop_name,
                 loop_type=node.loop_type,
                 loop_condition=node.loop_condition,
                 loop_body_dag={},
+                results_to_collect=results_to_collect,
+                position=node.position,
             )
             loop_nodes.append(node.id)
             continue
 
-    loop_starts = set()
+    loop_body_starts = set()
 
     for edge in editor_workflow_graph.edges:
-        if isinstance(workflow_dag[edge.target], LoopNode):
-            loop_starts.add((edge.source, edge.target))
+        if edge.source_handle == EditorWorkflowEdgeHandle.LOOP_BODY_START:
+            loop_body_starts.add(edge.target)
 
         if isinstance(workflow_dag[edge.source], IfNode):
             if edge.source_handle == EditorWorkflowEdgeHandle.TRUE:
@@ -397,9 +413,6 @@ def editor_workflow_graph_to_workflow(
         else:
             workflow_dag[edge.source].children.append(edge.target)
 
-    print("\n\nworkflow_to_editor_workflow_graph")  # FIXME:
-    print("DAG: ", workflow_dag)  # FIXME:
-
     # Algorithm idea:
     # perform DFS => if we hit a loop node, then continue exploration until we hit the end of the loop
     # if we hit another loop node on the way, then we have a nested loop which we need to collapse first
@@ -408,17 +421,13 @@ def editor_workflow_graph_to_workflow(
     ) -> None:
         node = workflow_dag[node_id]
 
-        print("Node: ", node)  # FIXME:
         if isinstance(node, LoopNode) and is_empty(node.loop_body_dag):
             # Extract loop body
 
             loop_body_dag = {}
             queue = deque(
-                child_id
-                for child_id in node.children
-                if (node_id, child_id) in loop_starts
+                child_id for child_id in node.children if child_id in loop_body_starts
             )
-            print("Queue: ", queue)  # FIXME:
 
             # remove all nodes from the dag that are part of the loop body
             # and move them into loop_body_dag
@@ -450,18 +459,20 @@ def editor_workflow_graph_to_workflow(
             node.children = [
                 child_id
                 for child_id in node.children
-                if child_id not in loop_body_dag
-                and not isinstance(workflow_dag[child_id], LoopNode)
+                if child_id not in loop_body_starts
             ]
             node.loop_body_dag = loop_body_dag
 
         # filter out the loop nodes
-        for child in node.children:
+        node_children = (
+            node.true_children + node.false_children
+            if isinstance(node, IfNode)
+            else node.children
+        )
+        for child in node_children:
             extract_loop_bodies(workflow_dag, child)
 
     extract_loop_bodies(workflow_dag, "start")
-
-    print("AFTER DAG: ", workflow_dag)  # FIXME:
 
     return Workflow(
         workflow_id=editor_workflow_graph.workflow_id,

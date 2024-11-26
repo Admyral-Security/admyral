@@ -43,6 +43,7 @@ function buildStartNode(
 			actionType: "start",
 			webhook: null,
 			schedules: [],
+			position: null,
 		},
 		selected: false,
 	};
@@ -204,7 +205,13 @@ export const useWorkflowStore = create<WorkflowStoreState>((set, get) => ({
 			description: get().description,
 			controls: get().controls,
 			isActive: get().isActive,
-			nodes: get().nodes.map((node) => node.data),
+			nodes: get().nodes.map((node) => {
+				const nodeData = {
+					...node.data,
+					position: [node.position.x, node.position.y],
+				};
+				return nodeData;
+			}),
 			edges: get().edges.map((edge) => ({
 				source: edge.source,
 				sourceHandle: edge.sourceHandle,

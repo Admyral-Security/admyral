@@ -1,4 +1,3 @@
-import { TActionMetadata } from "@/types/editor-actions";
 import {
 	TEditorWorkflowGraph,
 	TReactFlowNode,
@@ -59,12 +58,14 @@ export function prepareForReactFlow(
 	workflow: TEditorWorkflowGraph,
 	windowInnerWidth: number,
 ): TReactFlowGraph {
+	const doLayoutNodes = workflow.nodes[0].position === null;
+
 	const nodes: TReactFlowNode[] = workflow.nodes.map((node) => ({
 		id: node.id,
 		type: node.type,
 		position: {
-			x: 0,
-			y: 0,
+			x: node.position ? node.position[0] : 0,
+			y: node.position ? node.position[1] : 0,
 		},
 		data: node,
 		selected: false,
@@ -85,7 +86,9 @@ export function prepareForReactFlow(
 		},
 	}));
 
-	const positionedNodes = layoutGraph(nodes, edges, windowInnerWidth);
+	const positionedNodes = doLayoutNodes
+		? layoutGraph(nodes, edges, windowInnerWidth)
+		: nodes;
 
 	return {
 		...workflow,
@@ -98,7 +101,6 @@ export function buildReactFlowActionNode(
 	id: string,
 	position: { x: number; y: number },
 	actionType: string,
-	actionMetadata: TActionMetadata,
 ): TReactFlowNode {
 	return {
 		id,
@@ -111,6 +113,7 @@ export function buildReactFlowActionNode(
 			resultName: null,
 			secretsMapping: {},
 			args: {},
+			position: [position.x, position.y],
 		},
 		selected: false,
 	};
@@ -129,6 +132,7 @@ export function buildReactFlowIfNode(
 			type: EditorWorkflowNodeType.IF_CONDITION,
 			actionType: "if_condition",
 			condition: "",
+			position: [position.x, position.y],
 		},
 		selected: false,
 	};
@@ -149,6 +153,8 @@ export function buildReactFlowLoopNode(
 			loopName: "",
 			loopType: LoopType.LIST,
 			loopCondition: "",
+			resultsToCollect: "",
+			position: [position.x, position.y],
 		},
 		selected: false,
 	};
