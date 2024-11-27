@@ -132,30 +132,30 @@ async def test_cascade_delete_workflow(store: AdmyralStore):
         await session.commit()
 
         # Verify everything is created
-        mapping_result = await session.execute(select(ControlsWorkflowsMappingSchema))
-        mappings = mapping_result.scalars().all()
+        mapping_result = await session.exec(select(ControlsWorkflowsMappingSchema))
+        mappings = mapping_result.all()
         assert len(mappings) == 1
 
-        results_result = await session.execute(select(WorkflowControlResultsSchema))
-        results = results_result.scalars().all()
+        results_result = await session.exec(select(WorkflowControlResultsSchema))
+        results = results_result.all()
         assert len(results) == 1
 
         # First delete the control results
-        results_to_delete = await session.execute(
+        results_to_delete = await session.exec(
             select(WorkflowControlResultsSchema).where(
                 WorkflowControlResultsSchema.workflow_id == workflow.workflow_id
             )
         )
-        for result in results_to_delete.scalars().all():
+        for result in results_to_delete.all():
             await session.delete(result)
 
         # Then delete the workflow mappings
-        mappings_to_delete = await session.execute(
+        mappings_to_delete = await session.exec(
             select(ControlsWorkflowsMappingSchema).where(
                 ControlsWorkflowsMappingSchema.workflow_id == workflow.workflow_id
             )
         )
-        for mapping in mappings_to_delete.scalars().all():
+        for mapping in mappings_to_delete.all():
             await session.delete(mapping)
 
         # Finally delete the workflow
@@ -163,14 +163,14 @@ async def test_cascade_delete_workflow(store: AdmyralStore):
         await session.commit()
 
         # Verify cascading deletes
-        mapping_result = await session.execute(select(ControlsWorkflowsMappingSchema))
-        mappings = mapping_result.scalars().all()
+        mapping_result = await session.exec(select(ControlsWorkflowsMappingSchema))
+        mappings = mapping_result.all()
         assert len(mappings) == 0
 
-        results_result = await session.execute(select(WorkflowControlResultsSchema))
-        results = results_result.scalars().all()
+        results_result = await session.exec(select(WorkflowControlResultsSchema))
+        results = results_result.all()
         assert len(results) == 0
 
-        control_result = await session.execute(select(ControlSchema))
-        controls = control_result.scalars().all()
+        control_result = await session.exec(select(ControlSchema))
+        controls = control_result.all()
         assert len(controls) == 1
