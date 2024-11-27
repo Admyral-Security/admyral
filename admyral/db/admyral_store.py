@@ -39,6 +39,8 @@ from admyral.db.schemas import (
     UserSchema,
     ApiKeySchema,
     WorkflowControlResultsSchema,
+    ControlSchema,
+    ControlsWorkflowsMappingSchema,
 )
 from admyral.db.alembic.database_manager import DatabaseManager
 from admyral.config.config import CONFIG
@@ -1075,4 +1077,12 @@ class AdmyralStore(StoreInterface):
                     result=result,
                 )
             )
+            await db.commit()
+
+    async def clean_up_controls_data(self) -> None:
+        """Delete all data from controls-related tables. Should only be used in testing environments."""
+        async with self._get_async_session() as db:
+            await db.exec(delete(WorkflowControlResultsSchema))
+            await db.exec(delete(ControlsWorkflowsMappingSchema))
+            await db.exec(delete(ControlSchema))
             await db.commit()
