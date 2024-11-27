@@ -50,6 +50,7 @@ class ControlsWorkflowsMappingSchema(BaseSchema, table=True):
             {
                 "control_id": self.control_id,
                 "workflow_id": self.workflow_id,
+                "user_id": self.user_id,
             }
         )
 

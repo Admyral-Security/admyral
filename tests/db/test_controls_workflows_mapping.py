@@ -118,7 +118,7 @@ async def test_create_control_workflow_mapping(store: AdmyralStore):
 async def test_cascade_delete_workflow(store: AdmyralStore):
     async with store.async_session_maker() as session:
         await store.clean_up_workflow_data_of(TEST_USER_ID)
-        await store.clean_up_controls_data()
+        await store.clean_up_controls_data(TEST_USER_ID)
         _, workflow, _ = await setup_scenario(session)
 
         # Create a control result

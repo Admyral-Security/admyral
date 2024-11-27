@@ -18,4 +18,4 @@ async def store(event_loop):
     store = await AdmyralStore.create_store(database_url=CONFIG.test_database_url)
     yield store
     await store.clean_up_workflow_data_of(TEST_USER_ID)
-    await store.clean_up_controls_data()
+    await store.clean_up_controls_data(TEST_USER_ID)

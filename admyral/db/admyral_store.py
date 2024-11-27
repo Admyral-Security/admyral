@@ -8,6 +8,7 @@ from sqlalchemy.orm import sessionmaker
 from contextlib import asynccontextmanager
 from uuid import uuid4
 import json
+from sqlalchemy import select as sa_select
 
 from admyral.models import (
     User,
@@ -1079,10 +1080,23 @@ class AdmyralStore(StoreInterface):
             )
             await db.commit()
 
-    async def clean_up_controls_data(self) -> None:
+    async def clean_up_controls_data(self, user_id: str) -> None:
         """Delete all data from controls-related tables. Should only be used in testing environments."""
         async with self._get_async_session() as db:
-            await db.exec(delete(WorkflowControlResultsSchema))
-            await db.exec(delete(ControlsWorkflowsMappingSchema))
-            await db.exec(delete(ControlSchema))
+            # Delete workflow control results where the workflow belongs to the user
+            await db.exec(
+                delete(WorkflowControlResultsSchema).where(
+                    WorkflowControlResultsSchema.workflow_id.in_(
+                        sa_select(WorkflowSchema.workflow_id).where(
+                            WorkflowSchema.user_id == user_id
+                        )
+                    )
+                )
+            )
+            await db.exec(
+                delete(ControlsWorkflowsMappingSchema).where(
+                    ControlsWorkflowsMappingSchema.user_id == user_id
+                )
+            )
+            await db.exec(delete(ControlSchema).where(ControlSchema.user_id == user_id))
             await db.commit()
