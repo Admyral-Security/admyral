@@ -3,7 +3,6 @@ from collections import defaultdict
 from admyral.models.workflow import ActionNode, IfNode, LoopNode
 
 
-# TODO: write unit tests
 def is_dag(adj_list: dict[str, list[str]], root: str) -> bool:
     def dfs(node_id: str, visited: set[str]) -> bool:
         if node_id in visited:
