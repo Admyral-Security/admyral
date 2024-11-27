@@ -75,7 +75,7 @@ class EditorWorkflowLoopNode(EditorWorkflowBaseNode):
 
     loop_name: str
     loop_type: LoopType
-    loop_condition: str | int
+    loop_condition: str
     results_to_collect: str
 
 

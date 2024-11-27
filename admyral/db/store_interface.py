@@ -198,6 +198,9 @@ class StoreInterface(ABC):
     ) -> None: ...
 
     @abstractmethod
+    async def mark_workflow_as_failed(self, run_id: str, error: str) -> None: ...
+
+    @abstractmethod
     async def append_logs(
         self, step_id: str, run_id: str, action_id: str, prev_step_id: str, logs: str
     ) -> None: ...
@@ -211,6 +214,14 @@ class StoreInterface(ABC):
         prev_step_id: str,
         result: JsonValue,
         input_args: dict[str, JsonValue],
+    ) -> None: ...
+
+    @abstractmethod
+    async def update_action_result(
+        self,
+        step_id: str,
+        run_id: str,
+        result: JsonValue,
     ) -> None: ...
 
     @abstractmethod

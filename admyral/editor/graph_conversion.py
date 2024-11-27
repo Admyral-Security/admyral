@@ -105,7 +105,9 @@ def workflow_to_editor_workflow_graph(
                         id=node_id,
                         loop_name=node.loop_name,
                         loop_type=node.loop_type,
-                        loop_condition=str(node.loop_condition),
+                        loop_condition=serialize_json_with_reference(
+                            node.loop_condition
+                        ),
                         results_to_collect=""
                         if node.results_to_collect is None
                         else ", ".join(node.results_to_collect),
@@ -391,7 +393,7 @@ def editor_workflow_graph_to_workflow(
                 id=node.id,
                 loop_name=node.loop_name,
                 loop_type=node.loop_type,
-                loop_condition=node.loop_condition,
+                loop_condition=deserialize_json_with_reference(node.loop_condition),
                 loop_body_dag={},
                 results_to_collect=results_to_collect,
                 position=node.position,

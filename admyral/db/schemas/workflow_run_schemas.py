@@ -41,6 +41,7 @@ class WorkflowRunSchema(BaseSchema, table=True):
     canceled_at: datetime | None = Field(
         sa_type=TIMESTAMP(timezone=True), nullable=True
     )
+    error: str | None = Field(sa_type=TEXT(), nullable=True)
 
     # relationship parents
     workflow: "WorkflowSchema" = Relationship(back_populates="workflow_runs")
@@ -55,12 +56,11 @@ class WorkflowRunSchema(BaseSchema, table=True):
         workflow_run = WorkflowRun.model_validate(
             {
                 "run_id": self.run_id,
-                "trigger_id": self.trigger_id,
-                "payload": self.payload,
                 "created_at": self.created_at,
                 "completed_at": self.completed_at,
                 "failed_at": self.failed_at,
                 "canceled_at": self.canceled_at,
+                "error": self.error,
             }
         )
 
@@ -81,6 +81,7 @@ class WorkflowRunSchema(BaseSchema, table=True):
                 "completed_at": self.completed_at,
                 "failed_at": self.failed_at,
                 "canceled_at": self.canceled_at,
+                "error": self.error,
             }
         )
 

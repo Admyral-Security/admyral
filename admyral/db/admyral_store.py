@@ -775,6 +775,15 @@ class AdmyralStore(StoreInterface):
             )
             await db.commit()
 
+    async def mark_workflow_as_failed(self, run_id: str, error: str) -> None:
+        async with self._get_async_session() as db:
+            await db.exec(
+                update(WorkflowRunSchema)
+                .where(WorkflowRunSchema.run_id == run_id)
+                .values(failed_at=utc_now(), error=error)
+            )
+            await db.commit()
+
     async def _get_workflow_step_without_user_id(
         self,
         db: AdmyralDatabaseSession,
@@ -853,6 +862,22 @@ class AdmyralStore(StoreInterface):
                         input_args=input_args,
                     )
                 )
+            await db.commit()
+
+    async def update_action_result(
+        self,
+        step_id: str,
+        run_id: str,
+        result: JsonValue,
+    ) -> None:
+        async with self._get_async_session() as db:
+            await db.exec(
+                update(WorkflowRunStepsSchema)
+                .where(WorkflowRunStepsSchema.step_id == step_id)
+                .where(WorkflowRunStepsSchema.run_id == run_id)
+                .values(result=result)
+            )
+
             await db.commit()
 
     async def store_workflow_run_error(

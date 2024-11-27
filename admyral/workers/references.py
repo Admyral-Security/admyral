@@ -36,6 +36,10 @@ def _resolve_access_path(action_outputs: dict, input: str) -> JsonValue:
     access_path_start = access_path.find("[")
     if access_path_start != -1:
         variable = access_path[:access_path_start]
+    if variable not in current_value:
+        raise AdmyralFailureError(
+            message=f"Invalid access path: {access_path}. Variable '{variable}' not found."
+        )
     current_value = current_value.get(variable)
     if current_value is None:
         return None

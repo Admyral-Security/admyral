@@ -13,7 +13,6 @@ from copy import deepcopy
 # Import activity, passing it through the sandbox without reloading the module
 with workflow.unsafe.imports_passed_through():
     from admyral.exceptions import AdmyralFailureError
-    from admyral.logger import get_logger
     from admyral.models import (
         ActionNode,
         IfNode,
@@ -28,9 +27,6 @@ with workflow.unsafe.imports_passed_through():
     from admyral.utils.memory import count_json_payload_bytes
     from admyral.config.config import TEMPORAL_PAYLOAD_LIMIT
     from admyral.utils.graph import calculate_in_deg
-
-
-logger = get_logger(__name__)
 
 
 START_TO_CLOSE_TIMEOUT = timedelta(seconds=6 * 60 * 60)  # 6 hours
@@ -70,7 +66,7 @@ class JobQueueEntry(BaseModel):
 async def _execute_activity(action_type: str, args: list[JsonValue]) -> JsonValue:
     # Use Temporal's default converter
     size_bytes = count_json_payload_bytes(args)
-    logger.info(f"Activity {action_type} args size: {size_bytes} bytes")
+    workflow.logger.info(f"Activity {action_type} args size: {size_bytes} bytes")
 
     if size_bytes > TEMPORAL_PAYLOAD_LIMIT:
         raise AdmyralFailureError("Input payload too large.")
@@ -83,7 +79,7 @@ async def _execute_activity(action_type: str, args: list[JsonValue]) -> JsonValu
             retry_policy=ACTION_RETRY_POLICY,
         )
     except ActivityError as e:
-        logger.error(
+        workflow.logger.error(
             f"Error executing activity of type {action_type}: {e.message}. Cause: {e.cause}"
         )
         raise e
@@ -117,7 +113,7 @@ async def _store_reference_resolution_error(
 @workflow.defn(name="WorkflowExecutor")
 class WorkflowExecutor:
     @workflow.run
-    async def run(self, params: WorkflowParams) -> None:
+    async def run(self, params: WorkflowParams) -> str:
         workflow_dag = params.workflow.workflow_dag
 
         # initialize workflow run
@@ -132,7 +128,7 @@ class WorkflowExecutor:
             init_workflow_run_result["step_id"],
         )
 
-        logger.info(
+        workflow.logger.info(
             f'Triggering workflow "{params.workflow.workflow_id}" from source "{params.source_name}" with run ID "{workflow_run_id}".'
         )
 
@@ -144,6 +140,7 @@ class WorkflowExecutor:
             execution_state: dict,
             prev_step_id: str | None = None,
             is_loop_body: bool = False,
+            out_execution_state: dict[str, JsonValue] = {},
         ) -> dict[str, JsonValue]:
             # calculate in_deg for current top-level DAG
             in_deg = calculate_in_deg(dag)
@@ -153,8 +150,6 @@ class WorkflowExecutor:
                 start_node_ids = [
                     node_id for node_id in dag.keys() if in_deg[node_id] == 0
                 ]
-                if len(start_node_ids) != 1:
-                    raise ValueError("Workflow must have exactly one start node.")
             else:
                 start_node_ids = ["start"]
 
@@ -190,7 +185,7 @@ class WorkflowExecutor:
                         "prev_step_id": prev_step_id,
                     }
 
-                    logger.info(f"Executing action: {action_id}")
+                    workflow.logger.info(f"Executing action: {action_id}")
 
                     # execution
                     if isinstance(node, IfNode):
@@ -217,6 +212,7 @@ class WorkflowExecutor:
                             )
                             if node.result_name is not None:
                                 execution_state[node.result_name] = execution_result
+                                out_execution_state[node.result_name] = execution_result
                         else:
                             # start node
                             step_id = start_step_id
@@ -225,6 +221,10 @@ class WorkflowExecutor:
                     elif isinstance(node, LoopNode):
                         aggregated_result = []
 
+                        loop_condition = evaluate_references(
+                            node.loop_condition, execution_state
+                        )
+
                         # initialize loop state
                         step_id = await _execute_activity(
                             "init_loop_action",
@@ -232,17 +232,13 @@ class WorkflowExecutor:
                                 workflow_run_id,
                                 prev_step_id,
                                 node.loop_name,
-                                node.loop_condition,
+                                loop_condition,
                                 node.loop_type.value,
                             ],
                         )
 
                         match node.loop_type:
                             case LoopType.LIST | LoopType.COUNT:
-                                loop_condition = evaluate_references(
-                                    node.loop_condition, execution_state
-                                )
-
                                 if node.loop_type == LoopType.LIST and not isinstance(
                                     loop_condition, list
                                 ):
@@ -274,6 +270,9 @@ class WorkflowExecutor:
                                         loop_body_execution_state,
                                         prev_step_id=step_id,
                                         is_loop_body=True,
+                                        out_execution_state={
+                                            f"{node.loop_name}_value": value
+                                        },
                                     )
 
                                     # aggregate results from iteration
@@ -303,7 +302,14 @@ class WorkflowExecutor:
                                     "Condition loop type is not yet available."
                                 )
 
+                        # store loop result
+                        await _execute_activity(
+                            "store_loop_action_result",
+                            args=[workflow_run_id, step_id, aggregated_result],
+                        )
+
                         execution_state[node.loop_name] = aggregated_result
+                        out_execution_state[node.loop_name] = aggregated_result
                         candidates = node.children
 
                     else:
@@ -311,6 +317,8 @@ class WorkflowExecutor:
 
                     # schedule next actions
                     for child_id in candidates:
+                        if child_id not in dag:
+                            raise ValueError(f"Invalid child node: {child_id}")
                         # mark the current node as resolved for each child
                         resolved_dependencies[child_id] += 1
                         # we only schedule a child if all its dependencies (i.e., its parents) are resolved
@@ -323,7 +331,9 @@ class WorkflowExecutor:
                             )
 
                 except Exception as e:
-                    logger.error(f"Error executing task: {action_id}. Exception: {e}")
+                    workflow.logger.error(
+                        f"Error executing task: {action_id}. Exception: {e}"
+                    )
                     await push_job(None)
                     await exception_queue.put(e)
 
@@ -361,32 +371,34 @@ class WorkflowExecutor:
                         continue
 
                     # launch new task
-                    logger.info(
+                    workflow.logger.info(
                         f"Scheduling action: {job.action_id}"
                     )  # TODO: better log message
                     number_of_running_tasks += 1
                     tg.create_task(task(job.action_id, job.prev_step_id))
 
             if exception:
-                raise AdmyralFailureError(
-                    f"An exception occurred during workflow execution. Error: {str(exception)}"
-                )
+                raise exception
 
-            return execution_state
+            return out_execution_state
 
         try:
             await execution_loop(workflow_dag.dag, execution_state)
         except Exception as e:
-            logger.error(
-                f"An exception occurred during workflow execution. Error: {str(e)}"
+            msg = f"An exception occurred during workflow execution. Error: {str(e)}"
+            workflow.logger.error(msg)
+            await _execute_activity(
+                "mark_workflow_as_failed", args=[workflow_run_id, msg]
             )
-            return
+            return workflow_run_id
 
         await _execute_activity("mark_workflow_as_completed", args=[workflow_run_id])
 
-        logger.info(
+        workflow.logger.info(
             f'Workflow execution of workflow "{params.workflow.workflow_id}" with run ID "{workflow_run_id}" completed successfully.'
         )
+
+        return workflow_run_id
 
     def _inject_default_args(
         self,

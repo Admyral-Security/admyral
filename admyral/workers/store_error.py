@@ -28,3 +28,11 @@ async def store_reference_resolution_error(
     )
     end = time.monotonic_ns()
     logger.info(f"Stored reference resolution error in {(end - start) / 1_000_000}ms")
+
+
+@activity.defn
+async def mark_workflow_as_failed(workflow_run_id: str, error: str) -> None:
+    start = time.monotonic_ns()
+    await SharedWorkerState.get_store().mark_workflow_as_failed(workflow_run_id, error)
+    end = time.monotonic_ns()
+    logger.info(f"Marked workflow as failed in {(end - start) / 1_000_000}ms")

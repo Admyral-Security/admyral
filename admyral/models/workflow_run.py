@@ -27,13 +27,12 @@ class WorkflowRunStepWithSerializedResult(BaseModel):
 
 class WorkflowRun(BaseModel):
     run_id: str
-    trigger_id: int
-    payload: JsonValue | None
     created_at: datetime
     completed_at: datetime | None = None
     failed_at: datetime | None = None
     canceled_at: datetime | None = None
     steps: list[WorkflowRunStep] | None = None
+    error: str | None = None
 
 
 class WorkflowRunMetadata(BaseModel):
@@ -42,6 +41,7 @@ class WorkflowRunMetadata(BaseModel):
     completed_at: datetime | None = None
     failed_at: datetime | None = None
     canceled_at: datetime | None = None
+    error: str | None = None
 
 
 class WorkflowRunStepMetadata(BaseModel):

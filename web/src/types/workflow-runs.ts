@@ -8,6 +8,7 @@ export const WorkflowRunMetadata = withCamelCaseTransform(
 		created_at: z.string(),
 		completed_at: z.string().nullable(),
 		failed_at: z.string().nullable(),
+		error: z.string().nullable(),
 	}),
 );
 export type TWorkflowRunMetadata = z.infer<typeof WorkflowRunMetadata>;

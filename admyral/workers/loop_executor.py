@@ -1,3 +1,4 @@
+from typing import Any
 from temporalio import activity
 from uuid import uuid4
 
@@ -13,7 +14,7 @@ async def init_loop_action(
     run_id: str,
     prev_step_id: str,
     loop_name: str,
-    loop_condition: str | int,
+    loop_condition: dict[str, Any] | list[Any] | str | int | float | bool | None,
     loop_type: str,
 ) -> str:
     step_id = str(uuid4())
@@ -30,3 +31,16 @@ async def init_loop_action(
         },
     )
     return step_id
+
+
+@activity.defn
+async def store_loop_action_result(
+    run_id: str,
+    step_id: str,
+    result: list,
+) -> None:
+    await SharedWorkerState.get_store().update_action_result(
+        step_id,
+        run_id,
+        result,
+    )

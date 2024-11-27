@@ -78,7 +78,7 @@ class LoopNode(NodeBase):
     # loop_name must be snake_case
     loop_name: str
     loop_type: LoopType
-    loop_condition: str | int
+    loop_condition: JsonValue
     results_to_collect: list[str] | None = None
 
     # children are the edges that leave the loop
