@@ -62,7 +62,6 @@ class DatabaseManager:
         async with engine.connect() as conn:
             await conn.execute(text("commit"))
             await conn.execute(text("create database admyral"))
-        return
 
     async def drop_database(self) -> None:
         # TODO:

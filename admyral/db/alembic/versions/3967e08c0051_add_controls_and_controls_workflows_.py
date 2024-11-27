@@ -1,8 +1,8 @@
 """add controls and controls_workflows tables
 
-Revision ID: 1239762f7ef5
+Revision ID: 3967e08c0051
 Revises: 7985f1c159a3
-Create Date: 2024-11-27 14:35:05.957132
+Create Date: 2024-11-27 17:36:23.138028
 
 """
 
@@ -14,7 +14,7 @@ import sqlmodel  # noqa F401
 
 
 # revision identifiers, used by Alembic.
-revision: str = "1239762f7ef5"
+revision: str = "3967e08c0051"
 down_revision: Union[str, None] = "7985f1c159a3"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -36,7 +36,7 @@ def upgrade() -> None:
             server_default=sa.text("now()"),
             nullable=False,
         ),
-        sa.Column("control_id", sa.Integer(), nullable=False),
+        sa.Column("control_id", sa.TEXT(), nullable=False),
         sa.Column("user_id", sa.TEXT(), nullable=False),
         sa.Column("control_name", sa.TEXT(), nullable=False),
         sa.Column("control_description", sa.TEXT(), nullable=False),
@@ -61,7 +61,7 @@ def upgrade() -> None:
             server_default=sa.text("now()"),
             nullable=False,
         ),
-        sa.Column("control_id", sa.Integer(), nullable=False),
+        sa.Column("control_id", sa.TEXT(), nullable=False),
         sa.Column("user_id", sa.TEXT(), nullable=False),
         sa.Column("workflow_id", sa.TEXT(), nullable=False),
         sa.ForeignKeyConstraint(

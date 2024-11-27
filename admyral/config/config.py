@@ -121,7 +121,7 @@ ENV_ADMYRAL_SECRETS_MANAGER_TYPE = "ADMYRAL_SECRETS_MANAGER"
 
 ADMYRAL_DATABASE_URL = os.getenv(
     ENV_ADMYRAL_DATABASE_URL,
-    "postgresql://postgres:your-super-secret-and-long-postgres-password@localhost:5432/admyral",
+    "postgresql://postgres:your-super-secret-and-long-postgres-password@localhost:5433/admyral",
 ).replace("postgresql://", "postgresql+asyncpg://")
 
 ADMYRAL_TEST_DATABASE_URL = os.getenv(

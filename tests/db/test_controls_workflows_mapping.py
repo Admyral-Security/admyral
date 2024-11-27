@@ -8,21 +8,20 @@ from admyral.db.schemas.workflow_control_results_schemas import (
     WorkflowControlResultsSchema,
 )
 from admyral.config.config import TEST_USER_ID
-from sqlmodel import select
+from sqlmodel import select, delete
 from admyral.db.admyral_store import AdmyralStore
-import random
 import uuid
 
 
-def generate_random_control_id() -> int:
-    return random.randint(1, 999999)
+def generate_random_control_id() -> str:
+    return str(uuid.uuid4())
 
 
 def generate_random_workflow_id() -> str:
     return f"workflow-{uuid.uuid4()}"
 
 
-async def create_control(session, control_id=1):
+async def create_control(session, control_id: str):
     control = ControlSchema(
         control_name="Test Control",
         control_description="A test control",
@@ -35,7 +34,7 @@ async def create_control(session, control_id=1):
     return control
 
 
-async def create_workflow(session, workflow_id="workflow123"):
+async def create_workflow(session, workflow_id: str):
     workflow = WorkflowSchema(
         workflow_id=workflow_id,
         workflow_name=f"Test Workflow-{workflow_id}",
@@ -141,36 +140,81 @@ async def test_cascade_delete_workflow(store: AdmyralStore):
         assert len(results) == 1
 
         # First delete the control results
-        results_to_delete = await session.exec(
+        await session.exec(
+            delete(WorkflowControlResultsSchema).where(
+                WorkflowControlResultsSchema.workflow_id == workflow.workflow_id
+            )
+        )
+
+        # Then delete the workflows
+        await session.exec(
+            delete(WorkflowSchema).where(WorkflowSchema.user_id == TEST_USER_ID)
+        )
+
+        await session.commit()
+
+        # Verify cascading deletes
+        mapping_result = await session.exec(
+            select(ControlsWorkflowsMappingSchema).where(
+                ControlsWorkflowsMappingSchema.user_id == TEST_USER_ID
+            )
+        )
+        mappings = mapping_result.all()
+        assert len(mappings) == 0
+
+        results_result = await session.exec(
             select(WorkflowControlResultsSchema).where(
                 WorkflowControlResultsSchema.workflow_id == workflow.workflow_id
             )
         )
-        for result in results_to_delete.all():
-            await session.delete(result)
-
-        # Then delete the workflow mappings
-        mappings_to_delete = await session.exec(
-            select(ControlsWorkflowsMappingSchema).where(
-                ControlsWorkflowsMappingSchema.workflow_id == workflow.workflow_id
-            )
-        )
-        for mapping in mappings_to_delete.all():
-            await session.delete(mapping)
-
-        # Finally delete the workflow
-        await session.delete(workflow)
-        await session.commit()
-
-        # Verify cascading deletes
-        mapping_result = await session.exec(select(ControlsWorkflowsMappingSchema))
-        mappings = mapping_result.all()
-        assert len(mappings) == 0
-
-        results_result = await session.exec(select(WorkflowControlResultsSchema))
         results = results_result.all()
         assert len(results) == 0
 
-        control_result = await session.exec(select(ControlSchema))
+        control_result = await session.exec(
+            select(ControlSchema).where(ControlSchema.user_id == TEST_USER_ID)
+        )
         controls = control_result.all()
         assert len(controls) == 1
+
+
+@pytest.mark.asyncio
+async def test_cascade_delete_control(store: AdmyralStore):
+    async with store.async_session_maker() as session:
+        await store.clean_up_workflow_data_of(TEST_USER_ID)
+        await store.clean_up_controls_data(TEST_USER_ID)
+        control, workflow, _ = await setup_scenario(session)
+
+        control_result = WorkflowControlResultsSchema(
+            workflow_id=workflow.workflow_id,
+            run_id="run123",
+            result=True,
+            user_id=TEST_USER_ID,
+        )
+        session.add(control_result)
+        await session.commit()
+
+        mapping_result = await session.exec(select(ControlsWorkflowsMappingSchema))
+        mappings = mapping_result.all()
+        assert len(mappings) == 1
+
+        await session.exec(
+            delete(ControlSchema).where(ControlSchema.control_id == control.control_id)
+        )
+        await session.commit()
+
+        # Verify cascading deletes
+        mapping_result = await session.exec(
+            select(ControlsWorkflowsMappingSchema).where(
+                ControlsWorkflowsMappingSchema.control_id == control.control_id
+            )
+        )
+        mappings = mapping_result.all()
+        assert len(mappings) == 0
+
+        control_result = await session.exec(select(ControlSchema))
+        controls = control_result.all()
+        assert len(controls) == 0
+
+        workflow_result = await session.exec(select(WorkflowSchema))
+        workflows = workflow_result.all()
+        assert len(workflows) == 1

@@ -8,7 +8,6 @@ from sqlalchemy.orm import sessionmaker
 from contextlib import asynccontextmanager
 from uuid import uuid4
 import json
-from sqlalchemy import select as sa_select
 
 from admyral.models import (
     User,
@@ -41,7 +40,6 @@ from admyral.db.schemas import (
     ApiKeySchema,
     WorkflowControlResultsSchema,
     ControlSchema,
-    ControlsWorkflowsMappingSchema,
 )
 from admyral.db.alembic.database_manager import DatabaseManager
 from admyral.config.config import CONFIG
@@ -1087,15 +1085,10 @@ class AdmyralStore(StoreInterface):
             await db.exec(
                 delete(WorkflowControlResultsSchema).where(
                     WorkflowControlResultsSchema.workflow_id.in_(
-                        sa_select(WorkflowSchema.workflow_id).where(
+                        select(WorkflowSchema.workflow_id).where(
                             WorkflowSchema.user_id == user_id
                         )
                     )
-                )
-            )
-            await db.exec(
-                delete(ControlsWorkflowsMappingSchema).where(
-                    ControlsWorkflowsMappingSchema.user_id == user_id
                 )
             )
             await db.exec(delete(ControlSchema).where(ControlSchema.user_id == user_id))

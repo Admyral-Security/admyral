@@ -35,7 +35,7 @@ class ControlsWorkflowsMappingSchema(BaseSchema, table=True):
     )
 
     # primary keys
-    control_id: int = Field(primary_key=True, default=None)
+    control_id: str = Field(sa_type=TEXT(), primary_key=True)
     user_id: str = Field(sa_type=TEXT(), primary_key=True)
     workflow_id: str = Field(sa_type=TEXT(), primary_key=True)
 
@@ -50,7 +50,6 @@ class ControlsWorkflowsMappingSchema(BaseSchema, table=True):
             {
                 "control_id": self.control_id,
                 "workflow_id": self.workflow_id,
-                "user_id": self.user_id,
             }
         )
 
@@ -71,7 +70,7 @@ class ControlSchema(BaseSchema, table=True):
     )
 
     # primary keys
-    control_id: int = Field(primary_key=True, default=None)
+    control_id: str = Field(sa_type=TEXT(), primary_key=True)
     user_id: str = Field(sa_type=TEXT(), primary_key=True)
 
     # other fields
@@ -93,7 +92,6 @@ class ControlSchema(BaseSchema, table=True):
         return Control.model_validate(
             {
                 "control_id": self.control_id,
-                "user_id": self.user_id,
                 "control_name": self.control_name,
                 "control_description": self.control_description,
             }
