@@ -10,8 +10,6 @@ from typing import Callable, Optional, Iterable, Any
 from sqlalchemy.engine import Connection
 from functools import partial
 
-from admyral.config.config import GlobalConfig, DatabaseType
-
 
 # TODO: why are we filtering out the alembic_version table?
 def include_object(object, name, type_, reflected, compare_to):
@@ -25,9 +23,9 @@ def get_admyral_dir() -> str:
 
 
 class DatabaseManager:
-    def __init__(self, engine: AsyncEngine, config: GlobalConfig) -> None:
+    def __init__(self, engine: AsyncEngine, database_url: str) -> None:
         self.engine = engine
-        self.config = config
+        self.database_url = database_url
 
         self.target_metadata = SQLModel.metadata
 
@@ -42,39 +40,28 @@ class DatabaseManager:
 
     def _get_postgres_setup_engine(self) -> str:
         # https://stackoverflow.com/questions/6506578/how-to-create-a-new-database-using-sqlalchemy/8977109#8977109
-        db_name = self.config.database_url.split("/")[-1]
-        db_url = self.config.database_url[: -len(db_name)] + "postgres"
+        db_name = self.database_url.split("/")[-1]
+        db_url = self.database_url[: -len(db_name)] + "postgres"
         return create_async_engine(db_url, echo=True, future=True, pool_pre_ping=True)
 
     async def database_exists(self) -> bool:
-        if self.config.database_type == DatabaseType.POSTGRES:
-            engine = self._get_postgres_setup_engine()
-            try:
-                async with engine.connect() as conn:
-                    result = await conn.execute(
-                        text(
-                            "select exists (select 1 from pg_database where datname = 'admyral')"
-                        )
+        engine = self._get_postgres_setup_engine()
+        try:
+            async with engine.connect() as conn:
+                result = await conn.execute(
+                    text(
+                        "select exists (select 1 from pg_database where datname = 'admyral')"
                     )
-                    return result.scalar()
-            except Exception:
-                return False
-
-        raise NotImplementedError(
-            f"Unimplemented database type in database_exists: {self.database_type}"
-        )
+                )
+                return result.scalar()
+        except Exception:
+            return False
 
     async def create_database(self) -> None:
-        if self.config.database_type == DatabaseType.POSTGRES:
-            engine = self._get_postgres_setup_engine()
-            async with engine.connect() as conn:
-                await conn.execute(text("commit"))
-                await conn.execute(text("create database admyral"))
-            return
-
-        raise NotImplementedError(
-            f"Unimplemented database type in create_database: {self.database_type}"
-        )
+        engine = self._get_postgres_setup_engine()
+        async with engine.connect() as conn:
+            await conn.execute(text("commit"))
+            await conn.execute(text("create database admyral"))
 
     async def drop_database(self) -> None:
         # TODO:

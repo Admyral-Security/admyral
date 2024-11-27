@@ -63,6 +63,7 @@ from admyral.models.editor import (
     EditorScheduleType,
 )
 from admyral.models.workflow_control_result import WorkflowControlResult
+from admyral.models.control import Control, ControlsWorkflowsMapping
 
 __all__ = [
     "PipLockfile",
@@ -128,4 +129,6 @@ __all__ = [
     "UserProfile",
     "WorkflowControlResult",
     "WorkflowRunStepWithSerializedResult",
+    "Control",
+    "ControlsWorkflowsMapping",
 ]

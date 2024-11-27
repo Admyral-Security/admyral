@@ -115,21 +115,20 @@ class SecretsManagerType(str, Enum):
 
 
 ENV_ADMYRAL_DATABASE_URL = "ADMYRAL_DATABASE_URL"
+ENV_ADMYRAL_TEST_DATABASE_URL = "ADMYRAL_TEST_DATABASE_URL"
 ENV_ADMYRAL_SECRETS_MANAGER_TYPE = "ADMYRAL_SECRETS_MANAGER"
 
 
 ADMYRAL_DATABASE_URL = os.getenv(
     ENV_ADMYRAL_DATABASE_URL,
-    "postgresql://postgres:your-super-secret-and-long-postgres-password@localhost:5432/admyral",
-)
-if ADMYRAL_DATABASE_URL.startswith("postgresql"):
-    if ADMYRAL_DATABASE_URL.startswith("postgresql://"):
-        ADMYRAL_DATABASE_URL = ADMYRAL_DATABASE_URL.replace(
-            "postgresql://", "postgresql+asyncpg://"
-        )
-    ADMYRAL_DATABASE_TYPE = DatabaseType.POSTGRES
-else:
-    raise NotImplementedError(f"Unsupported database type: {ADMYRAL_DATABASE_URL}")
+    "postgresql://postgres:your-super-secret-and-long-postgres-password@localhost:5433/admyral",
+).replace("postgresql://", "postgresql+asyncpg://")
+
+ADMYRAL_TEST_DATABASE_URL = os.getenv(
+    ENV_ADMYRAL_TEST_DATABASE_URL,
+    "postgresql://postgres:your-super-secret-and-long-postgres-password@localhost:5433/admyral",
+).replace("postgresql://", "postgresql+asyncpg://")
+
 
 ADMYRAL_SECRETS_MANAGER_TYPE = SecretsManagerType(
     os.getenv(ENV_ADMYRAL_SECRETS_MANAGER_TYPE, SecretsManagerType.SQL)
@@ -151,8 +150,8 @@ class GlobalConfig(BaseModel):
     default_user_email: str = "default.user@admyral.ai"
     telemetry_disabled: bool = ADMYRAL_DISABLE_TELEMETRY
     storage_directory: str = get_local_storage_path()
-    database_type: DatabaseType = ADMYRAL_DATABASE_TYPE
     database_url: str = ADMYRAL_DATABASE_URL
+    test_database_url: str = ADMYRAL_TEST_DATABASE_URL
     temporal_host: str = ADMYRAL_TEMPORAL_HOST
     secrets_manager_type: SecretsManagerType = ADMYRAL_SECRETS_MANAGER_TYPE
     posthog_api_key: str = ADMYRAL_POSTHOG_API_KEY

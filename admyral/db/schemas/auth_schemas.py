@@ -13,6 +13,7 @@ from admyral.db.schemas.api_key_schemas import ApiKeySchema
 from admyral.db.schemas.workflow_schemas import WorkflowSchema
 from admyral.db.schemas.secrets_schemas import SecretsSchema
 from admyral.db.schemas.base_schemas import BaseSchema
+from admyral.db.schemas.control_schemas import ControlSchema
 
 
 class UserSchema(BaseSchema, table=True):
@@ -51,6 +52,9 @@ class UserSchema(BaseSchema, table=True):
         back_populates="user", sa_relationship_kwargs=dict(cascade="all, delete")
     )
     secrets: list[SecretsSchema] = Relationship(
+        back_populates="user", sa_relationship_kwargs=dict(cascade="all, delete")
+    )
+    controls: list[ControlSchema] = Relationship(
         back_populates="user", sa_relationship_kwargs=dict(cascade="all, delete")
     )
 

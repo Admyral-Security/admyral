@@ -19,6 +19,10 @@ from admyral.db.schemas.api_key_schemas import ApiKeySchema
 from admyral.db.schemas.workflow_control_results_schemas import (
     WorkflowControlResultsSchema,
 )
+from admyral.db.schemas.control_schemas import (
+    ControlSchema,
+    ControlsWorkflowsMappingSchema,
+)
 
 __all__ = [
     "PipLockfileCacheSchema",
@@ -36,4 +40,6 @@ __all__ = [
     "AuthenticatorSchema",
     "ApiKeySchema",
     "WorkflowControlResultsSchema",
+    "ControlSchema",
+    "ControlsWorkflowsMappingSchema",
 ]
