@@ -16,7 +16,7 @@ class AnthropicSecret(BaseModel):
 @action(
     display_name="Chat Completion",
     display_namespace="Anthropic",
-    description="Use advanced AI models from Azure OpenAI to perform complex tasks, such as categorization, "
+    description="Use advanced AI models from Anthropic to perform complex tasks, such as categorization, "
     "analysis, summarization, or decision support.",
     secrets_placeholders=["ANTHROPIC_SECRET"],
 )
